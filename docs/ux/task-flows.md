@@ -78,91 +78,129 @@ The diagram places successful completion after **Save data → Yes**. It does no
 
 > As a user, I want to find a recipe for a dish that is suitable for me.
 
-**Entry point:** S07 — Recipe Discovery.  
+**Entry point:** S06 — Recipe Discovery.  
 **User outcome:** Find a recipe that meets the user's needs.
 
 ### Search and selection criteria
 
-The user can browse without refinement or enter a query and/or select criteria.
+The user starts in Recipe Discovery and can either browse available recipes or refine the selection by entering a query and/or choosing criteria.
 
 | Input | Purpose |
 | --- | --- |
-| Search query | Search for a recipe. |
-| Calories per portion | Refine the selection by calorie content. |
-| Protein per portion | Refine the selection by protein content. |
-| Dietary type | Refine the selection by dietary preference. |
-| Preparation time | Refine the selection by cooking time. |
+| Search query | Search for a specific recipe or dish. |
+| Calories per portion | Refine recipes by calorie content. |
+| Protein per portion | Refine recipes by protein content. |
+| Dietary type | Refine recipes by dietary preference. |
+| Preparation time | Refine recipes by cooking time. |
 
-The flow identifies the available criteria. Specific filter values, ranges, and matching rules are not defined.
+The task flow identifies the available criteria. Specific filter values, ranges, matching rules, and ranking logic are not defined.
 
 ### Flow sequence
 
-1. **Browse recipes in S07.**  
-   Recipe Discovery provides access to recipes, search, and filters.
+1. **Browse recipes in S06 — Recipe Discovery.**  
+   The user enters Recipe Discovery, where recipes can be browsed and search and filters are available.
 
-2. **Optionally refine the selection.**  
-   Enter a query and/or select criteria. The user can also continue without refinement.
+2. **Decide whether to refine the selection.**
+   - If **No**, continue directly to checking whether recipes are available.
+   - If **Yes**, enter a search query and/or select criteria in the S07 search/filter state.
 
-3. **Check whether recipes are available.**
-   - If recipes are found, display the results within S07.
-   - If none are found, display the no-results state and return to search or filters.
+3. **Enter a query and/or select criteria in S07.**  
+   The user can refine recipes using calories per portion, protein per portion, dietary type, and preparation time.
 
-4. **Review the results.**  
-   Compare recipes using calories and protein per portion, dietary type, and preparation time. Show matches with the selected criteria when criteria are specified.
+4. **Check whether recipes are found.**
+   - If **Yes**, proceed to S08 — Results.
+   - If **No**, display the S08 no-results state.
 
-5. **Open a recipe in S08.**  
-   Review its ingredients, preparation instructions, portion information, calories, available macronutrients, dietary type, and preparation time.
+5. **Recover from no results when necessary.**  
+   If no recipes match the current selection, the user changes the query and/or filters and the system checks for matching recipes again.
 
-6. **Evaluate suitability.**
-   - If the recipe is suitable, complete the task.
-   - Otherwise, return to the results in S07 and continue reviewing options.
+6. **Review recipes in S08 — Results.**  
+   Compare available recipes using:
+   - calories per portion;
+   - protein per portion;
+   - dietary type;
+   - preparation time;
+   - selected-criteria matches, when criteria were specified.
+
+7. **Evaluate whether the results are relevant.**
+   - If **No**, return to S06 — Recipe Discovery and adjust the search or selection.
+   - If **Yes**, select and open a recipe.
+
+8. **Open the selected recipe in S09 — Recipe Details.**  
+   Review:
+   - ingredients;
+   - preparation instructions;
+   - portion information;
+   - calories;
+   - available macronutrients;
+   - dietary type;
+   - preparation time.
+
+9. **Evaluate whether the recipe is suitable.**
+   - If **Yes**, the task is complete.
+   - If **No**, return to S08 — Results and continue reviewing available recipes.
 
 ### Decision logic
 
 | Decision | Yes | No |
 | --- | --- | --- |
-| Refine the selection? | Enter a query and/or select criteria in S07. | Continue to the recipes-found decision. |
-| Recipes found? | Display results within S07. | Display the no-results state, then return to search or filters. |
-| Recipe suitable? | Complete the flow. | Return from S08 to the results in S07. |
-
-The user can also return directly from the results to search or filters to change the selection.
+| Refine the selection? | Enter a query and/or select criteria in S07. | Continue directly to the recipes-found decision. |
+| Recipes found? | Proceed to S08 — Results. | Show the S08 no-results state and change the query and/or filters. |
+| Results relevant? | Select and open a recipe. | Return to S06 — Recipe Discovery to adjust the selection. |
+| Recipe suitable? | Complete the task. | Return to S08 — Results and review another recipe. |
 
 ### Screens and states
 
 | Screen | State or action | Content and behaviour |
 | --- | --- | --- |
-| S07 — Recipe Discovery | Browse | View recipes with search and filters available. |
-| S07 — Recipe Discovery | Search and filters | Enter a query and/or select criteria. |
-| S07 — Recipe Discovery | Results | Review recipe summaries, open a recipe, or refine the selection. |
-| S07 — Recipe Discovery | No results | Change the query or filters. |
-| S08 — Recipe Details | Review recipe | Inspect ingredients, instructions, portion, nutrition information, dietary type, and preparation time. |
-| S08 — Recipe Details | Return to results | Continue browsing when the recipe is unsuitable. |
+| S06 — Recipe Discovery | Browse | Browse available recipes and access search and filters. |
+| S07 — Search / Filters | Refine selection | Enter a query and/or select calories, protein, dietary type, and preparation-time criteria. |
+| S08 — Results | Results available | Review and compare recipes matching the current selection. |
+| S08 — Results | No results | Change the query and/or filters when no recipes match. |
+| S08 — Results | Return from recipe | Continue reviewing alternatives after rejecting a recipe. |
+| S09 — Recipe Details | Review recipe | Inspect ingredients, preparation instructions, portion information, nutrition information, dietary type, and preparation time. |
 
-Search, filters, results, and no results are states or interactions within S07. They do not introduce additional screen IDs.
+### Navigation and recovery behaviour
+
+The flow supports several recovery paths:
+
+- **No matching recipes:** change the query and/or filters and retry.
+- **Irrelevant result set:** return to Recipe Discovery and adjust the selection.
+- **Unsuitable individual recipe:** return to S08 — Results without restarting the discovery process.
+
+The exact persistence of search criteria, filters, and scroll position after returning to a previous screen is an implementation decision.
 
 ### Completion
 
-The task is complete when the user identifies a suitable recipe.
+The task is complete when the user identifies a recipe they consider suitable.
 
-The suitability decision represents the user's assessment. The flow does not define an additional confirmation dialog, save action, or meal-log step.
+The final **Recipe suitable?** decision represents the user's assessment of the recipe. The flow does not introduce an additional confirmation dialog, save action, meal-log action, or other post-selection behaviour.
 
 ---
 
 ## Implementation Boundaries
 
-Screen IDs follow the source diagrams: **S01, S07, and S08**. Intermediate actions in the calorie flow have no assigned screen IDs.
+Screen IDs follow the updated task flow:
+
+**S06 — Recipe Discovery**  
+**S07 — Search / Filters**  
+**S08 — Results**  
+**S09 — Recipe Details**
 
 The following details require decisions during UI design and implementation:
 
 | Area | Detail to define |
 | --- | --- |
-| Input-method selection | The control used to choose barcode, search, photo, or manual entry. |
-| Calorie calculation | Nutrition-data basis, calculation rules, and when the result becomes visible. |
-| Manual input | Required fields, units, defaults, and validation. |
-| Return behaviour | Which entered values, query, filters, and scroll position remain after navigating back. |
-| System states | Loading, camera permissions, service failures, and incomplete data. |
+| Search behaviour | Search triggering, suggestions, recent searches, and query matching. |
+| Filter controls | Exact values, ranges, defaults, multi-selection behaviour, and reset behaviour. |
+| Result ranking | How recipes are ordered and how strongly selected criteria affect ranking. |
+| Criteria matching | How matching criteria are communicated within recipe results. |
+| No-results recovery | Whether filters can be edited directly from the no-results state or through S07. |
+| Return behaviour | Whether query, filters, selected values, and scroll position persist when navigating back. |
+| Recipe data | Required nutrition fields, handling of unavailable macronutrients, and portion representation. |
+| System states | Loading, network/service failures, incomplete recipe data, and empty states. |
 
-These details are not established by the supplied task flows.
+These implementation details are not established by the supplied task flow and should be defined during UI design and implementation.
 
 ## Source Diagrams
 
