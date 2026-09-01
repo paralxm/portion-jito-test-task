@@ -2,7 +2,7 @@
 
 FigJam
 → problem framing and problem statement
-→ market and competitor analysis
+→ Product Research & Competitive Analysis
 → research synthesis
 → target audience / user needs
 → user stories
