@@ -1,269 +1,168 @@
-# UI Contract
+# Portion — UI Contract
 
-Behaviour contracts for the components and patterns defined on the Figma page
-[Branding / Stylescape](https://www.figma.com/design/heuO3V1WlKG44CukQswCkw/jito-calories-calculator?node-id=92-1209),
-sections 07, 08 and 09.
+**Updated:** 2026-09-02. **Status:** Behavior specification aligned with current navigation; implementation unverified.
 
-Visual decisions live in [`../design/visual-direction.md`](../design/visual-direction.md).
-Screen IDs and flow logic live in [`./task-flows.md`](./task-flows.md).
+This document defines component and pattern behavior. Visual decisions belong in [visual-direction.md](../design/visual-direction.md); current screen IDs and transitions belong in [low-fidelity.md](./low-fidelity.md). [Task flows](./task-flows.md) provide task intent, not authority for superseded screen IDs.
 
-A static design file can show appearance and structure. It cannot demonstrate
-focus management, screen-reader semantics, keyboard operation, runtime text
-scaling or reduced motion. Everything marked **verify in implementation** is
-outside what the file establishes.
+The supplied [Branding / Stylescape](https://www.figma.com/design/heuO3V1WlKG44CukQswCkw/jito-calories-calculator?node-id=92-1209) sections 07–09 are visual references. Older two-tab, S06–S09 recipe routing and mandatory-save examples are superseded by the rules below. Neither the live repository nor the prototype was tested during this documentation update.
 
----
+## 1. Demonstration fixtures
 
-## 1. Demonstration Fixtures
+These are synthetic UI-test data, not database records, photo-derived values or nutritional advice.
 
-These are synthetic test fixtures. They are not nutritional advice, not external
-database records, and not values inferred from a photograph.
-
-### Fixture C — calculator
-
-| Amount | Energy | Protein | Carbohydrates | Fat |
+| Fixture C amount | Energy | Protein | Carbohydrates | Fat |
 | --- | --- | --- | --- | --- |
 | 100 g | 180 kcal | 6 g | 21 g | 8 g |
 | 250 g | 450 kcal | 15 g | 52.5 g | 20 g |
 | 300 g | 540 kcal | 18 g | 63 g | 24 g |
 
-Scaling for demonstration: per-100-g value × amount ÷ 100.
+Fixture C scales from its per-100-g basis: `reference value × amount / 100`.
 
-### Fixture R — recipe
+**Fixture R:** Lentil soup; 1 serving = 300 g; 450 kcal, 24 g protein, 48 g carbohydrates, 18 g fat, 25 minutes; dietary type not specified. Expanded specimen only: fibre 8 g, calcium 120 mg, iron 3 mg, vitamin C 12 mg; vitamin D unavailable. For this fixture, carbohydrate total includes fibre; do not add fibre again.
 
-Lentil soup, 1 serving = 300 g — 450 kcal, 24 g protein, 48 g carbohydrates,
-18 g fat, 25 min, dietary type not specified.
+C and R are separate: C at 300 g is 540 kcal, whereas R at 300 g is 450 kcal. Do not derive one from the other, from an image or by recomputing declared energy from displayed macros.
 
-Clearly-labelled synthetic extension for the expanded-nutrient specimen only:
-fibre 8 g, calcium 120 mg, iron 3 mg, vitamin C 12 mg, vitamin D unavailable.
+Retain precision internally. Display whole kcal and up to one decimal for macro grams, without unnecessary trailing zeros. Define units/precision for individual micronutrients so a known small value does not become a misleading zero.
 
-**C and R are separate fixtures.** C at 300 g is 540 kcal while R at 300 g is
-450 kcal; neither is derived from the other.
+## 2. Data, completion and session state
 
-### Rounding
+- Amount and reference quantity must be valid and positive. Nutrient values may legitimately be zero. Keep invalid input for correction; an old result must not appear current for a new invalid amount.
+- A missing value is `Not available`, never zero or inferred from another field. Optional missing card metadata may be omitted; required detail rows identify missing data explicitly.
+- Offer only supported conversions. Never assume equivalence between grams, milliliters, pieces or servings. Preserve each source's documented reference and carbohydrate/fibre basis.
+- Photo output is a suggestion requiring identity/portion review; wrong barcode matches must also be correctable. No working AI or verified-recognition claim is permitted for fixtures.
+- Recipe criteria combine with AND. Known values must meet every active criterion; unknown dietary/nutrient data cannot establish a match. No active criteria means no match claim.
+- A blank threshold means no constraint. The current low-fidelity specification allows a calorie range per serving, a protein minimum, a preparation-time maximum and dietary preference. The stylescape example uses only a calorie maximum; it does not remove the optional lower bound from the interaction contract. Validate the supplied bounds; these are user constraints, not nutrition recommendations.
 
-Retain full precision internally. Display: whole kcal; up to one decimal for
-macronutrient grams, omitting unnecessary trailing zeros. A small micronutrient
-quantity must never round a known non-zero value to a misleading zero — define
-unit and precision behaviour per nutrient separately.
+### Completion, not a separate Save step
 
----
+Food identification creates a **candidate**, not a committed calculation. Review confirmation commits the valid candidate once and opens Calculate. Existing valid portion edits recalculate locally without a Save button or fake loading state.
 
-## 2. Data Rules
+Keep the previous calculation until confirmation. Explain replacement before confirming; do not accumulate items, add a second confirmation dialog or create diary/history records. Finding and evaluating a suitable recipe completes the recipe task without a Save or Cook requirement.
 
-- An amount must be valid and greater than zero. An invalid entry is **retained
-  for correction**, and a previous result is never labelled as current.
-- A blank filter threshold means **no constraint**, not a threshold of zero.
-- A recipe matches when **known** values satisfy **every** active criterion.
-- An unknown value can never establish a match. Unknown dietary type cannot
-  establish a dietary match.
-- With no active filters, omit "Matches your filters" rather than inventing one.
-- Missing information is **Not available** — never zero, never inferred from
-  another field.
-- Only supported data units. No invented mass, volume or serving conversions.
-- Empty results, loading and operational failure are three different states with
-  different copy and different recovery actions.
-- The prototype uses mock data. Nothing may claim verified food identification
-  or a working AI backend.
+Preserve calculation, search context and applied criteria during the active app session and internal navigation. Reload persistence, account sync and durable storage are not promised by this specification. Do not introduce a save-failure journey for an undefined storage operation.
 
----
+`SaveFeedback` and saved-result copy in older specimens are not required product features. Reuse the general success-message treatment only when a defined outcome needs confirmation; do not add a redundant toast when the updated result already makes completion clear.
 
-## 3. Persistence in This Prototype
+## 3. Component contracts
 
-The task flow places successful completion after **Save data → Yes** but does not
-define storage.
+| Group | Required components | Variants, states and behavior |
+| --- | --- | --- |
+| Actions | Button, IconButton | Primary/secondary/text; default, pressed, focus-visible, disabled, loading; hover only for pointer input. Prevent duplicate activation. IconButton target at least 48 × 48 CSS px. |
+| Inputs | TextField, AmountField, SearchField | Empty, filled, focused, invalid, disabled; visible label, helper/error and relevant clear action. Retain other input on error. |
+| Unit selection | UnitControl | Supported-unit list, marked selection and explicit confirmation/cancellation; no unsupported conversion. |
+| Selection | DietaryControl, FilterChip, AppliedCriterionChip | Selectable versus removable are separate behaviors. Prevent contradictory dietary selections. Selected chips use boundary, fill and check, plus accessible state. |
+| Static data | NutrientBadge, NutritionSummary, NutrientRow, MatchCriteria | Known/partial/unavailable; compact/expanded; never styled as tappable. Values always retain units and basis. |
+| Lists | MethodRow, FoodResultRow | Default, pressed, focus; long identity and incomplete data; one clear selection action. |
+| Recipes | RecipeCard | Photo/no photo, long title, active criteria/no criteria; one predictable route to details. |
+| Overlays | ModalSheet | Methods, filters, units; short/scrollable; visible close; background blocked; focus managed. |
+| Feedback | InlineMessage, EmptyState, LoadingState | Operational error, explanation, no results, progress and defined success; cause-specific recovery. |
+| Navigation | AppHeader, BackAction, NavigationBar | Three selected-destination variants plus a separate Add food action; return preserves context. |
 
-**Bounded prototype assumption:** *Save result* stores the current result locally
-on the device for the duration of the prototype session. It does **not** create a
-diary, a history or a synced account, and the UI must not promise any of those.
-Success is reported with the `SaveFeedback` state; failure uses operational-error
-copy and keeps the entry intact.
+### Shared control rules
 
-If the product later defines real persistence, this assumption is the thing to
-replace.
+- A placeholder is not the only label. Invalid fields use explanatory text and a visible state, not color alone.
+- Loading may replace visible button content, but retains an accessible name/status, stable dimensions and protection against repeated activation. Do not show loading on static data or synchronous arithmetic.
+- Focus ring: 3 px outside the control with a 2 px canvas gap. Ensure both the control and ancestor containers leave it visible.
+- Icon-only controls have an accessible name; hide decorative glyphs from assistive technology. Phosphor regular is default; bold is reserved for persistent selected navigation, not hover/press/focus.
+- Use real navigation semantics: current-page state for navigation links, selected state only where an actual tab pattern is implemented. Add food is a button, never a selected destination.
 
----
+### Recipe and nutrition presentation
 
-## 4. Component Contracts
+- Recipe cards use 4:3 images; details use 16:9. An absent/failed image retains valid content and is not a failed recipe record.
+- Titles wrap. No active criteria: omit suitability claims. Active criteria: use a compact list summary such as `Matches all 3 filters`; details show each criterion against its known value.
+- Energy and relevant macros are immediately visible. Use one consistent disclosure for additional nutrition on calculator results and recipe details, not an expanded nutrient table on every card.
+- Vitamins and minerals use group markers with neutral named rows. No health score, daily-value percentages, nutrient-goal charts or inferred dietary guarantees.
 
-### Actions — `Button`, `IconButton`
+## 4. Navigation and state ownership
 
-| Aspect | Contract |
+Exactly one bottom row: **Calculate | Search | Recipes | + Add food**.
+
+| Surface | Selected destination | Bar behavior |
+| --- | --- | --- |
+| Calculate, S01 | Calculate | Present; initial launch is the empty calculation workspace |
+| Search Food or Recipes scope, S02 | Search | Present; scope selector belongs near the search field |
+| Recipe discovery, S03 | Recipes | Present; useful browsing without a query |
+| Recipe details, S08 | Actual origin: Search or Recipes | Same bar; Back restores the originating list |
+| Add-method/filter/unit sheet | Underlying selection retained | Overlay covers and blocks the underlying bar |
+| Barcode, photo, manual, review: S04–S07 | No root-tab selection shown | Focused step; no bottom bar; explicit back/close |
+
+- Plus is the distinct trailing action inside the bar, not a floating button or fourth tab; retain the 56 × 56 target from the low-fidelity contract.
+- Plus opens the same method sheet from every root and recipe details. Dismissal restores the exact invoking screen. Cancel after choosing a method returns to the invoking surface unless a meaningful dirty draft needs confirmation.
+- First Search entry uses Food scope with no query; later visits restore scope/query. Scope changes retain the query. Recipe criteria remain stored with Recipes scope and never constrain Food results.
+- Browse-to-Search opens Recipes scope with a snapshot of relevant criteria. Later Search edits do not silently mutate browse state.
+- New queries reset result scroll; Back from details restores it. Tab switches preserve each destination's state without duplicating history entries.
+- Keyboard-focused roots hide the entire bar and restore it after dismissal. Do not move only the plus. Keep the active field and relevant action reachable above the keyboard, with scrolling as needed.
+
+## 5. Shared interaction patterns
+
+### 5.1 Choose an entry method — O01
+
+Plus opens four labelled choices: Search food, Scan barcode, Take a photo, Enter manually. Selecting a method starts that journey; **it does not commit food data**. Close, backdrop or supported Escape/swipe dismissal changes no calculation. A visible close control is always available; never require a gesture alone.
+
+### 5.2 Search and review — S02 → S07
+
+Keep query and scope visible. Food selection opens review; Back restores the preceding results/input. Distinguish no matches from request failure. Recipe scope uses the same search architecture and opens recipe details, not food review. Do not fabricate recent searches or favourites for a fresh session.
+
+### 5.3 Manual entry, amount and units — S06, S07, S01, O04
+
+Manual entry establishes name, calories and a positive reference quantity/unit; macros are optional. Review establishes the desired portion. These quantities must be separately identifiable.
+
+Unit choice is a modal draft: mark the selection, Confirm applies it, Cancel preserves the prior unit. Calculate locally only when conversion and quantity are valid. After a current result exists, valid edits update it in place without a separate submit step. Dirty manual cancellation offers Keep editing/Discard; untouched forms exit directly.
+
+### 5.4 Filters — O02 from S02 Recipes or S03
+
+Draft edits do not change the list. Apply validates and commits. Reset all clears the draft and takes effect only on Apply. Close/cancel discards unapplied edits. Applied-criterion chips remove a committed criterion immediately; cancelling a later draft does not undo that removal.
+
+Blank bounds are unrestricted. Where both minimum and maximum are offered, minimum must not exceed maximum. Keep query and applied criteria available during empty/error recovery. Do not silently relax hard filters or assert a match with unknown values.
+
+### 5.5 Recipe details — results → S08
+
+| From | Event | To |
+| --- | --- | --- |
+| S02-5 Search results, S03-1 Browse or S03-2 Filtered results | Open card | S08-2 Loading, retaining origin |
+| S08-2 Loading | Success | S08-1 Loaded |
+| S08-2 Loading | Request failure | S08-3 Unavailable |
+| S08-3 Unavailable | Retry | S08-2 for the same recipe |
+| S08-1, S08-2 or S08-3 | Back | Exact originating list with query, criteria and scroll |
+
+S02-6 No matches cannot open details: edit query/criteria and obtain results first. S08-4 No photo/long title is a Loaded-state variant, not a step after Retry. Back during loading ignores later responses for the closed detail. A failed image alone does not trigger S08-3.
+
+### 5.6 Recover according to the cause
+
+| Cause | Appropriate recovery |
 | --- | --- |
-| Variants | Primary, secondary, text; `IconButton` at 48 × 48 |
-| States | Default, pressed, focus-visible, disabled, loading; hover for pointer input only |
-| Loading | Replaces the label and makes the control unavailable. Never applied to a static component. |
-| Focus | 3 px `focus/ring` drawn **outside** the control with a 2 px canvas gap, so it cannot be clipped |
-| Accessible name | An icon-only control must carry a name in code; the glyph is decorative to assistive technology |
+| Food no matches | Change query or enter manually; no generic network Retry |
+| Recipe no matches | Change query or adjust/remove criteria |
+| Search/browse service failure | Retry while preserving input; food also offers manual entry |
+| Barcode unreadable | Continue/rescan or switch method; no lookup has succeeded yet |
+| Barcode product missing | Search/manual; optionally rescan |
+| Barcode lookup failed | Retry lookup with the read code or switch method |
+| Camera denied/unavailable | Search/manual; platform settings only where appropriate; no prompt loop |
+| Photo no usable match | Retake/search/manual; no invented nutrition |
+| Photo analysis failed | Retain image; retry analysis, retake or exit |
+| Invalid input | Keep values, identify the affected field and prevent invalid submission |
 
-### Inputs — `TextField`, `AmountField`, `SearchField`, `UnitControl`
+Pause capture after reading a barcode to avoid repeated lookup. Photo capture has preview/retake before analysis and a reviewable suggestion afterward. Cancelled analysis and obsolete query responses cannot navigate or overwrite newer state. Operational failure never appears as zero nutrition or a no-results state.
 
-| Aspect | Contract |
-| --- | --- |
-| States | Empty, filled, focused, invalid, disabled |
-| Label | Always visible. A placeholder is never the only label. |
-| Invalid | Border, icon and text together — never colour alone. The entry is kept. |
-| `AmountField` | Numeric entry plus `UnitControl`; only valid unit conversions are offered |
-| `UnitControl` | Opens a modal list with explicit cancel and confirm; the selected option carries a check |
-| `SearchField` | The query stays visible with a clear action; the field border spans the full control width |
+## 6. Modal, accessibility and responsive requirements
 
-### Selection — `FilterChip`, `AppliedCriterionChip`, `NutrientBadge`
+- One foreground modal only; background inert and noninteractive. Initial focus goes inside; keyboard navigation stays inside; dismissal restores focus to the opener where it still exists.
+- Method sheets preserve origin; filter/unit sheets discard unapplied drafts on cancellation. A dismissal gesture must respect the same dirty-entry rule as an explicit close.
+- Sheets have 12 px top corners, the documented shadow and a 40% scrim. Support scrolling; anchored header/footer must not cover fields, content or focus indicators.
+- Controls are keyboard operable with visible focus. Communicate loading, validation and changed results accessibly without excessively announcing every keystroke.
+- Minimum product touch targets are 48 × 48 CSS px, independent of glyph size. The low-fidelity plus is 56 × 56. Platform units must be checked in the actual target implementation.
+- Verify 320/390/430 px layouts, real English titles, safe areas and text resizing to 200%. Font specimens are not proof of runtime reflow. [WCAG resize text](https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html).
+- Reduced motion removes translation/counting effects without removing progress or state information. Verify screen-reader names, focus order and modal return in implementation.
 
-| Component | Contract |
-| --- | --- |
-| `FilterChip` | Selectable. Selected = 2 px boundary + fill change + check mark + accessible selected state |
-| `AppliedCriterionChip` | Represents a committed criterion and carries a remove action |
-| `NutrientBadge` | **Static.** No border, not tappable, never styled to look interactive |
+The 24 color-pair ratios printed in **section 09** were recalculated and matched. This validates the listed foreground/background pairs, not all live uses or overall conformance. The 1.23:1 decorative border remains decorative; essential boundaries use the control-border role. Full visual values and contrast references are in `visual-direction.md`.
 
-### Data — `NutritionSummary`, `NutrientRow`, `MatchCriteria`
+## 7. Implementation handoff
 
-| Aspect | Contract |
-| --- | --- |
-| Compact | Energy plus the three macronutrients, used on result and card surfaces |
-| Expanded | Adds fibre as a component of carbohydrates, plus grouped vitamins and minerals |
-| Grouping | Vitamins and minerals share one group marker each; individual nutrients are labelled neutral rows |
-| Unavailable | Named as *Not available* in secondary text |
-| Stale after editing | When an amount changes, the previous result must not be presented as current until it recalculates |
-| Interaction | A nutrient row is not interactive |
+- [ ] Reconcile this contract with the current low-fidelity document; remove superseded two-tab, recipe-ID and mandatory-save rules elsewhere.
+- [ ] Use the same token-backed components in Storybook and product screens; do not duplicate implementations.
+- [ ] Cover default/selected/disabled/loading/error, long content, no photo, partial data, keyboard and modal states in representative stories/tests.
+- [ ] Exercise both user stories and all four entry methods, including wrong matches, no matches, failures, cancellation and replacement.
+- [ ] Verify recipe origin, selected tab, Retry/Back and query/filter/scroll restoration.
+- [ ] Confirm fixture-only boundaries and report unimplemented behavior explicitly. Do not mark static screenshots, mock recognition or design claims as passed runtime tests.
 
-### Recipes — `RecipeCard`
-
-| Aspect | Contract |
-| --- | --- |
-| Photo | 4:3. Absent photo uses a quiet tinted band — no broken-image icon, no skeleton |
-| Long title | Wraps; it is never truncated |
-| Active criteria | In a **list**, a compact summary ("Matches all 3 filters") so several options stay scannable |
-| | On the **detail**, each criterion is restated against the recipe's own value |
-| No active filters | The match block is omitted entirely |
-| Missing optional fields | Dropped, never shown as zero |
-| Never | An invented suitability score |
-
-### Overlays — `ModalSheet`
-
-| Aspect | Contract |
-| --- | --- |
-| Uses | Entry-method selection, filters, unit selection |
-| Appearance | 12 px top corners, one overlay elevation, a 40 % scrim over a still-recognisable underlying screen |
-| Dismissal | A visible close control is always present; Escape dismisses where the platform supports it. Dismissal never requires a swipe. |
-| Content | Short and scrolling content are both supported; the sheet keeps its header anchored |
-| **Verify in implementation** | Initial focus inside the sheet, keyboard containment, background inert, focus restored to the opener on dismissal |
-
-### Feedback — `InlineMessage`, `EmptyState`, `LoadingState`, `SaveFeedback`
-
-Four separate situations, each with its own copy and its own recovery action. An
-operational failure is never rendered as a zero result or as an empty result.
-
-### Navigation — `AppHeader`, `BackAction`, `NavigationBar`
-
-Two destinations: **Calculate** (S01) and **Recipes** (S06–S09). This is a new
-design decision; the task flows do not define a primary navigation.
-
-The navigation bar is the only fixed element, so a keyboard or footer cannot
-cover the active field or the primary action. **Verify in implementation.**
-
----
-
-## 5. Pattern Contracts
-
-### 5.1 Choose an entry method — S01
-
-| | |
-| --- | --- |
-| Trigger | *Add food* on S01 |
-| Visible state | Modal sheet over the dimmed calculator |
-| Commit / cancel | Choosing a method commits and navigates; close or Escape changes nothing |
-| Persistence | Nothing is written until a food is identified and its amount confirmed |
-| Recovery | Manual entry is always available as the fallback |
-
-### 5.2 Search and select a food — S01 search, S06 browse
-
-| | |
-| --- | --- |
-| Trigger | *Search food* from the entry sheet, or the S06 field |
-| Visible state | Query stays in the field beside a clear action; results list below |
-| Commit / cancel | Selecting a result opens review; Back returns with the query intact |
-| Persistence | Query survives navigation to review and back for the duration of the task |
-| Recovery | No match offers manual entry. Recipe discovery also works with no query at all. |
-
-### 5.3 Edit the amount and unit — S01 review
-
-| | |
-| --- | --- |
-| Trigger | Editing the amount field or opening the unit control |
-| Visible state | The result restates the amount it was calculated for and the nutrition basis |
-| Commit / cancel | The unit list is modal with explicit cancel and confirm |
-| Persistence | The result recalculates from the per-100-g basis |
-| Recovery | Zero or blank is rejected inline and the entry is kept |
-
-### 5.4 Draft, apply, reset and dismiss filters — S07
-
-| | |
-| --- | --- |
-| Trigger | *Filters* from S06 or S08 |
-| Visible state | Draft values live only in the sheet; applied values appear as chips above the results |
-| Commit / cancel | **Apply** validates and commits. Dismissal discards unapplied edits. **Reset all** clears the draft and takes effect only on Apply. |
-| Persistence | Applied criteria and the query survive opening a recipe and returning |
-| Recovery | A blank threshold means no constraint |
-
-Criteria: calories per serving (maximum), protein per serving (minimum),
-preparation time (maximum), dietary type. All active criteria must match — AND,
-not OR. Thresholds and AND matching are illustrative design proposals, not
-nutritional recommendations.
-
-### 5.5 Explain suitability before the details — S08 → S09
-
-| | |
-| --- | --- |
-| Trigger | A result set with at least one applied criterion |
-| Visible state | Each active criterion restated against the recipe's own value on the detail; a compact summary in the list |
-| Commit / cancel | Opening a recipe navigates to S09; Back returns to S08 |
-| Persistence | Query, applied filters and list position are restored on return |
-| Recovery | With no active filters the block is omitted; an unknown value never satisfies a criterion |
-
-### 5.6 Recover from empty, failed and error states — S08, S01
-
-| | |
-| --- | --- |
-| Trigger | Empty result set, failed identification, or a network/service failure |
-| Visible state | Three separate states with different copy; a failure is never rendered as a zero result |
-| Commit / cancel | Each state keeps the user in place; nothing is discarded |
-| Persistence | Query and applied filters are preserved throughout |
-| Recovery | Every state names its own next action; loading is a fourth, distinct state |
-
-### 5.7 Expanded nutrition
-
-One disclosure behaviour, used identically in the calculator result and in recipe
-details. Energy and macronutrients are always visible; vitamins and minerals sit
-behind a single expand. This is a presentation of existing data, not a separate
-feature journey.
-
----
-
-## 6. Accessibility Requirements
-
-Measured from the design file:
-
-- 24 contrast pairs recalculated on 2026-09-02 with the WCAG 2.2 sRGB
-  relative-luminance formula (Figma section 10).
-- Normal text meets 4.5:1; non-text control, state and boundary information meets
-  3:1, subject to the criterion's conditions and exceptions.
-- Colour is never the only carrier of meaning.
-- `border/decorative` (1.23:1) is restricted to decoration.
-- Controls target 48 × 48. This is a **product decision**: WCAG 2.2 AA sets a
-  24 × 24 CSS px minimum with exceptions, Apple's guidance is generally 44 × 44 pt
-  and Android's is 48 dp. CSS px, iOS pt and Android dp are not interchangeable
-  certification units.
-- Layout verified at 320, 390 and 430 widths and at 150 % text.
-
-**Verify in implementation** — not established by the file:
-
-- Screen-reader semantics and accessible names
-- Keyboard operation and focus order
-- Focus trapping and restoration for modal sheets
-- Runtime OS text scaling
-- Reduced motion — removes translation and counting effects; a state change must
-  never depend on animation
-- Tabular figures (`font-feature-settings: "tnum" 1`), which could not be enabled
-  through the Figma plugin API
-
-No blanket conformance claim is made.
+No code, GitHub push, Figma correction or accessibility certification is implied by this documentation update.
