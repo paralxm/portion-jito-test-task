@@ -18,6 +18,8 @@ Before making a product or UX decision, read the relevant documentation.
 - Research conclusions: `docs/research/synthesis.md`
 - Detailed research: `docs/research/`
 - UX hypotheses and flows: `docs/ux/` when present
+- Component and pattern behavior: `docs/ux/ui-contract.md`
+- Visual direction and tokens: `docs/design/visual-direction.md`, `docs/design/tokens.json`
 - Design-system behavior: design-system code and Storybook once implemented
 
 Do not load or reproduce all documentation by default. Read only what is
