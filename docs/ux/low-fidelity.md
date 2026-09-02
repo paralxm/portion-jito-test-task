@@ -171,7 +171,7 @@ Each recovery action must connect to its actual destination. A generic arrow bet
 
 Keep one foreground modal. Loading has a distinct progress indicator and an escape where needed. Ignore obsolete responses after query changes/cancellation, pause duplicate barcode reads and prevent duplicate commits. These are required behaviors, not PDF-verified functionality.
 
-## 8. Review findings and required corrections
+## 8. Validation status
 
 The previously identified connector, branching, navigation-origin, and state-coverage issues have been corrected in the current Figma low-fidelity flow.
 
@@ -218,24 +218,26 @@ Remaining validation belongs to implementation rather than low-fidelity structur
 
 ## 10. Exit criteria and handoff
 
-Leave checks open until evidence exists; update this document with frame IDs or test notes when closing them.
+The low-fidelity structure and current specification are ready to hand off into Design System and high-fidelity implementation.
 
-- [ ] Correct misleading arrows and demonstrate all six journeys, including their true completion and return destinations.
+Completed at the low-fidelity level:
 
-- [ ] Supply the missing state witnesses/reuse mappings in section 8.
+- [x] Core navigation and all six required journeys are structurally defined.
+- [x] Search, barcode, photo, manual-entry, review, filtering, and recipe-detail branching are aligned with the current interaction contract.
+- [x] Recipe Details preserves its actual Search or Recipes origin.
+- [x] No matches, request failure, loading, unavailable, and loaded variants are treated as distinct states.
+- [x] Add food remains a shared trailing action rather than a fourth destination.
+- [x] Required recovery paths and cancellation behavior are represented or explicitly mapped.
+- [x] The current Figma low-fidelity flow and this specification are aligned for the next design phase.
 
-- [ ] Click-test all three tabs, plus from roots/details, all four methods, scope switching and modal dismissal.
+Implementation validation remains intentionally open:
 
-- [ ] Test retry, no matches, permission denial, correction, invalid input, dirty cancellation and replacement without data loss.
+- [ ] Verify responsive behavior at 320 / 390 / 430 CSS px.
+- [ ] Verify software-keyboard and safe-area behavior.
+- [ ] Verify keyboard navigation, focus containment, and focus restoration.
+- [ ] Verify accessible names, semantics, contrast, and screen-reader behavior.
+- [ ] Verify runtime state preservation and scroll restoration.
+- [ ] Verify stale-response handling and duplicate-action protection.
+- [ ] Verify 200% text resizing and long-content behavior.
 
-- [ ] Verify the section 5 recipe transitions in Figma: no direct No matches → details; Retry → Loading; Back → actual origin; no-photo as a loaded-state variant.
-
-- [ ] Test both recipe origins and their selected tabs, filter Apply/Reset/Cancel and restoration of query/criteria/scroll; Back during loading must ignore late responses.
-
-- [ ] Verify keyboard, safe areas, long content, 320 px layout, target sizes and scroll reachability in Figma; record simulation limits.
-
-- [ ] Label behaviors that remain diagram-only. Do not mark fixture-based recognition or network behavior as implemented.
-
-**Handoff:** Foundations and component planning may proceed in parallel. Freeze screen specifications for detailed UI only after the blocking flow corrections are resolved. Keep final typography, color, icons, component variants and English microcopy in the design-system/UI work, not duplicated here.
-
-Maintain one concise specification alongside Figma: update affected IDs, rules and open checks when the flow changes; do not reproduce the research archive or add another documentation wall to the canvas.
+**Handoff:** Design System and high-fidelity implementation may proceed using this document, `ui-contract.md`, and `visual-direction.md` as the current implementation baseline.
