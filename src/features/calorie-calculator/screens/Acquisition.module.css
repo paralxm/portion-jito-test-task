@@ -1,0 +1,88 @@
+/* Shared by the barcode and photo steps. The camera is simulated in this prototype:
+   the viewfinder is a neutral region with a frame, never a fake video feed. */
+
+.viewfinder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--portion-ref-space-12);
+  aspect-ratio: 4 / 3;
+  margin-inline: calc(var(--portion-spacing-page-inset) * -1);
+  padding: var(--portion-ref-space-24);
+  background: var(--portion-color-background-sunken);
+  text-align: center;
+}
+
+.frame {
+  inline-size: 70%;
+  max-inline-size: 240px;
+  aspect-ratio: 3 / 2;
+  border: 2px dashed var(--portion-color-border-control);
+  border-radius: var(--portion-radius-structure);
+}
+
+.frame[data-paused] {
+  border-style: solid;
+  border-color: var(--portion-color-action-primary);
+}
+
+.preview {
+  aspect-ratio: 4 / 3;
+  margin: 0;
+  margin-inline: calc(var(--portion-spacing-page-inset) * -1);
+  background: var(--portion-color-background-sunken);
+  overflow: hidden;
+}
+
+.previewImage {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-section-title-to-content);
+  min-inline-size: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+}
+
+/* Prototype controls are visibly separate from product UI: dashed boundary, plain
+   secondary text, and a legend that says what they are. */
+.demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+  margin: 0;
+  padding: var(--portion-spacing-card-padding);
+  border: var(--portion-border-width-default) dashed var(--portion-color-border-control);
+  border-radius: var(--portion-radius-card);
+  min-inline-size: 0;
+}
+
+.demo > legend {
+  padding: 0;
+}
+
+.demoActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+}

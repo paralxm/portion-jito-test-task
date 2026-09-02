@@ -1,0 +1,12 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-form-group);
+  min-inline-size: 0;
+}
+
+.groupHeading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-heading-to-description);
+}
