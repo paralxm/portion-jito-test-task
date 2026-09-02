@@ -1,6 +1,6 @@
 # Portion — Low-Fidelity Specification
 
-**Status:** Recipe navigation contract updated; Figma changes and remaining coverage gaps await verification.  
+**Status:** Finalized for Design System and high-fidelity implementation.  
 
 **Reviewed:** 2026-09-02. **Product language:** English.  
 
@@ -173,16 +173,32 @@ Keep one foreground modal. Loading has a distinct progress indicator and an esca
 
 ## 8. Review findings and required corrections
 
-| Priority | Evidence | Required correction |
-| --- | --- | --- |
-| Blocking | Lane B: S02-2 → S02-3 labelled “results”; S02-3 → S02-4 labelled “edit query”. | Branch loading into results/no matches/failure. Editing the query returns to search input and a new request, not directly to failure. |
-| Blocking | Lane C1: S04-6 denied → S07-4 barcode review labelled “found → review”. | Connect denial to search/manual/settings recovery. Connect successful lookup to barcode review. |
-| Verify in Figma | Earlier Lane E connected Loaded → Loading with “back” and Loading → Unavailable with “loaded”; No matches and the no-photo variant were placed in the detail sequence. | The text contract is corrected in section 5. Verify results-only entry, success/failure branches, Retry → Loading, Back → actual origin, and S08-4 as a loaded-state variant. Do not mark the canvas fixed without checking it. |
-| Blocking | Other lanes primarily connect adjacent examples; branches and return routes are not consistently shown. | Audit every connector against section 5, anchor it to the triggering control, and connect successful review confirmation to S01-2. |
-| Required witness | Search initial/keyboard; discovery loading/no matches/failure; recipe-search failure. | Add minimal states or explicit parent-specific reuse mappings. Maintain the correct selected tab and recovery. |
-| Required witness | Calculate local invalid edit/disclosure; filter draft/reset/keyboard; details from Search; photo access/unavailable camera. | Add connected state crops or short scenario examples. Do not duplicate complete screen families unnecessarily. |
+The previously identified connector, branching, navigation-origin, and state-coverage issues have been corrected in the current Figma low-fidelity flow.
 
-The layout inventory is substantial; another collection of unrelated screens is not the priority. Correct branching and demonstrate the missing context-dependent states.
+The current Figma flow and this specification are aligned for Design System and high-fidelity implementation.
+
+The following UX structure has been resolved:
+
+- Search loading branches correctly into results, no matches, or request failure.
+- Barcode permission denial routes to the appropriate recovery path; successful lookup routes to Food Review.
+- Recipe Details follows Results → Loading → Loaded / Unavailable, with Retry → Loading.
+- Back from Recipe Details restores the actual originating Search or Recipes state.
+- The no-photo / long-title recipe example is treated as a Loaded-state variant, not a separate recovery state.
+- Review confirmation routes to the current Calculate result.
+- Search, recipe discovery, filters, calculation, photo acquisition, and recovery states required by the current specification are represented or explicitly mapped.
+- Navigation consistently follows Calculate | Search | Recipes | + Add food, with the trailing plus treated as an action rather than a destination.
+
+Remaining validation belongs to implementation rather than low-fidelity structure:
+
+- responsive behavior at implementation widths;
+- software-keyboard and viewport behavior;
+- keyboard interaction;
+- focus management and focus restoration;
+- accessibility semantics and screen-reader behavior;
+- runtime state preservation;
+- asynchronous stale-response and duplicate-action handling;
+- browser/device behavior;
+- text resizing and long-content behavior.
 
 ## 9. Fidelity and verification limits
 
