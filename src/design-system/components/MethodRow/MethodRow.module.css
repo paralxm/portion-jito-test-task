@@ -1,0 +1,45 @@
+.row {
+  display: grid;
+  grid-template-columns: var(--portion-size-icon-default) minmax(0, 1fr) var(--portion-size-icon-small-action);
+  column-gap: var(--portion-ref-space-12);
+  align-items: center;
+  inline-size: 100%;
+  min-block-size: var(--portion-ref-space-56);
+  padding-block: var(--portion-ref-space-12);
+  padding-inline: var(--portion-ref-space-16);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-control);
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-primary);
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+@media (hover: hover) {
+  .row:hover {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.row:active {
+  background: var(--portion-color-background-sunken);
+}
+
+.glyph,
+.chevron {
+  display: inline-flex;
+  justify-content: center;
+}
+
+.chevron {
+  color: var(--portion-color-text-secondary);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}

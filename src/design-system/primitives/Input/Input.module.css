@@ -1,0 +1,95 @@
+/* The boundary belongs to the wrapper so leading/suffix/trailing slots sit inside it and
+   the focus ring surrounds the whole control. The ring is drawn outside; ancestors must
+   not clip it. */
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+  min-block-size: var(--portion-size-target-minimum);
+  min-inline-size: 0;
+  padding-inline: var(--portion-ref-space-12);
+  background: var(--portion-color-background-canvas);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
+  border-radius: var(--portion-radius-control);
+  transition: border-color var(--portion-motion-transition-validation) var(--portion-motion-easing-standard);
+}
+
+.field:focus-within {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+}
+
+.field[data-invalid] {
+  border-color: var(--portion-color-feedback-error-foreground);
+  box-shadow: inset 0 0 0 1px var(--portion-color-feedback-error-foreground);
+}
+
+.field[data-disabled] {
+  background: var(--portion-color-state-disabled-surface);
+  border-color: var(--portion-color-state-disabled-surface);
+  color: var(--portion-color-state-disabled-text);
+}
+
+.input {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  inline-size: 100%;
+  padding-block: var(--portion-ref-space-12);
+  border: 0;
+  background: transparent;
+  color: var(--portion-color-text-primary);
+  font-family: var(--portion-typography-body-font-family);
+  font-size: var(--portion-typography-body-font-size);
+  font-weight: var(--portion-typography-body-font-weight);
+  line-height: var(--portion-typography-body-line-height);
+}
+
+.input:focus {
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--portion-color-text-secondary);
+  opacity: 1;
+}
+
+.input:disabled {
+  color: var(--portion-color-state-disabled-text);
+  cursor: not-allowed;
+}
+
+/* Remove native number spinners; steppers are explicit controls in this system. */
+.input[type='number']::-webkit-outer-spin-button,
+.input[type='number']::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.input[type='number'] {
+  appearance: textfield;
+}
+
+.input[type='search']::-webkit-search-decoration,
+.input[type='search']::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.leading,
+.trailing {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--portion-color-text-secondary);
+}
+
+/* Interactive trailing controls keep their own 48 px hit area but sit flush with the
+   field's inner edge. */
+.trailing {
+  margin-inline-end: calc(var(--portion-ref-space-12) * -1);
+}
+
+.suffix {
+  flex-shrink: 0;
+  white-space: nowrap;
+}

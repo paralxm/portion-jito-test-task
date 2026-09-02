@@ -1,0 +1,59 @@
+.value {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}
+
+.value[data-size='inline'] {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--portion-ref-space-4);
+}
+
+.labelRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+}
+
+/* Category marker: a small labelled bar, never a coloured number or card. */
+.marker {
+  inline-size: 4px;
+  block-size: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: var(--portion-color-nutrition-energy-accent);
+}
+
+.marker[data-category='protein'] { background: var(--portion-color-nutrition-protein-accent); }
+.marker[data-category='carbohydrates'] { background: var(--portion-color-nutrition-carbohydrates-accent); }
+.marker[data-category='fat'] { background: var(--portion-color-nutrition-fat-accent); }
+.marker[data-category='fibre'] { background: var(--portion-color-nutrition-fibre-accent); }
+.marker[data-category='vitamins'] { background: var(--portion-color-nutrition-vitamins-accent); }
+.marker[data-category='minerals'] { background: var(--portion-color-nutrition-minerals-accent); }
+
+/* Number and unit share a baseline; the unit may wrap to its own line only in the main size. */
+.figure {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+.value[data-size='main'] .figure {
+  column-gap: var(--portion-ref-space-8);
+}
+
+.number {
+  min-inline-size: 0;
+}
+
+.unit {
+  white-space: nowrap;
+}
+
+.basis {
+  min-inline-size: 0;
+}

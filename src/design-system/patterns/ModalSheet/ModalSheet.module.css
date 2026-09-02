@@ -1,0 +1,107 @@
+/* The dialog is the full-viewport top-layer box; the sheet is anchored to its bottom. */
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100%;
+  max-block-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dialog[open] {
+  display: flex;
+}
+
+.dialog::backdrop {
+  background: var(--portion-color-overlay-scrim);
+  transition: opacity var(--portion-motion-transition-sheet) var(--portion-motion-easing-standard);
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+  max-inline-size: 640px;
+  max-block-size: 90dvh;
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-primary);
+  border-start-start-radius: var(--portion-radius-sheet);
+  border-start-end-radius: var(--portion-radius-sheet);
+  box-shadow: var(--portion-shadow-sheet);
+  overflow: hidden;
+  animation: rise var(--portion-motion-transition-sheet) var(--portion-motion-easing-standard);
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(var(--portion-ref-space-24));
+    opacity: 0.6;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.handle {
+  align-self: center;
+  inline-size: var(--portion-ref-space-40);
+  block-size: var(--portion-ref-space-4);
+  margin-block: var(--portion-ref-space-8) 0;
+  border-radius: 2px;
+  background: var(--portion-color-border-control);
+  flex-shrink: 0;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--portion-size-target-minimum);
+  align-items: start;
+  column-gap: var(--portion-ref-space-8);
+  padding-block: var(--portion-ref-space-8) var(--portion-ref-space-12);
+  padding-inline: var(--portion-spacing-page-inset) var(--portion-ref-space-8);
+  flex-shrink: 0;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+  padding-block-start: var(--portion-ref-space-8);
+}
+
+/* The body is the only scrolling region; the focus ring of the last field must remain
+   visible, so it keeps inline padding and never clips horizontally. */
+.body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-inline: var(--portion-spacing-page-inset);
+  padding-block-end: var(--portion-ref-space-16);
+  scroll-padding-block-end: var(--portion-ref-space-16);
+}
+
+.footer {
+  flex-shrink: 0;
+  padding-block: var(--portion-ref-space-12);
+  padding-block-end: max(var(--portion-ref-space-12), var(--portion-safe-area-bottom));
+  padding-inline: var(--portion-spacing-page-inset);
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  background: var(--portion-color-background-canvas);
+}
+
+/* Without a footer the body carries the safe-area allowance. */
+.sheet > .body:last-child {
+  padding-block-end: max(var(--portion-ref-space-24), var(--portion-safe-area-bottom));
+}

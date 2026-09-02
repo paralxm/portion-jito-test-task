@@ -1,0 +1,34 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+  background: var(--portion-color-background-canvas);
+}
+
+.header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--portion-layer-sticky);
+}
+
+.content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-section);
+  padding-block: var(--portion-ref-space-16) var(--portion-ref-space-24);
+  padding-inline: var(--portion-spacing-page-inset);
+  min-inline-size: 0;
+}
+
+/* Sticky at the bottom but still in flow: it can never cover the field above it. */
+.footer {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: var(--portion-layer-sticky);
+  padding-block: var(--portion-ref-space-12);
+  padding-block-end: max(var(--portion-ref-space-12), var(--portion-safe-area-bottom));
+  padding-inline: var(--portion-spacing-page-inset);
+  background: var(--portion-color-background-canvas);
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}

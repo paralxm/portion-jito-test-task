@@ -1,0 +1,25 @@
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--portion-spacing-heading-to-description);
+  padding-block: var(--portion-ref-space-32);
+  padding-inline: var(--portion-spacing-page-inset);
+  text-align: center;
+}
+
+.glyph {
+  display: inline-flex;
+  color: var(--portion-color-text-secondary);
+  margin-block-end: var(--portion-ref-space-8);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--portion-ref-space-8);
+  inline-size: 100%;
+  max-inline-size: 24rem;
+  margin-block-start: var(--portion-ref-space-16);
+}

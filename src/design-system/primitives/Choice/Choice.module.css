@@ -1,0 +1,90 @@
+/* Checkbox and Radio share one anatomy: a native input (kept for semantics and
+   keyboard behaviour), a drawn control and a text block. The whole row is the hit area. */
+
+.choice {
+  display: grid;
+  grid-template-columns: var(--portion-size-icon-default) minmax(0, 1fr);
+  column-gap: var(--portion-ref-space-12);
+  align-items: start;
+  min-block-size: var(--portion-size-target-minimum);
+  padding-block: var(--portion-ref-space-12);
+  cursor: pointer;
+  position: relative;
+}
+
+.choice[data-disabled] {
+  cursor: not-allowed;
+  color: var(--portion-color-state-disabled-text);
+}
+
+.input {
+  /* Visually hidden but still focusable and clickable over the drawn control. */
+  position: absolute;
+  inset-block-start: var(--portion-ref-space-12);
+  inset-inline-start: 0;
+  inline-size: var(--portion-size-icon-default);
+  block-size: var(--portion-size-icon-default);
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--portion-size-icon-default);
+  block-size: var(--portion-size-icon-default);
+  border: var(--portion-border-width-indicator, 2px) solid var(--portion-color-border-control);
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-on-action);
+  transition:
+    background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.choice[data-kind='checkbox'] .control {
+  border-radius: var(--portion-radius-control);
+}
+
+.choice[data-kind='radio'] .control {
+  border-radius: var(--portion-radius-round);
+}
+
+.mark {
+  display: none;
+}
+
+.input:checked + .control {
+  background: var(--portion-color-action-primary);
+  border-color: var(--portion-color-action-primary);
+}
+
+.input:checked + .control .mark {
+  display: block;
+}
+
+.choice[data-kind='radio'] .mark {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--portion-radius-round);
+  background: currentColor;
+}
+
+.input:focus-visible + .control {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+}
+
+.input:disabled + .control {
+  background: var(--portion-color-state-disabled-surface);
+  border-color: var(--portion-color-state-disabled-surface);
+  color: var(--portion-color-state-disabled-text);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}

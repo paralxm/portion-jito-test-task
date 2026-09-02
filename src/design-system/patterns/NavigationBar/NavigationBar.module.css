@@ -1,0 +1,123 @@
+/* One bar, four controls as direct grid items. Three destinations share the available
+   width equally; the Add food action is a fixed-width target in the same row. Height is
+   content-driven and includes the bottom safe area. */
+
+.bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: stretch;
+  column-gap: var(--portion-ref-space-4);
+  padding-block-start: var(--portion-ref-space-4);
+  padding-block-end: max(var(--portion-ref-space-4), var(--portion-safe-area-bottom));
+  padding-inline: var(--portion-spacing-page-inset);
+  background: var(--portion-color-background-canvas);
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+.bar[hidden] {
+  display: none;
+}
+
+.destination,
+.addFood {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--portion-spacing-nav-icon-to-label);
+  min-inline-size: 0;
+  min-block-size: var(--portion-size-target-minimum);
+  padding-block: var(--portion-ref-space-8) var(--portion-ref-space-4);
+  padding-inline: var(--portion-ref-space-4);
+  border: 0;
+  border-radius: var(--portion-radius-control);
+  background: transparent;
+  color: var(--portion-color-text-secondary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.destination[data-selected] {
+  color: var(--portion-color-action-primary);
+}
+
+/* 2 px indicator above the selected destination. */
+.indicator {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: var(--portion-ref-space-12);
+  block-size: var(--portion-border-width-navigation-indicator);
+  border-radius: 1px;
+  background: transparent;
+}
+
+.destination[data-selected] .indicator {
+  background: var(--portion-color-action-primary);
+}
+
+/* The label slot lays out the bold weight invisibly so the width is stable when the
+   visible label switches between 500 and 600. */
+.labelSlot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.labelSlot > * {
+  grid-area: 1 / 1;
+}
+
+.labelGhost {
+  visibility: hidden;
+}
+
+/* The label is as wide as its cell, so an unbreakable word that does not fit is
+   measurable (scrollWidth > clientWidth) instead of silently widening the cell. */
+.label {
+  inline-size: 100%;
+  min-inline-size: 0;
+  text-align: center;
+  overflow-wrap: normal;
+}
+
+/* Add food: a labelled action, visually distinct from the destinations. */
+.addFood {
+  min-inline-size: var(--portion-size-target-add-food);
+  min-block-size: var(--portion-size-target-add-food);
+  padding-inline: var(--portion-ref-space-8);
+  color: var(--portion-color-text-primary);
+}
+
+.addGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--portion-ref-space-32);
+  block-size: var(--portion-ref-space-32);
+  border-radius: var(--portion-radius-control);
+  background: var(--portion-color-action-primary);
+  color: var(--portion-color-text-on-action);
+}
+
+@media (hover: hover) {
+  .destination:hover,
+  .addFood:hover {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.destination:active,
+.addFood:active {
+  background: var(--portion-color-background-sunken);
+}
+
+/* Enlargement-only fallback: two rows of two, same reading order
+   (Calculate, Search / Recipes, Add food). */
+.bar[data-layout='stacked'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: var(--portion-ref-space-4);
+}

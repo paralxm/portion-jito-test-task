@@ -1,0 +1,12 @@
+.wrapper {
+  min-inline-size: 0;
+}
+
+/* The clear action keeps its 48 px target but its visual sits inside the field. */
+.clear {
+  color: var(--portion-color-text-secondary);
+}
+
+.clear:focus-visible {
+  outline-offset: calc(var(--portion-focus-ring-offset) * -1);
+}

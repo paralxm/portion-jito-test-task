@@ -1,0 +1,99 @@
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-4);
+  min-block-size: var(--portion-ref-space-40);
+  padding-block: var(--portion-ref-space-8);
+  padding-inline: var(--portion-ref-space-12);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
+  border-radius: var(--portion-radius-control);
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-primary);
+  transition:
+    background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    box-shadow var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---- selectable ---- */
+
+.selectable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The drawn chip is 40 px tall; the hit area extends to the 48 px minimum. */
+.selectable::before {
+  content: '';
+  position: absolute;
+  inset-block: calc(var(--portion-ref-space-4) * -1);
+  inset-inline: 0;
+}
+
+@media (hover: hover) {
+  .selectable:not(:disabled):hover {
+    background: var(--portion-color-background-sunken);
+  }
+}
+
+.selectable[data-selected] {
+  background: var(--portion-color-action-selected-surface);
+  border-color: var(--portion-color-action-primary);
+  box-shadow: inset 0 0 0 1px var(--portion-color-action-primary);
+  color: var(--portion-color-action-pressed);
+}
+
+.selectable:disabled {
+  background: var(--portion-color-state-disabled-surface);
+  border-color: var(--portion-color-state-disabled-surface);
+  color: var(--portion-color-state-disabled-text);
+  cursor: not-allowed;
+}
+
+.mark {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* ---- applied (removable) ---- */
+
+.applied {
+  background: var(--portion-color-action-selected-surface);
+  border-color: var(--portion-color-action-primary);
+  color: var(--portion-color-action-pressed);
+  padding-inline-end: var(--portion-ref-space-4);
+}
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--portion-ref-space-32);
+  block-size: var(--portion-ref-space-32);
+  margin-block: calc(var(--portion-ref-space-8) * -1);
+  border: 0;
+  border-radius: var(--portion-radius-control);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Hit area of the remove action reaches 48 × 48 without enlarging the chip. */
+.remove::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--portion-ref-space-8) * -1);
+}
+
+@media (hover: hover) {
+  .remove:hover {
+    background: var(--portion-color-background-canvas);
+  }
+}

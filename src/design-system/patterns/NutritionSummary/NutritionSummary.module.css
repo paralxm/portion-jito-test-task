@@ -1,0 +1,44 @@
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-16);
+  min-inline-size: 0;
+}
+
+/* Three secondary metrics share the row; each may wrap its label and grow. */
+.macros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--portion-ref-space-12);
+  row-gap: var(--portion-ref-space-12);
+}
+
+.macro {
+  min-inline-size: 0;
+}
+
+/* At narrow widths or enlarged text the macros stack into two then one column. */
+@container (max-width: 340px) {
+  .macros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 240px) {
+  .macros {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.summary {
+  container-type: inline-size;
+}
+
+.more {
+  display: flex;
+  flex-direction: column;
+}
+
+.more[hidden] {
+  display: none;
+}

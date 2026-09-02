@@ -1,0 +1,33 @@
+.summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-4);
+  color: var(--portion-color-text-secondary);
+}
+
+.summary[data-all-met] {
+  color: var(--portion-color-action-pressed);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+}
+
+.item {
+  display: grid;
+  grid-template-columns: var(--portion-size-icon-compact) minmax(0, 1fr);
+  column-gap: var(--portion-ref-space-8);
+  align-items: start;
+  color: var(--portion-color-text-secondary);
+}
+
+.item[data-met] {
+  color: var(--portion-color-action-pressed);
+}
+
+/* Glyphs sit on the first text line. */
+.item > :first-child {
+  margin-block-start: 2px;
+}

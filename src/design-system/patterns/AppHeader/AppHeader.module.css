@@ -1,0 +1,56 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  padding-block-start: calc(var(--portion-ref-space-16) + var(--portion-safe-area-top));
+  padding-block-end: var(--portion-ref-space-8);
+  padding-inline: var(--portion-spacing-page-inset);
+}
+
+.wordmark {
+  color: var(--portion-color-text-primary);
+}
+
+.rootRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-12);
+}
+
+.rootTitle {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+}
+
+/* Focused-step bar: back, title, trailing. The title never squeezes between actions —
+   it wraps and the bar grows. */
+.focused {
+  display: grid;
+  grid-template-columns: var(--portion-size-target-minimum) minmax(0, 1fr) var(--portion-size-target-minimum);
+  align-items: center;
+  column-gap: var(--portion-ref-space-8);
+  min-block-size: calc(var(--portion-ref-space-56) + var(--portion-safe-area-top));
+  padding-block-start: var(--portion-safe-area-top);
+  padding-inline: var(--portion-ref-space-8);
+  background: var(--portion-color-background-canvas);
+  border-block-end: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+.leading,
+.trailing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--portion-size-target-minimum);
+}
+
+.trailing {
+  justify-content: flex-end;
+}
+
+.barTitle {
+  min-inline-size: 0;
+  padding-block: var(--portion-ref-space-8);
+  text-align: start;
+}

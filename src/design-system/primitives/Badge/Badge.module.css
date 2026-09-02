@@ -1,0 +1,17 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 1.5em;
+  padding-block: var(--portion-ref-space-0);
+  padding-inline: var(--portion-ref-space-8);
+  border-radius: var(--portion-radius-control);
+  background: var(--portion-color-background-sunken);
+  white-space: nowrap;
+}
+
+.badge[data-kind='count'] {
+  padding-block: 2px;
+  background: var(--portion-color-action-selected-surface);
+  color: var(--portion-color-action-pressed);
+}

@@ -1,0 +1,44 @@
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--portion-ref-space-12);
+  align-items: baseline;
+  padding-block: var(--portion-ref-space-8);
+  border-block-end: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+.row[data-nested] {
+  padding-inline-start: var(--portion-ref-space-24);
+}
+
+.row[data-heading] {
+  padding-block: var(--portion-ref-space-12) var(--portion-ref-space-4);
+  border-block-end: 0;
+}
+
+.name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.marker {
+  inline-size: 4px;
+  block-size: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: var(--portion-color-nutrition-energy-accent);
+}
+
+.marker[data-category='protein'] { background: var(--portion-color-nutrition-protein-accent); }
+.marker[data-category='carbohydrates'] { background: var(--portion-color-nutrition-carbohydrates-accent); }
+.marker[data-category='fat'] { background: var(--portion-color-nutrition-fat-accent); }
+.marker[data-category='fibre'] { background: var(--portion-color-nutrition-fibre-accent); }
+.marker[data-category='vitamins'] { background: var(--portion-color-nutrition-vitamins-accent); }
+.marker[data-category='minerals'] { background: var(--portion-color-nutrition-minerals-accent); }
+
+.figure {
+  text-align: end;
+  white-space: nowrap;
+}

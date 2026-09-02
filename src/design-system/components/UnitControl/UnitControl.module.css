@@ -1,0 +1,32 @@
+.unitControl {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-4);
+  min-block-size: var(--portion-size-target-minimum);
+  min-inline-size: var(--portion-size-target-minimum);
+  padding-inline: var(--portion-ref-space-12);
+  border: 0;
+  border-inline-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: 0 var(--portion-radius-control) var(--portion-radius-control) 0;
+  background: transparent;
+  color: var(--portion-color-text-primary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+@media (hover: hover) {
+  .unitControl:hover {
+    background: var(--portion-color-background-sunken);
+  }
+}
+
+.unitControl:active {
+  background: var(--portion-color-background-sunken);
+}
+
+/* The field wrapper already draws the focus ring on :focus-within; keep the inner ring
+   inset so two rings never stack. */
+.unitControl:focus-visible {
+  outline-offset: calc(var(--portion-focus-ring-offset) * -1);
+}

@@ -1,0 +1,24 @@
+.surface {
+  min-inline-size: 0;
+}
+
+.surface[data-tone='canvas'] { background: var(--portion-color-background-canvas); }
+.surface[data-tone='surface'] { background: var(--portion-color-background-surface); }
+.surface[data-tone='sunken'] { background: var(--portion-color-background-sunken); }
+
+.surface[data-border='decorative'] {
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+.surface[data-border='control'] {
+  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
+}
+
+.surface[data-radius='structure'] { border-radius: var(--portion-radius-structure); }
+.surface[data-radius='control'] { border-radius: var(--portion-radius-control); }
+.surface[data-radius='card'] { border-radius: var(--portion-radius-card); }
+
+.surface[data-padding='0'] { padding: 0; }
+.surface[data-padding='12'] { padding: var(--portion-ref-space-12); }
+.surface[data-padding='16'] { padding: var(--portion-spacing-card-padding); }
+.surface[data-padding='24'] { padding: var(--portion-ref-space-24); }

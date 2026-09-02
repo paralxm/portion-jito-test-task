@@ -1,0 +1,43 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100%;
+  max-block-size: none;
+  margin: 0;
+  padding: var(--portion-spacing-page-inset);
+  border: 0;
+  background: transparent;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog[open] {
+  display: flex;
+}
+
+.dialog::backdrop {
+  background: var(--portion-color-overlay-scrim);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-heading-to-description);
+  inline-size: 100%;
+  max-inline-size: 360px;
+  padding: var(--portion-ref-space-24);
+  border-radius: var(--portion-radius-sheet);
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-primary);
+  box-shadow: var(--portion-shadow-sheet);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+  margin-block-start: var(--portion-ref-space-16);
+}

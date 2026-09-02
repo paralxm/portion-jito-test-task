@@ -1,0 +1,19 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
+  min-inline-size: 0;
+}
+
+.label {
+  display: block;
+  min-inline-size: 0;
+}
+
+.message {
+  margin-block-start: calc(var(--portion-spacing-control-to-helper) - var(--portion-spacing-label-to-control));
+}
+
+.live:empty {
+  display: none;
+}

@@ -1,0 +1,37 @@
+.iconButton {
+  padding: 0;
+  color: var(--portion-color-text-primary);
+}
+
+.iconButton[data-size='default'] {
+  inline-size: var(--portion-size-target-minimum);
+  block-size: var(--portion-size-target-minimum);
+}
+
+.iconButton[data-size='large'] {
+  inline-size: var(--portion-size-target-add-food);
+  block-size: var(--portion-size-target-add-food);
+}
+
+.plain {
+  background: transparent;
+  border-color: transparent;
+}
+
+.outlined {
+  background: var(--portion-color-background-canvas);
+  border-color: var(--portion-color-border-control);
+}
+
+@media (hover: hover) {
+  .plain:not(:disabled, [aria-busy='true']):hover,
+  .outlined:not(:disabled, [aria-busy='true']):hover {
+    background: var(--portion-color-background-sunken);
+  }
+}
+
+.plain:not(:disabled, [aria-busy='true']):active,
+.outlined:not(:disabled, [aria-busy='true']):active {
+  background: var(--portion-color-background-sunken);
+  border-color: var(--portion-color-border-control);
+}
