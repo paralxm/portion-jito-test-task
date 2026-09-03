@@ -95,7 +95,7 @@ export function NavigationBar({ selected, onSelect, onAddFood, hidden = false, c
             }}
           >
             <span className={styles.indicator} aria-hidden="true" />
-            <Icon icon={icon} weight={current ? 'bold' : 'regular'} />
+            <Icon icon={icon} size="default" weight={current ? 'bold' : 'regular'} />
             {/* Both weights are laid out so the cell width never changes on selection. */}
             <span className={styles.labelSlot}>
               <Text variant={current ? 'caption-strong' : 'caption'} color="inherit" className={styles.label} data-nav-label>
@@ -114,7 +114,7 @@ export function NavigationBar({ selected, onSelect, onAddFood, hidden = false, c
       })}
       <button type="button" className={styles.addFood} onClick={onAddFood}>
         <span className={styles.addGlyph}>
-          <Icon icon={Plus} weight="bold" />
+          <Icon icon={Plus} size="default" weight="bold" />
         </span>
         <Text variant="caption-strong" color="inherit" className={styles.label} data-nav-label>
           Add food
