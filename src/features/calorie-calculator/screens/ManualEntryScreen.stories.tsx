@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow } from '../../../design-system/storybook/decorators';
 import { ManualEntryScreen } from './ManualEntryScreen';
 
 const meta = {
@@ -100,5 +101,14 @@ export const Enlarged200: Story = {
   play: async () => {
     await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1);
     document.documentElement.style.fontSize = '';
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: 'Continue to review' })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

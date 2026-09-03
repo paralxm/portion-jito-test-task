@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { NavigationBar } from '../../design-system';
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../design-system/storybook/decorators';
 import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { searchFoods } from '../../features/calorie-calculator/domain/fixtures';
 import { recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
@@ -145,6 +146,25 @@ export const Failure: Story = {
     await expect(canvas.getByRole('searchbox')).toHaveValue('offline');
     await userEvent.click(canvas.getByRole('button', { name: 'Try again' }));
     await expect(args.onRetry).toHaveBeenCalledTimes(1);
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('searchbox')).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 320 at 200 %',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('searchbox')).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };
 

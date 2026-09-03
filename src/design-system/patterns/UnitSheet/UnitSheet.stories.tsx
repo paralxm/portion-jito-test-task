@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../storybook/decorators';
 import { UnitSheet } from './UnitSheet';
 
 const meta = {
@@ -57,4 +58,23 @@ export const CancelKeepsUnit: Story = {
 export const SingleUnit: Story = {
   name: 'Only one supported unit',
   args: { options: [{ id: 'ml', label: 'ml' }], value: 'ml' },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('dialog')).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 320 at 200 %',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: 'Confirm' })).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
 };

@@ -3,6 +3,7 @@ import { expect, within } from 'storybook/test';
 import { CameraSlash, MagnifyingGlass } from '@phosphor-icons/react';
 
 import { Button } from '../../primitives/Button/Button';
+import { expectNoHorizontalOverflow } from '../../storybook/decorators';
 import { EmptyState } from './EmptyState';
 
 const meta = {
@@ -56,5 +57,22 @@ export const Failure: Story = {
   },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByRole('alert')).toHaveTextContent('Camera access is needed to scan');
+  },
+};
+
+export const LongContent: Story = {
+  name: 'Long title and body at 320',
+  args: {
+    kind: 'no-match',
+    icon: MagnifyingGlass,
+    title: 'No recipes match “wholegrain pasta with roasted vegetables” and your filters',
+    children:
+      'Every recipe is compared with the query and all of your active filters at once. Try a shorter search term, or open Filters and loosen one of the criteria you set — for example the calorie range or the preparation time — to see more recipes.',
+    actions: <Button variant="secondary">Change filters</Button>,
+  },
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText(/wholegrain pasta/)).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { Stack } from '../../primitives/layout/Stack';
+import { expectNoHorizontalOverflow } from '../../storybook/decorators';
 import { AmountField } from './AmountField';
 
 const meta = {
@@ -62,5 +63,15 @@ export const States: Story = {
     const invalid = within(canvasElement).getByDisplayValue('abc');
     await expect(invalid).toHaveAttribute('aria-invalid', 'true');
     await expect(invalid).toHaveAccessibleDescription(/Enter a number/);
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  args: { onRequestUnitChange: fn() },
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('textbox')).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

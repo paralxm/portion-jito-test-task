@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { Stack } from '../../primitives/layout/Stack';
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../storybook/decorators';
 import { FoodResultRow } from './FoodResultRow';
 
 const meta = {
@@ -43,5 +44,14 @@ export const LongNameAndMissingCalories: Story = {
     await expect(canvas.getByText('0 kcal')).toBeInTheDocument();
     const long = canvas.getByRole('button', { name: /Wholegrain pasta/ });
     await expect(long.scrollWidth).toBeLessThanOrEqual(long.clientWidth + 1);
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 200 %',
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: /Lentil soup/ })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { NavigationBar } from '../../../design-system/patterns/NavigationBar/NavigationBar';
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
 import { recipeCatalogue } from '../domain/fixtures';
 import { filterRecipes, removeCriterion, type RecipeCriteria } from '../domain/matching';
 import { RecipesScreen, type RecipesStatus } from './RecipesScreen';
@@ -116,5 +117,26 @@ export const Failure: Story = {
     await expect(canvas.getByRole('button', { name: 'Remove filter: Under 500 kcal' })).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Try again' }));
     await expect(args.onRetry).toHaveBeenCalledTimes(1);
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  render: (args) => <Harness status="ready" initialCriteria={{}} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('heading', { level: 1, name: 'Recipes' })).toBeInTheDocument();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 320 at 200 %',
+  render: (args) => <Harness status="ready" initialCriteria={{}} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('heading', { level: 1, name: 'Recipes' })).toBeInTheDocument();
+    await expectNoHorizontalOverflow();
   },
 };

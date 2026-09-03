@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
 import type { FoodCandidate } from '../domain/calculation';
 import { barcodeCatalogue, fixtureC, foodCatalogue, photoSuggestions } from '../domain/fixtures';
 import { FoodReviewScreen } from './FoodReviewScreen';
@@ -141,5 +142,14 @@ export const CancelAndBack: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Back' }));
     await expect(args.onBack).toHaveBeenCalledTimes(2);
     await expect(args.onConfirm).not.toHaveBeenCalled();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 200 %',
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: 'Confirm and calculate' })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };
