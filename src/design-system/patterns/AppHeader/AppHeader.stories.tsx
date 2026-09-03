@@ -8,7 +8,7 @@ import { AppHeader } from './AppHeader';
 const meta = {
   title: 'Patterns/AppHeader',
   component: AppHeader,
-  args: { title: 'Calculate' },
+  args: { title: 'Home' },
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -27,7 +27,7 @@ export const Root: Story = {
   args: { showWordmark: true },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { level: 1, name: 'Calculate' })).toBeInTheDocument();
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Home' })).toBeInTheDocument();
     await expect(canvas.getByText('portion')).toHaveAttribute('aria-label', 'Portion');
   },
 };

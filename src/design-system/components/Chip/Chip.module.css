@@ -3,7 +3,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--portion-ref-space-4);
-  min-block-size: var(--portion-ref-space-40);
+  /* The drawn chip's own height, not a spacing value; the 48 px hit area is reached
+     separately via .selectable::before below. */
+  min-block-size: 40px;
   padding-block: var(--portion-ref-space-8);
   padding-inline: var(--portion-ref-space-12);
   border: var(--portion-border-width-default) solid var(--portion-color-border-control);

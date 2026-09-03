@@ -1,0 +1,64 @@
+.control {
+  display: flex;
+  align-items: stretch;
+  gap: var(--portion-ref-space-4);
+  padding: var(--portion-ref-space-4);
+  background: var(--portion-color-background-surface);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
+  border-radius: var(--portion-radius-control);
+  min-inline-size: 0;
+}
+
+/* Each option is a flexible segment of the shared track; its own label wraps under
+   enlarged text or long labels instead of the segment breaking onto its own row. */
+.option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0%;
+  min-inline-size: 0;
+  min-block-size: var(--portion-size-target-minimum);
+  padding-inline: var(--portion-ref-space-12);
+  padding-block: var(--portion-ref-space-8);
+  border: 0;
+  border-radius: var(--portion-radius-control);
+  background: transparent;
+  color: var(--portion-color-text-secondary);
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    box-shadow var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (hover: hover) {
+  .option:not(:disabled):not([data-selected]):hover {
+    background: var(--portion-color-background-sunken);
+  }
+}
+
+/* Selection is a real boundary and background change, not a colour swap alone: the
+   selected segment visibly "raises" off the track. */
+.option[data-selected] {
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-action-primary);
+  box-shadow: inset 0 0 0 1px var(--portion-color-action-primary);
+}
+
+.option:disabled {
+  color: var(--portion-color-state-disabled-text);
+  cursor: not-allowed;
+}
+
+.option:focus-visible {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+}

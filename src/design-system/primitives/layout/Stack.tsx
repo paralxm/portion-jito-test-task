@@ -2,8 +2,8 @@ import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 
 import styles from './layout.module.css';
 
-/** Spacing scale steps from tokens.json → reference.space. */
-export type SpaceStep = 0 | 4 | 8 | 12 | 16 | 24 | 32 | 36 | 40 | 44 | 48 | 52 | 56 | 60 | 64;
+/** The approved spacing scale, matching tokens.json → reference.space exactly. */
+export type SpaceStep = 0 | 4 | 8 | 12 | 16 | 24 | 32;
 
 export type LayoutAlign = 'start' | 'center' | 'end' | 'stretch' | 'baseline';
 export type LayoutJustify = 'start' | 'center' | 'end' | 'between';

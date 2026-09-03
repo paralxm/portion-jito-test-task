@@ -4,8 +4,8 @@ import { MethodSheet, NavigationBar, type Destination, type EntryMethod } from '
 import { commitCandidate, updatePortion, type CurrentCalculation, type FoodCandidate, type Portion } from '../features/calorie-calculator/domain/calculation';
 import { samplePhotoImage } from '../features/calorie-calculator/domain/fixtures';
 import { BarcodeScreen } from '../features/calorie-calculator/screens/BarcodeScreen';
-import { CalculateScreen } from '../features/calorie-calculator/screens/CalculateScreen';
 import { FoodReviewScreen } from '../features/calorie-calculator/screens/FoodReviewScreen';
+import { HomeScreen } from '../features/calorie-calculator/screens/HomeScreen';
 import { ManualEntryScreen } from '../features/calorie-calculator/screens/ManualEntryScreen';
 import { PhotoScreen } from '../features/calorie-calculator/screens/PhotoScreen';
 import { filterRecipes, removeCriterion, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
@@ -41,12 +41,12 @@ const IDLE: RequestState<never> = { status: 'idle', results: [], query: '', crit
 
 /** The Portion runtime: in-memory navigation over fixture-backed screens. No persistence is promised. */
 export default function App() {
-  const [root, setRoot] = useState<Destination>('calculate');
+  const [root, setRoot] = useState<Destination>('home');
   const [flow, setFlow] = useState<FlowStep[]>([]);
   const [methodOpen, setMethodOpen] = useState(false);
   const keyboardOpen = useSoftwareKeyboard();
 
-  // Calculate ---------------------------------------------------------------
+  // Home / current calculation ------------------------------------------------
   const [calculation, setCalculation] = useState<CurrentCalculation | null>(null);
 
   // Search ------------------------------------------------------------------
@@ -191,7 +191,7 @@ export default function App() {
     if (!next) return;
     setCalculation(next);
     setFlow([]);
-    setRoot('calculate');
+    setRoot('home');
   };
 
   const openRecipe = (recipeId: string, criteriaSource: 'search' | 'browse') => {
@@ -254,12 +254,14 @@ export default function App() {
 
   return (
     <>
-      <div data-screen="calculate" hidden={!rootVisible('calculate')}>
-        <CalculateScreen
+      <div data-screen="home" hidden={!rootVisible('home')}>
+        <HomeScreen
           current={calculation}
           onPortionChange={(portion) => setCalculation((c) => (c ? updatePortion(c, portion) : c))}
           onChangeFood={() => setMethodOpen(true)}
-          navigation={navigation('calculate')}
+          onAddFood={() => setMethodOpen(true)}
+          onFindRecipes={() => switchRoot('recipes')}
+          navigation={navigation('home')}
         />
       </div>
 

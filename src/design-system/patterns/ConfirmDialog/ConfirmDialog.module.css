@@ -35,9 +35,8 @@
   box-shadow: var(--portion-shadow-sheet);
 }
 
+/* The Cancel/Confirm row itself is Inline (distribute="fill"); this only owns the
+   gap before it, an internal spacing decision fixed to ConfirmDialog's own template. */
 .actions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portion-ref-space-8);
   margin-block-start: var(--portion-ref-space-16);
 }

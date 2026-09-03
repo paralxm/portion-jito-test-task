@@ -1,243 +1,598 @@
-# Portion — Low-Fidelity Specification
+Portion — Low-Fidelity Specification
 
-**Status:** Finalized for Design System and high-fidelity implementation.  
+Updated: 2026-09-03.
+Status: Current design specification; targeted Figma and implementation alignment pending.
+Repository location: docs/ux/low-fidelity.md.
+Product language: English.
 
-**Reviewed:** 2026-09-02. **Product language:** English.  
+1. Purpose, sources and evidence
 
-**Suggested repository location:** `docs/ux/low-fidelity.md`.
+This document defines screen structure, navigation, state mapping and design coverage. Task flows define the two user tasks. UI contract defines detailed behavior and data rules. Visual direction owns branding and visual tokens.
 
-## 1. Purpose and evidence
+Sources used for this revision:
 
-Define the core screen structure, transitions, state ownership and recovery rules before detailed UI design. This is a design contract, not an implementation report.
+Supplied LF specification, UI contract and latest task-flow text.
 
-- [Figma source](https://www.figma.com/design/heuO3V1WlKG44CukQswCkw/jito-calories-calculator?node-id=0-1): `Low-fidelity — Complete Core Journeys`.
+Supplied Home/O01 screenshots and the original Low-fidelity — Complete Core Journeys export.
 
-- Reviewed export: `59985e47-01dd-4181-95ac-8d7b47abf02e.pdf`, one-page board.
+Latest supplied TF01 and TF02 PDF exports.
 
-- Scope grounding: `Product Scope(4).pdf`, `UX Requirements(9).pdf`, the supplied task flows and the latest agreed navigation decisions.
+User-approved Home/daily-overview direction and the two JTBD below.
 
-- **Observed** means visible in the PDF. **Required** means intended behavior, not a verified interaction. The board's “clickable prototype” claims have not been independently tested.
+Previously supplied research synthesis and user-needs findings; the daily overview is an additional product decision, not a newly demonstrated research finding.
 
-The reviewed export is the pre-correction baseline. This document now defines the corrected recipe transitions in section 5; these rules supersede the earlier recipe arrows. The Figma changes have not been re-inspected. Other findings remain open until verified.
+Figma — Low-fidelity board. The live board and runtime were not accessible for independent interaction verification during this documentation revision. Existing editing/test reports are historical evidence for their stated scope, not proof that the new requirements are implemented.
 
-## 2. Product boundaries
+2. Goals and product boundaries
 
-| User goal | Completion condition |
-| --- | --- |
-| Calculate calories for a food or dish | Identify the item, review/correct it, set a valid portion and see corresponding calories and available nutrition. |
-| Find a suitable recipe | Browse or search, optionally narrow results, inspect suitability and read recipe details. No forced save or cook action. |
+HMW: How might we help users understand the calorie content of a specific food or dish and quickly evaluate which recipes fit their needs, while keeping both experiences clear, efficient, and easy to control?
 
-In scope: four entry methods, review, portion editing, recipe discovery/search, supported criteria, details and recoverable states.
+JTBD 01: When I need to understand the calorie content of a food or dish, I want to identify what I am eating, set the relevant portion, and correct the input if necessary, so I can understand a calorie result that reflects what I actually intend to consume.
 
-Out of scope: diary/history, daily goals, accounts/onboarding, saved collections, meal planning, recipe authoring, multi-ingredient building, social features, payments, coaching, wearables and production recognition/database services. Calculate is the task workspace, not a diary or a separate Home dashboard. Prior meal-time/save steps are not mandatory.
+JTBD 02: When I need to find a suitable recipe, I want to narrow the available options by relevant criteria and understand why each option matches them, so I can choose without evaluating every recipe in detail.
 
-## 3. Navigation contract
+Task
 
-Exactly one bottom bar contains **Calculate | Search | Recipes | +**, in that order.
+Completion
 
-| Control | Role | Required behavior |
-| --- | --- | --- |
-| Calculate | Destination; initial launch | Open the empty workspace or restore the current calculation. |
-| Search | Destination | One search surface with Food/Recipes scope; first entry has no query and Food selected. |
-| Recipes | Destination | Query-free discovery with optional criteria; search entry opens Search in Recipes scope. |
-| + | Trailing action, not a destination | Open O01 over the actual current surface. Never acquire a selected-tab state. |
+Calculate calories for a food or dish
 
-- One destination remains selected. Search stays selected when its scope is Recipes.
+Understand the calorie result for the identified, reviewable food and intended portion in S07. Logging is optional.
 
-- Keep the same bar on recipe details; select the originating destination. No floating or duplicate plus.
+Find a suitable recipe
 
-- Camera, manual entry and food review are focused steps without this bar.
+Identify a suitable recipe using criteria and available evidence. No mandatory Save, Cook or logging action.
 
-- Sheets cover and block the bar. Close/backdrop/swipe cancellation restores the actual origin, including recipe details; dirty input uses the discard rule.
+Core scope: four food-entry methods, shared review and correction, portion calculation, recipe browse/search, criteria, details and appropriate recovery.
 
-- Tab switches preserve each destination's context. Re-selecting the current tab does not create another stack entry.
+Accepted supporting scope: a Home daily overview, an optional user-entered daily calorie goal, and an optional list of explicitly logged food portions with editing/removal. These support daily context; they are not prerequisites for either job. A daily list is a limited tracking capability even though there is no separate Diary destination.
 
-- During root search input, hide the whole bar behind the keyboard and restore it afterward; never relocate only the plus.
+Out of scope: accounts/onboarding, Profile/Diary destinations, automatic nutrition-goal calculation, exercise adjustment, weight, water, streaks, weekly analytics, health scores, coaching, saved recipe collections, meal planning, recipe authoring, multi-ingredient dish building, social features, payments, wearables and production recognition/database services.
 
-## 4. Observed screen inventory
+The research emphasis on calculation without mandatory tracking remains valid. Do not rewrite research or claim that a goal/ring was required by either JTBD. Neutral, correctable results and explainable recipe matches remain core requirements.
 
-IDs below come from the export. A listed frame proves a layout exists, not that its actions work.
+3. Navigation contract
 
-| Family | Exported states | Review |
-| --- | --- | --- |
-| Calculate | S01-1 empty; S01-2 result; S01-3 narrow-width check | Correct three-tab-plus structure. Local invalid edit and expanded nutrition need explicit witnesses. |
-| Shared Search | S02-1 Food results; S02-2 loading; S02-3 no matches; S02-4 failure; S02-5 Recipes results; S02-6 Recipes no matches | Main states drawn. No-query/keyboard states and recipe request-failure mapping are missing. |
-| Recipes | S03-1 browse; S03-2 filtered results | Discovery covered; loading, no matches and failure need origin-specific examples or explicit reuse mapping. |
-| Add food | O01 method sheet | Four-method overlay drawn; actual origin restoration remains unverified. |
-| Barcode | S04-1 scanning; S04-2 lookup; S04-3 unreadable; S04-4 not found; S04-5 service failure; S04-6 denied; P01 permission | Causes are distinguished; branch connections need correction. |
-| Photo | S05-1 capture; S05-2 preview; S05-3 analysis; S05-4 suggestions; S05-5 no match; S05-6 failure | Core acquisition states drawn; permission/unavailable-camera reuse must be mapped. |
-| Manual entry | S06-1 empty; S06-2 filled/keyboard; S06-3 field error; O03 discard; O04 units | Reference entry and recovery layouts drawn. Keyboard/inset behavior is not verified. |
-| Food review | S07-1 search; S07-2 invalid portion; S07-3 replacement; S07-4 barcode; S07-5 photo; S07-6 manual | Shared review is present; correction destinations and confirmation routes need explicit connections. |
-| Filters | O02 applied values; O02-2 invalid range | Sheet and validation crop drawn; edited/reset drafts and keyboard/scroll need witnesses. |
-| Recipe details | S08-1 loaded; S08-2 loading; S08-3 unavailable; S08-4 no-photo/long-title crop | S08-4 is a loaded-state variant, not a step after Retry. Correct transitions are specified below; both origins and Figma links await verification. |
+One bottom row: Home | Search | Recipes | + Add food. There are three destinations and one action. Calculate is a capability, not a navigation destination.
 
-## 5. Required journeys
+Surface/action
 
-These sequences correct the intended logic; they are not assertions that the existing prototype implements it. Permission steps are skipped when access is already available.
+Behavior
 
-1. **Search:** O01 Search food, or Search tab → query/loading → S02-1 result selection → S07-1 review → valid confirmation → S01-2. No matches and request failure are alternative outcomes, not consecutive steps.
+Home, S01
 
-2. **Barcode:** O01 Scan barcode → P01 if needed → S04-1 scanning → S04-2 lookup → S07-4 review → confirmation → S01-2. Unreadable code branches from scanning; missing product/service failure branch from lookup; denial branches from permission.
+Initial destination. S01-1 when today's entry count is zero; S01-2 when at least one entry exists. A portion preview does not change this state.
 
-3. **Photo:** O01 Take a photo → permission if needed → S05-1 capture → S05-2 preview → S05-3 analysis → S05-4 suggestions → explicit selection → S07-5 review → confirmation → S01-2. Retake returns to capture; no match and service failure branch from analysis.
+Search, S02
 
-4. **Manual:** O01 or a recovery action → S06-1/S06-2 reference-data entry → validation → S07-6 desired-portion review → confirmation → S01-2. Invalid fields stay in the form; they do not require discarding it.
+Food and Recipes scopes. First entry uses Food with no query; later visits restore context.
 
-5. **Recipe discovery:** Select a card from S03-1, or optionally edit O02 and Apply to obtain S03-2 filtered results. A selected card opens S08-2, which resolves to S08-1 on success or S08-3 on failure. No matching recipes is a separate list outcome: adjust criteria and request results again before any card can be selected. Back from details restores the actual browse state.
+Recipes, S03
 
-6. **Recipe search:** Enter a query and optional criteria in Search, Recipes scope. A successful request yields S02-5 results or S02-6 no matches; a request failure is a separate recovery state. Only a card in S02-5 can open S08-2, then S08-1 on success or S08-3 on failure. Back restores Search with its query, criteria and list position.
+Query-free browse with optional criteria. Restore its own existing criteria/list context on return.
 
-Each recovery action must connect to its actual destination. A generic arrow between neighboring frames does not represent a valid transition.
+Recipe details, S08
 
-### Recipe transition contract
+Retain the originating Search or Recipes selection. Back returns to that list.
 
-| From | Trigger / outcome | To |
-| --- | --- | --- |
-| S02-5 Search results | Open recipe | S08-2 Loading; origin = Search |
-| S03-1 Browse or S03-2 Filtered results | Open recipe | S08-2 Loading; origin = Recipes |
-| S08-2 Loading | Loaded | S08-1 Loaded, including its S08-4 variant where applicable |
-| S08-2 Loading | Request failed | S08-3 Unavailable |
-| S08-3 Unavailable | Retry | S08-2 Loading for the same recipe |
-| S08-1, S08-2 or S08-3 | Back | Exact originating result list, preserving query, criteria and scroll |
-| S02-6 No matches | Edit query / adjust criteria | Search input or filter draft, then a new request; results, no matches or request failure |
-| Recipe browse with no matches | Adjust criteria | Filter draft, then Apply and a new list request |
++ Add food
 
-- **S08-4 is a variant of Loaded:** missing photo and/or a long title do not make the recipe unavailable. Place the example beside S08-1 with the caption `Loaded-state variant`, not an action arrow. Apply the same Back and navigation rules.
-- **Origin controls tab selection:** keep Search selected for recipes opened from Search; keep Recipes selected for those opened from browse. Do not switch tabs merely because the content is a recipe.
-- **Back during loading:** return immediately to the origin and ignore any later response for the closed detail. Back never opens another loading screen.
-- **Board arrangement:** Results → Loading → Loaded; Unavailable below Loading, with failure and Retry branches. Keep No matches on the search/browse branch, outside the detail-opening path.
-- Do not connect No matches directly to details, Loaded to Loading with `Back`, or Unavailable to the no-photo variant with `Retry`.
+Open the single O01 overlay above the current surface. Never become selected.
 
-## 6. State and data rules
+S04–S07 focused steps
 
-### Context and cancellation
+No bottom navigation; provide clear Back/Close behavior.
 
-- Keep current calculation separate from the unconfirmed candidate. Confirmation commits once and opens Calculate; cancellation leaves the previous result unchanged.
+Foreground overlays
 
-- Explain replacement before confirmation (S07-3); do not silently accumulate foods or add a second confirmation dialog.
+Cover and block the underlying bar and content.
 
-- Review Back returns to the actual preceding search, photo, barcode or manual step with useful input retained. Identity correction must lead to an explicit change/search/manual route.
+Tab switches retain each destination's state. Search remains selected in Recipes scope. During keyboard-focused root search, hide the whole bar behind the keyboard and restore it afterward. Do not move the plus independently or introduce duplicate navigation.
 
-- Cancelling a method opened from O01 returns to O01's invoking surface. Cancelling manual entry opened from an error returns to that error context.
+4. Home — daily overview
 
-- Ask Keep editing/Discard only for meaningful unsaved entry. An untouched form exits immediately. Discard removes the draft, not the existing calculation.
+4.1 Names and shared structure
 
-- Preserve search query when changing scope, but keep recipe criteria scope-specific. A new query resets result scroll; returning from details restores it.
+ID
 
-- Moving from recipe browse into Search copies applicable criteria. Subsequent search edits must not silently mutate the separate browse state.
+Current target name
 
-### Portions and nutrition
+Existing node
 
-- Manual entry requires identity, calories and a positive reference amount/unit. Optional macros left blank remain unknown.
+S01-1
 
-- Reference basis and desired portion are different values. Calculate only from a supported conversion: `portion nutrition = reference nutrition × desired quantity / reference quantity` after compatible-unit conversion.
+Home / Today — No food logged
 
-- Quantity/reference amount must be positive; known nutrient values may be zero. Reject negative, malformed and unsupported values without erasing other fields.
+175:10
 
-- Never assume grams equal milliliters, pieces or servings without conversion data. Offer only supported units in O04; retain source precision until display rounding.
+S01-2
 
-- Valid local portion edits update the matching result without a fake network delay. Invalid edits must not display an old result as if it belongs to the new amount.
+Home / Today — Food logged
 
-- Show calories with the portion basis, then available protein/carbohydrate/fat. Additional nutrients, including fiber where supplied, use secondary disclosure. Missing data is not zero.
+175:38
 
-- Photo output is a suggestion, not proof of identity, weight or ingredients. Require review and a user-confirmed portion; allow correction of barcode matches too.
+S01-3
 
-### Criteria and details
+Home / Today — Food logged · 320 px width check
 
-- Supported criteria: dietary preference, calorie/protein bounds and preparation constraints. Avoid invented universal health scores or personalized recommendations.
+185:2; target name/composition pending alignment
 
-- Sheet changes remain drafts until Apply. Cancel discards draft edits; Reset clears the draft and still requires Apply. Removed applied chips update results immediately and are not undone by cancelling a later sheet.
+The names above include the existing ID prefix when applied to Figma frames. Preserve the node IDs and update visible captions as well as layer names. S01-3 is a responsive specimen of S01-2, not another navigation destination.
 
-- Blank numeric bounds mean unrestricted. Minimum cannot exceed maximum; invalid drafts cannot apply.
+Use the same region order in both main states:
 
-- Match evidence explains active criteria only. Unknown data cannot be asserted to meet a hard nutrient filter; do not silently relax criteria. Dietary preference is not an allergy guarantee.
+Region
 
-- Details group identity, serving basis, available nutrition, ingredients and preparation. Long content scrolls clear of navigation. A failed image does not remove otherwise valid details.
+Content and purpose
 
-## 7. Error and recovery contract
+Header
 
-| Condition | Response and recovery | Retain |
-| --- | --- | --- |
-| Food/recipe no matches | Edit query; adjust recipe criteria; food may use manual entry. No generic network Retry. | Query and applicable criteria |
-| Search/browse request failure | Retry the request; food also offers manual entry. | Query, scope and criteria |
-| Unreadable barcode | Continue/rescan or use another method; no lookup retry before a code exists. | Relevant acquisition context |
-| Read code, product missing | Search/manual; optional rescan. | Read code where useful |
-| Barcode service failure | Retry lookup or switch method. | Read code |
-| Camera denied/unavailable | Search/manual; settings only when appropriate. No permission loop. | Invoking context |
-| Photo no usable match | Retake/search/manual; never invent nutrition. | Photo while useful |
-| Photo service failure | Retry analysis, retake or leave. | Captured image |
-| Invalid form/portion/filter | Identify the affected field and correction; prevent invalid submission. | Other entered values |
-| Recipe detail failure (S08-3) | Retry → S08-2 for the same recipe; Back → originating list. | Recipe identity, origin, query, criteria and scroll |
+Home, Today, and a contextual Set/Edit daily goal action. No Profile dependency.
 
-Keep one foreground modal. Loading has a distinct progress indicator and an escape where needed. Ignore obsolete responses after query changes/cancellation, pause duplicate barcode reads and prevent duplicate commits. These are required behaviors, not PDF-verified functionality.
+Daily calories
 
-## 8. Validation status
+One ring; arc represents logged energy / goal, center names Remaining. Logged and Goal are labeled below. Supporting daily context, not the calorie result for a single food.
 
-The previously identified connector, branching, navigation-origin, and state-coverage issues have been corrected in the current Figma low-fidelity flow.
+Nutrition summary
 
-The current Figma flow and this specification are aligned for Design System and high-fidelity implementation.
+Compact Protein / Carbs / Fat aggregate row, with units and partial-data handling. No additional rings or undefined macro targets.
 
-The following UX structure has been resolved:
+Today's food
 
-- Search loading branches correctly into results, no matches, or request failure.
-- Barcode permission denial routes to the appropriate recovery path; successful lookup routes to Food Review.
-- Recipe Details follows Results → Loading → Loaded / Unavailable, with Retry → Loading.
-- Back from Recipe Details restores the actual originating Search or Recipes state.
-- The no-photo / long-title recipe example is treated as a Loaded-state variant, not a separate recovery state.
-- Review confirmation routes to the current Calculate result.
-- Search, recipe discovery, filters, calculation, photo acquisition, and recovery states required by the current specification are represented or explicitly mapped.
-- Navigation consistently follows Calculate | Search | Recipes | + Add food, with the trailing plus treated as an action rather than a destination.
+Empty guidance plus Add first food, or compact logged-entry rows with identity, portion and energy. Entry points into the food task or review of explicitly recorded portions.
 
-Remaining validation belongs to implementation rather than low-fidelity structure:
+Recipe discovery
 
-- responsive behavior at implementation widths;
-- software-keyboard and viewport behavior;
-- keyboard interaction;
-- focus management and focus restoration;
-- accessibility semantics and screen-reader behavior;
-- runtime state preservation;
-- asynchronous stale-response and duplicate-action handling;
-- browser/device behavior;
-- text resizing and long-content behavior.
+Find a recipe, relevant criterion cues, and Find recipes. With actual applied Recipes criteria, show their summary and See matching recipes. Supports JTBD 02.
 
-## 9. Fidelity and verification limits
+Bottom navigation
 
-- The reviewed export uses grayscale shapes, omitted-text bars, essential vectors and external captions. These bars are not loading skeletons.
+Home selected; the trailing plus remains an action.
 
-- Keep this board structural: no final copy, icon library, photography or branded component system. Add final English labels in the next fidelity stage.
+Home has no food-reference form, editable grams/unit control or inline single-food calculator. Identify, correct and calculate a portion in S07.
 
-- Text-free layouts cannot validate comprehension, actual text wrapping, accessible names or numeric readability. The long-title crop reserves space; it does not prove real text fits.
+4.2 Empty and populated specimens
 
-- The board contains a 320 px example and manual keyboard example. Their presence does not prove every screen reflows, scrolls or avoids keyboard overlap.
+The following are synthetic demonstration values, not default goals assigned to users or nutrition recommendations.
 
-- PDF review cannot verify native editability, component usage, actual hit areas, overlays, links, focus, gestures, state persistence or scrolling.
+Value
 
-- Recognition, search and nutrition outcomes are fixtures, not working services. Runtime permissions, stale responses and duplicate-action protection need separate verification.
+S01-1
 
-- Nielsen heuristics inform the rules above; this is not proof of compliance with all ten heuristics or accessibility standards. Task comprehension and accessibility require later testing with meaningful content.
+S01-2
 
-## 10. Exit criteria and handoff
+Today's entry count
 
-The low-fidelity structure and current specification are ready to hand off into Design System and high-fidelity implementation.
+0
 
-Completed at the low-fidelity level:
+2
 
-- [x] Core navigation and all six required journeys are structurally defined.
-- [x] Search, barcode, photo, manual-entry, review, filtering, and recipe-detail branching are aligned with the current interaction contract.
-- [x] Recipe Details preserves its actual Search or Recipes origin.
-- [x] No matches, request failure, loading, unavailable, and loaded variants are treated as distinct states.
-- [x] Add food remains a shared trailing action rather than a fourth destination.
-- [x] Required recovery paths and cancellation behavior are represented or explicitly mapped.
-- [x] The current Figma low-fidelity flow and this specification are aligned for the next design phase.
+Goal
 
-Implementation validation remains intentionally open:
+2,200 kcal
 
-- [ ] Verify responsive behavior at 320 / 390 / 430 CSS px.
-- [ ] Verify software-keyboard and safe-area behavior.
-- [ ] Verify keyboard navigation, focus containment, and focus restoration.
-- [ ] Verify accessible names, semantics, contrast, and screen-reader behavior.
-- [ ] Verify runtime state preservation and scroll restoration.
-- [ ] Verify stale-response handling and duplicate-action protection.
-- [ ] Verify 200% text resizing and long-content behavior.
+2,200 kcal
 
-**Handoff:** Design System and high-fidelity implementation may proceed using this document, `ui-contract.md`, and `visual-direction.md` as the current implementation baseline.
+Logged
+
+0 kcal
+
+1,350 kcal
+
+Remaining
+
+2,200 kcal
+
+850 kcal
+
+Progress
+
+0%
+
+Approximately 61%
+
+Protein / Carbs / Fat
+
+0 / 0 / 0 g recorded
+
+90 / 135 / 50 g
+
+S01-1: No food logged today; supporting text explains adding a food or dish to review its portion and nutrition. Add first food opens the same O01 instance as the plus.
+
+S01-2: example rows are Oatmeal with mixed berries — 300 g, 550 kcal; and Grilled chicken Caesar salad — 350 g, 800 kcal. These synthetic entries sum to 1,350 kcal. Their displayed portion energy does not establish real-world nutrition values. Inspect/edit opens the existing-entry review mode; the current screenshot rows are static examples and those interactions still need implementation.
+
+Empty/populated state depends on entry count, not energy sum: a valid zero-kcal entry still produces a populated list. An empty list means nothing is recorded, not that the person ate nothing.
+
+4.3 Ring, goal and dependent states
+
+The UI contract owns the detailed arithmetic and data handling. Required presentation:
+
+State
+
+Home presentation
+
+Valid goal, complete energy
+
+Remaining = goal − today's logged energy. Arc = logged/goal, visually capped at 100%.
+
+No goal
+
+Show logged information; remaining is unavailable. Offer optional Set a daily goal. Do not use a fabricated goal or a 0/0 ratio.
+
+Invalid/zero goal draft
+
+Explain the invalid value inside the contextual editor; preserve the last committed goal until a valid change is applied.
+
+Goal reached
+
+Full ring, 0 kcal remaining; neutral wording.
+
+Goal exceeded
+
+Full ring and X kcal over your set goal; no hidden negative value, shame or success/error coloring based on food intake.
+
+Incomplete energy
+
+Label the total partial and the exact remainder unavailable. Do not treat unknown entries as zero.
+
+Missing macros
+
+Show known/partial/unavailable values for each nutrient independently.
+
+The contextual goal editor allows entering, changing or clearing the optional goal, with explicit Apply and Cancel. It has no permanently assigned new screen/overlay ID in this revision; locate existing reusable patterns before allocating one. Goal changes never modify entries or recipe filters.
+
+The displayed recipes and their criteria are independent of logging state. A remainder is not automatically a meal budget or suitability filter.
+
+4.4 Recipe action contract
+
+Use Find recipes when opening Recipes browse. On first use this leads to S03-1; otherwise restore the user's existing Recipes state. Criteria cues are informational, not preselected chips or buttons unless a real action is defined.
+
+When Recipes already has applied criteria, See matching recipes restores that filtered context. Home summarizes Recipes-owned criteria, not whichever Search query was used last.
+
+The supplied prototype report says the current Home button is labeled Choose criteria while navigating to S03-1. Relabel it Find recipes to match the existing browse destination. Opening filters is a separate explicit action in Recipes/Search. This document does not claim the Figma label has already been updated.
+
+5. O01 — Add food / Choose a method (overlay)
+
+Existing node: 176:20. Use one shared bottom sheet.
+
+Position at reference width
+
+Button
+
+Supporting copy
+
+Destination
+
+Top left
+
+Search food
+
+Find a product or dish
+
+S02 Food
+
+Top right
+
+Scan barcode
+
+For packaged food
+
+S04
+
+Bottom left
+
+Take a photo
+
+Review suggested matches
+
+S05
+
+Bottom right
+
+Enter manually
+
+Use known label values
+
+S06
+
+At the 393 px reference width, use four equal neutral outlined tiles in a 2×2 grid, approximately 16 px side insets, 12 px gaps and 108 px tile height. Each has icon, label and helper regions. Selecting a tile immediately enters that method: no radio state or extra Continue. Grid versus rows is a design hypothesis, not proven superior usability.
+
+At 320 px or enlarged text, increase height or reflow to full-width rows. Maintain readable content and at least 48×48 target areas. The narrower adaptation remains a verification task.
+
+Opening O01 leaves the underlying screen, query, filters, input and scroll intact. Close, backdrop and supported Escape dismiss only the sheet. Swipe is optional. The background is inactive. Method selection does not log food; camera permission is requested only when a camera method needs it.
+
+Origins are Home, Search, Recipes and Recipe Details where Add food is available. Focused camera/manual/review steps have no extra O01 trigger. Preserve both the overall invoking context and each acquisition step's Back context.
+
+6. Optional daily record scenarios
+
+These supporting scenarios do not change either JTBD completion condition.
+
+Scenario
+
+Intended behavior
+
+Design status
+
+Obtain result without logging
+
+Review/correct identity and portion in S07, read the result, then close to the invoking surface. Entries remain unchanged.
+
+S07 result/exit behavior needs alignment.
+
+Add a new entry
+
+After reviewing a valid result, explicitly activate Add to today once. Append one entry and return to Home with updated totals.
+
+New intent must replace the old replacement confirmation.
+
+Inspect/edit a logged entry
+
+Open from its Home row into S07 existing-entry mode. Preview edits locally; Update entry commits to the same ID and returns Home.
+
+Supporting mode and row interactions pending.
+
+Cancel editing
+
+Discard the edit draft and retain the committed entry and totals; confirm discard only for meaningful unsaved changes.
+
+Pending alignment.
+
+Remove an entry
+
+Explicit Remove entry in existing-entry mode opens a concise confirmation; confirm removes that entry and returns Home, Cancel changes nothing.
+
+Supporting confirmation pending; allocate/reuse an appropriate state, not the unrelated discard semantics.
+
+Set/change/clear goal
+
+Contextual Home editor; Apply commits a valid positive value or explicit clearing; Cancel preserves the prior value.
+
+Supporting editor pending.
+
+Calculation previews and logged entries are different objects. S07's preview updates without Save. Updating an existing logged record is explicit so cancellation remains meaningful. A new selection never replaces previously logged food.
+
+S07-3 formerly described replacement of a single calculation. Its proposed new use is Food review / Edit logged food. Preserve the source node if repurposing it, update its caption/links, and do not report this as already drawn. Other S07 variants retain their acquisition-source distinctions.
+
+7. Screen inventory and state mapping
+
+The supplied baseline contains 42 named specimens: 36 S-states, five overlay specimens and P01. This inventory preserves their identities; it is not a claim that all states are aligned or verified.
+
+Family
+
+Existing specimens
+
+Alignment notes
+
+Home
+
+S01-1 empty; S01-2 populated; S01-3 320 px
+
+First two redesigned in supplied screenshots; narrow specimen still uses the previous composition in the supplied report.
+
+Search
+
+S02-1 Food results; S02-2 loading; S02-3 no matches; S02-4 failure; S02-5 Recipes results; S02-6 Recipes no matches
+
+Preserve scopes and recovery. Map no-query/keyboard and recipe-failure witnesses where needed.
+
+Recipes
+
+S03-1 browse; S03-2 filtered
+
+Origin-specific loading/empty/failure must be mapped; do not invent completed frames.
+
+Barcode
+
+S04-1 scan; S04-2 lookup; S04-3 unreadable; S04-4 missing product; S04-5 service failure; S04-6 denied
+
+Keep different causes distinct.
+
+Photo
+
+S05-1 capture; S05-2 preview; S05-3 analysing; S05-4 suggestions; S05-5 no usable match; S05-6 failure
+
+Explicit suggestion selection; map camera permission/unavailability.
+
+Manual
+
+S06-1 empty; S06-2 filled/keyboard; S06-3 validation error
+
+All valid manual entries continue to S07-6.
+
+Review
+
+S07-1 Search; S07-2 invalid portion; S07-3 former replacement; S07-4 Barcode; S07-5 Photo; S07-6 Manual
+
+Target S07-3 becomes existing-entry editing; add/close/correction semantics pending in the canvas.
+
+Details
+
+S08-1 loaded; S08-2 loading; S08-3 unavailable; S08-4 no photo/long title
+
+S08-4 is a loaded-state variant.
+
+Overlays
+
+O01 methods; O02 applied-filter specimen; O02-2 invalid-range fragment; O03 discard; O04 units
+
+O02-2 is a supporting specimen, not another main flow step.
+
+System
+
+P01 permission
+
+Conceptual system surface, not branded application UI.
+
+Goal editing, removal confirmation and additional daily-data witnesses need explicit coverage. Do not imply their existence merely because their requirements are documented.
+
+8. Required journeys and transitions
+
+8.1 Food acquisition
+
+Method
+
+Main sequence
+
+Search
+
+S02 query → S02-2 → S02-1 → explicit result selection → S07-1. No matches/failure are alternative branches.
+
+Barcode
+
+Permission if needed → S04-1 → S04-2 → S07-4 on a match.
+
+Photo
+
+Permission if needed → S05-1 → S05-2 → S05-3 → S05-4 → explicit suggestion selection → S07-5.
+
+Manual
+
+S06-1/S06-2 → valid reference data → S07-6. Invalid fields stay in S06.
+
+Every path includes reviewable identity, a distinct desired portion, a calorie result and an explicit correction route. Barcode/search correction opens the appropriate search/change route; photo correction returns to suggestions/retake/search; manual correction returns to editable reference data. Retain origin and useful input, and recompute only against the corrected basis.
+
+The calorie result is available in S07 before optional Add to today. Invalid input remains there for correction. A new candidate or preview never changes Home totals.
+
+8.2 Recipe transitions
+
+From
+
+Trigger/outcome
+
+To
+
+S02-5 or S03-1/S03-2
+
+Open recipe
+
+S08-2, retaining Search or Recipes origin
+
+S08-2
+
+Loaded
+
+S08-1, including S08-4 where applicable
+
+S08-2
+
+Request failed
+
+S08-3
+
+S08-3
+
+Retry
+
+S08-2 for the same recipe
+
+Any S08 state
+
+Back
+
+Exact originating list and context
+
+No matching recipes
+
+Change query/criteria
+
+Same discovery context and a new list request
+
+Keep no matches outside the details branch. Do not connect no matches to details, Back to Loading, or Retry to the no-photo specimen. Returning during loading ignores later responses for the abandoned detail.
+
+Cards expose enough known nutrition/preparation and active-criteria evidence for initial comparison. Details expand the criterion-to-value comparison. No criteria means no match claim. Recipes remain usable without daily tracking.
+
+9. Recovery, data and fidelity rules
+
+Condition
+
+Recovery
+
+Food no matches
+
+Change query, manual entry or another method.
+
+Recipe no matches
+
+Adjust query/criteria while retaining discovery context.
+
+Request failure
+
+Retry with relevant input retained; food may use manual entry.
+
+Unreadable barcode
+
+Continue/rescan or switch method.
+
+Read code, product missing
+
+Search/manual or optional rescan.
+
+Barcode service failure
+
+Retry lookup with the code retained or switch method.
+
+Camera denied/unavailable
+
+Search/manual; settings where appropriate, no prompt loop.
+
+Photo no usable match
+
+Retake/search/manual; never invent nutrition.
+
+Photo analysis failure
+
+Retain image, retry, retake or leave.
+
+Invalid form/portion/filters
+
+Identify the field, preserve other input and prevent invalid submission.
+
+Details unavailable
+
+Retry same recipe or Back to origin.
+
+The UI contract owns reference/portion conversions, unknown data, draft/commit rules, daily aggregation, persistence boundaries and criteria ownership. Preserve all these behaviors when rendering the LF.
+
+Use the established neutral, structural LF style at 393×852, with responsive witnesses at 320 px. Placeholder bars indicate omitted text, not loading; actual loading needs distinct feedback. Keep future English labels and behavioral notes in readable external captions. Preserve the established navigation selection marker; color alone must not carry selection.
+
+Text-free LF cannot validate wording comprehension, real text wrapping, screen-reader semantics or numeric readability. Screenshots cannot verify focus, gestures, persistence, asynchronous behavior or functioning prototype reactions.
+
+10. Alignment and verification checklist
+
+The specification is ready to guide bounded design changes; the whole product is not declared finalized.
+
+Align S01 frame names and visible captions; use Find recipes for the Browse action.
+
+Adapt S01-3 to the daily overview and verify the narrow O01 layout.
+
+Align all S07 source variants with result-first review, correction and optional Add to today.
+
+Replace S07-3's old replacement semantics with explicit existing-entry editing.
+
+Add inspect/edit/remove and optional goal-editor witnesses and transitions.
+
+Connect S06 to S07 in TF01; align both FigJam flows with task-flows.md.
+
+Verify every changed prototype reaction and cancellation origin, separately from screenshots.
+
+Align runtime/Storybook and use one reusable ring implementation; component existence is not established here.
+
+Verify 320/393/430 px, software keyboard, safe areas, long text and 200% text resizing.
+
+Verify focus, keyboard operation, accessible naming, contrast and screen-reader output in runtime.
+
+Verify no preview logging, duplicate activation, edit identity, removal, day rollover and incomplete-data handling.
+
+Usability checks not yet conducted: obtain a portion result without logging; correct a wrong identity; dismiss O01 from a recipe; explain Logged/Goal/Remaining; compare recipes using two criteria; complete either core task without a daily goal. Record actual observations when tested, not assumed success rates.
+
+11. Decision history and known implementation gap
+
+The earlier design used Calculate as the destination and later Home with a single replaceable current calculation. The supplied redesign report and screenshots show S01-1/S01-2 as daily-overview layouts and O01 as a 2×2 grid. The existing report identifies nodes 175:10, 175:38 and 176:20, and reports preserved IDs and edited reactions. This revision does not independently verify that report.
+
+Previous runtime reports describe replacement semantics, in-place portion editing on Home and a list-based method sheet. Those are historical behaviors to migrate, not current requirements. Prior test/build counts apply only to the revision they tested and do not validate daily logging or the redesigned sheet.
+
+Earlier supplied documents label these revisions 2026-09-07 and 2026-09-08, dates later than this update. Those event dates cannot be used as verified history; their exact dates remain unconfirmed. This document records its actual revision date without inventing earlier dates.
+
+This update changes documentation only. Figma, FigJam, runtime, Storybook, tokens, git history and deployment were not modified. Keep stable design IDs when performing the pending edits.
+
+Downstream documentation: align the existing visual-direction rules for a functional labeled ring, the product-scope description for optional daily records, and any stale navigation instructions. Preserve research findings and established visual tokens; do not duplicate them into new competing documents.

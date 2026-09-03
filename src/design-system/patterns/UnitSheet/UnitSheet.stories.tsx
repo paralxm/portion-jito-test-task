@@ -64,7 +64,13 @@ export const Narrow320: Story = {
   name: 'Narrow — 320',
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('dialog')).toBeVisible();
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('dialog')).toBeVisible();
+    // Cancel/Confirm share the row equally (Inline distribute="fill") and both clear the 48 px floor.
+    const cancel = canvas.getByRole('button', { name: 'Cancel' });
+    const confirm = canvas.getByRole('button', { name: 'Confirm' });
+    await expect(Math.abs(cancel.getBoundingClientRect().width - confirm.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    await expect(cancel.getBoundingClientRect().height).toBeGreaterThanOrEqual(48);
     await expectNoHorizontalOverflow();
   },
 };
@@ -74,7 +80,12 @@ export const EnlargedText: Story = {
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   decorators: [withRootFontSize(200)],
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: 'Confirm' })).toBeVisible();
+    const canvas = within(canvasElement);
+    const cancel = canvas.getByRole('button', { name: 'Cancel' });
+    const confirm = canvas.getByRole('button', { name: 'Confirm' });
+    await expect(confirm).toBeVisible();
+    await expect(Math.abs(cancel.getBoundingClientRect().width - confirm.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    await expect(cancel.getBoundingClientRect().height).toBeGreaterThanOrEqual(48);
     await expectNoHorizontalOverflow();
   },
 };

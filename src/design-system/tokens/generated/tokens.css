@@ -64,14 +64,6 @@
   --portion-ref-space-16: 16px;
   --portion-ref-space-24: 24px;
   --portion-ref-space-32: 32px;
-  --portion-ref-space-36: 36px;
-  --portion-ref-space-40: 40px;
-  --portion-ref-space-44: 44px;
-  --portion-ref-space-48: 48px;
-  --portion-ref-space-52: 52px;
-  --portion-ref-space-56: 56px;
-  --portion-ref-space-60: 60px;
-  --portion-ref-space-64: 64px;
   --portion-ref-radius-0: 0px;
   --portion-ref-radius-4: 4px;
   --portion-ref-radius-8: 8px;
@@ -93,8 +85,11 @@
   --portion-ref-size-icon-16: 16px;
   --portion-ref-size-icon-20: 20px;
   --portion-ref-size-icon-24: 24px;
+  --portion-ref-size-icon-28: 28px;
   --portion-ref-size-icon-32: 32px;
+  --portion-ref-size-icon-40: 40px;
   --portion-ref-size-icon-48: 48px;
+  --portion-ref-size-icon-56: 56px;
   --portion-ref-size-icon-64: 64px;
   --portion-ref-size-target-minimum: 48px; /* Product interaction-target baseline. */
   --portion-ref-size-target-add-food: 56px; /* Trailing Add food action target. */
@@ -239,6 +234,7 @@
   --portion-typography-wordmark-letter-spacing: var(--portion-ref-font-letter-spacing-wordmark);
   --portion-spacing-page-inset: var(--portion-ref-space-16); /* Mobile page inset; safe-area padding is additional. */
   --portion-spacing-card-padding: var(--portion-ref-space-16);
+  --portion-spacing-card-gap: var(--portion-ref-space-12); /* Between card-shaped items in a vertical list, e.g. RecipeCard. Distinct from card-padding, a card's own internal inset. */
   --portion-spacing-related: var(--portion-ref-space-8); /* Closely related items. */
   --portion-spacing-form-group: var(--portion-ref-space-16);
   --portion-spacing-section: var(--portion-ref-space-24); /* Between major screen groups. */

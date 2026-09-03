@@ -1,6 +1,6 @@
 # Portion — Branding / Stylescape
 
-**Direction:** Measured Clarity. **Language:** English. **Updated:** 2026-09-02.
+**Direction:** Measured Clarity. **Language:** English. **Updated:** 2026-09-03.
 
 This is the branding and visual-direction document. Do not create a second `branding.md` that repeats it.
 
@@ -13,7 +13,7 @@ This is the branding and visual-direction document. Do not create a second `bran
 - [Low-fidelity](../ux/low-fidelity.md): current screen IDs, navigation and transitions.
 - [Task flows](../ux/task-flows.md) and [research](../ux/research/): task intent and supporting evidence. Earlier screen IDs must not override the current low-fidelity mapping.
 
-Reviewed inputs: the two supplied Markdown documents and all nine exported stylescape sections. The live repository, Figma node properties and implementation were not inspected. This document updates the specification; it does not claim the canvas or code has already been corrected.
+The eight Figma sections provide visual references; some specimens retain earlier labels or layouts. Use this document for current visual rules and the UX documents for current behavior and screen mapping. Documentation changes do not establish that Figma or code has been updated.
 
 | Figma section | What it defines |
 | --- | --- |
@@ -23,13 +23,12 @@ Reviewed inputs: the two supplied Markdown documents and all nine exported style
 | 04 — Color Palette | Foundation, interaction, feedback and nutrition roles |
 | 05 — Typography | Typeface, hierarchy, numeric treatment and scaling specimens |
 | 06 — Iconography | Library, weights, size and state rules |
-| 07 — Core UI Components | Starter anatomy and visual states, not a completed coded design system |
-| 08 — Shared Patterns & References | Pattern examples, adaptations and reference limitations |
-| 09 — Accessibility Principles | Contrast evidence and implementation requirements |
+| 07 — Shared Patterns & References | Pattern examples, adaptations and reference limitations |
+| 08 — Accessibility Principles | Contrast evidence and implementation requirements |
 
 ## 2. Product and brand foundation
 
-Portion helps people calculate calories for a specific food or dish and find recipes that match criteria they choose, without requiring a diary or daily-goal workflow.
+Portion is a food decision tool for people who want clarity before they eat. It helps them understand the calories in their intended portion and choose recipes with clear reasons why they match their needs. Food identity and portion can be reviewed and corrected. Daily logging and a user-set calorie goal are optional supporting features; neither is required to obtain a calorie result or choose a recipe.
 
 | Attribute | Visible consequence |
 | --- | --- |
@@ -53,7 +52,7 @@ The section 02 specimens compare Kitchen Counter and Measured Clarity with equiv
 | Numeric treatment | Terracotta-tinted main result | Neutral ink keeps values separate from actions and feedback |
 | Photography | Warm surfaces reinforce the food imagery | Cool controls provide a contrasting visual role alongside warm photography |
 | Geometry | Softer editorial treatment | Minimal corner rounding and structured alignment |
-| Token organization | Would require its own tested surface/color combinations | One chosen action family, with separate feedback and nutrition roles |
+|  | Would require its own tested surface/color combinations | One chosen action family, with separate feedback and nutrition roles |
 
 Blue is the user's selected preference and supports separation of actions from food imagery in this composition. It is not inherently more trustworthy, accessible or cheaper to implement than another hue. Neutral numbers and correctable inputs—not blue alone—support the product's intended clarity.
 
@@ -71,7 +70,7 @@ The accepted scale (2026-09-03) is the one implemented in `src/design-system/tok
 
 | Role | Size / line height, px | Weight | Use |
 | --- | --- | --- | --- |
-| main-result | 40 / 48 | 600 | The single calorie result |
+| main-result | 40 / 48 | 600 | The primary calorie value in food review or the Home daily overview |
 | screen-heading | 28 / 36 | 600 | Root screen titles |
 | detail-heading | 24 / 32 | 600 | Food or recipe title on a detail screen |
 | section-title | 20 / 28 | 600 | Section and sheet titles |
@@ -87,7 +86,7 @@ The accepted scale (2026-09-03) is the one implemented in `src/design-system/tok
 | metric-secondary | → detail-heading | | Secondary macro values |
 | wordmark | 24 / 32, −0.03em | 600 | The lowercase wordmark only |
 
-- Reserve the 40 px main-result style for the single calculator/detail result; card and row values use metric-inline (16) and secondary metrics use 24.
+- Reserve the 40 px main-result style for one primary calorie value per screen, including the Home ring value; card and row values use metric-inline (16) and secondary metrics use 24.
 - Keep interface tracking normal. Keep a number and its unit together where possible, without creating overflow.
 - Use tabular figures on updating values and aligned numeric columns: `font-variant-numeric: tabular-nums` or the equivalent `"tnum"` feature. Align with layout, never inserted spaces.
 - The board reports tabular figures were not enabled through its authoring workflow. Treat them as unverified in Figma and required in code; do not turn that report into a general claim that Figma cannot support them.
@@ -110,7 +109,7 @@ Official weights are `thin`, `light`, `regular`, `bold`, `fill`, `duotone`. Ther
 
 Use official SVGs or `@phosphor-icons/react` without applying Lucide-style stroke-width edits. Icon dimensions and target dimensions are independent. Default interactive targets are at least 48 × 48 CSS px; the trailing Add food action uses the existing 56 × 56 low-fidelity target.
 
-Catalogue concepts: `plus`, `magnifying-glass`, `barcode`, `camera`, `pencil-simple`, `sliders-horizontal`, `x`, `arrow-left`, `check`, `info`, `clock`, `caret-down`, `calculator`, `cooking-pot`, `warning-circle`. Verify installed-package export names when implementing; catalogue names are not JavaScript import identifiers.
+Catalogue concepts: `plus`, `magnifying-glass`, `barcode`, `camera`, `pencil-simple`, `sliders-horizontal`, `x`, `arrow-left`, `check`, `info`, `clock`, `caret-down`, `house`, `cooking-pot`, `warning-circle`. Verify installed-package export names when implementing; catalogue names are not JavaScript import identifiers.
 
 ## 6. Color system
 
@@ -162,10 +161,10 @@ These describe system conditions, never food quality. An informational message m
 | Minerals | `#6B6259` | `#F3F0ED` |
 
 - Values and units remain neutral. Use a small category marker or label accent, not a full colored card or a colored numeric result.
-- Keep names, units, order and color mapping consistent across calculator, cards, details and Storybook.
+- Keep names, units, order and color mapping consistent across Home, food review, recipe surfaces and Storybook.
 - Vitamins and minerals use one group marker each; individual nutrients are neutral labelled rows. Never alias nutrient tokens to success/warning/error tokens.
 - Energy is not a fourth macro. Fixture R defines fibre within its carbohydrate total: show `of which fibre`, without adding it again. For future sources, preserve their documented carbohydrate/fibre basis instead of assuming this convention universally.
-- Do not combine grams, milligrams and micrograms in one proportional chart. No daily-value percentages, deficiency verdicts or nutrient goals are defined.
+- Do not combine grams, milligrams and micrograms in one proportional chart. No daily-value percentages, deficiency verdicts or macro or micronutrient targets are defined.
 - Compact surfaces show energy and relevant macros. Expanded details disclose available fibre, vitamins and minerals; missing values are not zero.
 
 All six non-energy category accents exceed 4.5:1 against their listed subtle surfaces; the lowest recalculated pair is carbohydrates at 4.85:1. Their similar grayscale brightness means color cannot be the sole identifier. The PDF's color-vision simulation is illustrative, not user testing or proof that the hues remain distinguishable.
@@ -184,7 +183,7 @@ All six non-energy category accents exceed 4.5:1 against their listed subtle sur
 
 No pill-shaped controls or 20–32 px card corners. A circular glyph does not change its target's geometry. Controls grow with content and text scaling.
 
-Ordinary surfaces use spacing and borders. The one overlay shadow is `0 -2px 24px 0 rgba(23, 33, 43, 0.16)`, for sheets only. Avoid decorative calorie rings, blobs, gradients, celebration graphics and unexplained gauges. Low-fidelity placeholder geometry does not override these visual tokens.
+Ordinary surfaces use spacing and borders. The one overlay shadow is `0 -2px 24px 0 rgba(23, 33, 43, 0.16)`, for sheets only. Avoid decorative calorie rings, blobs, gradients, celebration graphics and unexplained gauges. Low-fidelity placeholder geometry does not override these visual tokens. The Home calorie ring is a functional visualization of explicitly logged calories against an optional user-set goal. Keep its value and progress arc neutral, provide equivalent text, and do not use an error color for exceeding the goal. Its no-goal and other states follow the UI contract.
 
 ## 8. Photography and reference use
 
@@ -200,12 +199,12 @@ A photograph never establishes ingredients, calories, dietary type or nutrient v
 
 The export credits Wikimedia Commons and cropping to ratio, but does not supply exact file-page URLs. Before shipping these assets, record the exact source page, author, license link and modifications, and verify permitted reuse. These transcribed credits are not a completed asset-license review.
 
-### Pattern references already present in section 08
+### Pattern references already present in section 07
 
 | Ref | Reference shown | Adapt for Portion | Do not import |
 | --- | --- | --- | --- |
-| R1 | MyFitnessPal method menu; help-center composite | One explicit choice among four methods | Diary, daily budget or article annotations |
-| R2 | MyFitnessPal serving selector; help-center image | Editable amount and a marked unit choice | Goal percentages and calorie rings |
+| R1 | MyFitnessPal method menu; help-center composite | One explicit choice among four methods | Mandatory logging or goal setup before obtaining a calorie result; article annotations |
+| R2 | MyFitnessPal serving selector; help-center image | Editable amount and a marked unit choice | Goal percentages in portion review; daily progress without a defined goal |
 | R3 | Samsung Food filtered results; help-center image | Visible applied criteria | Ratings as suitability scores; it is not a no-results example |
 | R4 | YAZIO filters; promotional composite | Close, Reset, scrollable fields and Apply | Claims about unobserved dismissal or live counts |
 | R5 | Booking.com attribute card; promotional composite | Concrete qualifying facts | Promotional framing or color-only meaning |
@@ -215,17 +214,21 @@ These are reference types and adaptations documented in the supplied board, not 
 
 ## 9. Applied navigation and component scope
 
-Use one bottom row: **Calculate | Search | Recipes | + Add food**. There are **three destinations and one action**, not four destinations. The trailing plus opens the shared method sheet; it never becomes selected.
+Use one bottom row: **Home | Search | Recipes | + Add food**. There are **three destinations and one action**. Home is the initial destination. The trailing plus opens O01 over the current screen and never becomes selected. Closing O01 dismisses it while preserving the underlying screen and its state.
+
+O01 presents four equal method buttons in a 2 × 2 grid: Search food, Scan barcode, Take a photo and Enter manually. Labels remain visible and the layout grows or reflows when needed. Choosing a method starts that path immediately and does not log food.
 
 Selection uses the Phosphor bold glyph, action color, a 2 px indicator and label. Details retain the originating tab. Search remains selected in both Food and Recipes scopes. Detailed visibility, keyboard, modal and return rules belong in the UI contract and low-fidelity document.
 
-Section 07 supplies a starter visual vocabulary: actions, inputs, selection, rows, nutrition, cards, overlays, feedback and navigation. It is not evidence that these components exist in code or have passed tests. Build one shared implementation for the product and Storybook; use tokens rather than duplicated literal values.
+Use one shared component implementation for the product and Storybook, with shared tokens. Reuse or extend an existing ring component where suitable; create one only if coverage is missing. Keep daily-food and goal logic outside the visual component. Figma specimens do not establish component availability or implementation status.
 
-`Save result`, `Saving…` and `Result saved` in older specimens do not establish a required save feature. The current flow confirms reviewed data into the current calculation; no separate save or diary step is required. Keep the visual success style, but apply it only to a real defined outcome.
+Home presents today's explicitly logged food, a daily calorie summary, available macros and recipe discovery. Reviewing the identified food, correcting it, adjusting the portion and reading its calorie result belong in S07 — Food review.
+
+The calorie task is complete when the intended portion's result is available. **Add to today** is an optional, explicit action; previewing or cancelling adds nothing. Older `Save result`, `Saving…` and `Result saved` specimens do not define current behavior. Use `Added to today` only after the corresponding action succeeds.
 
 ## 10. Accessibility evidence and handoff
 
-All 24 color pairs printed in section 09 were independently recalculated from their stated hex values on 2026-09-02 and agree at two decimals. Examples: primary text/canvas **16.29:1**, secondary text/canvas **6.46:1**, white/primary blue **6.19:1**, control border/canvas **3.96:1**, decorative border/canvas **1.23:1**. This verifies those pairs, not every real placement or the entire interface.
+All 24 color pairs printed in section 08 were independently recalculated from their stated hex values on 2026-09-02 and agree at two decimals. Examples: primary text/canvas **16.29:1**, secondary text/canvas **6.46:1**, white/primary blue **6.19:1**, control border/canvas **3.96:1**, decorative border/canvas **1.23:1**. This verifies those pairs, not every real placement or the entire interface.
 
 Targets: normal text 4.5:1; large text and qualifying non-text information 3:1, with the applicable exceptions. [Text contrast](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum), [non-text contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html).
 
@@ -233,13 +236,7 @@ The product's 48 × 48 CSS px touch-target baseline is a design decision; WCAG 2
 
 Focus appearance: 3 px `focus/ring`, 2 px canvas gap, outside the control. Ancestor containers must not clip it. Color is supported by labels, markers, boundaries and accessible state.
 
-Before freezing the design-system baseline:
 
-- [ ] Update sections 01 and 06 from two destinations; relabel section 07 as three destinations plus Add food and distinguish the action visually.
-- [ ] Replace obsolete S06–S09 route references in stylescape annotations with current low-fidelity IDs.
-- [ ] Remove mandatory-save implications from action and feedback specimens; shorten list suitability evidence to a compact summary, leaving detailed comparisons in recipe details.
-- [ ] Reconcile every value and role with the actual `tokens.json`, app styles and Storybook; check token aliases as well as hex values.
-- [ ] Add exact reference and image-source URLs and verify attribution/reuse before shipping assets.
-- [ ] Test real English text, keyboard and modal focus, screen-reader names, reduced motion, safe areas, 320/390/430 px widths and text resizing to 200%. [Resize text](https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html).
+Validate the implemented interface with real English text, keyboard and modal focus, screen-reader names, reduced motion, safe areas, 320/390/430 px widths and text resizing to 200%. The ring needs a readable text equivalent; O01 method labels must remain available when text grows.
 
-Brand direction is documented. Canvas consistency, component implementation and accessibility behavior remain separate checks—not claims of completed work.
+Static specimens and contrast calculations do not establish runtime accessibility or completed implementation.

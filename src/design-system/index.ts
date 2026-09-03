@@ -65,6 +65,8 @@ export { SearchField } from './components/SearchField/SearchField';
 export type { SearchFieldProps } from './components/SearchField/SearchField';
 export { FilterChip, AppliedCriterionChip } from './components/Chip/Chip';
 export type { FilterChipProps, AppliedCriterionChipProps } from './components/Chip/Chip';
+export { SegmentedControl } from './components/SegmentedControl/SegmentedControl';
+export type { SegmentedControlProps, SegmentedControlOption } from './components/SegmentedControl/SegmentedControl';
 export { NutritionValue } from './components/NutritionValue/NutritionValue';
 export type { NutritionValueProps, NutritionValueStatus } from './components/NutritionValue/NutritionValue';
 export { NutrientRow } from './components/NutrientRow/NutrientRow';

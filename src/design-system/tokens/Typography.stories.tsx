@@ -115,7 +115,7 @@ function Specimen() {
         portion
       </Text>
       <Text as="h1" variant="screen-heading" wrap>
-        Calculate
+        Home
       </Text>
       <Text as="h2" variant="detail-heading" wrap>
         Wholegrain pasta with roasted vegetables and tahini dressing
