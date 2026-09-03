@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react';
 
 import { Radio } from '../../primitives/Choice/Radio';
 import { Button } from '../../primitives/Button/Button';
+import { Inline } from '../../primitives/layout/Inline';
 import { Text } from '../../primitives/Text/Text';
 import { ModalSheet } from '../ModalSheet/ModalSheet';
 import styles from './UnitSheet.module.css';
@@ -44,14 +45,14 @@ export function UnitSheet({ open, options, value, onConfirm, onCancel }: UnitShe
       title="Choose a unit"
       description="Only units this food's data supports are listed."
       footer={
-        <div className={styles.actions}>
+        <Inline gap={8} distribute="fill" align="stretch">
           <Button variant="secondary" onClick={onCancel}>
             Cancel
           </Button>
           <Button variant="primary" onClick={() => onConfirm(draft)} disabled={draft === value}>
             Confirm
           </Button>
-        </div>
+        </Inline>
       }
     >
       <fieldset className={styles.group}>

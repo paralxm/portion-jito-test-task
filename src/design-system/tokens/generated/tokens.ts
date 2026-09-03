@@ -245,6 +245,7 @@ export const tokenVars = {
   "semantic.typography.wordmark.letterSpacing": "--portion-typography-wordmark-letter-spacing",
   "semantic.spacing.page-inset": "--portion-spacing-page-inset",
   "semantic.spacing.card-padding": "--portion-spacing-card-padding",
+  "semantic.spacing.card-gap": "--portion-spacing-card-gap",
   "semantic.spacing.related": "--portion-spacing-related",
   "semantic.spacing.form-group": "--portion-spacing-form-group",
   "semantic.spacing.section": "--portion-spacing-section",
@@ -688,6 +689,7 @@ export const tokens = {
     "spacing": {
       "page-inset": "16px",
       "card-padding": "16px",
+      "card-gap": "12px",
       "related": "8px",
       "form-group": "16px",
       "section": "24px",

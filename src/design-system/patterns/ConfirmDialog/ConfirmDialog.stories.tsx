@@ -114,7 +114,13 @@ export const Narrow320: Story = {
   name: 'Narrow — 320',
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('alertdialog')).toBeVisible();
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('alertdialog')).toBeVisible();
+    // Cancel/Confirm share the row equally (Inline distribute="fill") and both clear the 48 px floor.
+    const keep = canvas.getByRole('button', { name: 'Keep editing' });
+    const discard = canvas.getByRole('button', { name: 'Discard' });
+    await expect(Math.abs(keep.getBoundingClientRect().width - discard.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    await expect(keep.getBoundingClientRect().height).toBeGreaterThanOrEqual(48);
     await expectNoHorizontalOverflow();
   },
 };
@@ -125,8 +131,14 @@ export const EnlargedText: Story = {
   decorators: [withRootFontSize(200)],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('button', { name: 'Discard' })).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Keep editing' })).toBeVisible();
+    const keep = canvas.getByRole('button', { name: 'Keep editing' });
+    const discard = canvas.getByRole('button', { name: 'Discard' });
+    await expect(keep).toBeVisible();
+    await expect(discard).toBeVisible();
+    // align="stretch" keeps both buttons the same height even under 200 % text.
+    await expect(Math.abs(keep.getBoundingClientRect().width - discard.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    await expect(Math.abs(keep.getBoundingClientRect().height - discard.getBoundingClientRect().height)).toBeLessThanOrEqual(1);
+    await expect(keep.getBoundingClientRect().height).toBeGreaterThanOrEqual(48);
     await expectNoHorizontalOverflow();
   },
 };

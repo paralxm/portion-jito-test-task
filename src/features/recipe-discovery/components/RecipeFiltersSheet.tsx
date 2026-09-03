@@ -69,7 +69,11 @@ export function RecipeFiltersSheet({ open, applied, onApply, onCancel }: RecipeF
         </div>
       }
     >
-      <Stack gap={24}>
+      {/* Gap between this form's own field-groups matches ManualEntryScreen's
+          spacing.form-group (16 px) — the same "gap between groups within one form"
+          concept both forms use, not spacing.section (24 px), which is for major
+          screen-level regions. */}
+      <Stack gap={16}>
         <fieldset className={styles.group} role="radiogroup" aria-labelledby={dietaryLabelId}>
           <Text as="legend" id={dietaryLabelId} variant="label" color="primary" className={styles.legend}>
             Dietary preference

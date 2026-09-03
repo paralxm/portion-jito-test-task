@@ -123,19 +123,19 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | Reduced motion | `prefers-reduced-motion` → 0 ms | `isReduceMotionEnabled` | Verified through the data attribute path |
 | Typeface | Inter Variable | SF Pro | Inter is the approved brand face |
 
-## 6. Verification status (last executed 2026-09-05, after §11's completion pass)
+## 6. Verification status (last executed 2026-09-06, after §12's layout refinement)
 
 | Check | Command | Result |
 | --- | --- | --- |
 | Typecheck | `npm run typecheck` | exit 0 |
-| Token validity and drift | `npm run tokens:check` | 220 tokens validated; generated output current (`--check`'s Windows CRLF false positive fixed — see §11) |
+| Token validity and drift | `npm run tokens:check` | 221 tokens validated; generated output current |
 | Unit tests (node) | `npm run test:unit` | 4 files, 38 tests passed |
-| Storybook tests (headless Chromium, axe at `error`) | `npm run test:storybook` | 59 files, 242 tests passed |
+| Storybook tests (headless Chromium, axe at `error`) | `npm run test:storybook` | 59 files, 246 tests passed |
 | App build | `npm run build` | success (Inter opsz woff2 + CSS + JS bundles) |
 | Storybook build | `npm run build-storybook` | success (`storybook-static/`, ignored) |
 | Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | 24/24 checks passed, 0 console/page errors, screenshots in `.verification/runtime/` |
 
-Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %); re-read after §10's refactor for Calculate result, Food review, Recipes filtered, Recipe details and Search results (no pixel changed); and, after §11, by serving `storybook-static` and screenshotting Components/SegmentedControl (default, selected, selected+focus-visible via an actual Tab press, disabled, long labels at both widths, the illustrative example), Foundations/Icons → Size catalogue, and Product compositions/Search's own Interactive story — confirming the real production component renders and wraps correctly, not merely that its tests pass. The unit-change and 2 × 2 fallback defects found by the original inspection were fixed and re-verified; §10 and §11 list what each pass found and fixed.
+Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %); re-read after §10's refactor for Calculate result, Food review, Recipes filtered, Recipe details and Search results (no pixel changed); after §11, screenshotting Components/SegmentedControl, Foundations/Icons → Size catalogue and Search's Interactive story directly from `storybook-static`; and after §12, re-reading the manual-entry discard dialog and unit-sheet screenshots specifically to confirm Cancel/Confirm now render as a real equal-width side-by-side pair. The unit-change and 2 × 2 fallback defects found by the original inspection were fixed and re-verified; §10–§12 list what each pass found and fixed.
 
 Not verified: manual screen-reader pass (NVDA/VoiceOver), real-device software keyboard and safe-area behaviour, deployed app/Storybook URLs, and synchronisation of the final screens into the Figma Design file (no code-to-canvas capture tool was exposed in this session). Passing axe on every story is not a WCAG conformance claim.
 
@@ -266,3 +266,19 @@ Typecheck, `tokens:build`/`tokens:check` (220 tokens, generated output current, 
 ### Remaining gaps
 
 Unchanged from §10: no manual assistive-technology pass, no real-device software-keyboard/safe-area verification, Figma capture, deployment and the pull request remain open. This pass found no additional gap in the two Portion journeys' foundational-control coverage.
+
+## 12. Layout-system refinement before Hi-Fi (2026-09-06)
+
+A narrow, verify-then-fix pass over the layout contracts specifically — not a repeat of §10/§11. Full detail lives in Foundations/Spacing and layout and Primitives/Layout's own Storybook descriptions (now the canonical source for this); this section records only what changed and why.
+
+**Verified already correct, no change:** page inset, card padding and section/major-section spacing all resolve through one consistent semantic role each (`page-inset`, `card-padding`, `section`), used identically by both root templates. Every semantic spacing role already stayed within 0/4/8/12/16/24/32 — now asserted as an executable Storybook check, not just documented. "Parent owns spacing between children" already held everywhere: every non-zero `margin` in the codebase was audited and is either an internal micro-adjustment inside one component's own fixed template, a documented full-bleed negative-margin breakout, or a hit-area expansion trick — none of it reaches out to size a component against an external sibling that's a parent `Stack`/`Inline`/template's job. Fields, `RecipeCard` and `SegmentedControl` already fill their parent through ordinary block-box/flex-stretch behaviour, with no width hack needed; chips and badges already hug via `inline-flex`. `Button` already supported hug (default `inline-flex`) and fill (`block` → `inline-size: 100%`) without any fixed width. No `Container` primitive exists or was added — see Primitives/Layout's description for why one has no real consumer on this mobile-only prototype.
+
+**Found and fixed:**
+
+| Inconsistency | Fix |
+| --- | --- |
+| `ConfirmDialog`'s Cancel/Confirm were two independently `block` (full-width) buttons stacked vertically — inconsistent with `UnitSheet`'s equivalent Cancel/Confirm pair, which was already side-by-side (via CSS Grid) | `Inline` gained a `distribute?: 'hug' \| 'fill'` prop (`fill` → `flex: 1 1 0%; min-inline-size: 0` on every direct child) — the flex-based "share a row equally" mechanism the brief asked for. Both `ConfirmDialog` and `UnitSheet` now compose `<Inline gap={8} distribute="fill" align="stretch">` around two plain (non-`block`) buttons, so the same pattern is implemented once and looks identical in both places. `Button`'s own `block` prop is untouched and still owns the *single* full-width-action case (Confirm and calculate, Continue to review, …). This is a visible layout change — screenshotted before/after (§6) — justified by the cross-component inconsistency it fixes, not a stylistic preference. |
+| `RecipeFiltersSheet`'s outer field-group `Stack` used `gap={24}` (`spacing.section`'s value, meant for major screen-level regions) where `ManualEntryScreen`, the app's other multi-field form, correctly uses `spacing.form-group` (16) between its groups | Changed to `gap={16}`, matching `spacing.form-group` — both forms now space their field-groups the same way. |
+| `RecipeList`'s card-to-card gap used a raw `--portion-ref-space-12` reference value with no semantic role, unlike every other spacing decision in product code | Added `semantic.spacing.card-gap` (12), distinct from `card-padding` (a card's own internal inset). `RecipeList` now consumes the role. |
+
+**Not changed, considered and rejected:** narrowing `Stack`/`Inline`'s `gap` prop type to only accept 0–32 (would be an API change with no real defect behind it — nothing in the codebase misuses the wider range; the approved layout scale is established through the semantic roles and the new Storybook assertion instead, without touching the primitive's permissive type). `RecipeFiltersSheet`'s Reset-all/Apply-filters footer stays an asymmetric grid (`auto` + `1fr`) — a different, correct shape (one hug-sized text action, one fill action), not the "two equal peers" case `distribute="fill"` addresses.

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode, type SyntheticEvent } from 'react';
 
 import { Button } from '../../primitives/Button/Button';
+import { Inline } from '../../primitives/layout/Inline';
 import { Text } from '../../primitives/Text/Text';
 import styles from './ConfirmDialog.module.css';
 
@@ -77,12 +78,14 @@ export function ConfirmDialog({ open, title, children, confirmLabel, cancelLabel
           {children}
         </Text>
         <div className={styles.actions}>
-          <Button ref={cancelRef} variant="secondary" onClick={onCancel} block>
-            {cancelLabel}
-          </Button>
-          <Button variant={destructive ? 'destructive' : 'primary'} onClick={onConfirm} block>
-            {confirmLabel}
-          </Button>
+          <Inline gap={8} distribute="fill" align="stretch">
+            <Button ref={cancelRef} variant="secondary" onClick={onCancel}>
+              {cancelLabel}
+            </Button>
+            <Button variant={destructive ? 'destructive' : 'primary'} onClick={onConfirm}>
+              {confirmLabel}
+            </Button>
+          </Inline>
         </div>
       </div>
     </dialog>

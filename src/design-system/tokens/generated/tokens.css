@@ -242,6 +242,7 @@
   --portion-typography-wordmark-letter-spacing: var(--portion-ref-font-letter-spacing-wordmark);
   --portion-spacing-page-inset: var(--portion-ref-space-16); /* Mobile page inset; safe-area padding is additional. */
   --portion-spacing-card-padding: var(--portion-ref-space-16);
+  --portion-spacing-card-gap: var(--portion-ref-space-12); /* Between card-shaped items in a vertical list, e.g. RecipeCard. Distinct from card-padding, a card's own internal inset. */
   --portion-spacing-related: var(--portion-ref-space-8); /* Closely related items. */
   --portion-spacing-form-group: var(--portion-ref-space-16);
   --portion-spacing-section: var(--portion-ref-space-24); /* Between major screen groups. */

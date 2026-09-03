@@ -18,6 +18,15 @@
   flex-wrap: wrap;
 }
 
+/* Every direct child shares the row's available width equally — the flex-based
+   mechanism for two or more peer actions dividing a row evenly (e.g. Cancel/Confirm).
+   min-inline-size: 0 lets a child's own content shrink/wrap instead of pushing the row
+   wider than its parent. */
+.inline[data-distribute='fill'] > * {
+  flex: 1 1 0%;
+  min-inline-size: 0;
+}
+
 .stack[data-block='true'],
 .inline[data-block='true'] {
   inline-size: 100%;
