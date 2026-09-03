@@ -1,20 +1,18 @@
 import { useMemo, useState } from 'react';
-import { PencilSimple } from '@phosphor-icons/react';
 
 import { AmountField } from '../../../design-system/components/AmountField/AmountField';
 import { InlineMessage } from '../../../design-system/components/InlineMessage/InlineMessage';
 import { Button } from '../../../design-system/primitives/Button/Button';
 import { Stack } from '../../../design-system/primitives/layout/Stack';
-import { Text } from '../../../design-system/primitives/Text/Text';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
 import { NutritionSummary } from '../../../design-system/patterns/NutritionSummary/NutritionSummary';
 import { UnitSheet } from '../../../design-system/patterns/UnitSheet/UnitSheet';
 import { FocusedFlowLayout } from '../../../design-system/templates/FocusedFlowLayout/FocusedFlowLayout';
+import { FoodIdentityHeader } from '../components/FoodIdentityHeader';
 import {
   canCalculateEnergy,
   convertQuantity,
   describePortionBasis,
-  describeReferenceBasis,
   findUnit,
   formatQuantityDraft,
   parseAmount,
@@ -22,7 +20,6 @@ import {
   type FoodCandidate,
   type Portion,
 } from '../domain/calculation';
-import styles from './FoodReviewScreen.module.css';
 
 export interface FoodReviewScreenProps {
   candidate: FoodCandidate;
@@ -95,24 +92,7 @@ export function FoodReviewScreen({ candidate, replaces, initialPortion, onConfir
         </Stack>
       }
     >
-      <section className={styles.identity} aria-labelledby="review-food-name">
-        <Stack gap={4}>
-          <Text as="h2" id="review-food-name" variant="detail-heading" color="primary" wrap>
-            {candidate.name}
-          </Text>
-          {candidate.detail ? (
-            <Text as="p" variant="supporting" color="secondary" wrap>
-              {candidate.detail}
-            </Text>
-          ) : null}
-          <Text as="p" variant="supporting" color="secondary">
-            Nutrition basis: {describeReferenceBasis(candidate).toLowerCase()}
-          </Text>
-        </Stack>
-        <Button variant="secondary" icon={PencilSimple} onClick={onChangeMatch}>
-          Change food
-        </Button>
-      </section>
+      <FoodIdentityHeader candidate={candidate} onChangeFood={onChangeMatch} headingId="review-food-name" />
 
       {explanation ? (
         <InlineMessage tone="info" announce="none">
