@@ -1,0 +1,40 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Start Here/Introduction" />
+
+# Portion design system
+
+**Portion** is an iOS-oriented web prototype for two journeys: calculate the calories of a specific food or dish, and find a suitable recipe. This Storybook exercises the same React components, generated tokens and global stylesheet that the runtime application uses — it is not a separate implementation and not the final product.
+
+## How this Storybook is organised
+
+- **Foundations** — tokens resolved in the browser, colour roles with recomputed contrast, the Inter typography catalogue with stress specimens at 320/390/393/430 px and 100–200 % text, the Phosphor icon catalogue, spacing, radius, borders/focus/layers, motion, and the accessibility and platform ledger.
+- **Primitives** — Text, layout, Button, IconButton, Input, Checkbox/Radio, Badge, Surface, Separator, Spinner, VisuallyHidden.
+- **Components** — fields, chips, nutrition values and rows, match criteria, feedback states, method and result rows.
+- **Patterns** — navigation bar, headers, sheets and dialogs, nutrition summary, recipe card.
+- **Templates** — root and focused-flow layouts.
+- **Product compositions** — the actual feature screens and the full runtime app rendered with fixtures.
+
+Every story with behaviour has a play function; the Storybook Vitest project runs them in headless Chromium with the accessibility addon set to fail on violations.
+
+## Rules the components enforce
+
+- Measurements are CSS px. The iOS column in the platform ledger is a mapping, never a relabel.
+- Spacing steps are 0/4/8/12/16/24/32/36/40/44/48/52/56/60/64 px; `full` is a radius.
+- Unknown nutrition is named “Not available”, never zero; a known zero is a value.
+- Nutrition numbers stay neutral; category markers carry labelled colour.
+- Add food is an action in the bottom row, never a tab; one modal at a time; a gesture is never the only exit.
+- Regular icon weight by default; bold only for the persistently selected destination.
+
+## Commands
+
+| Purpose | Command |
+| --- | --- |
+| Regenerate tokens / check drift | `npm run tokens:build` / `npm run tokens:check` |
+| Typecheck | `npm run typecheck` |
+| Unit tests (domain, formatting) | `npm run test:unit` |
+| Storybook tests (browser) | `npm run test:storybook` |
+| Run Storybook | `npm run storybook` |
+| Runtime walkthrough with screenshots | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` |
+
+The written guide, coverage register and verification status live in `docs/design-system/README.md`.
