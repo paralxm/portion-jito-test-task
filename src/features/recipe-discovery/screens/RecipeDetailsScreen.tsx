@@ -4,6 +4,7 @@ import { Clock } from '@phosphor-icons/react';
 import { EmptyState } from '../../../design-system/components/EmptyState/EmptyState';
 import { LoadingState } from '../../../design-system/components/LoadingState/LoadingState';
 import { MatchCriteria } from '../../../design-system/components/MatchCriteria/MatchCriteria';
+import { MediaFrame } from '../../../design-system/components/MediaFrame/MediaFrame';
 import { Icon } from '../../../design-system/icons/Icon';
 import { NBSP } from '../../../design-system/nutrition/nutrition';
 import { Badge } from '../../../design-system/primitives/Badge/Badge';
@@ -81,17 +82,7 @@ export function RecipeDetailsScreen({ state, criteria, onBack, onRetry, navigati
 
   return (
     <RootScreenLayout header={header} navigation={navigation}>
-      <div className={styles.hero}>
-        {recipe.imageUrl ? (
-          <img className={styles.image} src={recipe.imageUrl} alt="" />
-        ) : (
-          <div className={styles.noPhoto}>
-            <Text variant="supporting" color="secondary">
-              No photo
-            </Text>
-          </div>
-        )}
-      </div>
+      <MediaFrame aspect="16:9" imageUrl={recipe.imageUrl} imageAlt="" eager className={styles.hero} />
 
       <div className={styles.identity}>
         <Text as="h2" variant="detail-heading" color="primary" wrap>

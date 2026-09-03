@@ -23,6 +23,8 @@
   min-inline-size: 0;
 }
 
+/* Sized to the row's 16/24 body text (nested rows) or 14/20 label text (heading rows);
+   matches the same marker concept in NutritionValue, scaled to its own adjacent text. */
 .marker {
   inline-size: 4px;
   block-size: 16px;

@@ -17,7 +17,9 @@
   gap: var(--portion-ref-space-8);
 }
 
-/* Category marker: a small labelled bar, never a coloured number or card. */
+/* Category marker: a small labelled bar, never a coloured number or card. Sized to the
+   14/20 label text it always sits beside here (the category name, not the value figure);
+   matches the same marker concept in NutrientRow, scaled to its own adjacent text. */
 .marker {
   inline-size: 4px;
   block-size: 14px;

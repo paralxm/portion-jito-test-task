@@ -11,16 +11,6 @@
   min-inline-size: 0;
 }
 
-.resultsHeading {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portion-spacing-title-to-secondary);
-}
-
-.resultsHeading > p:empty {
-  display: none;
-}
-
 .list {
   list-style: none;
   margin: 0;
