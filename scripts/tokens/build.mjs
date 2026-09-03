@@ -347,10 +347,14 @@ export const tokens = ${JSON.stringify(tsValues, null, 2)} as const;
 function read(file) {
   return existsSync(file) ? readFileSync(file, 'utf8') : null;
 }
+// Compare content only, not line endings: a Windows checkout with core.autocrlf=true
+// reads committed LF files back as CRLF, which would otherwise look like drift on
+// every fresh clone even when nothing actually changed.
+const normalizeNewlines = (s) => (s === null ? null : s.replace(/\r\n/g, '\n'));
 if (check) {
   const drift = [];
-  if (read(OUT_CSS) !== css) drift.push(path.relative(root, OUT_CSS));
-  if (read(OUT_TS) !== ts) drift.push(path.relative(root, OUT_TS));
+  if (normalizeNewlines(read(OUT_CSS)) !== normalizeNewlines(css)) drift.push(path.relative(root, OUT_CSS));
+  if (normalizeNewlines(read(OUT_TS)) !== normalizeNewlines(ts)) drift.push(path.relative(root, OUT_TS));
   if (drift.length) {
     console.error(`Generated token output is out of date: ${drift.join(', ')}. Run "npm run tokens:build".`);
     process.exit(1);

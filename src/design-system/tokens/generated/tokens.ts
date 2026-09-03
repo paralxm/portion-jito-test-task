@@ -96,8 +96,11 @@ export const tokenVars = {
   "reference.size.icon.16": "--portion-ref-size-icon-16",
   "reference.size.icon.20": "--portion-ref-size-icon-20",
   "reference.size.icon.24": "--portion-ref-size-icon-24",
+  "reference.size.icon.28": "--portion-ref-size-icon-28",
   "reference.size.icon.32": "--portion-ref-size-icon-32",
+  "reference.size.icon.40": "--portion-ref-size-icon-40",
   "reference.size.icon.48": "--portion-ref-size-icon-48",
+  "reference.size.icon.56": "--portion-ref-size-icon-56",
   "reference.size.icon.64": "--portion-ref-size-icon-64",
   "reference.size.target.minimum": "--portion-ref-size-target-minimum",
   "reference.size.target.add-food": "--portion-ref-size-target-add-food",
@@ -433,8 +436,11 @@ export const tokens = {
         "16": "16px",
         "20": "20px",
         "24": "24px",
+        "28": "28px",
         "32": "32px",
+        "40": "40px",
         "48": "48px",
+        "56": "56px",
         "64": "64px"
       },
       "target": {
