@@ -22,12 +22,16 @@ export interface FocusedFlowLayoutProps {
  * never leaves it underneath an anchored bar.
  */
 export function FocusedFlowLayout({ header, children, footer, className }: FocusedFlowLayoutProps) {
+  const layoutRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
     const apply = () => {
+      // Several focused steps can be mounted at once (earlier steps stay hidden for
+      // Back). Only the visible layout may write the document's scroll padding.
+      if (!layoutRef.current || layoutRef.current.getClientRects().length === 0) return;
       root.style.scrollPaddingBlockStart = `${headerRef.current?.offsetHeight ?? 0}px`;
       root.style.scrollPaddingBlockEnd = `${footerRef.current?.offsetHeight ?? 0}px`;
     };
@@ -44,7 +48,7 @@ export function FocusedFlowLayout({ header, children, footer, className }: Focus
   }, [footer]);
 
   return (
-    <div className={[styles.layout, className].filter(Boolean).join(' ')}>
+    <div ref={layoutRef} className={[styles.layout, className].filter(Boolean).join(' ')}>
       <div ref={headerRef} className={styles.header}>
         {header}
       </div>

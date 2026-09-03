@@ -144,4 +144,10 @@ Open:
 
 ## 9. Code review findings
 
-Recorded after the review pass at the end of the slice; see the commit history for the fixes applied.
+A `feature-dev:code-reviewer` agent read the full branch diff against `main` (source, generator, walkthrough script, Storybook and Vitest configuration, tests) on 2026-09-03. It had no shell access, so it did not execute the commands in §6 itself; those results come from the runs recorded above.
+
+- No high-confidence defects were found in nutrition scaling and fixtures, confirm-once/replace and stale-draft handling, AND criteria and filter-draft semantics, request-id guards against late responses, modal focus and dismissal routes, the navigation bar, TypeScript soundness or the token generator.
+- Observation 1 (latent): `FocusedFlowLayout` wrote the document scroll padding from every mounted instance, including hidden earlier steps; correctness depended on observer ordering. Fixed: only a visible layout writes the padding.
+- Observation 2 (latent): the generator's typography emission assumed every composite member is an alias; a literal member would have been emitted through the generic fallback. Fixed: literal members are formatted by their declared member type.
+
+Both fixes were re-verified with the typecheck, the token drift check and the Storybook test run before the final push.

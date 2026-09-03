@@ -41,6 +41,11 @@ const KNOWN_TYPES = new Set([
 ]);
 const DIMENSION_UNITS = new Set(['px', 'rem', 'em']);
 const ALIAS = /^\{([^}]+)\}$/;
+/** Member types of the supported composite tokens (DTCG 2025.10). */
+const COMPOSITE_MEMBERS = {
+  typography: { fontFamily: 'fontFamily', fontSize: 'dimension', fontWeight: 'fontWeight', lineHeight: 'number', letterSpacing: 'dimension' },
+  shadow: { offsetX: 'dimension', offsetY: 'dimension', blur: 'dimension', spread: 'dimension', color: 'color' },
+};
 
 const check = process.argv.includes('--check');
 const errors = [];
@@ -109,7 +114,8 @@ function resolve(id, stack = []) {
     !Array.isArray(token.raw) &&
     (token.type === 'shadow' || token.type === 'typography')
   ) {
-    // Composite tokens: each member may itself be an alias.
+    // Composite tokens: each member may itself be an alias or a literal value. A literal
+    // member takes the type the composite defines for it and is validated as that type.
     const value = {};
     for (const [member, memberRaw] of Object.entries(token.raw)) {
       if (typeof memberRaw === 'string' && ALIAS.test(memberRaw)) {
@@ -117,7 +123,7 @@ function resolve(id, stack = []) {
         const r = resolve(target, next);
         value[member] = { value: r.value, type: r.type, aliasOf: target };
       } else {
-        value[member] = { value: memberRaw, type: null, aliasOf: null };
+        value[member] = { value: memberRaw, type: COMPOSITE_MEMBERS[token.type]?.[member] ?? null, aliasOf: null };
       }
     }
     result = { type: token.type, value, aliasOf: null };
@@ -135,6 +141,13 @@ for (const id of tokens.keys()) resolve(id);
 // ---------------------------------------------------------------------------
 function isDimension(v) {
   return v && typeof v === 'object' && typeof v.value === 'number' && DIMENSION_UNITS.has(v.unit);
+}
+/** Validates the literal (non-alias) members of a composite by their member type. */
+function validateLiteralMembers(id, type, value) {
+  for (const [member, memberType] of Object.entries(COMPOSITE_MEMBERS[type] ?? {})) {
+    const m = value[member];
+    if (m && m.aliasOf === null) validate(`${id}.${member}`, { type: memberType, value: m.value });
+  }
 }
 function validate(id, { type, value }) {
   const at = (msg) => fail(`${id}: ${msg}`);
@@ -170,14 +183,15 @@ function validate(id, { type, value }) {
         if (!isDimension(value[m]?.value)) at(`shadow.${m} must be a dimension`);
       }
       if (value.color?.type !== 'color') at('shadow.color must resolve to a color');
+      validateLiteralMembers(id, type, value);
       return;
     }
     case 'typography': {
-      const need = { fontFamily: 'fontFamily', fontSize: 'dimension', fontWeight: 'fontWeight', lineHeight: 'number', letterSpacing: 'dimension' };
-      for (const [m, t] of Object.entries(need)) {
+      for (const [m, t] of Object.entries(COMPOSITE_MEMBERS.typography)) {
         if (!value[m]) at(`typography.${m} missing`);
         else if (value[m].type !== t) at(`typography.${m} must resolve to ${t}, got ${value[m].type}`);
       }
+      validateLiteralMembers(id, type, value);
       return;
     }
     default:
@@ -260,7 +274,8 @@ for (const [id, token] of tokens) {
         cssValue = `var(${varName(tokens.get(targetId).path)}-${cssProp})`;
       } else {
         const m = r.value[member];
-        cssValue = m.aliasOf ? `var(${varName(tokens.get(m.aliasOf).path)})` : fmtScalar(m.type, m.value, token.path);
+        // A literal member is formatted by its member type; font sizes become rem like their reference tokens.
+        cssValue = m.aliasOf ? `var(${varName(tokens.get(m.aliasOf).path)})` : fmtScalar(m.type, m.value, member === 'fontSize' ? ['font', 'size'] : token.path);
       }
       cssLines.push(`  ${memberVar}: ${cssValue};`);
       const memberValue = targetId ? resolved.get(targetId).value[member] : r.value[member];
