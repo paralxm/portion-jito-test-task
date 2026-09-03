@@ -381,7 +381,7 @@ export const tokens = {
       },
       "letter-spacing": {
         "normal": "0px",
-        "wordmark": "-0.03em"
+        "wordmark": -0.03
       },
       "line-height": {
         "caption": 1.333333,
