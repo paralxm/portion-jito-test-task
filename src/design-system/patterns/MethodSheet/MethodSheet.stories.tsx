@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../storybook/decorators';
 import { MethodSheet } from './MethodSheet';
 
 const meta = {
@@ -43,5 +44,25 @@ export const Dismiss: Story = {
     await userEvent.keyboard('{Escape}');
     await expect(args.onRequestClose).toHaveBeenCalledTimes(1);
     await expect(args.onChoose).not.toHaveBeenCalled();
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('dialog')).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 320 at 200 %',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: /Enter manually/ })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

@@ -38,3 +38,16 @@ export const withTextSpacing: Decorator = (Story) => (
 
 /** Removes the default story padding so full-screen layouts fill the viewport. */
 export const fullscreen = { parameters: { layout: 'fullscreen' } } as const;
+
+/**
+ * Asserts nothing inside `root` (default: the whole document) is wider than the
+ * viewport — the one check every 320 CSS px and enlarged-text story needs. Reports the
+ * offending element instead of just failing, so a regression names its own cause.
+ */
+export async function expectNoHorizontalOverflow(root: HTMLElement = document.documentElement) {
+  const limit = window.innerWidth + 1;
+  const offenders = Array.from(root.querySelectorAll<HTMLElement>('*'))
+    .filter((el) => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().right > limit)
+    .map((el) => `${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]} → right edge ${Math.round(el.getBoundingClientRect().right)} (viewport ${window.innerWidth})`);
+  if (offenders.length > 0) throw new Error(`Horizontal overflow:\n${offenders.join('\n')}`);
+}

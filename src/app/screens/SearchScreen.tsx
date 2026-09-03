@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 
-import { AppHeader, Button, EmptyState, FilterChip, FoodResultRow, LoadingState, RootScreenLayout, SearchField, Text, VisuallyHidden } from '../../design-system';
+import { AppHeader, Button, EmptyState, FilterChip, FoodResultRow, LoadingState, ResultsHeading, RootScreenLayout, SearchField } from '../../design-system';
 import { describeReferenceBasis, type FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { CriteriaToolbar } from '../../features/recipe-discovery/components/CriteriaToolbar';
 import { RecipeList } from '../../features/recipe-discovery/components/RecipeList';
@@ -187,17 +187,7 @@ export function SearchScreen({
       ) : null}
 
       <section className={styles.results} aria-labelledby={resultsId}>
-        <div className={styles.resultsHeading} hidden={current.status === 'idle'}>
-          <Text as="h2" id={resultsId} variant="section-title" color="primary">
-            Results
-          </Text>
-          <VisuallyHidden as="p" role="status" aria-label="Results summary">
-            {summary}
-          </VisuallyHidden>
-          <Text as="p" variant="supporting" color="secondary" aria-hidden="true">
-            {countText}
-          </Text>
-        </div>
+        <ResultsHeading id={resultsId} heading="Results" summary={summary} countText={countText} hidden={current.status === 'idle'} />
         {content}
       </section>
     </RootScreenLayout>

@@ -1,23 +1,7 @@
-/* 16:9 hero, full-bleed against the page inset. No photo is a quiet neutral region. */
+/* Breaks the MediaFrame hero out to the viewport edge; MediaFrame owns the aspect
+   ratio, background and image/no-photo fill. */
 .hero {
-  aspect-ratio: 16 / 9;
   margin-inline: calc(var(--portion-spacing-page-inset) * -1);
-  background: var(--portion-color-background-sunken);
-  overflow: hidden;
-}
-
-.image {
-  display: block;
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
-}
-
-.noPhoto {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  block-size: 100%;
 }
 
 .identity {

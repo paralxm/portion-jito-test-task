@@ -8,19 +8,19 @@ Authority: `docs/ux/ui-contract.md` and `docs/ux/low-fidelity.md` own behaviour;
 
 | Layer | Path | What lives there | Storybook |
 | --- | --- | --- | --- |
-| Token source | `src/design-system/tokens/tokens.json` | DTCG 2025.10 `reference` and `semantic` families (220 tokens) | Foundations/Tokens |
+| Token source | `src/design-system/tokens/tokens.json` | DTCG 2025.10 `reference` and `semantic` families (217 tokens) | Foundations/Tokens |
 | Token generator | `scripts/tokens/build.mjs` | Validation, alias resolution, deterministic `tokens.css` + `tokens.ts` | — |
 | Generated tokens | `src/design-system/tokens/generated/` | `--portion-ref-*` and `--portion-*` custom properties; typed `tokens`, `tokenVars`, `cssVar` | Foundations |
 | Global styles | `src/design-system/styles/` | Inter registration, generated tokens, reset, focus ring, `[hidden]`, reduced motion, safe areas, type classes | Foundations/Typography |
 | Icons | `src/design-system/icons/` | `Icon` wrapper; Storybook-only `catalogue.ts` (134 verified Phosphor glyphs) | Foundations/Icons |
 | Nutrition rules | `src/design-system/nutrition/` | Categories, ordering, formatting (`formatQuantity`), "Not available" wording | — (unit tests) |
 | Primitives | `src/design-system/primitives/` | Text, Stack/Inline, Surface, Separator, Spinner, Button, IconButton, Input, Checkbox/Radio, Badge, VisuallyHidden | Primitives/* |
-| Components | `src/design-system/components/` | FormField, TextField, AmountField, UnitControl, SearchField, chips, NutritionValue, NutrientRow, MatchCriteria, InlineMessage, EmptyState, LoadingState, MethodRow, FoodResultRow | Components/* |
-| Patterns | `src/design-system/patterns/` | NavigationBar, AppHeader, ModalSheet, ConfirmDialog, MethodSheet, UnitSheet, NutritionSummary, RecipeCard | Patterns/* |
+| Components | `src/design-system/components/` | FormField, TextField, AmountField, UnitControl, SearchField, chips, NutritionValue, NutrientRow, MatchCriteria, MediaFrame, ResultsHeading, InlineMessage, EmptyState, LoadingState, MethodRow, FoodResultRow | Components/* |
+| Patterns | `src/design-system/patterns/` | NavigationBar, AppHeader, ModalSheet, ConfirmDialog, MethodSheet, UnitSheet, NutritionSummary, RecipeCard (composes MediaFrame) | Patterns/* |
 | Templates | `src/design-system/templates/` | RootScreenLayout, FocusedFlowLayout | Templates/* |
 | Public entry | `src/design-system/index.ts` | Supported exports only (no fixtures, catalogue or stories) | — |
-| Calculator feature | `src/features/calorie-calculator/` | `domain/` (calculation, manual entry, fixtures, tests), `screens/` (Calculate, Food review, Manual entry, Barcode, Photo) | Product compositions |
-| Recipe feature | `src/features/recipe-discovery/` | `domain/` (matching, fixtures, tests), `components/` (filters sheet, criteria toolbar, list), `screens/` (Recipes, Recipe details) | Product compositions |
+| Calculator feature | `src/features/calorie-calculator/` | `domain/` (calculation, manual entry, fixtures, tests), `components/` (`FoodIdentityHeader`, shared by Calculate and Food review), `screens/` (Calculate, Food review, Manual entry, Barcode, Photo) | Product compositions |
+| Recipe feature | `src/features/recipe-discovery/` | `domain/` (matching, fixtures, tests), `components/` (filters sheet, criteria toolbar, list), `screens/` (Recipes, Recipe details, composes MediaFrame + ResultsHeading) | Product compositions |
 | App shell | `src/app/` | `App.tsx` navigation, shared `SearchScreen`, simulated `services.ts`, keyboard and scroll hooks | Product compositions/App |
 | Storybook helpers | `src/design-system/storybook/` | Enlarged-text and text-spacing decorators, contrast helpers (not exported) | — |
 | Verification | `scripts/verify/runtime-walkthrough.mjs` | Playwright walkthrough of both journeys with screenshots to `.verification/runtime/` (ignored) | — |
@@ -34,6 +34,7 @@ The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same
 - Conversions: colours to lowercase hex or `rgb(r g b / a)`; dimensions keep their unit except font sizes, which are emitted in rem (root 16 px); line heights stay unitless ratios; durations in ms; easing as `cubic-bezier()`; shadows as CSS shadow lists; typography composites as five custom properties each (`-font-family`, `-font-size`, `-font-weight`, `-line-height`, `-letter-spacing`).
 - Semantic aliases are emitted as `var()` references to their reference token, so a reference change flows through. Product and component styles use semantic roles; reference steps appear only in token definitions, the layout primitives (`Stack`/`Inline` gaps map to `reference.space`) and foundation specimens.
 - `html { font-size: 100% }` keeps the user's browser text preference; everything in rem scales from it. All values in code, stories and this guide are CSS px.
+- **em exception (wordmark tracking):** DTCG 2025.10's `dimension` type accepts only `px` or `rem` as `$value.unit` — `em` is not a valid dimension unit, and a `dimension` token declared with `unit: "em"` fails schema validation (the red squiggly VS Code shows against `tokens.json`'s `$schema`). The approved wordmark tracking is `-0.03em`, a font-size-relative value that `px`/`rem` cannot express. `reference.font.letter-spacing.wordmark` is therefore declared as a schema-valid `number` token (`$value: -0.03`, no unit), and the generator recognises it as the one `letterSpacing` composite member allowed to resolve to `number` instead of `dimension`; it is the only case where `fmtScalar`/`fmtTypographyMember` append `em` to a number. Every other `letter-spacing` token (`normal`, and every style's resolved `letterSpacing` member) stays a `dimension` and renders `0px`.
 
 ## 3. Foundations at a glance
 
@@ -109,21 +110,21 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | Reduced motion | `prefers-reduced-motion` → 0 ms | `isReduceMotionEnabled` | Verified through the data attribute path |
 | Typeface | Inter Variable | SF Pro | Inter is the approved brand face |
 
-## 6. Verification status (executed on 2026-09-03)
+## 6. Verification status (last executed 2026-09-04, after the pre-Hi-Fi audit in §10)
 
 | Check | Command | Result |
 | --- | --- | --- |
 | Typecheck | `npm run typecheck` | exit 0 |
-| Token validity and drift | `npm run tokens:check` | 220 tokens validated; generated output current |
+| Token validity and drift | `npm run tokens:check` | 217 tokens validated; generated output current |
 | Unit tests (node) | `npm run test:unit` | 4 files, 38 tests passed |
-| Storybook tests (headless Chromium, axe at `error`) | `npm run test:storybook` | 53 files, 184 tests passed |
+| Storybook tests (headless Chromium, axe at `error`) | `npm run test:storybook` | 58 files, 231 tests passed |
 | App build | `npm run build` | success (Inter opsz woff2 + CSS + JS bundles) |
 | Storybook build | `npm run build-storybook` | success (`storybook-static/`, ignored) |
-| Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | 24/24 checks passed, 0 console/page errors, 47 screenshots in `.verification/runtime/` |
+| Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | 24/24 checks passed, 0 console/page errors, screenshots in `.verification/runtime/` |
 
-Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %). The unit-change and 2 × 2 fallback defects found by that inspection were fixed and re-verified.
+Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %) and, after §10's refactor, re-read specifically for Calculate result, Food review, Recipes filtered, Recipe details and Search results to confirm the MediaFrame/ResultsHeading/FoodIdentityHeader extraction changed no pixel. The unit-change and 2 × 2 fallback defects found by the original inspection were fixed and re-verified; §10 lists what the audit pass found and fixed.
 
-Not verified in this slice: manual screen-reader pass (NVDA/VoiceOver), real-device software keyboard and safe-area behaviour, deployed app/Storybook URLs, and synchronisation of the final screens into the Figma Design file (no code-to-canvas capture tool was exposed in this session). Passing axe on every story is not a WCAG conformance claim.
+Not verified: manual screen-reader pass (NVDA/VoiceOver), real-device software keyboard and safe-area behaviour, deployed app/Storybook URLs, and synchronisation of the final screens into the Figma Design file (no code-to-canvas capture tool was exposed in this session). Passing axe on every story is not a WCAG conformance claim.
 
 ## 7. Skills and tools used
 
@@ -134,7 +135,7 @@ Not verified in this slice: manual screen-reader pass (NVDA/VoiceOver), real-dev
 
 ## 8. Resumable status
 
-Done in this slice (branch `feat/design-system`): tokens and generator, global styles, primitives, components, patterns, templates, both feature domains with fixtures and tests, all runtime screens, the app shell with simulated services, Storybook consolidation and 53 story files, the runtime walkthrough script, and this guide.
+Done in this slice (branch `feat/design-system`): tokens and generator, global styles, primitives, components, patterns, templates, both feature domains with fixtures and tests, all runtime screens, the app shell with simulated services, Storybook consolidation and 58 story files, the runtime walkthrough script, a pre-Hi-Fi audit pass (§10) and this guide.
 
 Open:
 1. Add the verified final screens to the existing Figma Design file for review and handoff (requires a capture or native-edit capability in the session; not attempted here).
@@ -151,3 +152,46 @@ A `feature-dev:code-reviewer` agent read the full branch diff against `main` (so
 - Observation 2 (latent): the generator's typography emission assumed every composite member is an alias; a literal member would have been emitted through the generic fallback. Fixed: literal members are formatted by their declared member type.
 
 Both fixes were re-verified with the typecheck, the token drift check and the Storybook test run before the final push.
+
+## 10. Pre-Hi-Fi design-system audit (2026-09-04)
+
+A full audit of the design system as implemented in the repository — not of the earlier completion report — before any Hi-Fi visual work begins. Scope: foundations, token integrity and generated output, dependency architecture, primitives/components/patterns/templates, public exports, Storybook coverage and discoverability, component APIs and state ownership, accessibility and keyboard behaviour, 320–430 px layouts, 200 % text, long content, reduced motion, build/test integrity, and whether the system can compose both journeys without missing foundational controls. Two independent read-only passes (architecture/duplication; Storybook/accessibility/responsive) fed the fixes below; every command in §6 was re-run afterward, and the runtime walkthrough was re-inspected against screenshots to confirm the refactor changed no rendered pixel.
+
+### Verified clean (no defect found)
+
+- **Import boundaries** — nothing under `src/design-system/` imports `features/` or `app/`; `storybook/` helpers and the icon catalogue are imported only by `.stories.tsx` files.
+- **Business logic placement** — every design-system component receives typed data and callbacks; nutrition scaling, unit conversion and criteria evaluation live only in `features/*/domain/`.
+- **State ownership** — the one internal draft (`UnitSheet`'s pending unit) resets from its `value` prop on open and is a standard cancel-restores-previous pattern; no component owns state a parent can't observe when it affects a confirm/submit outcome.
+- **Modal/dialog mechanics, read from source** — `ModalSheet` and `ConfirmDialog` use native `<dialog>` + `showModal()` (real focus containment, not custom JS); Escape, backdrop click (`ModalSheet` only) and the close control all route through the same callback; `ConfirmDialog` deliberately has no backdrop-dismiss route, and a new story now proves a click inside it never closes it, rather than that being assumed. Focus-return-to-opener on close is native `<dialog>` behaviour; a new `ConfirmDialog` story with an actual opener button now proves it, rather than inferring it from `ModalSheet`'s existing test.
+- **No raw clickable non-button elements** anywhere in `src/design-system`.
+- **Reduced motion** — every semantic motion token was already zeroed by both override blocks except `--portion-motion-duration-instant` (harmless — already 0 ms, unused by any rule; added for completeness). `ModalSheet`'s rise animation uses the token-backed duration, so it correctly collapses.
+- **Token generator soundness, dependency architecture and TypeScript strictness** — no `any`/`@ts-ignore` in `src/`, no cross-boundary imports, alias/cycle/type-conflict detection all correct on inspection.
+
+### Defects found and fixed
+
+| Finding | Fix |
+| --- | --- |
+| `reference.size.icon.28/40/56` were declared, aliased by no semantic role, shown in no Foundations story and consumed by no component — dead catalogue entries (220 → 217 tokens) | Removed from `tokens.json`; regenerated |
+| `CalculateScreen.module.css` and `FoodReviewScreen.module.css` were byte-identical files; both screens hand-rolled the same name/detail/basis/"Change food" block | Extracted `FoodIdentityHeader` (feature-local — it takes the calculator's `FoodCandidate` type) |
+| `RecipeCard` and `RecipeDetailsScreen` each hand-rolled an identical 4:3/16:9 image-or-"No photo" region | Extracted `MediaFrame` (design-system, exported); preserved each screen's loading behaviour (cards lazy, details hero eager) |
+| `RecipesScreen` and `SearchScreen` had byte-identical results-heading CSS, including a `:empty` hiding hack | Extracted `ResultsHeading` (design-system, exported); the empty-count case is now conditional rendering, not a CSS hack |
+| Every sheet/dialog (ModalSheet, ConfirmDialog, MethodSheet, UnitSheet, RecipeFiltersSheet) had zero 320 px and zero enlarged-text Storybook coverage; RecipeCard and FoodResultRow had no enlarged-text story; Amount/TextField forms and both result-list screens had zero 320 px coverage; BarcodeScreen/PhotoScreen had neither; FoodReviewScreen had 320 px but no enlarged text | Added the missing stories (~20), plus a shared `expectNoHorizontalOverflow()` assertion in `storybook/decorators.tsx` so they check the same thing the same way |
+| InlineMessage, EmptyState and NutritionSummary were never exercised with long/unbreakable content in any story | Added a long-content story to each |
+| `TextField`, `CriteriaToolbar` and `RecipeList` had no story file of their own (only indirect coverage) | Added `TextField.stories.tsx`, `CriteriaToolbar.stories.tsx`, `RecipeList.stories.tsx` |
+
+### Investigated and judged not a defect
+
+- **`NutrientRow` vs `NutritionValue` category markers** (16 px vs 14 px tall, both `border-radius: 2px`) looked like accidental drift on first read. Each marker in fact sits beside a different adjacent text size in its own context (16/24 body text in nested rows vs. 14/20 label text above a value figure), so the difference is proportional scaling, not an untracked inconsistency. Left the values as designed; added a comment to each file explaining the relationship so a future reader doesn't "fix" it into a visual mismatch.
+- **`Button.loading` and `InlineMessage tone="success"`** are documented, tested capabilities (required by the acceptance criteria in the coverage register) with no current call site in product code — the async flows that exist (barcode lookup, photo analysis) use a separate region-level `LoadingState` instead of a button spinner, and no screen currently has a "success" moment. Not dead code — reachable, tested, and part of the system's required surface — just unconsumed today. Wiring either into a screen would be product-screen behaviour, out of this audit's scope.
+- **`Surface`, `Separator`, `Checkbox`** are exported but not yet composed by other design-system components (several patterns hand-roll their own bordered-box CSS instead of using `Surface`, for instance). This is a real architectural observation worth acting on eventually — consolidating box styling through `Surface` would reduce exactly the kind of drift this audit found elsewhere — but doing that sweep now, immediately before Hi-Fi work, risks visual regressions for a purely internal refactor. Left as a known follow-up rather than forced through under audit time pressure.
+- **`ConfirmDialog` `max-inline-size: 360px` vs `ModalSheet` `max-inline-size: 640px`, `Choice` radio-dot `10px`, `Badge` count `padding-block: 2px`, the modal drag-handle and nav-indicator `1–2px` radii** — small, isolated, sub-token decorative constants (a dialog width ceiling, a radio dot, a badge inset, hairline corner rounding) rather than restyled use of a concept the token scale already names. Left untokenized, consistent with the hairline-border exception the system already makes elsewhere.
+- **`Acquisition.module.css`'s viewfinder `max-inline-size: 240px` and `2px dashed` border** (Barcode/Photo) — a feature-screen-level decorative constant. Touching it would mean editing final product screens, which this audit was explicitly scoped not to do.
+
+### Remaining gaps (not addressed by this audit; unchanged from §6/§8)
+
+1. No manual assistive-technology pass (NVDA/VoiceOver) has been performed — every accessibility fact in this document comes from source reading, automated axe checks and scripted keyboard/focus assertions, not a human screen-reader session.
+2. Real-device software-keyboard and safe-area behaviour is unverified — `.verification/runtime/` and Storybook both run in desktop Chromium, where `visualViewport` shrink and `env(safe-area-inset-*)` cannot be exercised.
+3. `Surface`-consolidation across existing box-styled components (RecipeCard, InlineMessage, EmptyState and others), noted above, is a deliberate follow-up, not done here.
+4. Figma capture of the final screens, deployment of the app/Storybook and the pull request for `feat/design-system` remain open, as recorded in §8.
+
+This audit did not find any missing foundational control that would block composing either journey — both are already composed end to end in `src/app/App.tsx` and verified by the runtime walkthrough; the duplication findings were about implementations that existed twice, not capabilities that were missing.

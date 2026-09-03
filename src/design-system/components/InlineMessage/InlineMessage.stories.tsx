@@ -3,6 +3,7 @@ import { expect, within } from 'storybook/test';
 
 import { Button } from '../../primitives/Button/Button';
 import { Stack } from '../../primitives/layout/Stack';
+import { expectNoHorizontalOverflow } from '../../storybook/decorators';
 import { InlineMessage } from './InlineMessage';
 
 const meta = {
@@ -66,5 +67,20 @@ export const ErrorAlert: Story = {
   args: { tone: 'error', title: 'Analysis failed', children: 'The recognition service did not respond. Your photo is kept, so you can try again without retaking it.' },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByRole('alert')).toHaveTextContent('Analysis failed');
+  },
+};
+
+export const LongContent: Story = {
+  name: 'Long, wrapping content at 320',
+  args: {
+    tone: 'error',
+    title: 'Lookup failed',
+    children:
+      'The product lookup service for code 5012345678900 did not respond in time, and the connection could not be re-established after several retries — the code you scanned is kept so you can try again without rescanning it.',
+  },
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('alert')).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

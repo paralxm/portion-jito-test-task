@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow } from '../../storybook/decorators';
 import { NutritionSummary } from './NutritionSummary';
 
 const meta = {
@@ -88,4 +89,14 @@ export const Stale: Story = {
 export const KnownZero: Story = {
   name: 'Known zero (sparkling water)',
   args: { energy: 0, protein: 0, carbohydrates: 0, fat: 0, basis: 'For 330 ml', additional: undefined },
+};
+
+export const LongBasis: Story = {
+  name: 'Long basis text at 320',
+  args: { basis: 'For 2 servings of the wholegrain pasta with roasted vegetables and tahini dressing (800 g)' },
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText(/wholegrain pasta/)).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
 };

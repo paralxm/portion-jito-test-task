@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Clock } from '@phosphor-icons/react';
 
 import { MatchCriteria, type MatchCriterion } from '../../components/MatchCriteria/MatchCriteria';
+import { MediaFrame } from '../../components/MediaFrame/MediaFrame';
 import { Icon } from '../../icons/Icon';
 import { Badge } from '../../primitives/Badge/Badge';
 import { Text } from '../../primitives/Text/Text';
@@ -36,17 +37,7 @@ export interface RecipeCardProps {
 export function RecipeCard({ title, imageUrl, imageAlt = '', calories, protein, servingBasis, preparationMinutes, dietary, criteria, onOpen, className, children }: RecipeCardProps) {
   return (
     <article className={[styles.card, className].filter(Boolean).join(' ')}>
-      <div className={styles.media}>
-        {imageUrl ? (
-          <img className={styles.image} src={imageUrl} alt={imageAlt} loading="lazy" />
-        ) : (
-          <div className={styles.noPhoto}>
-            <Text variant="supporting" color="secondary">
-              No photo
-            </Text>
-          </div>
-        )}
-      </div>
+      <MediaFrame aspect="4:3" imageUrl={imageUrl} imageAlt={imageAlt} />
       <div className={styles.body}>
         <h3 className={styles.titleRow}>
           <button type="button" className={styles.titleButton} onClick={onOpen}>

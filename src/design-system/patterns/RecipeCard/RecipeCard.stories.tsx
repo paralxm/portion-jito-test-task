@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { Stack } from '../../primitives/layout/Stack';
+import { withRootFontSize, expectNoHorizontalOverflow } from '../../storybook/decorators';
 import { RecipeCard } from './RecipeCard';
 
 /** A clearly artificial placeholder — the repository ships no photographs. */
@@ -90,6 +91,15 @@ export const MissingProtein: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Protein Not available')).toBeInTheDocument();
     await expect(canvas.getByText('Matches 1 of 2 filters')).toBeInTheDocument();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 200 %',
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: 'Lentil soup' })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };
 

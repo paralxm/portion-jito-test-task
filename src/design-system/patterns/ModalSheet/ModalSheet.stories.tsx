@@ -5,6 +5,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from '../../primitives/Button/Button';
 import { Stack } from '../../primitives/layout/Stack';
 import { Text } from '../../primitives/Text/Text';
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../storybook/decorators';
 import { ModalSheet } from './ModalSheet';
 
 const meta = {
@@ -99,5 +100,30 @@ export const LongContent: Story = {
     const dialog = canvas.getByRole('dialog');
     await expect(dialog.getBoundingClientRect().height).toBeLessThanOrEqual(window.innerHeight);
     await expect(canvas.getByRole('button', { name: 'Apply filters' })).toBeVisible();
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  render: (args) => <Harness onRequestClose={args.onRequestClose} />,
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open filters' }));
+    await expect(canvas.getByRole('button', { name: 'Apply filters' })).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 320 at 200 %',
+  render: (args) => <Harness onRequestClose={args.onRequestClose} />,
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open filters' }));
+    await expect(canvas.getByRole('button', { name: 'Apply filters' })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

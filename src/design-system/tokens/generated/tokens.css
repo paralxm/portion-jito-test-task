@@ -48,7 +48,7 @@
   --portion-ref-font-size-28: 1.75rem;
   --portion-ref-font-size-40: 2.5rem;
   --portion-ref-font-letter-spacing-normal: 0px;
-  --portion-ref-font-letter-spacing-wordmark: -0.03em; /* Wordmark only. Never applied to interface text. */
+  --portion-ref-font-letter-spacing-wordmark: -0.03em; /* Wordmark tracking ratio, authored unitless per DTCG 2025.10 (the dimension type accepts only px or rem, not em). The generator emits this specific token as -0.03em, the approved CSS value, never as px or rem. Wordmark only; never applied to interface text. */
   --portion-ref-font-line-height-caption: 1.333333; /* 16 px line height at 12 px text (16/12). */
   --portion-ref-font-line-height-supporting: 1.428571; /* 20 px line height at 14 px text (20/14). */
   --portion-ref-font-line-height-body: 1.5; /* 24 px line height at 16 px text (24/16). */
@@ -93,11 +93,8 @@
   --portion-ref-size-icon-16: 16px;
   --portion-ref-size-icon-20: 20px;
   --portion-ref-size-icon-24: 24px;
-  --portion-ref-size-icon-28: 28px;
   --portion-ref-size-icon-32: 32px;
-  --portion-ref-size-icon-40: 40px;
   --portion-ref-size-icon-48: 48px;
-  --portion-ref-size-icon-56: 56px;
   --portion-ref-size-icon-64: 64px;
   --portion-ref-size-target-minimum: 48px; /* Product interaction-target baseline. */
   --portion-ref-size-target-add-food: 56px; /* Trailing Add food action target. */

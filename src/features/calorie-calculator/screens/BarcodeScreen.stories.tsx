@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
 import { barcodeCatalogue } from '../domain/fixtures';
 import { BarcodeScreen, type BarcodeLookupResult } from './BarcodeScreen';
 
@@ -94,5 +95,23 @@ export const CameraDenied: Story = {
     await expect(canvas.getByRole('alert')).toHaveTextContent('Camera access is needed to scan');
     await userEvent.click(canvas.getByRole('button', { name: 'Enter manually' }));
     await expect(args.onEnterManually).toHaveBeenCalledTimes(1);
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText('Point the camera at the product barcode')).toBeInTheDocument();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 200 %',
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText('Point the camera at the product barcode')).toBeInTheDocument();
+    await expectNoHorizontalOverflow();
   },
 };

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
 import { photoSuggestions, samplePhotoImage } from '../domain/fixtures';
 import { PhotoScreen, type PhotoAnalysisResult } from './PhotoScreen';
 
@@ -94,5 +95,23 @@ export const CameraDenied: Story = {
     await expect(canvas.getByRole('alert')).toHaveTextContent('Camera access is needed to take a photo');
     await userEvent.click(canvas.getByRole('button', { name: 'Search by name' }));
     await expect(args.onSearchInstead).toHaveBeenCalledTimes(1);
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: 'Take photo' })).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 200 %',
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: 'Take photo' })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };

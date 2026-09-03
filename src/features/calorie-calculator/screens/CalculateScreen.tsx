@@ -1,20 +1,16 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { PencilSimple } from '@phosphor-icons/react';
 
 import { AmountField } from '../../../design-system/components/AmountField/AmountField';
 import { EmptyState } from '../../../design-system/components/EmptyState/EmptyState';
 import { InlineMessage } from '../../../design-system/components/InlineMessage/InlineMessage';
-import { Button } from '../../../design-system/primitives/Button/Button';
-import { Stack } from '../../../design-system/primitives/layout/Stack';
-import { Text } from '../../../design-system/primitives/Text/Text';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
 import { NutritionSummary } from '../../../design-system/patterns/NutritionSummary/NutritionSummary';
 import { UnitSheet } from '../../../design-system/patterns/UnitSheet/UnitSheet';
 import { RootScreenLayout } from '../../../design-system/templates/RootScreenLayout/RootScreenLayout';
+import { FoodIdentityHeader } from '../components/FoodIdentityHeader';
 import {
   convertQuantity,
   describePortionBasis,
-  describeReferenceBasis,
   findUnit,
   formatQuantityDraft,
   parseAmount,
@@ -22,7 +18,6 @@ import {
   type CurrentCalculation,
   type Portion,
 } from '../domain/calculation';
-import styles from './CalculateScreen.module.css';
 
 export interface CalculateScreenProps {
   /** The committed calculation, or `null` for a new session. */
@@ -110,24 +105,7 @@ export function CalculateScreen({ current, onPortionChange, onChangeFood, naviga
 
   return (
     <RootScreenLayout header={header} navigation={navigation}>
-      <section className={styles.identity} aria-labelledby="current-food-name">
-        <Stack gap={4}>
-          <Text as="h2" id="current-food-name" variant="detail-heading" color="primary" wrap>
-            {candidate.name}
-          </Text>
-          {candidate.detail ? (
-            <Text as="p" variant="supporting" color="secondary" wrap>
-              {candidate.detail}
-            </Text>
-          ) : null}
-          <Text as="p" variant="supporting" color="secondary">
-            Nutrition basis: {describeReferenceBasis(candidate).toLowerCase()}
-          </Text>
-        </Stack>
-        <Button variant="secondary" icon={PencilSimple} onClick={onChangeFood}>
-          Change food
-        </Button>
-      </section>
+      <FoodIdentityHeader candidate={candidate} onChangeFood={onChangeFood} headingId="current-food-name" />
 
       <AmountField
         label="Amount"

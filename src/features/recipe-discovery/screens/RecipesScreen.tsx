@@ -3,10 +3,10 @@ import { MagnifyingGlass } from '@phosphor-icons/react';
 
 import { EmptyState } from '../../../design-system/components/EmptyState/EmptyState';
 import { LoadingState } from '../../../design-system/components/LoadingState/LoadingState';
+import { ResultsHeading } from '../../../design-system/components/ResultsHeading/ResultsHeading';
 import { Icon } from '../../../design-system/icons/Icon';
 import { Button } from '../../../design-system/primitives/Button/Button';
 import { Text } from '../../../design-system/primitives/Text/Text';
-import { VisuallyHidden } from '../../../design-system/primitives/VisuallyHidden/VisuallyHidden';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
 import { RootScreenLayout } from '../../../design-system/templates/RootScreenLayout/RootScreenLayout';
 import { CriteriaToolbar } from '../components/CriteriaToolbar';
@@ -112,17 +112,7 @@ export function RecipesScreen({ results, criteria, status, onApplyCriteria, onRe
       />
 
       <section className={styles.results} aria-labelledby={resultsId}>
-        <div className={styles.resultsHeading}>
-          <Text as="h2" id={resultsId} variant="section-title" color="primary">
-            {active > 0 ? 'Matching recipes' : 'All recipes'}
-          </Text>
-          <VisuallyHidden as="p" role="status" aria-label="Results summary">
-            {summary}
-          </VisuallyHidden>
-          <Text as="p" variant="supporting" color="secondary" aria-hidden="true">
-            {countText}
-          </Text>
-        </div>
+        <ResultsHeading id={resultsId} heading={active > 0 ? 'Matching recipes' : 'All recipes'} summary={summary} countText={countText} />
         {content}
       </section>
     </RootScreenLayout>

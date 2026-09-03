@@ -9,25 +9,6 @@
   transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
 }
 
-/* 4:3 media region. A missing photo is a quiet neutral area, not a skeleton or a broken glyph. */
-.media {
-  aspect-ratio: 4 / 3;
-  background: var(--portion-color-background-sunken);
-}
-
-.image {
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
-}
-
-.noPhoto {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  block-size: 100%;
-}
-
 .body {
   display: flex;
   flex-direction: column;

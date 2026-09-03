@@ -39,13 +39,22 @@ const KNOWN_TYPES = new Set([
   'shadow',
   'typography',
 ]);
-const DIMENSION_UNITS = new Set(['px', 'rem', 'em']);
+// DTCG 2025.10 dimension tokens accept only px or rem — never em. The wordmark's
+// em-based tracking is authored as a unitless number instead (see LETTER_SPACING_TYPES).
+const DIMENSION_UNITS = new Set(['px', 'rem']);
 const ALIAS = /^\{([^}]+)\}$/;
 /** Member types of the supported composite tokens (DTCG 2025.10). */
 const COMPOSITE_MEMBERS = {
   typography: { fontFamily: 'fontFamily', fontSize: 'dimension', fontWeight: 'fontWeight', lineHeight: 'number', letterSpacing: 'dimension' },
   shadow: { offsetX: 'dimension', offsetY: 'dimension', blur: 'dimension', spread: 'dimension', color: 'color' },
 };
+/**
+ * letterSpacing normally resolves to a dimension (0px). The wordmark is the one
+ * exception: its tracking is authored as a schema-valid unitless `number` (-0.03) and
+ * formatted as an em value by fmtTypographyMember/fmtScalar — the only way to express
+ * -0.03em given that the dimension type does not accept "em" as a unit.
+ */
+const LETTER_SPACING_TYPES = new Set(['dimension', 'number']);
 
 const check = process.argv.includes('--check');
 const errors = [];
@@ -188,8 +197,9 @@ function validate(id, { type, value }) {
     }
     case 'typography': {
       for (const [m, t] of Object.entries(COMPOSITE_MEMBERS.typography)) {
+        const allowed = m === 'letterSpacing' ? LETTER_SPACING_TYPES : new Set([t]);
         if (!value[m]) at(`typography.${m} missing`);
-        else if (value[m].type !== t) at(`typography.${m} must resolve to ${t}, got ${value[m].type}`);
+        else if (!allowed.has(value[m].type)) at(`typography.${m} must resolve to ${[...allowed].join(' or ')}, got ${value[m].type}`);
       }
       validateLiteralMembers(id, type, value);
       return;
@@ -233,7 +243,9 @@ function fmtScalar(type, value, pathArr) {
     case 'color': return fmtColor(value);
     case 'dimension': return fmtDimension(value, pathArr);
     case 'duration': return `${trim(value.value)}ms`;
-    case 'number': return trim(value);
+    // A number token under letter-spacing is the wordmark's authored tracking ratio;
+    // every other number token (line-height, layer index, …) stays a plain unitless value.
+    case 'number': return pathArr.includes('letter-spacing') ? `${trim(value)}em` : trim(value);
     case 'fontWeight': return String(value);
     case 'fontFamily': return fmtFamily(value);
     case 'cubicBezier': return `cubic-bezier(${value.map(trim).join(', ')})`;
@@ -245,6 +257,16 @@ function fmtScalar(type, value, pathArr) {
   }
 }
 const TYPO_MEMBERS = { fontFamily: 'font-family', fontSize: 'font-size', fontWeight: 'font-weight', lineHeight: 'line-height', letterSpacing: 'letter-spacing' };
+/**
+ * Formats one resolved typography composite member. `letterSpacing` is the only member
+ * that can resolve to `number` (the wordmark's tracking ratio); it becomes `-0.03em`.
+ * Every other member — and letterSpacing when it resolves to `dimension`, e.g. 0px —
+ * keeps its ordinary formatting.
+ */
+function fmtTypographyMember(member, type, value) {
+  if (member === 'letterSpacing' && type === 'number') return `${trim(value)}em`;
+  return fmtScalar(type, value, member === 'fontSize' ? ['font', 'size'] : []);
+}
 
 // ---------------------------------------------------------------------------
 // 5. Emit CSS
@@ -274,12 +296,13 @@ for (const [id, token] of tokens) {
         cssValue = `var(${varName(tokens.get(targetId).path)}-${cssProp})`;
       } else {
         const m = r.value[member];
-        // A literal member is formatted by its member type; font sizes become rem like their reference tokens.
-        cssValue = m.aliasOf ? `var(${varName(tokens.get(m.aliasOf).path)})` : fmtScalar(m.type, m.value, member === 'fontSize' ? ['font', 'size'] : token.path);
+        // A literal member is formatted by its member type; font sizes become rem like
+        // their reference tokens, and a literal letterSpacing number becomes an em value.
+        cssValue = m.aliasOf ? `var(${varName(tokens.get(m.aliasOf).path)})` : fmtTypographyMember(member, m.type, m.value);
       }
       cssLines.push(`  ${memberVar}: ${cssValue};`);
       const memberValue = targetId ? resolved.get(targetId).value[member] : r.value[member];
-      members[member] = fmtScalar(memberValue.type, memberValue.value, member === 'fontSize' ? ['font', 'size'] : []);
+      members[member] = fmtTypographyMember(member, memberValue.type, memberValue.value);
       tsVars[`${id}.${member}`] = memberVar;
     }
     if (desc) cssLines[cssLines.length - 5] += desc;

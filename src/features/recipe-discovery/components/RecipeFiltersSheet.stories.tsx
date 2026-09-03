@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
+import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
 import { RecipeFiltersSheet } from './RecipeFiltersSheet';
 
 const meta = {
@@ -65,5 +66,24 @@ export const CancelDiscardsDraft: Story = {
     await userEvent.keyboard('{Escape}');
     await expect(args.onCancel).toHaveBeenCalledTimes(1);
     await expect(args.onApply).not.toHaveBeenCalled();
+  },
+};
+
+export const Narrow320: Story = {
+  name: 'Narrow — 320',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('dialog', { name: 'Filters' })).toBeVisible();
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const EnlargedText: Story = {
+  name: 'Enlarged text — 320 at 200 %',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  decorators: [withRootFontSize(200)],
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('button', { name: 'Apply filters' })).toBeVisible();
+    await expectNoHorizontalOverflow();
   },
 };
