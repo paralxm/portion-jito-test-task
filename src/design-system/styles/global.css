@@ -126,6 +126,7 @@ a {
    [data-portion-motion="reduced"] lets Storybook and tests exercise the same path. */
 @media (prefers-reduced-motion: reduce) {
   :root {
+    --portion-motion-duration-instant: 0ms;
     --portion-motion-duration-feedback: 0ms;
     --portion-motion-duration-disclosure: 0ms;
     --portion-motion-duration-overlay: 0ms;
