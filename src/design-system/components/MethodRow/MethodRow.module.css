@@ -4,7 +4,9 @@
   column-gap: var(--portion-ref-space-12);
   align-items: center;
   inline-size: 100%;
-  min-block-size: var(--portion-ref-space-56);
+  /* The row's own minimum height (taller than the 48 px minimum target for a
+     two-line title/description pair), not a spacing value. */
+  min-block-size: 56px;
   padding-block: var(--portion-ref-space-12);
   padding-inline: var(--portion-ref-space-16);
   border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);

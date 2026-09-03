@@ -32,7 +32,7 @@
   inline-size: 100%;
 }
 
-/* Spacing scale 0/4/8/12/16/24/32/36/40/44/48/52/56/60/64 */
+/* Spacing scale 0/4/8/12/16/24/32 */
 [data-gap='0'] { gap: var(--portion-ref-space-0); }
 [data-gap='4'] { gap: var(--portion-ref-space-4); }
 [data-gap='8'] { gap: var(--portion-ref-space-8); }
@@ -40,14 +40,6 @@
 [data-gap='16'] { gap: var(--portion-ref-space-16); }
 [data-gap='24'] { gap: var(--portion-ref-space-24); }
 [data-gap='32'] { gap: var(--portion-ref-space-32); }
-[data-gap='36'] { gap: var(--portion-ref-space-36); }
-[data-gap='40'] { gap: var(--portion-ref-space-40); }
-[data-gap='44'] { gap: var(--portion-ref-space-44); }
-[data-gap='48'] { gap: var(--portion-ref-space-48); }
-[data-gap='52'] { gap: var(--portion-ref-space-52); }
-[data-gap='56'] { gap: var(--portion-ref-space-56); }
-[data-gap='60'] { gap: var(--portion-ref-space-60); }
-[data-gap='64'] { gap: var(--portion-ref-space-64); }
 
 [data-align='start'] { align-items: flex-start; }
 [data-align='center'] { align-items: center; }

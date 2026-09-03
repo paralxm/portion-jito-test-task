@@ -11,21 +11,21 @@ const meta = {
     docs: {
       description: {
         component: `
-The full \`reference.space\` catalogue is 0/4/8/12/16/24/32/36/40/44/48/52/56/60/64 px, but
-two different things draw from it:
+The approved \`reference.space\` scale is exactly 0/4/8/12/16/24/32 px — **spacing between
+elements**, and nothing else. Every semantic spacing role this system defines (page
+inset, card padding, card gap, form group, section, and every smaller
+label/helper/paragraph role) resolves to one of these seven steps — checked below
+against the live tokens, not just declared. **The parent layout owns spacing between its
+children** (\`Stack\`/\`Inline\` \`gap\`, typed to this same seven-value union, or a
+template's own \`gap\`/padding); a reusable component owns only its own internal padding
+and internal gaps, never an external margin reaching for a sibling it doesn't control.
 
-- **0/4/8/12/16/24/32 — spacing between elements.** Every semantic spacing role this
-  system defines (page inset, card padding, card gap, form group, section, and every
-  smaller label/helper/paragraph role) resolves to one of these seven steps — checked
-  below against the live tokens, not just declared. **The parent layout owns spacing
-  between its children** (\`Stack\`/\`Inline\` \`gap\`, or a template's own \`gap\`/padding);
-  a reusable component owns only its own internal padding and internal gaps, never an
-  external margin reaching for a sibling it doesn't control.
-- **36/40/44/48/52/56/60/64 — a few components' own fixed dimensions**, which happen to
-  share the same numeric family for consistency but are not "spacing between children":
-  \`Chip\`'s minimum height (40), \`ModalSheet\`'s drag handle width (40), and
-  \`FoodResultRow\`/\`MethodRow\`/\`AppHeader\`'s minimum row height (56). None of these are
-  gaps — they never appear as a \`Stack\`/\`Inline\` \`gap\` or a semantic spacing role today.
+A handful of components have their own fixed dimension in this numeric neighbourhood —
+\`Chip\`'s minimum height (40 px), \`ModalSheet\`'s drag handle width (40 px), and
+\`FoodResultRow\`/\`MethodRow\`/\`AppHeader\`'s minimum row height (56 px) — but these are
+plain pixel literals written directly in the component's own CSS, not \`reference.space\`
+tokens. A fixed dimension is a different concept from spacing between siblings, so it is
+never exposed through \`gap\` or any spacing token.
 
 Product and component styles consume semantic roles or the \`Stack\`/\`Inline\` primitives,
 never a raw \`reference.space\` value, outside of token definitions and this catalogue.
@@ -40,7 +40,7 @@ of page spacing by the bar and focused footers.
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const STEPS = [0, 4, 8, 12, 16, 24, 32, 36, 40, 44, 48, 52, 56, 60, 64] as const;
+const STEPS = [0, 4, 8, 12, 16, 24, 32] as const;
 /** The subset every semantic "spacing between elements" role is verified to stay within. */
 const APPROVED_LAYOUT_STEPS = ['0px', '4px', '8px', '12px', '16px', '24px', '32px'] as const;
 
@@ -62,7 +62,7 @@ const ROLES = [
   'nav-icon-to-label',
 ] as const;
 
-/** Real, current, non-gap consumers of the steps above 32 — see the component description. */
+/** Components with their own fixed pixel dimension near this scale — plain literals, not tokens. */
 const FIXED_DIMENSION_USES = [
   { step: 40, owner: 'Chip', use: 'minimum height' },
   { step: 40, owner: 'ModalSheet', use: 'drag handle width' },
@@ -82,7 +82,7 @@ export const Scale: Story = {
             style={{
               blockSize: 16,
               inlineSize: `var(--portion-ref-space-${step})`,
-              background: step <= 32 ? 'var(--portion-color-action-primary)' : 'var(--portion-color-text-secondary)',
+              background: 'var(--portion-color-action-primary)',
               borderRadius: 2,
               minInlineSize: step === 0 ? 1 : undefined,
             }}
@@ -133,7 +133,7 @@ export const SemanticRoles: Story = {
 };
 
 export const FixedDimensionsAboveTheLayoutScale: Story = {
-  name: 'Steps above 32 — fixed dimensions, not gaps',
+  name: 'Fixed dimensions above 32 — plain literals, not spacing tokens',
   render: () => (
     <table style={{ borderCollapse: 'collapse' }}>
       <tbody>

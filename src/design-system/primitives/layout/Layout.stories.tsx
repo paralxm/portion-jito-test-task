@@ -18,16 +18,15 @@ const meta = {
 Stack (vertical) and Inline (horizontal) place siblings with a token \`gap\` instead of
 margins — **the parent layout owns spacing between its children; a reusable component
 only ever owns its own internal padding/gaps**, never a margin that reaches out to a
-sibling it doesn't control. \`gap\` accepts every step in \`reference.space\`
-(0/4/8/12/16/24/32/36/40/44/48/52/56/60/64 px), but **0/4/8/12/16/24/32 is the
-semantically-approved scale for spacing between elements in a layout** — every
-semantic spacing role this system defines (page inset 16, card padding 16, card gap 12,
-form group 16, section 24, and every smaller label/helper/paragraph role) already
-resolves to one of these seven steps, verified against real usage, not just declared.
-The steps above 32 back a few components' own fixed internal dimensions instead (a
-control's minimum height, a decorative handle's width) — a different concept that
-happens to share the same numeric family for consistency, not a wider "spacing" range
-to reach for between siblings.
+sibling it doesn't control. \`gap\`'s type is the approved spacing scale itself,
+\`0 | 4 | 8 | 12 | 16 | 24 | 32\`, matching \`reference.space\` exactly — every semantic
+spacing role this system defines (page inset 16, card padding 16, card gap 12, form
+group 16, section 24, and every smaller label/helper/paragraph role) already resolves
+to one of these seven steps, verified against real usage, not just declared. A handful
+of components have their own fixed internal dimensions in this numeric neighbourhood —
+a control's minimum height, a decorative handle's width — but those are plain literals
+in the component's own CSS, not \`reference.space\` tokens and not reachable through
+\`gap\`: a fixed dimension is never a valid spacing value between siblings.
 
 Inline additionally takes \`distribute\`: \`hug\` (default) sizes each child to its own
 content, like a chip row; \`fill\` makes every direct child share the row's available
@@ -52,7 +51,7 @@ generic centring/max-width wrapper has no real consumer to serve yet.
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const STEPS: readonly SpaceStep[] = [0, 4, 8, 12, 16, 24, 32, 36, 40, 44, 48, 52, 56, 60, 64];
+const STEPS: readonly SpaceStep[] = [0, 4, 8, 12, 16, 24, 32];
 
 export const StackGaps: Story = {
   name: 'Stack — every step',

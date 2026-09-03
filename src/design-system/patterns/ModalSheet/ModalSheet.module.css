@@ -54,7 +54,8 @@
 
 .handle {
   align-self: center;
-  inline-size: var(--portion-ref-space-40);
+  /* A decorative drag-handle width, not a spacing value. */
+  inline-size: 40px;
   block-size: var(--portion-ref-space-4);
   margin-block: var(--portion-ref-space-8) 0;
   border-radius: 2px;
