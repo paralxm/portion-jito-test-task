@@ -11,8 +11,8 @@ const meta = {
   title: 'Templates/RootScreenLayout',
   component: RootScreenLayout,
   args: {
-    header: <AppHeader title="Calculate" showWordmark />,
-    navigation: <NavigationBar selected="calculate" onSelect={fn()} onAddFood={fn()} />,
+    header: <AppHeader title="Home" showWordmark />,
+    navigation: <NavigationBar selected="home" onSelect={fn()} onAddFood={fn()} />,
     children: (
       <EmptyState title="Nothing calculated yet">Add a food or dish to see the calories and nutrition for the amount you choose.</EmptyState>
     ),
@@ -36,7 +36,7 @@ export const Empty: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('main')).toBeInTheDocument();
     await expect(canvas.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
-    await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Calculate');
+    await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Home');
   },
 };
 

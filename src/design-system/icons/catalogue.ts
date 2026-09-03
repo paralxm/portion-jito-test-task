@@ -87,6 +87,7 @@ import {
   Hash,
   Heartbeat,
   Hourglass,
+  House,
   IceCream,
   Image,
   ImageBroken,
@@ -169,7 +170,8 @@ const entry = (name: string, icon: PhosphorIcon, group: IconGroup, use: string):
 
 export const iconCatalogue: readonly CatalogueEntry[] = [
   // Navigation
-  entry('Calculator', Calculator, 'Navigation', 'Calculate destination; bold when selected'),
+  entry('House', House, 'Navigation', 'Home destination; bold when selected'),
+  entry('Calculator', Calculator, 'Navigation', 'Calculation remains a capability, not a navigation destination'),
   entry('MagnifyingGlass', MagnifyingGlass, 'Navigation', 'Search destination and search fields'),
   entry('CookingPot', CookingPot, 'Navigation', 'Recipes destination; bold when selected'),
   entry('Plus', Plus, 'Navigation', 'Add food — the trailing action in the bottom row'),

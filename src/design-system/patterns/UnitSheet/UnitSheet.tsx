@@ -31,7 +31,7 @@ export interface UnitSheetProps {
  */
 export function UnitSheet({ open, options, value, onConfirm, onCancel }: UnitSheetProps) {
   const [draft, setDraft] = useState(value);
-  // Several unit sheets can be mounted at once (Calculate, Review, Manual entry), so
+  // Several unit sheets can be mounted at once (Home, Review, Manual entry), so
   // option ids and the radio group name must be unique per instance.
   const id = useId();
   useEffect(() => {

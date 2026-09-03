@@ -8,13 +8,13 @@ import { NavigationBar, type Destination } from './NavigationBar';
 const meta = {
   title: 'Patterns/NavigationBar',
   component: NavigationBar,
-  args: { selected: 'calculate', onSelect: fn(), onAddFood: fn() },
+  args: { selected: 'home', onSelect: fn(), onAddFood: fn() },
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         component:
-          'One bottom row: Calculate | Search | Recipes | + Add food. Three destinations expose `aria-current="page"`; Add food is a 56 × 56 action, never a tab. Selection uses the bold glyph, action colour, a 2 px indicator and label weight — hover, press and focus never look selected. Retapping the current destination is ignored. Under enlarged text the same four controls rearrange into two rows of two, measured with ResizeObserver rather than guessed.',
+          'One bottom row: Home | Search | Recipes | + Add food. Three destinations expose `aria-current="page"`; Add food is a 56 × 56 action, never a tab. Selection uses the bold glyph, action colour, a 2 px indicator and label weight — hover, press and focus never look selected. Retapping the current destination is ignored. Under enlarged text the same four controls rearrange into two rows of two, measured with ResizeObserver rather than guessed.',
       },
     },
   },
@@ -26,9 +26,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const calculate = canvas.getByRole('button', { name: 'Calculate' });
-    await expect(calculate).toHaveAttribute('aria-current', 'page');
-    await userEvent.click(calculate);
+    const home = canvas.getByRole('button', { name: 'Home' });
+    await expect(home).toHaveAttribute('aria-current', 'page');
+    await userEvent.click(home);
     await expect(args.onSelect).not.toHaveBeenCalled();
     await userEvent.click(canvas.getByRole('button', { name: 'Search' }));
     await expect(args.onSelect).toHaveBeenCalledWith('search');
@@ -46,14 +46,14 @@ export const Default: Story = {
 export const Selection: Story = {
   name: 'Selection follows the destination',
   render: (args) => {
-    const [selected, setSelected] = useState<Destination>('calculate');
+    const [selected, setSelected] = useState<Destination>('home');
     return <NavigationBar {...args} selected={selected} onSelect={setSelected} />;
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Recipes' }));
     await expect(canvas.getByRole('button', { name: 'Recipes' })).toHaveAttribute('aria-current', 'page');
-    await expect(canvas.getByRole('button', { name: 'Calculate' })).not.toHaveAttribute('aria-current');
+    await expect(canvas.getByRole('button', { name: 'Home' })).not.toHaveAttribute('aria-current');
   },
 };
 
@@ -81,7 +81,7 @@ export const EnlargedText: Story = {
     const nav = within(canvasElement).getByRole('navigation');
     await new Promise((resolve) => setTimeout(resolve, 50));
     await expect(nav.getAttribute('data-layout')).toBe('stacked');
-    for (const name of ['Calculate', 'Search', 'Recipes', 'Add food']) {
+    for (const name of ['Home', 'Search', 'Recipes', 'Add food']) {
       const label = within(canvasElement).getByRole('button', { name }).querySelector<HTMLElement>('[data-nav-label]');
       await expect(label).not.toBeNull();
       if (label) await expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth + 1);

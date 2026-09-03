@@ -8,7 +8,7 @@ import styles from './FoodIdentityHeader.module.css';
 
 export interface FoodIdentityHeaderProps {
   candidate: FoodCandidate;
-  /** Opens the shared method chooser (Calculate) or the correction route (Review). */
+  /** Opens the shared method chooser (Home) or the correction route (Review). */
   onChangeFood: () => void;
   changeFoodLabel?: string;
   /** Id placed on the name heading; the caller's section points its `aria-labelledby` at it. */
@@ -17,8 +17,8 @@ export interface FoodIdentityHeaderProps {
 
 /**
  * Name, optional detail, reference basis and a "Change food" action — the identity
- * block shared by Calculate's current result and Food review's candidate. Both screens
- * describe the same food the same way; only what surrounds this block differs.
+ * block shared by Home's current-calculation module and Food review's candidate. Both
+ * screens describe the same food the same way; only what surrounds this block differs.
  */
 export function FoodIdentityHeader({ candidate, onChangeFood, changeFoodLabel = 'Change food', headingId }: FoodIdentityHeaderProps) {
   return (

@@ -1,12 +1,12 @@
 import { useLayoutEffect, useRef } from 'react';
-import { Calculator, CookingPot, MagnifyingGlass, Plus } from '@phosphor-icons/react';
+import { CookingPot, House, MagnifyingGlass, Plus } from '@phosphor-icons/react';
 
 import { Icon } from '../../icons/Icon';
 import { Text } from '../../primitives/Text/Text';
 import styles from './NavigationBar.module.css';
 
 /** The three root destinations. Add food is an action, never a destination. */
-export type Destination = 'calculate' | 'search' | 'recipes';
+export type Destination = 'home' | 'search' | 'recipes';
 
 export interface NavigationBarProps {
   selected: Destination;
@@ -17,8 +17,8 @@ export interface NavigationBarProps {
   className?: string;
 }
 
-const DESTINATIONS: ReadonlyArray<{ id: Destination; label: string; icon: typeof Calculator }> = [
-  { id: 'calculate', label: 'Calculate', icon: Calculator },
+const DESTINATIONS: ReadonlyArray<{ id: Destination; label: string; icon: typeof House }> = [
+  { id: 'home', label: 'Home', icon: House },
   { id: 'search', label: 'Search', icon: MagnifyingGlass },
   { id: 'recipes', label: 'Recipes', icon: CookingPot },
 ];
@@ -26,14 +26,14 @@ const DESTINATIONS: ReadonlyArray<{ id: Destination; label: string; icon: typeof
 const px = (value: string) => parseFloat(value) || 0;
 
 /**
- * One bottom row: Calculate | Search | Recipes | + Add food.
+ * One bottom row: Home | Search | Recipes | + Add food.
  *
  * Selection is shown by the bold glyph, action colour, a 2 px indicator and the label
  * weight, and exposed as `aria-current="page"`. Retapping the current destination is
  * ignored here so it can never reset that destination.
  *
  * Enlarged-text fallback: labels may wrap and the row grows. If a single word (such as
- * "Calculate") cannot fit its cell, the same four controls rearrange into two rows of
+ * "Recipes") cannot fit its cell, the same four controls rearrange into two rows of
  * two in the same reading order. This is measured, not guessed: each label's natural
  * width (an invisible nowrap copy) is compared with the width a row cell would have.
  * The layout is written on the next frame so the observer never loops on itself.
