@@ -1,0 +1,103 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-canvas);
+  overflow: hidden;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+/* 4:3 media region. A missing photo is a quiet neutral area, not a skeleton or a broken glyph. */
+.media {
+  aspect-ratio: 4 / 3;
+  background: var(--portion-color-background-sunken);
+}
+
+.image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.noPhoto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 100%;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  padding: var(--portion-spacing-card-padding);
+}
+
+.titleRow {
+  min-inline-size: 0;
+}
+
+/* The title is the card's single control. Its ::after covers the whole card so any
+   tap opens details; the focus ring is drawn on the card via the inset rule below. */
+.titleButton {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.titleButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.titleButton:focus-visible {
+  outline: none;
+}
+
+.card:has(.titleButton:focus-visible) {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+}
+
+@media (hover: hover) {
+  .card:has(.titleButton:hover) {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.card:has(.titleButton:active) {
+  background: var(--portion-color-background-sunken);
+}
+
+.values {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--portion-ref-space-8);
+  margin-block-start: var(--portion-ref-space-4);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+  margin-block-start: var(--portion-ref-space-4);
+}
+
+.time {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-4);
+  color: var(--portion-color-text-secondary);
+}

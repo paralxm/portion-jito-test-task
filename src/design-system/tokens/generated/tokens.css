@@ -1,0 +1,293 @@
+/* GENERATED FILE — do not edit.
+   Source: src/design-system/tokens/tokens.json
+   Regenerate: npm run tokens:build   Verify: npm run tokens:check */
+:root {
+  --portion-ref-color-neutral-0: #ffffff;
+  --portion-ref-color-neutral-50: #f7f8fa;
+  --portion-ref-color-neutral-100: #f2f4f7;
+  --portion-ref-color-neutral-175: #e4e8ec;
+  --portion-ref-color-neutral-200: #e5e7eb;
+  --portion-ref-color-neutral-500: #77818b;
+  --portion-ref-color-neutral-600: #59636e;
+  --portion-ref-color-neutral-650: #52606d;
+  --portion-ref-color-neutral-900: #17212b;
+  --portion-ref-color-neutral-900-alpha-40: rgb(23 33 43 / 0.4);
+  --portion-ref-color-neutral-900-alpha-16: rgb(23 33 43 / 0.16);
+  --portion-ref-color-blue-50: #eaf0ff;
+  --portion-ref-color-blue-600: #2855d9;
+  --portion-ref-color-blue-700: #2147b6;
+  --portion-ref-color-blue-800: #19368f;
+  --portion-ref-color-red-50: #fff1f0;
+  --portion-ref-color-red-700: #b42318;
+  --portion-ref-color-amber-50: #fff5e7;
+  --portion-ref-color-amber-800: #8a4b0c;
+  --portion-ref-color-green-50: #eff8f1;
+  --portion-ref-color-green-800: #166534;
+  --portion-ref-color-purple-50: #f3eff9;
+  --portion-ref-color-purple-600: #7252a3;
+  --portion-ref-color-teal-50: #eaf6f7;
+  --portion-ref-color-teal-700: #087682;
+  --portion-ref-color-ochre-50: #fff4e2;
+  --portion-ref-color-ochre-700: #955a0c;
+  --portion-ref-color-olive-50: #f1f5e8;
+  --portion-ref-color-olive-700: #4e7029;
+  --portion-ref-color-rose-50: #f9eef3;
+  --portion-ref-color-rose-700: #a04574;
+  --portion-ref-color-taupe-50: #f3f0ed;
+  --portion-ref-color-taupe-700: #6b6259;
+  --portion-ref-font-family-ui: 'Inter Variable', Inter, system-ui, sans-serif; /* The installed @fontsource-variable/inter asset registers 'Inter Variable'; it is the approved Inter typeface. */
+  --portion-ref-font-weight-regular: 400;
+  --portion-ref-font-weight-medium: 500;
+  --portion-ref-font-weight-semibold: 600;
+  --portion-ref-font-size-12: 0.75rem;
+  --portion-ref-font-size-14: 0.875rem;
+  --portion-ref-font-size-16: 1rem;
+  --portion-ref-font-size-18: 1.125rem;
+  --portion-ref-font-size-20: 1.25rem;
+  --portion-ref-font-size-24: 1.5rem;
+  --portion-ref-font-size-28: 1.75rem;
+  --portion-ref-font-size-40: 2.5rem;
+  --portion-ref-font-letter-spacing-normal: 0px;
+  --portion-ref-font-letter-spacing-wordmark: -0.03em; /* Wordmark only. Never applied to interface text. */
+  --portion-ref-font-line-height-caption: 1.333333; /* 16 px line height at 12 px text (16/12). */
+  --portion-ref-font-line-height-supporting: 1.428571; /* 20 px line height at 14 px text (20/14). */
+  --portion-ref-font-line-height-body: 1.5; /* 24 px line height at 16 px text (24/16). */
+  --portion-ref-font-line-height-compact-title: 1.333333; /* 24 px line height at 18 px text (24/18). */
+  --portion-ref-font-line-height-section-title: 1.4; /* 28 px line height at 20 px text (28/20). */
+  --portion-ref-font-line-height-detail-heading: 1.333333; /* 32 px line height at 24 px text (32/24). */
+  --portion-ref-font-line-height-screen-heading: 1.285714; /* 36 px line height at 28 px text (36/28). */
+  --portion-ref-font-line-height-main-result: 1.2; /* 48 px line height at 40 px text (48/40). */
+  --portion-ref-space-0: 0px;
+  --portion-ref-space-4: 4px;
+  --portion-ref-space-8: 8px;
+  --portion-ref-space-12: 12px;
+  --portion-ref-space-16: 16px;
+  --portion-ref-space-24: 24px;
+  --portion-ref-space-32: 32px;
+  --portion-ref-space-36: 36px;
+  --portion-ref-space-40: 40px;
+  --portion-ref-space-44: 44px;
+  --portion-ref-space-48: 48px;
+  --portion-ref-space-52: 52px;
+  --portion-ref-space-56: 56px;
+  --portion-ref-space-60: 60px;
+  --portion-ref-space-64: 64px;
+  --portion-ref-radius-0: 0px;
+  --portion-ref-radius-4: 4px;
+  --portion-ref-radius-8: 8px;
+  --portion-ref-radius-12: 12px;
+  --portion-ref-radius-16: 16px;
+  --portion-ref-radius-20: 20px;
+  --portion-ref-radius-24: 24px;
+  --portion-ref-radius-28: 28px;
+  --portion-ref-radius-32: 32px;
+  --portion-ref-radius-36: 36px;
+  --portion-ref-radius-40: 40px;
+  --portion-ref-radius-44: 44px;
+  --portion-ref-radius-48: 48px;
+  --portion-ref-radius-52: 52px;
+  --portion-ref-radius-56: 56px;
+  --portion-ref-radius-60: 60px;
+  --portion-ref-radius-64: 64px;
+  --portion-ref-radius-full: 9999px; /* Exceptional token for true circles only; not a default pill radius. */
+  --portion-ref-size-icon-16: 16px;
+  --portion-ref-size-icon-20: 20px;
+  --portion-ref-size-icon-24: 24px;
+  --portion-ref-size-icon-28: 28px;
+  --portion-ref-size-icon-32: 32px;
+  --portion-ref-size-icon-40: 40px;
+  --portion-ref-size-icon-48: 48px;
+  --portion-ref-size-icon-56: 56px;
+  --portion-ref-size-icon-64: 64px;
+  --portion-ref-size-target-minimum: 48px; /* Product interaction-target baseline. */
+  --portion-ref-size-target-add-food: 56px; /* Trailing Add food action target. */
+  --portion-ref-border-width-default: 1px;
+  --portion-ref-border-width-indicator: 2px;
+  --portion-ref-focus-ring-width: 3px;
+  --portion-ref-focus-ring-offset: 2px;
+  --portion-ref-shadow-sheet: 0px -2px 24px 0px rgb(23 33 43 / 0.16);
+  --portion-ref-motion-duration-instant: 0ms;
+  --portion-ref-motion-duration-feedback: 100ms;
+  --portion-ref-motion-duration-disclosure: 150ms;
+  --portion-ref-motion-duration-overlay: 200ms;
+  --portion-ref-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1); /* Restrained interface easing; an implementation decision, not a research finding. */
+  --portion-ref-layer-content: 0;
+  --portion-ref-layer-sticky: 10;
+  --portion-ref-layer-navigation: 20;
+  --portion-ref-layer-scrim: 30;
+  --portion-ref-layer-modal: 40;
+  --portion-color-background-canvas: var(--portion-ref-color-neutral-0);
+  --portion-color-background-surface: var(--portion-ref-color-neutral-50);
+  --portion-color-background-sunken: var(--portion-ref-color-neutral-100);
+  --portion-color-text-primary: var(--portion-ref-color-neutral-900);
+  --portion-color-text-secondary: var(--portion-ref-color-neutral-650);
+  --portion-color-text-disabled: var(--portion-ref-color-neutral-600);
+  --portion-color-text-on-action: var(--portion-ref-color-neutral-0);
+  --portion-color-border-control: var(--portion-ref-color-neutral-500);
+  --portion-color-border-decorative: var(--portion-ref-color-neutral-175);
+  --portion-color-action-primary: var(--portion-ref-color-blue-600);
+  --portion-color-action-hover: var(--portion-ref-color-blue-700);
+  --portion-color-action-pressed: var(--portion-ref-color-blue-800);
+  --portion-color-action-selected-surface: var(--portion-ref-color-blue-50);
+  --portion-color-focus-ring: var(--portion-ref-color-blue-800);
+  --portion-color-state-disabled-surface: var(--portion-ref-color-neutral-200);
+  --portion-color-state-disabled-text: var(--portion-ref-color-neutral-600);
+  --portion-color-overlay-scrim: var(--portion-ref-color-neutral-900-alpha-40);
+  --portion-color-feedback-error-foreground: var(--portion-ref-color-red-700);
+  --portion-color-feedback-error-surface: var(--portion-ref-color-red-50);
+  --portion-color-feedback-warning-foreground: var(--portion-ref-color-amber-800);
+  --portion-color-feedback-warning-surface: var(--portion-ref-color-amber-50);
+  --portion-color-feedback-success-foreground: var(--portion-ref-color-green-800);
+  --portion-color-feedback-success-surface: var(--portion-ref-color-green-50);
+  --portion-color-feedback-info-foreground: var(--portion-ref-color-blue-700);
+  --portion-color-feedback-info-surface: var(--portion-ref-color-blue-50);
+  --portion-color-nutrition-energy-accent: var(--portion-ref-color-neutral-900);
+  --portion-color-nutrition-energy-surface: var(--portion-ref-color-neutral-100);
+  --portion-color-nutrition-protein-accent: var(--portion-ref-color-purple-600);
+  --portion-color-nutrition-protein-surface: var(--portion-ref-color-purple-50);
+  --portion-color-nutrition-carbohydrates-accent: var(--portion-ref-color-teal-700);
+  --portion-color-nutrition-carbohydrates-surface: var(--portion-ref-color-teal-50);
+  --portion-color-nutrition-fat-accent: var(--portion-ref-color-ochre-700);
+  --portion-color-nutrition-fat-surface: var(--portion-ref-color-ochre-50);
+  --portion-color-nutrition-fibre-accent: var(--portion-ref-color-olive-700);
+  --portion-color-nutrition-fibre-surface: var(--portion-ref-color-olive-50);
+  --portion-color-nutrition-vitamins-accent: var(--portion-ref-color-rose-700);
+  --portion-color-nutrition-vitamins-surface: var(--portion-ref-color-rose-50);
+  --portion-color-nutrition-minerals-accent: var(--portion-ref-color-taupe-700);
+  --portion-color-nutrition-minerals-surface: var(--portion-ref-color-taupe-50);
+  --portion-typography-main-result-font-family: var(--portion-ref-font-family-ui); /* One main calculated calorie value in a result composition. 40/48, 600. */
+  --portion-typography-main-result-font-size: var(--portion-ref-font-size-40);
+  --portion-typography-main-result-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-main-result-line-height: var(--portion-ref-font-line-height-main-result);
+  --portion-typography-main-result-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-screen-heading-font-family: var(--portion-ref-font-family-ui); /* Root screen title: Calculate, Search, Recipes. 28/36, 600. */
+  --portion-typography-screen-heading-font-size: var(--portion-ref-font-size-28);
+  --portion-typography-screen-heading-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-screen-heading-line-height: var(--portion-ref-font-line-height-screen-heading);
+  --portion-typography-screen-heading-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-detail-heading-font-family: var(--portion-ref-font-family-ui); /* Full food or recipe title in details or review. 24/32, 600. */
+  --portion-typography-detail-heading-font-size: var(--portion-ref-font-size-24);
+  --portion-typography-detail-heading-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-detail-heading-line-height: var(--portion-ref-font-line-height-detail-heading);
+  --portion-typography-detail-heading-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-section-title-font-family: var(--portion-ref-font-family-ui); /* Nutrition, Ingredients, Instructions; sheet and dialog titles. 20/28, 600. */
+  --portion-typography-section-title-font-size: var(--portion-ref-font-size-20);
+  --portion-typography-section-title-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-section-title-line-height: var(--portion-ref-font-line-height-section-title);
+  --portion-typography-section-title-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-compact-title-font-family: var(--portion-ref-font-family-ui); /* Top app bar title, recipe-card title, empty-state title. 18/24, 600. */
+  --portion-typography-compact-title-font-size: var(--portion-ref-font-size-18);
+  --portion-typography-compact-title-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-compact-title-line-height: var(--portion-ref-font-line-height-compact-title);
+  --portion-typography-compact-title-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-action-font-family: var(--portion-ref-font-family-ui); /* Standard actions; prominent list-row titles through aliases. 16/24, 600. */
+  --portion-typography-action-font-size: var(--portion-ref-font-size-16);
+  --portion-typography-action-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-action-line-height: var(--portion-ref-font-line-height-body);
+  --portion-typography-action-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-body-font-family: var(--portion-ref-font-family-ui); /* Reading text; input, textarea and search values. 16/24, 400. */
+  --portion-typography-body-font-size: var(--portion-ref-font-size-16);
+  --portion-typography-body-font-weight: var(--portion-ref-font-weight-regular);
+  --portion-typography-body-line-height: var(--portion-ref-font-line-height-body);
+  --portion-typography-body-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-label-font-family: var(--portion-ref-font-family-ui); /* Field and group labels; filter chip labels. 14/20, 500. */
+  --portion-typography-label-font-size: var(--portion-ref-font-size-14);
+  --portion-typography-label-font-weight: var(--portion-ref-font-weight-medium);
+  --portion-typography-label-line-height: var(--portion-ref-font-line-height-supporting);
+  --portion-typography-label-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-supporting-font-family: var(--portion-ref-font-family-ui); /* Helper and error text, context, secondary descriptions. 14/20, 400. */
+  --portion-typography-supporting-font-size: var(--portion-ref-font-size-14);
+  --portion-typography-supporting-font-weight: var(--portion-ref-font-weight-regular);
+  --portion-typography-supporting-line-height: var(--portion-ref-font-line-height-supporting);
+  --portion-typography-supporting-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-compact-action-font-family: var(--portion-ref-font-family-ui); /* Compact standalone text action: Clear, Reset, View all. 14/20, 600. */
+  --portion-typography-compact-action-font-size: var(--portion-ref-font-size-14);
+  --portion-typography-compact-action-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-compact-action-line-height: var(--portion-ref-font-line-height-supporting);
+  --portion-typography-compact-action-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-caption-font-family: var(--portion-ref-font-family-ui); /* Unselected bottom-navigation label; short incidental metadata. 12/16, 500. */
+  --portion-typography-caption-font-size: var(--portion-ref-font-size-12);
+  --portion-typography-caption-font-weight: var(--portion-ref-font-weight-medium);
+  --portion-typography-caption-line-height: var(--portion-ref-font-line-height-caption);
+  --portion-typography-caption-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-caption-strong-font-family: var(--portion-ref-font-family-ui); /* Selected bottom-navigation label; compact count badge. 12/16, 600. */
+  --portion-typography-caption-strong-font-size: var(--portion-ref-font-size-12);
+  --portion-typography-caption-strong-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-caption-strong-line-height: var(--portion-ref-font-line-height-caption);
+  --portion-typography-caption-strong-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-item-title-font-family: var(--portion-typography-action-font-family); /* Alias: food search-result row title and photo suggestion name. */
+  --portion-typography-item-title-font-size: var(--portion-typography-action-font-size);
+  --portion-typography-item-title-font-weight: var(--portion-typography-action-font-weight);
+  --portion-typography-item-title-line-height: var(--portion-typography-action-line-height);
+  --portion-typography-item-title-letter-spacing: var(--portion-typography-action-letter-spacing);
+  --portion-typography-method-title-font-family: var(--portion-typography-action-font-family); /* Alias: entry-method row title. */
+  --portion-typography-method-title-font-size: var(--portion-typography-action-font-size);
+  --portion-typography-method-title-font-weight: var(--portion-typography-action-font-weight);
+  --portion-typography-method-title-line-height: var(--portion-typography-action-line-height);
+  --portion-typography-method-title-letter-spacing: var(--portion-typography-action-letter-spacing);
+  --portion-typography-metric-inline-font-family: var(--portion-typography-action-font-family); /* Alias: compact calorie or nutrient value in a row; pair with the numeric modifier. */
+  --portion-typography-metric-inline-font-size: var(--portion-typography-action-font-size);
+  --portion-typography-metric-inline-font-weight: var(--portion-typography-action-font-weight);
+  --portion-typography-metric-inline-line-height: var(--portion-typography-action-line-height);
+  --portion-typography-metric-inline-letter-spacing: var(--portion-typography-action-letter-spacing);
+  --portion-typography-metric-secondary-font-family: var(--portion-typography-detail-heading-font-family); /* Alias: macro value in a nutrition summary; not an HTML heading. */
+  --portion-typography-metric-secondary-font-size: var(--portion-typography-detail-heading-font-size);
+  --portion-typography-metric-secondary-font-weight: var(--portion-typography-detail-heading-font-weight);
+  --portion-typography-metric-secondary-line-height: var(--portion-typography-detail-heading-line-height);
+  --portion-typography-metric-secondary-letter-spacing: var(--portion-typography-detail-heading-letter-spacing);
+  --portion-typography-wordmark-font-family: var(--portion-ref-font-family-ui); /* Lowercase 'portion' wordmark in a header. 24/32, 600, -0.03em tracking, isolated to the wordmark. */
+  --portion-typography-wordmark-font-size: var(--portion-ref-font-size-24);
+  --portion-typography-wordmark-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-wordmark-line-height: var(--portion-ref-font-line-height-detail-heading);
+  --portion-typography-wordmark-letter-spacing: var(--portion-ref-font-letter-spacing-wordmark);
+  --portion-spacing-page-inset: var(--portion-ref-space-16); /* Mobile page inset; safe-area padding is additional. */
+  --portion-spacing-card-padding: var(--portion-ref-space-16);
+  --portion-spacing-related: var(--portion-ref-space-8); /* Closely related items. */
+  --portion-spacing-form-group: var(--portion-ref-space-16);
+  --portion-spacing-section: var(--portion-ref-space-24); /* Between major screen groups. */
+  --portion-spacing-heading-to-description: var(--portion-ref-space-8);
+  --portion-spacing-section-title-to-content: var(--portion-ref-space-12);
+  --portion-spacing-title-to-secondary: var(--portion-ref-space-4);
+  --portion-spacing-label-to-control: var(--portion-ref-space-8);
+  --portion-spacing-control-to-helper: var(--portion-ref-space-4);
+  --portion-spacing-paragraph: var(--portion-ref-space-12);
+  --portion-spacing-instruction-item: var(--portion-ref-space-16);
+  --portion-spacing-icon-to-label: var(--portion-ref-space-8);
+  --portion-spacing-nav-icon-to-label: var(--portion-ref-space-4);
+  --portion-radius-structure: var(--portion-ref-radius-0);
+  --portion-radius-control: var(--portion-ref-radius-4);
+  --portion-radius-card: var(--portion-ref-radius-8);
+  --portion-radius-sheet: var(--portion-ref-radius-12);
+  --portion-radius-round: var(--portion-ref-radius-full); /* Use only for true circles when required. */
+  --portion-size-icon-compact: var(--portion-ref-size-icon-16);
+  --portion-size-icon-small-action: var(--portion-ref-size-icon-20);
+  --portion-size-icon-default: var(--portion-ref-size-icon-24);
+  --portion-size-icon-emphasis: var(--portion-ref-size-icon-32);
+  --portion-size-icon-empty-state: var(--portion-ref-size-icon-48);
+  --portion-size-icon-large-illustrative: var(--portion-ref-size-icon-64);
+  --portion-size-target-minimum: var(--portion-ref-size-target-minimum);
+  --portion-size-target-add-food: var(--portion-ref-size-target-add-food);
+  --portion-border-width-default: var(--portion-ref-border-width-default);
+  --portion-border-width-navigation-indicator: var(--portion-ref-border-width-indicator);
+  --portion-focus-ring-color: var(--portion-color-focus-ring);
+  --portion-focus-ring-width: var(--portion-ref-focus-ring-width);
+  --portion-focus-ring-offset: var(--portion-ref-focus-ring-offset);
+  --portion-shadow-sheet: var(--portion-ref-shadow-sheet);
+  --portion-motion-duration-instant: var(--portion-ref-motion-duration-instant);
+  --portion-motion-duration-feedback: var(--portion-ref-motion-duration-feedback);
+  --portion-motion-duration-disclosure: var(--portion-ref-motion-duration-disclosure);
+  --portion-motion-duration-overlay: var(--portion-ref-motion-duration-overlay);
+  --portion-motion-easing-standard: var(--portion-ref-motion-easing-standard);
+  --portion-motion-transition-press: var(--portion-ref-motion-duration-feedback); /* Button press and release surface change. */
+  --portion-motion-transition-selection: var(--portion-ref-motion-duration-feedback); /* Chip, tab and option selection. */
+  --portion-motion-transition-validation: var(--portion-ref-motion-duration-feedback); /* Error message appearance. */
+  --portion-motion-transition-disclosure: var(--portion-ref-motion-duration-disclosure); /* Expand and collapse of secondary content. */
+  --portion-motion-transition-async-result: var(--portion-ref-motion-duration-disclosure); /* Result region replacing a pending state. */
+  --portion-motion-transition-sheet: var(--portion-ref-motion-duration-overlay); /* Modal sheet enter and exit. */
+  --portion-motion-transition-navigation: var(--portion-ref-motion-duration-overlay); /* Root and focused-flow transitions. */
+  --portion-layer-content: var(--portion-ref-layer-content);
+  --portion-layer-sticky: var(--portion-ref-layer-sticky);
+  --portion-layer-navigation: var(--portion-ref-layer-navigation);
+  --portion-layer-scrim: var(--portion-ref-layer-scrim);
+  --portion-layer-modal: var(--portion-ref-layer-modal);
+}

@@ -1,0 +1,17 @@
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--portion-spacing-related);
+  min-inline-size: 0;
+}
+
+.count {
+  margin-inline-start: var(--portion-ref-space-4);
+}
+
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

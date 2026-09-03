@@ -1,0 +1,127 @@
+/* Button — one base, variants change treatment only, never type hierarchy.
+   Height is a minimum: a label may wrap and the control grows. */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--portion-spacing-icon-to-label);
+  min-block-size: var(--portion-size-target-minimum);
+  min-inline-size: var(--portion-size-target-minimum);
+  padding-block: var(--portion-ref-space-12);
+  padding-inline: var(--portion-ref-space-16);
+  border: var(--portion-border-width-default) solid transparent;
+  border-radius: var(--portion-radius-control);
+  background: transparent;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard),
+    color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+.button[data-block='true'] {
+  display: flex;
+  inline-size: 100%;
+}
+
+.label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* A stable slot so a spinner replacing an icon never shifts the label. */
+.slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--portion-size-icon-small-action);
+  block-size: var(--portion-size-icon-small-action);
+  flex-shrink: 0;
+}
+
+/* ---- variants ---- */
+
+.primary {
+  background: var(--portion-color-action-primary);
+  border-color: var(--portion-color-action-primary);
+  color: var(--portion-color-text-on-action);
+}
+
+.secondary {
+  background: var(--portion-color-background-canvas);
+  border-color: var(--portion-color-action-primary);
+  color: var(--portion-color-action-primary);
+}
+
+.text {
+  background: transparent;
+  border-color: transparent;
+  color: var(--portion-color-action-primary);
+  padding-inline: var(--portion-ref-space-12);
+}
+
+.destructive {
+  background: var(--portion-color-background-canvas);
+  border-color: var(--portion-color-feedback-error-foreground);
+  color: var(--portion-color-feedback-error-foreground);
+}
+
+/* Hover only exists for pointer input; touch never sees it. */
+@media (hover: hover) {
+  .primary:not(:disabled, [aria-busy='true']):hover {
+    background: var(--portion-color-action-hover);
+    border-color: var(--portion-color-action-hover);
+  }
+
+  .secondary:not(:disabled, [aria-busy='true']):hover,
+  .text:not(:disabled, [aria-busy='true']):hover {
+    background: var(--portion-color-action-selected-surface);
+  }
+
+  .destructive:not(:disabled, [aria-busy='true']):hover {
+    background: var(--portion-color-feedback-error-surface);
+  }
+}
+
+.primary:not(:disabled, [aria-busy='true']):active {
+  background: var(--portion-color-action-pressed);
+  border-color: var(--portion-color-action-pressed);
+}
+
+.secondary:not(:disabled, [aria-busy='true']):active,
+.text:not(:disabled, [aria-busy='true']):active {
+  background: var(--portion-color-action-selected-surface);
+  color: var(--portion-color-action-pressed);
+  border-color: var(--portion-color-action-pressed);
+}
+
+.text:not(:disabled, [aria-busy='true']):active {
+  border-color: transparent;
+}
+
+.destructive:not(:disabled, [aria-busy='true']):active {
+  background: var(--portion-color-feedback-error-surface);
+}
+
+/* ---- states ---- */
+
+.button:disabled {
+  background: var(--portion-color-state-disabled-surface);
+  border-color: var(--portion-color-state-disabled-surface);
+  color: var(--portion-color-state-disabled-text);
+  cursor: not-allowed;
+}
+
+.text:disabled {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* Loading keeps the variant's colours and size; activation is blocked in code. */
+.button[aria-busy='true'] {
+  cursor: progress;
+}

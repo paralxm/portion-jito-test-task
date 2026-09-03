@@ -1,0 +1,60 @@
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.spinner[data-size='small-action'] .ring {
+  inline-size: var(--portion-size-icon-small-action);
+  block-size: var(--portion-size-icon-small-action);
+}
+
+.spinner[data-size='default'] .ring {
+  inline-size: var(--portion-size-icon-default);
+  block-size: var(--portion-size-icon-default);
+}
+
+.spinner[data-size='emphasis'] .ring {
+  inline-size: var(--portion-size-icon-emphasis);
+  block-size: var(--portion-size-icon-emphasis);
+}
+
+.ring {
+  display: block;
+  animation: spin 900ms linear infinite;
+}
+
+.track,
+.arc {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+
+.track {
+  opacity: 0.2;
+}
+
+.arc {
+  stroke-linecap: round;
+  stroke-dasharray: 40 60;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reduced motion: keep the indicator and its text, drop the rotation. */
+@media (prefers-reduced-motion: reduce) {
+  .ring {
+    animation: none;
+  }
+}
+
+[data-portion-motion='reduced'] .ring {
+  animation: none;
+}

@@ -1,0 +1,206 @@
+/*
+ * Semantic type classes. Each maps one token style to the five typographic
+ * properties; nothing here sets colour, margin or transform. Components apply these
+ * classes (or the underlying custom properties) rather than restating sizes.
+ *
+ * Base styles:  main-result 40/48 · screen-heading 28/36 · detail-heading 24/32 ·
+ *               section-title 20/28 · compact-title 18/24 · action 16/24 · body 16/24 ·
+ *               label 14/20 · supporting 14/20 · compact-action 14/20 · caption 12/16 ·
+ *               caption-strong 12/16
+ * Aliases:      item-title, method-title, metric-inline → action;
+ *               metric-secondary → detail-heading; wordmark → 24/32 with -0.03em.
+ */
+
+.portion-type-main-result,
+.portion-type-screen-heading,
+.portion-type-detail-heading,
+.portion-type-section-title,
+.portion-type-compact-title,
+.portion-type-action,
+.portion-type-body,
+.portion-type-label,
+.portion-type-supporting,
+.portion-type-compact-action,
+.portion-type-caption,
+.portion-type-caption-strong,
+.portion-type-item-title,
+.portion-type-method-title,
+.portion-type-metric-inline,
+.portion-type-metric-secondary,
+.portion-type-wordmark {
+  font-family: var(--portion-type-family);
+  font-size: var(--portion-type-size);
+  font-weight: var(--portion-type-weight);
+  line-height: var(--portion-type-line-height);
+  letter-spacing: var(--portion-type-letter-spacing);
+  font-optical-sizing: auto;
+}
+
+.portion-type-main-result {
+  --portion-type-family: var(--portion-typography-main-result-font-family);
+  --portion-type-size: var(--portion-typography-main-result-font-size);
+  --portion-type-weight: var(--portion-typography-main-result-font-weight);
+  --portion-type-line-height: var(--portion-typography-main-result-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-main-result-letter-spacing);
+}
+
+.portion-type-screen-heading {
+  --portion-type-family: var(--portion-typography-screen-heading-font-family);
+  --portion-type-size: var(--portion-typography-screen-heading-font-size);
+  --portion-type-weight: var(--portion-typography-screen-heading-font-weight);
+  --portion-type-line-height: var(--portion-typography-screen-heading-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-screen-heading-letter-spacing);
+}
+
+.portion-type-detail-heading {
+  --portion-type-family: var(--portion-typography-detail-heading-font-family);
+  --portion-type-size: var(--portion-typography-detail-heading-font-size);
+  --portion-type-weight: var(--portion-typography-detail-heading-font-weight);
+  --portion-type-line-height: var(--portion-typography-detail-heading-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-detail-heading-letter-spacing);
+}
+
+.portion-type-section-title {
+  --portion-type-family: var(--portion-typography-section-title-font-family);
+  --portion-type-size: var(--portion-typography-section-title-font-size);
+  --portion-type-weight: var(--portion-typography-section-title-font-weight);
+  --portion-type-line-height: var(--portion-typography-section-title-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-section-title-letter-spacing);
+}
+
+.portion-type-compact-title {
+  --portion-type-family: var(--portion-typography-compact-title-font-family);
+  --portion-type-size: var(--portion-typography-compact-title-font-size);
+  --portion-type-weight: var(--portion-typography-compact-title-font-weight);
+  --portion-type-line-height: var(--portion-typography-compact-title-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-compact-title-letter-spacing);
+}
+
+.portion-type-action {
+  --portion-type-family: var(--portion-typography-action-font-family);
+  --portion-type-size: var(--portion-typography-action-font-size);
+  --portion-type-weight: var(--portion-typography-action-font-weight);
+  --portion-type-line-height: var(--portion-typography-action-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-action-letter-spacing);
+}
+
+.portion-type-body {
+  --portion-type-family: var(--portion-typography-body-font-family);
+  --portion-type-size: var(--portion-typography-body-font-size);
+  --portion-type-weight: var(--portion-typography-body-font-weight);
+  --portion-type-line-height: var(--portion-typography-body-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-body-letter-spacing);
+}
+
+.portion-type-label {
+  --portion-type-family: var(--portion-typography-label-font-family);
+  --portion-type-size: var(--portion-typography-label-font-size);
+  --portion-type-weight: var(--portion-typography-label-font-weight);
+  --portion-type-line-height: var(--portion-typography-label-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-label-letter-spacing);
+}
+
+.portion-type-supporting {
+  --portion-type-family: var(--portion-typography-supporting-font-family);
+  --portion-type-size: var(--portion-typography-supporting-font-size);
+  --portion-type-weight: var(--portion-typography-supporting-font-weight);
+  --portion-type-line-height: var(--portion-typography-supporting-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-supporting-letter-spacing);
+}
+
+.portion-type-compact-action {
+  --portion-type-family: var(--portion-typography-compact-action-font-family);
+  --portion-type-size: var(--portion-typography-compact-action-font-size);
+  --portion-type-weight: var(--portion-typography-compact-action-font-weight);
+  --portion-type-line-height: var(--portion-typography-compact-action-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-compact-action-letter-spacing);
+}
+
+.portion-type-caption {
+  --portion-type-family: var(--portion-typography-caption-font-family);
+  --portion-type-size: var(--portion-typography-caption-font-size);
+  --portion-type-weight: var(--portion-typography-caption-font-weight);
+  --portion-type-line-height: var(--portion-typography-caption-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-caption-letter-spacing);
+}
+
+.portion-type-caption-strong {
+  --portion-type-family: var(--portion-typography-caption-strong-font-family);
+  --portion-type-size: var(--portion-typography-caption-strong-font-size);
+  --portion-type-weight: var(--portion-typography-caption-strong-font-weight);
+  --portion-type-line-height: var(--portion-typography-caption-strong-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-caption-strong-letter-spacing);
+}
+
+.portion-type-item-title {
+  --portion-type-family: var(--portion-typography-item-title-font-family);
+  --portion-type-size: var(--portion-typography-item-title-font-size);
+  --portion-type-weight: var(--portion-typography-item-title-font-weight);
+  --portion-type-line-height: var(--portion-typography-item-title-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-item-title-letter-spacing);
+}
+
+.portion-type-method-title {
+  --portion-type-family: var(--portion-typography-method-title-font-family);
+  --portion-type-size: var(--portion-typography-method-title-font-size);
+  --portion-type-weight: var(--portion-typography-method-title-font-weight);
+  --portion-type-line-height: var(--portion-typography-method-title-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-method-title-letter-spacing);
+}
+
+.portion-type-metric-inline {
+  --portion-type-family: var(--portion-typography-metric-inline-font-family);
+  --portion-type-size: var(--portion-typography-metric-inline-font-size);
+  --portion-type-weight: var(--portion-typography-metric-inline-font-weight);
+  --portion-type-line-height: var(--portion-typography-metric-inline-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-metric-inline-letter-spacing);
+}
+
+.portion-type-metric-secondary {
+  --portion-type-family: var(--portion-typography-metric-secondary-font-family);
+  --portion-type-size: var(--portion-typography-metric-secondary-font-size);
+  --portion-type-weight: var(--portion-typography-metric-secondary-font-weight);
+  --portion-type-line-height: var(--portion-typography-metric-secondary-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-metric-secondary-letter-spacing);
+}
+
+.portion-type-wordmark {
+  --portion-type-family: var(--portion-typography-wordmark-font-family);
+  --portion-type-size: var(--portion-typography-wordmark-font-size);
+  --portion-type-weight: var(--portion-typography-wordmark-font-weight);
+  --portion-type-line-height: var(--portion-typography-wordmark-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-wordmark-letter-spacing);
+  text-transform: lowercase;
+}
+
+/* Text colour roles. Numbers stay neutral; nutrition accents belong to category markers. */
+.portion-text-primary {
+  color: var(--portion-color-text-primary);
+}
+
+.portion-text-secondary {
+  color: var(--portion-color-text-secondary);
+}
+
+.portion-text-on-action {
+  color: var(--portion-color-text-on-action);
+}
+
+.portion-text-error {
+  color: var(--portion-color-feedback-error-foreground);
+}
+
+/* Shrinkable text columns must be allowed to shrink; long words fall back to breaking
+   only when a word cannot fit at all. Never applied globally. */
+.portion-text-wrap {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.portion-text-start {
+  text-align: start;
+}
+
+.portion-text-center {
+  text-align: center;
+}

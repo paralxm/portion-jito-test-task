@@ -19,7 +19,8 @@ Documentation for the Portion calorie calculator and recipe-discovery project.
 ## Design
 
 - [Visual direction](./design/visual-direction.md) — the selected direction and its decisions
-- [Token draft](./design/tokens.json) — machine-readable draft mirroring the Figma variables
+- [Canonical tokens](../src/design-system/tokens/tokens.json) — DTCG 2025.10 source; generated CSS/TS in `src/design-system/tokens/generated/`
+- [Design-system guide](./design-system/README.md) — architecture, coverage register, platform ledger and verification status
 
 ## Figma
 

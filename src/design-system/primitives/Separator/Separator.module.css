@@ -1,0 +1,7 @@
+.separator {
+  inline-size: 100%;
+  block-size: 0;
+  margin: 0;
+  border: 0;
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}

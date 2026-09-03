@@ -1,0 +1,174 @@
+/*
+ * Portion — shared style entry.
+ * Imported once by the application (src/main.tsx) and by Storybook (.storybook/preview.ts).
+ * Registers the approved Inter typeface, the generated tokens, a small reset and the
+ * cross-cutting rules that components rely on (focus ring, numeric modifier, reduced motion).
+ */
+
+/* Inter Variable with the wght + opsz axes. The @font-face family name is 'Inter Variable';
+   the font-family token references that registered name. */
+@import '@fontsource-variable/inter/opsz.css';
+
+/* Generated from src/design-system/tokens/tokens.json — never edit by hand. */
+@import '../tokens/generated/tokens.css';
+
+/* Semantic type classes built from the same tokens. */
+@import './typography.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* 100 % keeps the user's browser text preference; rem-based tokens scale from it. */
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-block-size: 100dvh;
+  font-family: var(--portion-typography-body-font-family);
+  font-size: var(--portion-typography-body-font-size);
+  font-weight: var(--portion-typography-body-font-weight);
+  line-height: var(--portion-typography-body-line-height);
+  letter-spacing: var(--portion-typography-body-letter-spacing);
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  color: var(--portion-color-text-primary);
+  background: var(--portion-color-background-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Native controls do not inherit typography by default; make them use the system's. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+
+button {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-inline-size: 100%;
+}
+
+a {
+  color: var(--portion-color-action-primary);
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.12em;
+}
+
+/* Focus appearance: a 3 px ring drawn outside the control with a 2 px gap.
+   Containers must not clip it — see the overflow rules in components. */
+:focus-visible {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Numeric modifier: aligned or updating values only. Digits stop shifting when a
+   same-length substitution happens; a value may still grow when digits are added. */
+.portion-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.portion-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion: every transition token collapses to instant completion. Components
+   only ever read the semantic motion tokens, so no !important override is needed.
+   [data-portion-motion="reduced"] lets Storybook and tests exercise the same path. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --portion-motion-duration-feedback: 0ms;
+    --portion-motion-duration-disclosure: 0ms;
+    --portion-motion-duration-overlay: 0ms;
+    --portion-motion-transition-press: 0ms;
+    --portion-motion-transition-selection: 0ms;
+    --portion-motion-transition-validation: 0ms;
+    --portion-motion-transition-disclosure: 0ms;
+    --portion-motion-transition-async-result: 0ms;
+    --portion-motion-transition-sheet: 0ms;
+    --portion-motion-transition-navigation: 0ms;
+  }
+}
+
+[data-portion-motion='reduced'] {
+  --portion-motion-duration-feedback: 0ms;
+  --portion-motion-duration-disclosure: 0ms;
+  --portion-motion-duration-overlay: 0ms;
+  --portion-motion-transition-press: 0ms;
+  --portion-motion-transition-selection: 0ms;
+  --portion-motion-transition-validation: 0ms;
+  --portion-motion-transition-disclosure: 0ms;
+  --portion-motion-transition-async-result: 0ms;
+  --portion-motion-transition-sheet: 0ms;
+  --portion-motion-transition-navigation: 0ms;
+}
+
+/* Safe areas are read through custom properties so both the app shell and Storybook
+   can set them (Storybook's iframe reports 0). */
+:root {
+  --portion-safe-area-top: env(safe-area-inset-top, 0px);
+  --portion-safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --portion-safe-area-left: env(safe-area-inset-left, 0px);
+  --portion-safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+/* The hidden attribute wins over any component display rule, so a screen or the
+   navigation bar can be removed as a unit without per-component overrides. */
+[hidden] {
+  display: none !important;
+}
+
+/* Fields scrolled or focused into view keep clear of anchored bars. Layouts with a
+   sticky header or footer set the document's scroll padding to their measured heights. */
+:focus-visible {
+  scroll-margin-block: var(--portion-ref-space-8);
+}

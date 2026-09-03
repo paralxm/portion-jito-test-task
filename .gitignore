@@ -29,3 +29,6 @@ Thumbs.db
 *.tmp
 *.temp
 *storybook.log
+
+# Local browser-verification captures (see scripts/verify)
+.verification/

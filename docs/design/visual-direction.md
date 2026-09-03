@@ -65,19 +65,29 @@ Both directions use Inter. Neither the equal-width specimens nor their photograp
 
 **Inter**, one family throughout. It supports screen-oriented text and tabular numbers; its range of weights allows one coherent hierarchy. This is a project fit, not a ranking of typefaces. [Official Inter documentation](https://rsms.me/inter/).
 
-Fallback: `Inter, system-ui, sans-serif`. Confirm the font is actually loaded in the application and Storybook; the export's claim that it is already implemented was not checked against code.
+Implementation: `@fontsource-variable/inter/opsz.css` registers the `@font-face` family **`Inter Variable`** (wght 100–900, opsz 14–32); the canonical family token is `['Inter Variable', 'Inter', 'system-ui', 'sans-serif']`, so the token names the registered face and falls back to the system stack. Loading is verified in the runtime walkthrough (`document.fonts.check`) and in Foundations/Typography → Font loading and fallback.
 
-| Role | Size / line height, px | Weight |
-| --- | --- | --- |
-| Screen heading | 24 / 32 | 600 |
-| Main result | 32 / 40 | 600 |
-| Card / section title | 18 / 26 | 600 |
-| Body / input | 16 / 24 | 400 |
-| Action | 16 / 24 | 600 |
-| Label | 14 / 20 | 500 |
-| Supporting text | 14 / 20 | 400 |
+The accepted scale (2026-09-03) is the one implemented in `src/design-system/tokens/tokens.json` → `semantic.typography`; sizes are authored in px and emitted in rem, line heights are unitless ratios.
 
-- Reserve 32 px for the main calculator/detail result; list and card values use 18 or 16 px.
+| Role | Size / line height, px | Weight | Use |
+| --- | --- | --- | --- |
+| main-result | 40 / 48 | 600 | The single calorie result |
+| screen-heading | 28 / 36 | 600 | Root screen titles |
+| detail-heading | 24 / 32 | 600 | Food or recipe title on a detail screen |
+| section-title | 20 / 28 | 600 | Section and sheet titles |
+| compact-title | 18 / 24 | 600 | Focused bar titles, card and empty-state titles |
+| action | 16 / 24 | 600 | Button labels, unit selector |
+| body | 16 / 24 | 400 | Paragraphs, inputs, list items |
+| label | 14 / 20 | 500 | Field labels, chips, nutrient category labels |
+| supporting | 14 / 20 | 400 | Helper, error, basis, secondary lines |
+| compact-action | 14 / 20 | 600 | Compact standalone actions (Reset, Clear) |
+| caption | 12 / 16 | 500 | Navigation labels |
+| caption-strong | 12 / 16 | 600 | Selected navigation labels, count badge |
+| item-title, method-title, metric-inline | → action | | Row titles and inline values |
+| metric-secondary | → detail-heading | | Secondary macro values |
+| wordmark | 24 / 32, −0.03em | 600 | The lowercase wordmark only |
+
+- Reserve the 40 px main-result style for the single calculator/detail result; card and row values use metric-inline (16) and secondary metrics use 24.
 - Keep interface tracking normal. Keep a number and its unit together where possible, without creating overflow.
 - Use tabular figures on updating values and aligned numeric columns: `font-variant-numeric: tabular-nums` or the equivalent `"tnum"` feature. Align with layout, never inserted spaces.
 - The board reports tabular figures were not enabled through its authoring workflow. Treat them as unverified in Figma and required in code; do not turn that report into a general claim that Figma cannot support them.

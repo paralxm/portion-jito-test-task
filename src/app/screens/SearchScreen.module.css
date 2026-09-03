@@ -1,0 +1,32 @@
+.scopes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-section-title-to-content);
+  min-inline-size: 0;
+}
+
+.resultsHeading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+}
+
+.resultsHeading > p:empty {
+  display: none;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}

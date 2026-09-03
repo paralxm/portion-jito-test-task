@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { defineConfig } from 'vitest/config';
 
@@ -7,13 +6,24 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 
 import { playwright } from '@vitest/browser-playwright';
 
-const dirname =
-  typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+const dirname = import.meta.dirname;
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
+// Two projects:
+//  - "unit": pure token, formatting and domain tests in Node (src/**/*.test.ts).
+//  - "storybook": every story runs as a browser test in headless Chromium; the addon
+//    supplies preview annotations itself (no manual vitest.setup file is needed with
+//    @storybook/addon-vitest 10.5).
 export default defineConfig({
   test: {
     projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          environment: 'node',
+          include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
+        },
+      },
       {
         extends: true,
         plugins: [

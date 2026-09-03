@@ -1,0 +1,50 @@
+.message {
+  display: grid;
+  grid-template-columns: var(--portion-size-icon-small-action) minmax(0, 1fr);
+  column-gap: var(--portion-ref-space-12);
+  align-items: start;
+  padding: var(--portion-ref-space-12);
+  border-radius: var(--portion-radius-control);
+  border: var(--portion-border-width-default) solid transparent;
+}
+
+.message[data-tone='error'] {
+  background: var(--portion-color-feedback-error-surface);
+  color: var(--portion-color-feedback-error-foreground);
+}
+
+.message[data-tone='warning'] {
+  background: var(--portion-color-feedback-warning-surface);
+  color: var(--portion-color-feedback-warning-foreground);
+}
+
+.message[data-tone='success'] {
+  background: var(--portion-color-feedback-success-surface);
+  color: var(--portion-color-feedback-success-foreground);
+}
+
+.message[data-tone='info'] {
+  background: var(--portion-color-feedback-info-surface);
+  color: var(--portion-color-feedback-info-foreground);
+}
+
+.glyph {
+  display: inline-flex;
+  margin-block-start: 2px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+  margin-block-start: var(--portion-ref-space-8);
+  /* Actions inside a message keep normal action colours, not the message tone. */
+  color: var(--portion-color-text-primary);
+}

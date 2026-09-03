@@ -1,0 +1,54 @@
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto var(--portion-size-icon-small-action);
+  column-gap: var(--portion-ref-space-12);
+  align-items: center;
+  inline-size: 100%;
+  min-block-size: var(--portion-ref-space-56);
+  padding-block: var(--portion-ref-space-12);
+  padding-inline: var(--portion-spacing-page-inset);
+  border: 0;
+  border-block-end: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-primary);
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+@media (hover: hover) {
+  .row:hover {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.row:active {
+  background: var(--portion-color-background-sunken);
+}
+
+/* The ring is drawn inside the scroll container's bounds so a list never clips it. */
+.row:focus-visible {
+  outline-offset: calc(var(--portion-focus-ring-offset) * -1);
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--portion-spacing-title-to-secondary);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.chevron {
+  display: inline-flex;
+  color: var(--portion-color-text-secondary);
+}

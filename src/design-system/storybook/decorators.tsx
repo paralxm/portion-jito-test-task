@@ -1,0 +1,40 @@
+/**
+ * Storybook-only helpers. Not part of the design-system public entry point.
+ */
+import { useEffect, type ReactNode } from 'react';
+import type { Decorator } from '@storybook/react-vite';
+
+/**
+ * Applies a root font-size percentage for the life of the story, the way a browser or
+ * OS text-size preference would. Every rem-based token scales with it.
+ */
+export function RootFontSize({ percent, children }: { percent: number; children: ReactNode }) {
+  useEffect(() => {
+    const root = document.documentElement;
+    const previous = root.style.fontSize;
+    root.style.fontSize = `${percent}%`;
+    return () => {
+      root.style.fontSize = previous;
+    };
+  }, [percent]);
+  return <>{children}</>;
+}
+
+export const withRootFontSize =
+  (percent: number): Decorator =>
+  (Story) => (
+    <RootFontSize percent={percent}>
+      <Story />
+    </RootFontSize>
+  );
+
+/** WCAG 1.4.12 text-spacing overrides: the layout must survive them without loss. */
+export const withTextSpacing: Decorator = (Story) => (
+  <div style={{ lineHeight: 1.5, letterSpacing: '0.12em', wordSpacing: '0.16em' }}>
+    <style>{`p { margin-block-end: 2em !important; }`}</style>
+    <Story />
+  </div>
+);
+
+/** Removes the default story padding so full-screen layouts fill the viewport. */
+export const fullscreen = { parameters: { layout: 'fullscreen' } } as const;
