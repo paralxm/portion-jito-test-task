@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 
-import { AppHeader, Button, EmptyState, FilterChip, FoodResultRow, LoadingState, RootScreenLayout, SearchField, Text } from '../../design-system';
+import { AppHeader, Button, EmptyState, FilterChip, FoodResultRow, LoadingState, RootScreenLayout, SearchField, Text, VisuallyHidden } from '../../design-system';
 import { describeReferenceBasis, type FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { CriteriaToolbar } from '../../features/recipe-discovery/components/CriteriaToolbar';
 import { RecipeList } from '../../features/recipe-discovery/components/RecipeList';
@@ -72,6 +72,8 @@ export function SearchScreen({
     const n = current.results.length;
     countText = scope === 'food' ? `${n} ${n === 1 ? 'food' : 'foods'} found` : `${n} ${n === 1 ? 'recipe' : 'recipes'} ${active > 0 ? 'match your filters' : 'found'}`;
   }
+  // Announced when results change; loading and failure announce themselves.
+  const summary = current.status !== 'ready' ? '' : current.results.length === 0 ? `No ${scope === 'food' ? 'foods' : 'recipes'} match “${trimmed}”` : countText;
 
   let content: ReactNode;
   if (current.status === 'idle') {
@@ -189,7 +191,10 @@ export function SearchScreen({
           <Text as="h2" id={resultsId} variant="section-title" color="primary">
             Results
           </Text>
-          <Text as="p" variant="supporting" color="secondary" role="status">
+          <VisuallyHidden as="p" role="status" aria-label="Results summary">
+            {summary}
+          </VisuallyHidden>
+          <Text as="p" variant="supporting" color="secondary" aria-hidden="true">
             {countText}
           </Text>
         </div>

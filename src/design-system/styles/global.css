@@ -166,3 +166,9 @@ a {
 [hidden] {
   display: none !important;
 }
+
+/* Fields scrolled or focused into view keep clear of anchored bars. Layouts with a
+   sticky header or footer set the document's scroll padding to their measured heights. */
+:focus-visible {
+  scroll-margin-block: var(--portion-ref-space-8);
+}

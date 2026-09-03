@@ -84,6 +84,16 @@
   overflow-wrap: normal;
 }
 
+/* Invisible nowrap copy of each label, used only to measure its natural width. */
+.measure {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  visibility: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 /* Add food: a labelled action, visually distinct from the destinations. */
 .addFood {
   min-inline-size: var(--portion-size-target-add-food);

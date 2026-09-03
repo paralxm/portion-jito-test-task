@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type MouseEvent, type ReactNode, type SyntheticEvent } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode, type SyntheticEvent } from 'react';
 import { X } from '@phosphor-icons/react';
 
 import { IconButton } from '../../primitives/IconButton/IconButton';
@@ -53,10 +53,38 @@ export function ModalSheet({ open, onRequestClose, title, description, children,
     };
   }, [open]);
 
+  // A text-only body that overflows must still be reachable from the keyboard.
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [bodyScrolls, setBodyScrolls] = useState(false);
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!open || !body || typeof ResizeObserver === 'undefined') return;
+    const measure = () => setBodyScrolls(body.scrollHeight > body.clientHeight + 1);
+    const observer = new ResizeObserver(measure);
+    observer.observe(body);
+    measure();
+    return () => observer.disconnect();
+  }, [open]);
+
   const handleCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
     // Escape: route through the same request so a dirty draft can intercept it.
     event.preventDefault();
     onRequestClose();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+    // Handle Escape ourselves as well: the native cancel event is skipped by browsers
+    // when there has been no user activation, which would leave state out of sync.
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      onRequestClose();
+    }
+  };
+
+  const handleClose = () => {
+    // Native close without a cancel event (e.g. no user activation): keep the owner in sync.
+    if (open) onRequestClose();
   };
 
   const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
@@ -70,6 +98,8 @@ export function ModalSheet({ open, onRequestClose, title, description, children,
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
       onCancel={handleCancel}
+      onKeyDown={handleKeyDown}
+      onClose={handleClose}
       onClick={handleBackdropClick}
     >
       <div className={styles.sheet}>
@@ -87,7 +117,9 @@ export function ModalSheet({ open, onRequestClose, title, description, children,
           </div>
           <IconButton icon={X} label={closeLabel} onClick={onRequestClose} />
         </header>
-        <div className={styles.body}>{children}</div>
+        <div ref={bodyRef} className={styles.body} tabIndex={bodyScrolls ? 0 : undefined}>
+          {children}
+        </div>
         {footer ? <footer className={styles.footer}>{footer}</footer> : null}
       </div>
     </dialog>

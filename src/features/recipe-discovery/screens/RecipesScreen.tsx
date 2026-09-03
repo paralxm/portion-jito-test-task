@@ -6,6 +6,7 @@ import { LoadingState } from '../../../design-system/components/LoadingState/Loa
 import { Icon } from '../../../design-system/icons/Icon';
 import { Button } from '../../../design-system/primitives/Button/Button';
 import { Text } from '../../../design-system/primitives/Text/Text';
+import { VisuallyHidden } from '../../../design-system/primitives/VisuallyHidden/VisuallyHidden';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
 import { RootScreenLayout } from '../../../design-system/templates/RootScreenLayout/RootScreenLayout';
 import { CriteriaToolbar } from '../components/CriteriaToolbar';
@@ -47,6 +48,8 @@ export function RecipesScreen({ results, criteria, status, onApplyCriteria, onRe
       : active > 0
         ? `${results.length} ${results.length === 1 ? 'recipe matches' : 'recipes match'} your filters`
         : `${results.length} recipes`;
+  // Announced when results change; loading and failure announce themselves.
+  const summary = status !== 'ready' ? '' : results.length === 0 ? (active > 0 ? 'No recipes match your filters' : 'No recipes available') : countText;
 
   let content: ReactNode;
   if (status === 'loading') {
@@ -113,7 +116,10 @@ export function RecipesScreen({ results, criteria, status, onApplyCriteria, onRe
           <Text as="h2" id={resultsId} variant="section-title" color="primary">
             {active > 0 ? 'Matching recipes' : 'All recipes'}
           </Text>
-          <Text as="p" variant="supporting" color="secondary" role="status">
+          <VisuallyHidden as="p" role="status" aria-label="Results summary">
+            {summary}
+          </VisuallyHidden>
+          <Text as="p" variant="supporting" color="secondary" aria-hidden="true">
             {countText}
           </Text>
         </div>

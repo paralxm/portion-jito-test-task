@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode, type SyntheticEvent } from 'react';
+import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode, type SyntheticEvent } from 'react';
 
 import { Button } from '../../primitives/Button/Button';
 import { Text } from '../../primitives/Text/Text';
@@ -45,8 +45,30 @@ export function ConfirmDialog({ open, title, children, confirmLabel, cancelLabel
     onCancel();
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+    // Browsers skip the native cancel event without user activation; handle Escape directly.
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      onCancel();
+    }
+  };
+
+  const handleClose = () => {
+    if (open) onCancel();
+  };
+
   return (
-    <dialog ref={dialogRef} className={styles.dialog} aria-labelledby={titleId} aria-describedby={bodyId} onCancel={handleCancel} role="alertdialog">
+    <dialog
+      ref={dialogRef}
+      className={styles.dialog}
+      aria-labelledby={titleId}
+      aria-describedby={bodyId}
+      onCancel={handleCancel}
+      onKeyDown={handleKeyDown}
+      onClose={handleClose}
+      role="alertdialog"
+    >
       <div className={styles.panel}>
         <Text as="h2" id={titleId} variant="section-title" color="primary" wrap>
           {title}

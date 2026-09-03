@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
 import styles from './FocusedFlowLayout.module.css';
 
@@ -17,14 +17,43 @@ export interface FocusedFlowLayoutProps {
 /**
  * Focused subtask layout — review, manual entry, camera steps. No bottom navigation is
  * shown, so the step can never be mistaken for a root destination. The header stays at
- * the top; content scrolls between it and the footer.
+ * the top; content scrolls between it and the footer. The measured header and footer
+ * heights become the document's scroll padding, so focusing or scrolling to a field
+ * never leaves it underneath an anchored bar.
  */
 export function FocusedFlowLayout({ header, children, footer, className }: FocusedFlowLayoutProps) {
+  const headerRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const apply = () => {
+      root.style.scrollPaddingBlockStart = `${headerRef.current?.offsetHeight ?? 0}px`;
+      root.style.scrollPaddingBlockEnd = `${footerRef.current?.offsetHeight ?? 0}px`;
+    };
+    apply();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(apply);
+    if (headerRef.current) observer.observe(headerRef.current);
+    if (footerRef.current) observer.observe(footerRef.current);
+    return () => {
+      observer.disconnect();
+      root.style.scrollPaddingBlockStart = '';
+      root.style.scrollPaddingBlockEnd = '';
+    };
+  }, [footer]);
+
   return (
     <div className={[styles.layout, className].filter(Boolean).join(' ')}>
-      <div className={styles.header}>{header}</div>
+      <div ref={headerRef} className={styles.header}>
+        {header}
+      </div>
       <main className={styles.content}>{children}</main>
-      {footer ? <div className={styles.footer}>{footer}</div> : null}
+      {footer ? (
+        <div ref={footerRef} className={styles.footer}>
+          {footer}
+        </div>
+      ) : null}
     </div>
   );
 }
