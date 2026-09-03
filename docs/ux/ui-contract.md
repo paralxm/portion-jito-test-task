@@ -158,11 +158,15 @@ The 24 color-pair ratios printed in **section 09** were recalculated and matched
 
 ## 7. Implementation handoff
 
-- [ ] Reconcile this contract with the current low-fidelity document; remove superseded two-tab, recipe-ID and mandatory-save rules elsewhere.
-- [ ] Use the same token-backed components in Storybook and product screens; do not duplicate implementations.
-- [ ] Cover default/selected/disabled/loading/error, long content, no photo, partial data, keyboard and modal states in representative stories/tests.
-- [ ] Exercise both user stories and all four entry methods, including wrong matches, no matches, failures, cancellation and replacement.
-- [ ] Verify recipe origin, selected tab, Retry/Back and query/filter/scroll restoration.
-- [ ] Confirm fixture-only boundaries and report unimplemented behavior explicitly. Do not mark static screenshots, mock recognition or design claims as passed runtime tests.
+Status recorded on 2026-09-03 against branch `feat/design-system`; evidence and commands are in `docs/design-system/README.md` §6.
 
-No code, GitHub push, Figma correction or accessibility certification is implied by this documentation update.
+- [ ] Reconcile this contract with the current low-fidelity document; remove superseded two-tab, recipe-ID and mandatory-save rules elsewhere. (Documentation task; still open.)
+- [x] Use the same token-backed components in Storybook and product screens; do not duplicate implementations. — `src/main.tsx` and `.storybook/preview.ts` import the same `global.css`; product screens are composed from `src/design-system/` and rendered as Product compositions stories.
+- [x] Cover default/selected/disabled/loading/error, long content, no photo, partial data, keyboard and modal states in representative stories/tests. — 53 story files / 184 tests, axe at `error`.
+- [x] Exercise both user stories and all four entry methods, including wrong matches, no matches, failures, cancellation and replacement. — `scripts/verify/runtime-walkthrough.mjs`, 24 checks with screenshots.
+- [x] Verify recipe origin, selected tab, Retry/Back and query/filter/scroll restoration. — walkthrough checks and Product compositions/Recipe details stories.
+- [x] Confirm fixture-only boundaries and report unimplemented behavior explicitly. — camera, recognition, product lookup and recipe loading are simulated by `src/app/services.ts` and labelled as prototype controls in the UI; the query word `offline` simulates a search failure.
+
+Decision recorded during implementation (§4 amount and units): when the user switches between two units the food's data supports, the current valid amount is re-expressed in the new unit so the portion — and the result — stay the same (300 g → 1 serving when 1 serving = 300 g; 100 g → 0.333 serving). An invalid draft only changes the unit and stays stale. No conversion is ever invented between g, ml, piece or serving.
+
+Still not implied by this update: a GitHub merge, deployment, Figma synchronisation of the final screens, or any accessibility certification.
