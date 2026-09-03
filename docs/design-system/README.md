@@ -15,13 +15,13 @@ Authority: `docs/ux/ui-contract.md` and `docs/ux/low-fidelity.md` own behaviour;
 | Icons | `src/design-system/icons/` | `Icon` wrapper; Storybook-only `catalogue.ts` (134 verified Phosphor glyphs) | Foundations/Icons |
 | Nutrition rules | `src/design-system/nutrition/` | Categories, ordering, formatting (`formatQuantity`), "Not available" wording | — (unit tests) |
 | Primitives | `src/design-system/primitives/` | Text, Stack/Inline, Surface, Separator, Spinner, Button, IconButton, Input, Checkbox/Radio, Badge, VisuallyHidden | Primitives/* |
-| Components | `src/design-system/components/` | FormField, TextField, AmountField, UnitControl, SearchField, chips, NutritionValue, NutrientRow, MatchCriteria, MediaFrame, ResultsHeading, InlineMessage, EmptyState, LoadingState, MethodRow, FoodResultRow | Components/* |
+| Components | `src/design-system/components/` | FormField, TextField, AmountField, UnitControl, SearchField, chips, SegmentedControl, NutritionValue, NutrientRow, MatchCriteria, MediaFrame, ResultsHeading, InlineMessage, EmptyState, LoadingState, MethodRow, FoodResultRow | Components/* |
 | Patterns | `src/design-system/patterns/` | NavigationBar, AppHeader, ModalSheet, ConfirmDialog, MethodSheet, UnitSheet, NutritionSummary, RecipeCard (composes MediaFrame) | Patterns/* |
 | Templates | `src/design-system/templates/` | RootScreenLayout, FocusedFlowLayout | Templates/* |
 | Public entry | `src/design-system/index.ts` | Supported exports only (no fixtures, catalogue or stories) | — |
 | Calculator feature | `src/features/calorie-calculator/` | `domain/` (calculation, manual entry, fixtures, tests), `components/` (`FoodIdentityHeader`, shared by Calculate and Food review), `screens/` (Calculate, Food review, Manual entry, Barcode, Photo) | Product compositions |
 | Recipe feature | `src/features/recipe-discovery/` | `domain/` (matching, fixtures, tests), `components/` (filters sheet, criteria toolbar, list), `screens/` (Recipes, Recipe details, composes MediaFrame + ResultsHeading) | Product compositions |
-| App shell | `src/app/` | `App.tsx` navigation, shared `SearchScreen`, simulated `services.ts`, keyboard and scroll hooks | Product compositions/App |
+| App shell | `src/app/` | `App.tsx` navigation, shared `SearchScreen` (composes `SegmentedControl` for the Food/Recipes scope switch), simulated `services.ts`, keyboard and scroll hooks | Product compositions/App |
 | Storybook helpers | `src/design-system/storybook/` | Enlarged-text and text-spacing decorators, contrast helpers (not exported) | — |
 | Verification | `scripts/verify/runtime-walkthrough.mjs` | Playwright walkthrough of both journeys with screenshots to `.verification/runtime/` (ignored) | — |
 
@@ -38,7 +38,20 @@ The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same
 
 ## 3. Foundations at a glance
 
-**Spacing** — exactly 0/4/8/12/16/24/32/36/40/44/48/52/56/60/64 px (`reference.space`). Semantic roles: page-inset, section, related, card-padding, form-group, heading-to-description, section-title-to-content, title-to-secondary, label-to-control, control-to-helper, paragraph, instruction-item, icon-to-label, nav-icon-to-label. `full = 9999px` is a radius token, not a spacing step.
+**Spacing** — exactly 0/4/8/12/16/24/32/36/40/44/48/52/56/60/64 px (`reference.space`, 15 steps), per the accepted contract. Semantic roles: page-inset, section, related, card-padding, form-group, heading-to-description, section-title-to-content, title-to-secondary, label-to-control, control-to-helper, paragraph, instruction-item, icon-to-label, nav-icon-to-label. `full = 9999px` is a radius token, not a spacing step, and touch-target (`reference.size.target.*`) and icon (`reference.size.icon.*`) dimensions are separate token families, never expressed as spacing. Re-verified on 2026-09-05: every one of the 15 steps is consumed directly by real component CSS today (e.g. `--portion-ref-space-40` sizes ModalSheet's drag handle, `--portion-ref-space-32` sizes RecipeDetailsScreen's step-number circle and NavigationBar's icon row), not only by the Foundations/Spacing catalogue display — the full scale is load-bearing, not vestigial, so it was left unchanged rather than narrowed to a public/private split.
+
+**Selection controls** — five distinct controls cover "the user picks something," each for a different shape of choice; do not substitute one for another:
+
+| Control | Selection shape | Exposed as | Production use |
+| --- | --- | --- | --- |
+| `SegmentedControl` | Exactly 2–4 peer modes of one task; picking one immediately changes visible content | `radiogroup` / `radio`, roving tabindex, arrow keys | Search's Food \| Recipes scope switch |
+| `FilterChip` (`selectionRole="radio"`) | A longer or wrapping mutually-exclusive set | `radiogroup` / `radio` | Recipe filters' dietary preference (5 options, wraps) |
+| `FilterChip` (`selectionRole="toggle"`) | An independent on/off filter, others unaffected | `aria-pressed` | (capability exists; no current multi-toggle-filter screen) |
+| `Radio` / `Checkbox` | A single labelled option inside an ordinary form, not a compact control row | native `radio`/`checkbox` | `UnitSheet`'s unit list |
+| `NavigationBar` | The app's three fixed root destinations, never a caller-supplied set | `aria-current="page"` | Calculate / Search / Recipes |
+| `UnitControl` → `UnitSheet` | A choice that opens a separate modal draft rather than switching content immediately | `aria-haspopup="dialog"` | Amount field's unit selector |
+
+`SegmentedControl` and the radio-mode `FilterChip` look similar (both are "pick one of several") but answer different questions: `SegmentedControl` is for a small, fixed, always-visible set of task-level modes where the surrounding content itself is what changes; `FilterChip` is for a longer or more open-ended set of values being narrowed, filtered or wrapped, where selection is one input among several rather than the entire visible context.
 
 **Radius** — catalogue 0/4/8/12/16/20/24/28/32/36/40/44/48/52/56/60/64 + `full`; semantic `structure`, `control`, `card`, `sheet`, `round` (actual circles only).
 
@@ -64,7 +77,7 @@ The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same
 
 `font-variant-numeric: tabular-nums` is applied only through `Text numeric` / `.portion-numeric` on values that update or align. No all-caps, negative tracking (except the wordmark) or ellipsis on essential text.
 
-**Icons** — `@phosphor-icons/react`, regular by default, bold only for the persistently selected navigation destination; there is no `medium` weight. Sizes are the semantic size roles (16/20/24/32/48/64); a 24 px glyph sits inside a 48 × 48 target, 56 × 56 for Add food.
+**Icons** — `@phosphor-icons/react`, regular by default, bold only for the persistently selected navigation destination; there is no `medium` weight. The approved primitive icon-size catalogue is 16/20/24/28/32/40/48/56/64 px (`reference.size.icon`), preserved in full regardless of which sizes a semantic role currently aliases — the same "catalogue survives even where a step has no current consumer" rule already applied to radius and spacing. Six of the nine are aliased to `Icon`'s semantic roles (16→compact, 20→small-action, 24→default, 32→emphasis, 48→empty-state, 64→large-illustrative); 28 and 40 remain supported, unaliased reference sizes, and 56/64 are rare/exceptional sizes. A 24 px glyph sits inside a 48 × 48 target, 56 × 56 for Add food. Foundations/Icons → "Size catalogue (reference)" renders all nine.
 
 **Colour** — semantic background, text, action, border, feedback, nutrition-category, state and overlay roles. Contrast for the pairs the product actually uses is recomputed in the browser in Foundations/Colors (all required pairs meet 4.5:1 text or 3:1 non-text; the decorative border is 1.23:1 and never a control's only boundary).
 
@@ -82,7 +95,7 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | 4 | Icons: official Phosphor set, weights, sizes, catalogue ≥ 80 | Observed in current code | Catalogue is Storybook-only, 134 names verified against the installed package | `visual-direction.md` §5 | `Icon`, `catalogue.ts` | Foundations/Icons | Catalogue count and render assertions | — |
 | 5 | Text and search fields (label, helper, error, clear, Enter) | Observed in current code | Persistent label; error replaces helper via `aria-describedby` + polite region | `ui-contract.md` §3 | `Input`, `FormField`, `TextField`, `SearchField` | Components/FormField and TextField, SearchField; Primitives/Input | Accessible description, clear target, submit assertions | — |
 | 6 | Numeric entry and supported units (decimal keyboard, one separator, unit selector, unit sheet) | Observed in current code | Draft string parsed by the feature; switching units re-expresses a valid amount in the new unit (300 g → 1 serving) | `ui-contract.md` §4 (recorded), `calculation.ts` | `AmountField`, `UnitControl`, `UnitSheet` | Components/AmountField, UnitControl; Patterns/UnitSheet; Product/Calculate (Unit change) | Unit tests for `convertQuantity`; walkthrough check "switching g → serving keeps the portion" | — |
-| 7 | Choice controls, chips and badges | Observed in current code | Toggle chips use `aria-pressed`, scope chips are radios in a radiogroup; remove action has a 48 px hit area via `::before` | `ui-contract.md` §3 | `Checkbox`, `Radio`, `FilterChip`, `AppliedCriterionChip`, `Badge` | Primitives/Choice, Badge; Components/Chip | State and target assertions | — |
+| 7 | Choice controls, chips, badges and mode selection | Observed in current code | Toggle chips use `aria-pressed`, scope/dietary chips are radios in a radiogroup; `SegmentedControl` adds a purpose-built peer-mode switch (also radiogroup semantics) distinct from filter chips — see §3's Selection controls table | `ui-contract.md` §3 | `Checkbox`, `Radio`, `FilterChip`, `AppliedCriterionChip`, `Badge`, `SegmentedControl` | Primitives/Choice, Badge; Components/Chip, SegmentedControl | State, keyboard and target assertions | — |
 | 8 | Nutrition presentation (main result, macros, expanded list, unknown vs zero, precision) | Observed in current code | Unknown = "Not available"; known zero shown as 0; small mg values keep precision; fibre nested under carbohydrates | `ui-contract.md` §1, §4 | `NutritionValue`, `NutrientRow`, `NutritionSummary`, `nutrition.ts` | Components/NutritionValue, NutrientRow; Patterns/NutritionSummary | Unit tests (`nutrition.test.ts`, `calculation.test.ts`), story assertions, fixtures C/R in walkthrough | — |
 | 9 | Recipe presentation (card 4:3, details 16:9, no photo, long titles, match evidence) | Observed in current code | Title is the single control with a stretched hit area; no match claim without active criteria | `ui-contract.md` §5 | `RecipeCard`, `MatchCriteria`, `RecipeList` | Patterns/RecipeCard; Components/MatchCriteria | Story assertions incl. 320 px long title | Real photography and licences remain out of scope |
 | 10 | Feedback and status (inline messages, empty/no-match/failure, loading, spinner, reduced motion) | Observed in current code | Cause-specific copy and actions; failure uses `alert`, others `status`; no skeletons | `ui-contract.md` §5.6 | `InlineMessage`, `EmptyState`, `LoadingState`, `Spinner` | Components/InlineMessage, EmptyState, LoadingState; Primitives/Spinner | Role and reduced-motion assertions | — |
@@ -92,7 +105,7 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | 14 | Calculation journey screens (S01 empty/result/stale, S07 review per source, S06 manual entry with dirty check) | Observed in current code | Review confirms once and replaces; invalid draft = stale result; manual macros optional | `ui-contract.md` §4, `low-fidelity.md` | `CalculateScreen`, `FoodReviewScreen`, `ManualEntryScreen`, `manual-entry.ts` | Product compositions/Calculate, Food review, Manual entry | Unit tests; story play functions; walkthrough checks 3–14 | — |
 | 15 | Acquisition screens (S04 barcode states, S05 photo capture/preview/analysis/suggestions) | Observed in current code | Camera and recognition are simulated and labelled as prototype controls; late responses ignored after Back/rescan/cancel | `ui-contract.md` §5.6 | `BarcodeScreen`, `PhotoScreen`, `services.ts` | Product compositions/Barcode, Photo | Story play functions (incl. cancel during analysis); walkthrough screenshots 12–27 | Real camera/recognition **Out of scope** |
 | 16 | Recipe journey screens (S03 browse/filtered/no match/failure, O02 filters draft, S08 loading/loaded/unavailable/no photo) | Observed in current code | AND criteria, unknown never matches, Apply/Reset/Cancel semantics, chip removal commits | `ui-contract.md` §5 | `RecipesScreen`, `RecipeFiltersSheet`, `CriteriaToolbar`, `RecipeDetailsScreen`, `matching.ts` | Product compositions/Recipes, Recipe filters, Recipe details | Unit tests (`matching.test.ts`); story play functions; walkthrough checks 15–20 | — |
-| 17 | Shared Search and app shell (scopes, query retention, criteria snapshot, origin tab, scroll memory, replacement) | Observed in current code | Roots stay mounted; focused steps stack and stay mounted for Back; `offline` in a query simulates failure | `low-fidelity.md`, `ui-contract.md` §2 | `SearchScreen`, `App.tsx`, `useScrollMemory` | Product compositions/Search, App (runtime) | Walkthrough checks 21–23 and scroll restore; App story | Reload persistence and account sync **Out of scope** |
+| 17 | Shared Search and app shell (scopes, query retention, criteria snapshot, origin tab, scroll memory, replacement) | Observed in current code | Roots stay mounted; focused steps stack and stay mounted for Back; `offline` in a query simulates failure; the Food/Recipes scope switch composes the shared `SegmentedControl` (§11), no screen-local selection UI | `low-fidelity.md`, `ui-contract.md` §2 | `SearchScreen`, `App.tsx`, `useScrollMemory`, `SegmentedControl` | Product compositions/Search, App (runtime); Components/SegmentedControl | Walkthrough checks 21–23 and scroll restore; App story | Reload persistence and account sync **Out of scope** |
 | 18 | Accessibility, motion and platform foundations (focus ring, targets, reduced motion, contrast, iOS ledger) | Observed in current code / Platform mapping | Product baseline 48 px (stricter than WCAG 2.2 AA 24 px); all values CSS px; iOS column is a mapping | `visual-direction.md`, `ui-contract.md` §6 | `global.css`, tokens | Foundations/Borders, focus and layers; Colors; Motion; Accessibility and platform | axe at `error` on every story; focus-ring and contrast assertions | Manual screen-reader pass and real-device checks not performed (see §5) |
 
 ## 5. iOS platform ledger
@@ -110,19 +123,19 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | Reduced motion | `prefers-reduced-motion` → 0 ms | `isReduceMotionEnabled` | Verified through the data attribute path |
 | Typeface | Inter Variable | SF Pro | Inter is the approved brand face |
 
-## 6. Verification status (last executed 2026-09-04, after the pre-Hi-Fi audit in §10)
+## 6. Verification status (last executed 2026-09-05, after §11's completion pass)
 
 | Check | Command | Result |
 | --- | --- | --- |
 | Typecheck | `npm run typecheck` | exit 0 |
-| Token validity and drift | `npm run tokens:check` | 217 tokens validated; generated output current |
+| Token validity and drift | `npm run tokens:check` | 220 tokens validated; generated output current (`--check`'s Windows CRLF false positive fixed — see §11) |
 | Unit tests (node) | `npm run test:unit` | 4 files, 38 tests passed |
-| Storybook tests (headless Chromium, axe at `error`) | `npm run test:storybook` | 58 files, 231 tests passed |
+| Storybook tests (headless Chromium, axe at `error`) | `npm run test:storybook` | 59 files, 242 tests passed |
 | App build | `npm run build` | success (Inter opsz woff2 + CSS + JS bundles) |
 | Storybook build | `npm run build-storybook` | success (`storybook-static/`, ignored) |
 | Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | 24/24 checks passed, 0 console/page errors, screenshots in `.verification/runtime/` |
 
-Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %) and, after §10's refactor, re-read specifically for Calculate result, Food review, Recipes filtered, Recipe details and Search results to confirm the MediaFrame/ResultsHeading/FoodIdentityHeader extraction changed no pixel. The unit-change and 2 × 2 fallback defects found by the original inspection were fixed and re-verified; §10 lists what the audit pass found and fixed.
+Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %); re-read after §10's refactor for Calculate result, Food review, Recipes filtered, Recipe details and Search results (no pixel changed); and, after §11, by serving `storybook-static` and screenshotting Components/SegmentedControl (default, selected, selected+focus-visible via an actual Tab press, disabled, long labels at both widths, the illustrative example), Foundations/Icons → Size catalogue, and Product compositions/Search's own Interactive story — confirming the real production component renders and wraps correctly, not merely that its tests pass. The unit-change and 2 × 2 fallback defects found by the original inspection were fixed and re-verified; §10 and §11 list what each pass found and fixed.
 
 Not verified: manual screen-reader pass (NVDA/VoiceOver), real-device software keyboard and safe-area behaviour, deployed app/Storybook URLs, and synchronisation of the final screens into the Figma Design file (no code-to-canvas capture tool was exposed in this session). Passing axe on every story is not a WCAG conformance claim.
 
@@ -135,13 +148,15 @@ Not verified: manual screen-reader pass (NVDA/VoiceOver), real-device software k
 
 ## 8. Resumable status
 
-Done in this slice (branch `feat/design-system`): tokens and generator, global styles, primitives, components, patterns, templates, both feature domains with fixtures and tests, all runtime screens, the app shell with simulated services, Storybook consolidation and 58 story files, the runtime walkthrough script, a pre-Hi-Fi audit pass (§10) and this guide.
+Done across this branch's history: tokens and generator, global styles, primitives, components, patterns, templates, both feature domains with fixtures and tests, all runtime screens, the app shell with simulated services, Storybook consolidation and 59 story files, the runtime walkthrough script, a pre-Hi-Fi audit pass (§10), a named-capability completion pass adding `SegmentedControl` and restoring the icon-size catalogue (§11) and this guide.
+
+`feat/design-system` has already been merged into `main` twice (PR #1, PR #2 in the repository history) before this pass began; §11's work was committed on top of that same branch name, which has therefore diverged from `main` again and needs its own new pull request if it is to be merged.
 
 Open:
 1. Add the verified final screens to the existing Figma Design file for review and handoff (requires a capture or native-edit capability in the session; not attempted here).
 2. Publish the app and Storybook, record real URLs in `README.md`, and check them in incognito.
 3. Manual assistive-technology and real-device passes listed in §6.
-4. Merge `feat/design-system` through a pull request (not part of this slice).
+4. Open a pull request for the commits added in §11 (not part of this pass — the branch was pushed, not merged).
 
 ## 9. Code review findings
 
@@ -195,3 +210,59 @@ A full audit of the design system as implemented in the repository — not of th
 4. Figma capture of the final screens, deployment of the app/Storybook and the pull request for `feat/design-system` remain open, as recorded in §8.
 
 This audit did not find any missing foundational control that would block composing either journey — both are already composed end to end in `src/app/App.tsx` and verified by the runtime walkthrough; the duplication findings were about implementations that existed twice, not capabilities that were missing.
+
+## 11. Final completion pass before Hi-Fi (2026-09-05)
+
+A named-capability reconciliation, not a repeat of §10's broad audit: every item below was checked against the actual current source tree, one by one, before deciding whether it needed a new file.
+
+### What changed
+
+- **`SegmentedControl`** (new) — `src/design-system/components/SegmentedControl/`. Fully controlled: `value`, `options: { value, label, disabled? }[]`, `onValueChange`, `ariaLabel` (required), `disabled`. Exposed as `radiogroup`/`radio` with roving tabindex and Arrow/Home/End keyboard support, matching the radio semantics this codebase already uses for other peer-option pickers rather than introducing tab/tabpanel semantics the component has no basis to claim (it never sees or owns the content its value switches). Replaced the hand-rolled `role="radiogroup"` of two `FilterChip`s that `SearchScreen` used for the Food/Recipes switch — same accessible names and `aria-checked` contract, so the existing `SearchScreen` story assertions passed unchanged. See the Selection controls table in §3 for how it relates to `FilterChip`, `Radio`, `NavigationBar` and `UnitControl`.
+- **Icon-size catalogue restored** — `reference.size.icon.28/40/56`, removed in §10's audit on the reasoning that an unaliased reference token with no consumer is dead weight, are back (217 → 220 tokens). On reflection that reasoning was inconsistent with how this repository already treats the radius catalogue (all 18 steps kept regardless of semantic-alias count, because the catalogue itself — not just its aliased subset — is the documented, supported surface); icon sizes are now treated the same way. Foundations/Icons gained a "Size catalogue (reference)" story rendering all nine, mirroring Foundations/Radius.
+- **Spacing scale — investigated, left unchanged.** Asked to narrow the public scale to 0/4/8/12/16/24/32 (7 steps) and treat 36–64 as touch-target/icon/radius dimensions instead. Verified first: `reference.space` is a distinct token family from `reference.size.target.*` and `reference.size.icon.*` (already separate, not conflated), and every one of the 15 steps — including 36 through 64 — is consumed directly by real component CSS today (`--portion-ref-space-40` sizes ModalSheet's drag handle, `--portion-ref-space-32` sizes RecipeDetailsScreen's step-number circle and appears in NavigationBar, etc. — grep-verified, not assumed). CLAUDE.md also states the full 15-step scale as an explicit requirement in two places. Narrowing it would have broken real, currently-correct layout and contradicted the project's own accepted contract, so it was left as-is rather than forced to match the instruction's premise — consistent with that instruction's own closing line, "do not modify correctly implemented token families merely to make them resemble spacing."
+- **`scripts/tokens/build.mjs` `--check` false positive fixed.** Found while re-establishing state (§0): on this Windows checkout, `tokens:check` failed with "output is out of date" against a clean, unmodified tree, because it compared freshly-generated LF content against the CRLF the committed files are checked out as. Fixed by normalizing line endings before comparing; real content drift (verified by temporarily reintroducing a stale value) still fails correctly.
+
+### Named-capability reconciliation
+
+| Requirement | Owner | Export / composition | Storybook evidence | Verification |
+| --- | --- | --- | --- | --- |
+| SegmentedControl | `SegmentedControl.tsx` (new) | DS export; composed by `SearchScreen` | Components/SegmentedControl (10 stories: default, selected, click, keyboard, selected+focus, disabled, long labels, 320, enlarged text, illustrative shape) | Story tests; `SearchScreen.stories.tsx` unchanged and passing |
+| DietaryControl | `FilterChip` (`selectionRole="radio"`) inside `RecipeFiltersSheet` | Feature composition, not a DS export (recipe-domain values) | Components/Chip; Product compositions/Recipe filters (O02) | Pre-existing; not converted to SegmentedControl — 5 options that wrap is the wrong shape for a fixed-row segmented control, and the instruction explicitly warns against a fake second consumer |
+| AppliedCriterionChip | `AppliedCriterionChip` in `Chip.tsx` | DS export | Components/Chip | Pre-existing, unchanged |
+| AppliedCriteriaSummary | `CriteriaToolbar` (Filters button + count `Badge` + chip row) | Feature composition (recipe-domain) | Product compositions/Recipe filters toolbar | Pre-existing, unchanged |
+| NutrientBadge | `NutritionValue` (main/secondary/inline) + `NutrientRow` (list rows) | DS exports | Components/NutritionValue, NutrientRow | Pre-existing — "NutrientBadge" was the planning-stage name in `docs/project/ai-workflow.md`; the shipped names differ, the responsibility (known/partial/unavailable, never tappable, units+basis retained) is the same |
+| IngredientList | Inline `<ul>` in `RecipeDetailsScreen` | Feature-local markup, one consumer | Product compositions/Recipe details | Not extracted: no state or interaction to encapsulate, single consumer — extracting it would be exactly the "component only to inflate the catalogue" the brief forbids |
+| PreparationSteps | Inline `<ol>` (numbered circles) in `RecipeDetailsScreen` | Feature-local markup, one consumer | Product compositions/Recipe details | Same reasoning as IngredientList |
+| Spinner | `Spinner` primitive | DS export | Primitives/Spinner | Pre-existing, unchanged |
+| Skeleton | **Deliberately absent** | — | — | The contract explicitly rejects skeleton loaders (`ui-contract.md`, and `LoadingState`'s own doc comment: "no fake content; placeholder bars are never used as loading feedback") in favour of a real `Spinner` + readable text. Not a gap — a decision |
+| AddFoodSheet | `MethodSheet` (O01) | DS export | Patterns/MethodSheet | Pre-existing — planning-stage name differs from the shipped one |
+| RecipeFiltersSheet | `RecipeFiltersSheet` | Feature export (recipe-domain) | Product compositions/Recipe filters (O02) | Pre-existing, unchanged |
+| ManualNutritionForm | `ManualEntryScreen` (S06) | Feature screen | Product compositions/Manual entry (S06) | Pre-existing — planning-stage name differs |
+| FoodReviewPanel | `FoodReviewScreen` (S07) | Feature screen | Product compositions/Food review (S07) | Pre-existing — planning-stage name differs |
+| CaptureFrame | Shared `Acquisition.module.css` viewfinder, used by `BarcodeScreen` and `PhotoScreen` | Feature-level shared stylesheet, no interactive behaviour | Product compositions/Barcode, Photo | Already deduplicated (one stylesheet, two consumers); no React component needed since the frame is purely decorative |
+| PhotoPreview | `PhotoScreen`'s `preview` phase | Feature-local, one consumer | Product compositions/Photo (S05) | Not extracted: single consumer, no reuse case |
+| RecognitionSuggestions | `PhotoScreen`'s `suggestions` phase, composed from `FoodResultRow` | Feature-local, reuses a DS export | Product compositions/Photo (S05) | Already correctly composed from an existing DS primitive rather than reimplemented |
+| CameraRecovery | `EmptyState`/`InlineMessage`, reused across `BarcodeScreen` and `PhotoScreen`'s denied/unreadable/not-found/failed states | DS exports, feature-composed | Components/EmptyState, InlineMessage; Product compositions/Barcode, Photo | Already deduplicated via shared DS components, not hand-rolled per screen |
+| BackAction | `AppHeader`'s `onBack` (renders `IconButton icon={ArrowLeft}`) | DS export (`AppHeader`) | Patterns/AppHeader | Pre-existing, single owner across every focused screen |
+| NavigationItem | Internal to `NavigationBar`'s `DESTINATIONS` map | Not separately exported | Patterns/NavigationBar | Correctly not extracted: the set is fixed by the product contract (3 destinations + Add food, never caller-configured), so a separate exported sub-component would be speculative |
+| RootScreenLayout | `RootScreenLayout` | DS export | Templates/RootScreenLayout | Pre-existing, unchanged |
+| FocusedFlowLayout | `FocusedFlowLayout` | DS export | Templates/FocusedFlowLayout | Pre-existing, unchanged |
+| RecipeDetailLayout | `RecipeDetailsScreen` composing `RootScreenLayout` directly | Feature screen | Templates/RootScreenLayout; Product compositions/Recipe details | Not a distinct template: S08 keeps the bottom bar (unlike S04–S07), so `RootScreenLayout` already is the correct, contract-mandated shell — a separate name would duplicate it for no structural difference |
+
+Result: **one genuinely new component** (`SegmentedControl`); everything else in the list was already correctly implemented, under a shipped name that differs from the item's planning-stage or generic name.
+
+### §5 (extractions) review
+
+Re-checked `MediaFrame`, `ResultsHeading` and `FoodIdentityHeader`'s placement from §10 against the architecture rule (domain-agnostic → design system; takes a Portion domain type → feature-local). `MediaFrame` (aspect + image-or-fallback, no domain types) and `ResultsHeading` (heading + live summary + count, no domain types) are correctly design-system exports. `FoodIdentityHeader` takes `FoodCandidate` (the calculator's own domain type) and is correctly feature-local. No change.
+
+### Documentation ownership
+
+Storybook already carries purpose, API, states, accessibility and responsive behaviour for every existing component via its own description plus dedicated state/a11y/responsive stories (built across the original implementation and the §10 audit) — verified rather than rewritten wholesale, since redoing all 58 files against a rigid template would be exactly the "redesign from scratch" this pass was told not to do. `SegmentedControl`, being new, got the full documentation checklist (purpose, when to use, when not to use, anatomy, API, variants, states, accessibility, content guidance, token usage, responsive, examples) in its own component description. `docs/design-system/README.md` — this file — remains the single system-level guide (architecture, token pipeline, verification, coverage, known gaps); no second file was created at the `docs/design/design-system.md` path this pass was asked to update, since that path does not exist in this repository and this file already is the design-system guide the request describes — creating a second one would itself be the "competing design-system documentation file" that request explicitly forbids.
+
+### Verification (2026-09-05)
+
+Typecheck, `tokens:build`/`tokens:check` (220 tokens, generated output current, `--check` no longer false-positives), unit tests, the full Storybook suite, both builds and the runtime walkthrough were all re-run after these changes; results are folded into §6's table above (updated in place) rather than duplicated here.
+
+### Remaining gaps
+
+Unchanged from §10: no manual assistive-technology pass, no real-device software-keyboard/safe-area verification, Figma capture, deployment and the pull request remain open. This pass found no additional gap in the two Portion journeys' foundational-control coverage.

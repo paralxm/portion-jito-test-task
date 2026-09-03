@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 
-import { AppHeader, Button, EmptyState, FilterChip, FoodResultRow, LoadingState, ResultsHeading, RootScreenLayout, SearchField } from '../../design-system';
+import { AppHeader, Button, EmptyState, FoodResultRow, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl } from '../../design-system';
 import { describeReferenceBasis, type FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { CriteriaToolbar } from '../../features/recipe-discovery/components/CriteriaToolbar';
 import { RecipeList } from '../../features/recipe-discovery/components/RecipeList';
@@ -166,14 +166,15 @@ export function SearchScreen({
         placeholder={scope === 'food' ? 'Food or dish name' : 'Recipe name or ingredient'}
       />
 
-      <div role="radiogroup" aria-label="Search in" className={styles.scopes}>
-        <FilterChip selectionRole="radio" selected={scope === 'food'} onClick={() => onScopeChange('food')}>
-          Food
-        </FilterChip>
-        <FilterChip selectionRole="radio" selected={scope === 'recipes'} onClick={() => onScopeChange('recipes')}>
-          Recipes
-        </FilterChip>
-      </div>
+      <SegmentedControl
+        value={scope}
+        onValueChange={onScopeChange}
+        ariaLabel="Search in"
+        options={[
+          { value: 'food', label: 'Food' },
+          { value: 'recipes', label: 'Recipes' },
+        ]}
+      />
 
       {scope === 'recipes' ? (
         <CriteriaToolbar
