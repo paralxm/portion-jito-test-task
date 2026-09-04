@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
+import { Container } from '../../primitives/layout/Container';
+import { Grid, GridItem } from '../../primitives/layout/Grid';
 import styles from './FocusedFlowLayout.module.css';
 
 export interface FocusedFlowLayoutProps {
@@ -52,10 +54,16 @@ export function FocusedFlowLayout({ header, children, footer, className }: Focus
       <div ref={headerRef} className={styles.header}>
         {header}
       </div>
-      <main className={styles.content}>{children}</main>
+      <main className={styles.content}>
+        <Container>
+          <Grid>
+            <GridItem className={styles.contentStack}>{children}</GridItem>
+          </Grid>
+        </Container>
+      </main>
       {footer ? (
         <div ref={footerRef} className={styles.footer}>
-          {footer}
+          <Container>{footer}</Container>
         </div>
       ) : null}
     </div>

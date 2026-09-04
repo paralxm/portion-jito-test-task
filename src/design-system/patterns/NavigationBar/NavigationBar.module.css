@@ -4,18 +4,20 @@
    function, not by distance — and the whole row reads as one navigation area. */
 
 .bar {
-  display: flex;
-  align-items: center;
-  gap: var(--portion-ref-space-16);
   padding-block-start: var(--portion-ref-space-8);
   padding-block-end: max(var(--portion-ref-space-8), var(--portion-safe-area-bottom));
-  padding-inline: var(--portion-spacing-page-inset);
   background: var(--portion-color-background-canvas);
   border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
 }
 
 .bar[hidden] {
   display: none;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: var(--portion-ref-space-16);
 }
 
 /* The group takes all remaining width and shares it equally among the three destinations.

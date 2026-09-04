@@ -394,7 +394,7 @@ await shot(page, '51-home-320-200pct');
 await check(page, 'navigation group fills up to a 16 px gap before the 56 px Log food circle and stacks the active label at 320 + 200%', async () =>
   page.evaluate(() => {
     const nav = document.querySelector('nav:not([hidden])');
-    const group = nav?.firstElementChild;
+    const group = nav?.querySelector('button[aria-current="page"]')?.parentElement;
     const action = nav?.querySelector('button[aria-label="Log food"]');
     const active = nav?.querySelector('button[aria-current="page"]');
     if (!nav || !group || !action || !active) return false;

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
 
+import { Container } from '../../primitives/layout/Container';
 import { IconButton } from '../../primitives/IconButton/IconButton';
 import { Text } from '../../primitives/Text/Text';
 import styles from './AppHeader.module.css';
@@ -29,27 +30,31 @@ export function AppHeader({ title, variant = 'root', onBack, backLabel = 'Back',
   if (variant === 'focused') {
     return (
       <header className={[styles.focused, className].filter(Boolean).join(' ')}>
-        <div className={styles.leading}>{onBack ? <IconButton icon={ArrowLeft} label={backLabel} onClick={onBack} /> : null}</div>
-        <Text as={Heading} variant="compact-title" color="primary" className={styles.barTitle} wrap>
-          {title}
-        </Text>
-        <div className={styles.trailing}>{trailing}</div>
+        <Container className={styles.focusedContent}>
+          <div className={styles.leading}>{onBack ? <IconButton icon={ArrowLeft} label={backLabel} onClick={onBack} /> : null}</div>
+          <Text as={Heading} variant="compact-title" color="primary" className={styles.barTitle} wrap>
+            {title}
+          </Text>
+          <div className={styles.trailing}>{trailing}</div>
+        </Container>
       </header>
     );
   }
   return (
     <header className={[styles.root, className].filter(Boolean).join(' ')}>
-      {showWordmark ? (
-        <Text as="p" variant="wordmark" color="primary" className={styles.wordmark} aria-label="Portion">
-          portion
-        </Text>
-      ) : null}
-      <div className={styles.rootRow}>
-        <Text as={Heading} variant="screen-heading" color="primary" className={styles.rootTitle} wrap>
-          {title}
-        </Text>
-        {trailing ? <div className={styles.trailing}>{trailing}</div> : null}
-      </div>
+      <Container className={styles.rootContent}>
+        {showWordmark ? (
+          <Text as="p" variant="wordmark" color="primary" className={styles.wordmark} aria-label="Portion">
+            portion
+          </Text>
+        ) : null}
+        <div className={styles.rootRow}>
+          <Text as={Heading} variant="screen-heading" color="primary" className={styles.rootTitle} wrap>
+            {title}
+          </Text>
+          {trailing ? <div className={styles.trailing}>{trailing}</div> : null}
+        </div>
+      </Container>
     </header>
   );
 }

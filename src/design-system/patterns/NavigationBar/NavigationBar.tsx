@@ -1,6 +1,7 @@
 import { CookingPot, House, MagnifyingGlass, Plus } from '@phosphor-icons/react';
 
 import { Icon } from '../../icons/Icon';
+import { Container } from '../../primitives/layout/Container';
 import { Text } from '../../primitives/Text/Text';
 import styles from './NavigationBar.module.css';
 
@@ -37,34 +38,36 @@ const DESTINATIONS: ReadonlyArray<{ id: Destination; label: string; icon: typeof
 export function NavigationBar({ selected, onSelect, onLogFood, hidden = false, className }: NavigationBarProps) {
   return (
     <nav aria-label="Main" className={[styles.bar, className].filter(Boolean).join(' ')} hidden={hidden}>
-      <div className={styles.group}>
-        {DESTINATIONS.map(({ id, label, icon }) => {
-          const current = id === selected;
-          return (
-            <button
-              key={id}
-              type="button"
-              className={styles.destination}
-              aria-current={current ? 'page' : undefined}
-              aria-label={current ? undefined : label}
-              data-selected={current || undefined}
-              onClick={() => {
-                if (!current) onSelect(id);
-              }}
-            >
-              <Icon icon={icon} size="default" weight={current ? 'bold' : 'regular'} />
-              {current ? (
-                <Text as="span" variant="nav-label-active" color="inherit" className={styles.label}>
-                  {label}
-                </Text>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
-      <button type="button" className={styles.action} aria-label="Log food" onClick={onLogFood}>
-        <Icon icon={Plus} size="default" weight="bold" />
-      </button>
+      <Container className={styles.content}>
+        <div className={styles.group}>
+          {DESTINATIONS.map(({ id, label, icon }) => {
+            const current = id === selected;
+            return (
+              <button
+                key={id}
+                type="button"
+                className={styles.destination}
+                aria-current={current ? 'page' : undefined}
+                aria-label={current ? undefined : label}
+                data-selected={current || undefined}
+                onClick={() => {
+                  if (!current) onSelect(id);
+                }}
+              >
+                <Icon icon={icon} size="default" weight={current ? 'bold' : 'regular'} />
+                {current ? (
+                  <Text as="span" variant="nav-label-active" color="inherit" className={styles.label}>
+                    {label}
+                  </Text>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+        <button type="button" className={styles.action} aria-label="Log food" onClick={onLogFood}>
+          <Icon icon={Plus} size="default" weight="bold" />
+        </button>
+      </Container>
     </nav>
   );
 }

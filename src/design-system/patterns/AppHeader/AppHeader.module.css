@@ -1,10 +1,12 @@
 .root {
+  padding-block-start: calc(var(--portion-ref-space-16) + var(--portion-safe-area-top));
+  padding-block-end: var(--portion-ref-space-8);
+}
+
+.rootContent {
   display: flex;
   flex-direction: column;
   gap: var(--portion-ref-space-4);
-  padding-block-start: calc(var(--portion-ref-space-16) + var(--portion-safe-area-top));
-  padding-block-end: var(--portion-ref-space-8);
-  padding-inline: var(--portion-spacing-page-inset);
 }
 
 .wordmark {
@@ -26,16 +28,18 @@
 /* Focused-step bar: back, title, trailing. The title never squeezes between actions —
    it wraps and the bar grows. */
 .focused {
+  padding-block-start: var(--portion-safe-area-top);
+  background: var(--portion-color-background-canvas);
+  border-block-end: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+.focusedContent {
   display: grid;
   grid-template-columns: var(--portion-size-target-minimum) minmax(0, 1fr) var(--portion-size-target-minimum);
   align-items: center;
   column-gap: var(--portion-ref-space-8);
   /* The bar's own minimum height, not a spacing value; the safe area is additional. */
-  min-block-size: calc(56px + var(--portion-safe-area-top));
-  padding-block-start: var(--portion-safe-area-top);
-  padding-inline: var(--portion-ref-space-8);
-  background: var(--portion-color-background-canvas);
-  border-block-end: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  min-block-size: 56px;
 }
 
 .leading,
