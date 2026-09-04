@@ -110,7 +110,11 @@ export const InvalidAmount: Story = {
     const canvas = within(canvasElement);
     const amount = canvas.getByLabelText('Amount to calculate');
     await userEvent.clear(amount);
-    await userEvent.click(canvas.getByRole('button', { name: 'Add to today' }));
+    await userEvent.tab();
+    // The commit is unavailable for an invalid draft; the guidance sits beside the field.
+    const add = canvas.getByRole('button', { name: 'Add to today' });
+    await expect(add).toBeDisabled();
+    await userEvent.click(add);
     await expect(args.onAddToToday).not.toHaveBeenCalled();
     await expect(amount).toHaveAccessibleDescription('Enter the amount you want to calculate');
   },

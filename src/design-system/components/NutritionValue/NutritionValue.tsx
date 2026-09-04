@@ -76,7 +76,9 @@ export function NutritionValue({ value, unit, size = 'inline', label, category, 
           </>
         )}
       </span>
-      {!isKnown && size !== 'inline' ? (
+      {/* A stale draft states its guidance once, under the main result; the subordinate
+          values show the dash and keep the hidden text so the sentence is not repeated. */}
+      {!isKnown && size !== 'inline' && (status !== 'stale' || size === 'main') ? (
         <Text variant="supporting" color="secondary">
           {status === 'stale' ? 'Enter a valid amount to see the result' : NOT_AVAILABLE}
         </Text>

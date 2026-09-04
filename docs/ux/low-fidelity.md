@@ -391,7 +391,7 @@ Photo
 
 S05-1 capture; S05-2 preview; S05-3 analysing; S05-4 suggestions; S05-5 no usable match; S05-6 failure
 
-Explicit suggestion selection; map camera permission/unavailability.
+Explicit suggestion selection; map camera permission/unavailability. Implemented 2026-09-04: select-then-review (D-3); the system permission prompt P01 is represented by the app-side waiting state only (D-6); S05-5 is a deterministic Storybook state because the prototype analyser always returns suggestions (D-9).
 
 Manual
 
@@ -403,7 +403,7 @@ Review
 
 S07-1 Search; S07-2 invalid portion; S07-3 former replacement; S07-4 Barcode; S07-5 Photo; S07-6 Manual
 
-Target S07-3 becomes existing-entry editing; add/close/correction semantics pending in the canvas.
+Target S07-3 becomes existing-entry editing; add/close/correction semantics pending in the canvas. Implemented 2026-09-04: code and Storybook render S07-3 as existing-entry editing (docs/design/hifi-decisions.md D-1, story “Product states / Lane B → S07-3”); the Figma frame keeps its node ID.
 
 Details
 
@@ -421,7 +421,7 @@ System
 
 P01 permission
 
-Conceptual system surface, not branded application UI.
+Conceptual system surface, not branded application UI. Implemented 2026-09-04 as the app-side “Waiting for camera permission” state in the barcode and photo steps; no OS chrome is drawn.
 
 Goal editing, removal confirmation and additional daily-data witnesses need explicit coverage. Do not imply their existence merely because their requirements are documented.
 

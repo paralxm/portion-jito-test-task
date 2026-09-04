@@ -86,3 +86,41 @@
   flex-wrap: wrap;
   gap: var(--portion-ref-space-8);
 }
+
+/* Photo suggestions: a radio group of candidate rows. The whole row is the label, so the
+   48 px target and the drawn control move together; the selected row gets the selected
+   surface and boundary as well as the mark, so selection never relies on colour alone. */
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-section-title-to-content);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.suggestionsLegend {
+  padding: 0;
+}
+
+.suggestionList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+}
+
+.suggestion {
+  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
+  border-radius: var(--portion-radius-control);
+  padding-inline: var(--portion-ref-space-12);
+  background: var(--portion-color-background-canvas);
+  transition:
+    background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.suggestion[data-selected] {
+  background: var(--portion-color-action-selected-surface);
+  border-color: var(--portion-color-action-primary);
+}

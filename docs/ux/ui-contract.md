@@ -106,11 +106,11 @@ All four acquisition methods lead to S07, including S06 → S07-6. Present ident
 
 Valid edits recalculate the preview locally, without a Calculate/Save step or artificial loading. Keep invalid drafts and label the result unavailable for that draft; an old result must not look current.
 
-Add to today is optional and enabled only for valid, reviewed identity/reference/portion data with a calculable energy result. One activation creates one entry and returns to Home. The button itself communicates the logging intent; no preceding generic Confirm or additional Save decision is required.
+Add to today is optional and enabled only for valid, reviewed identity/reference/portion data with a calculable energy result. One activation creates one entry and returns to Home. Implemented 2026-09-04: the button is disabled while the portion draft is invalid or the result is not calculable; the guidance stays beside the field. The button itself communicates the logging intent; no preceding generic Confirm or additional Save decision is required.
 
 Prevent duplicate activation for the same submission. Deliberately adding the same food again in a new acquisition is allowed and creates a separate entry; duplicate protection must not collapse legitimate repeated portions.
 
-Back returns to the previous acquisition step. Close, labelled **Done** in the implementation (2026-09-04), exits the food task to its invoking surface without logging. A read-only visit or new portion preview does not require a warning solely because it was not logged. Meaningful unsaved manual-reference work uses the existing Keep editing/Discard rule.
+Back returns to the previous acquisition step. Close, labelled **Done** in the implementation (2026-09-04), exits the food task to its invoking surface without logging. Implemented 2026-09-04: opening Log food records the invoking surface (root destination plus the focused stack, Recipe Details included); Done restores it even when Search food switched the root to Search, and a task started on the Search tab itself returns to Search (docs/design/hifi-decisions.md D-4). A read-only visit or new portion preview does not require a warning solely because it was not logged. Meaningful unsaved manual-reference work uses the existing Keep editing/Discard rule.
 
 2.3 Existing-entry review and removal
 
@@ -439,7 +439,7 @@ Invalid input
 
 Keep values, identify the affected field, prevent invalid submission.
 
-Pause capture after a barcode read to avoid repeated lookup. Photo flow has preview/retake before analysis and explicit selection from suggestions afterward. Cancelled operations and obsolete responses cannot navigate, log food or overwrite newer state. Service failures never become zero nutrition or no matches.
+Pause capture after a barcode read to avoid repeated lookup. Photo flow has preview/retake before analysis and explicit selection from suggestions afterward. Implemented 2026-09-04: suggestions are radio rows with a visible selection mark; **Review selected match** (unavailable until a suggestion is marked) opens review, and **None of these** reveals Retake photo / Search by name / Enter manually without leaving the step (docs/design/hifi-decisions.md D-3). Cancelled operations and obsolete responses cannot navigate, log food or overwrite newer state. Service failures never become zero nutrition or no matches.
 
 7. Accessibility and responsive requirements
 

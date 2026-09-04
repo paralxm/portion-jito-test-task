@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'S05 — capture, preview with retake, analysis, then suggestions the user must review. A suggestion is never a measurement; the amount is set on review. Analysis failure keeps the image for a retry. There is no camera or recognition service in this prototype; the sample image and fixed suggestions are labelled as such.',
+          'S05 — capture, preview with retake, analysis, then suggestions with an explicit selection: a radio row is marked, **Review selected match** opens review, and **None of these** reveals Retake / Search by name / Enter manually. A suggestion is never a measurement; the amount is set on review. Analysis failure keeps the image for a retry. There is no camera or recognition service in this prototype; the sample photograph and fixed suggestions are labelled as such.',
       },
     },
   },
@@ -46,16 +46,27 @@ export const PreviewAndRetake: Story = {
 };
 
 export const Suggestions: Story = {
-  name: 'Analysis → suggestions → review',
+  name: 'Analysis → suggestions → select → review',
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Take photo' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Analyse photo' }));
     await expect(canvas.getByRole('status')).toHaveTextContent('Analysing photo');
     await new Promise((resolve) => setTimeout(resolve, 150));
-    await expect(canvas.getByRole('heading', { name: 'Suggested foods' })).toBeInTheDocument();
-    await userEvent.click(canvas.getByRole('button', { name: /Lentil soup/ }));
+    await expect(canvas.getByRole('group', { name: 'Suggested foods' })).toBeInTheDocument();
+    const review = canvas.getByRole('button', { name: 'Review selected match' });
+    // Nothing is auto-accepted: review is unavailable until a suggestion is marked.
+    await expect(review).toBeDisabled();
+    await userEvent.click(canvas.getByRole('radio', { name: /Lentil soup/ }));
+    await expect(canvas.getByRole('radio', { name: /Lentil soup/ })).toBeChecked();
+    await userEvent.click(review);
     await expect(args.onSuggestionChosen).toHaveBeenCalledTimes(1);
+    await expect(args.onSuggestionChosen.mock.calls[0][0].name).toBe('Lentil soup');
+    // None of these reveals the recovery routes without leaving the step.
+    await userEvent.click(canvas.getByRole('button', { name: 'None of these' }));
+    await expect(canvas.getByRole('button', { name: 'Retake photo' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Search by name' }));
+    await expect(args.onSearchInstead).toHaveBeenCalledTimes(1);
   },
 };
 
@@ -69,7 +80,7 @@ export const CancelAnalysis: Story = {
     await expect(canvas.getByRole('button', { name: 'Analyse photo' })).toBeInTheDocument();
     await new Promise((resolve) => setTimeout(resolve, 150));
     // The late response is ignored: still in preview, no suggestions.
-    await expect(canvas.queryByRole('heading', { name: 'Suggested foods' })).toBeNull();
+    await expect(canvas.queryByRole('group', { name: 'Suggested foods' })).toBeNull();
   },
 };
 
@@ -83,7 +94,28 @@ export const AnalysisFailed: Story = {
     await expect(canvas.getByRole('alert')).toHaveTextContent('Analysis failed');
     await userEvent.click(canvas.getByRole('button', { name: 'Try again' }));
     await new Promise((resolve) => setTimeout(resolve, 150));
-    await expect(canvas.getByRole('heading', { name: 'Suggested foods' })).toBeInTheDocument();
+    await expect(canvas.getByRole('group', { name: 'Suggested foods' })).toBeInTheDocument();
+  },
+};
+
+export const NoUsableMatch: Story = {
+  name: 'No usable match — nothing invented',
+  args: { initialPhase: { kind: 'suggestions', imageId: 'sample-1', candidates: [] } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('No food was recognised')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Enter manually' }));
+    await expect(args.onEnterManually).toHaveBeenCalledTimes(1);
+  },
+};
+
+export const PermissionPending: Story = {
+  name: 'Waiting for the system camera prompt (P01, app side)',
+  args: { initialPhase: { kind: 'permission-pending' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Waiting for camera permission')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Search by name' })).toBeVisible();
   },
 };
 

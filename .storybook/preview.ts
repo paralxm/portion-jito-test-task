@@ -14,6 +14,7 @@ const viewports = {
   mobile393: { name: 'Check — 393', styles: { width: '393px', height: '852px' }, type: 'mobile' },
   mobile430: { name: 'Wide — 430', styles: { width: '430px', height: '932px' }, type: 'mobile' },
   shortHeight: { name: 'Short height — 390 × 560', styles: { width: '390px', height: '560px' }, type: 'mobile' },
+  keyboardInset: { name: 'Software keyboard visible area — 393 × 552', styles: { width: '393px', height: '552px' }, type: 'mobile' },
 } as const;
 
 const preview: Preview = {
@@ -50,6 +51,7 @@ const preview: Preview = {
           'Patterns',
           'Templates',
           'Product compositions',
+          'Product states',
         ],
       },
     },

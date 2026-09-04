@@ -158,6 +158,24 @@ await check(page, 'goal 2,200 with 540 logged shows 1,660 remaining and 25 %', a
   return t.includes('1,660') && t.includes('kcal remaining') && label === '540 of 2,200 kcal logged today, 25 %';
 });
 
+// Task origin (docs/design/hifi-decisions.md D-4): Log food from Home → Search food switches
+// to the Search root; Done from the review returns to Home, the surface that opened Log food.
+await scoped().getByRole('button', { name: 'Log food' }).first().click();
+await scoped().getByRole('button', { name: /Search food/ }).click();
+await page.waitForTimeout(300);
+await check(page, 'Search food from Home opens the Search root with Search selected', async () => (await page.locator('[data-screen="search"]:visible h1').innerText()) === 'Search');
+await scoped().getByRole('searchbox').fill('rice');
+await page.waitForTimeout(900);
+await scoped().getByRole('button', { name: /Vegetable rice bowl/ }).click();
+await page.waitForTimeout(300);
+await shot(page, '14b-review-from-home-origin');
+await scoped().getByRole('button', { name: 'Done' }).click();
+await page.waitForTimeout(300);
+await check(page, 'Done returns to Home, the invoking surface, without logging', async () => {
+  const home = await page.locator('[data-screen="home"]:visible').count();
+  return home === 1 && (await visibleText()).includes('1 entry · 540 kcal');
+});
+
 // Barcode → review → back, unknown, failed lookup, manual entry, discard
 await scoped().getByRole('button', { name: 'Log food' }).first().click();
 await scoped().getByRole('button', { name: /Scan barcode/ }).click();
@@ -224,7 +242,8 @@ await page.waitForTimeout(150);
 await shot(page, '27-photo-analysing');
 await page.waitForTimeout(1000);
 await shot(page, '28-photo-suggestions');
-await scoped().getByRole('button', { name: /Lentil soup/ }).click();
+await scoped().getByRole('radio', { name: /Lentil soup/ }).check();
+await scoped().getByRole('button', { name: 'Review selected match' }).click();
 await page.waitForTimeout(150);
 await shot(page, '29-review-photo');
 await scoped().getByRole('button', { name: 'Done' }).click();
