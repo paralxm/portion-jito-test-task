@@ -60,7 +60,7 @@ export function RecipeFiltersSheet({ open, applied, onApply, onCancel }: RecipeF
       description="Recipes must match every filter you set. Leave a field blank to skip it."
       footer={
         <div className={styles.footer}>
-          <Button variant="text" size="compact" onClick={() => { setDraft(EMPTY_DRAFT); setErrors({}); }}>
+          <Button variant="text" size="small" onClick={() => { setDraft(EMPTY_DRAFT); setErrors({}); }}>
             Reset all
           </Button>
           <Button variant="primary" onClick={apply}>

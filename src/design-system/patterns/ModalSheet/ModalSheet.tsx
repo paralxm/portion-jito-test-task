@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode, type SyntheticEvent } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode, type SyntheticEvent } from 'react';
 import { X } from '@phosphor-icons/react';
 
 import { IconButton } from '../../primitives/IconButton/IconButton';
@@ -36,7 +36,10 @@ export function ModalSheet({ open, onRequestClose, title, description, children,
   const titleId = `sheet-title-${id}`;
   const descriptionId = description ? `sheet-description-${id}` : undefined;
 
-  useEffect(() => {
+  // A layout effect opens the dialog synchronously with the commit, so the sheet is
+  // already modal (and its controls accessible) before the first paint and before any
+  // script that runs right after render — a Storybook play function, for instance.
+  useLayoutEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (open && !dialog.open) dialog.showModal();

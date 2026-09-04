@@ -150,7 +150,7 @@ export function RecipeDetailsScreen({ state, criteria, onBack, onRetry, navigati
         <ol className={styles.steps}>
           {recipe.instructions.map((instruction, index) => (
             <li key={index} className={styles.step}>
-              <Text variant="action" color="primary" numeric className={styles.stepNumber} aria-hidden="true">
+              <Text variant="action-md" color="primary" numeric className={styles.stepNumber} aria-hidden="true">
                 {index + 1}
               </Text>
               <Text variant="body" color="primary" wrap>

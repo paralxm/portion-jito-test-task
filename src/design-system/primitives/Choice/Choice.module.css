@@ -43,8 +43,10 @@
     border-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
 }
 
+/* A 24 px box takes the compact-control radius; the full control radius would read as
+   a bubble at this size. */
 .choice[data-kind='checkbox'] .control {
-  border-radius: var(--portion-radius-control);
+  border-radius: var(--portion-radius-control-compact);
 }
 
 .choice[data-kind='radio'] .control {

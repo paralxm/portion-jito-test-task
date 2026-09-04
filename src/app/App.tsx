@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { MethodSheet, NavigationBar, type Destination, type EntryMethod } from '../design-system';
-import { commitCandidate, updatePortion, type CurrentCalculation, type FoodCandidate, type Portion } from '../features/calorie-calculator/domain/calculation';
+import type { FoodCandidate, Portion } from '../features/calorie-calculator/domain/calculation';
+import { createEntry, entriesForDay, localDayKey, updateEntryPortion, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
 import { samplePhotoImage } from '../features/calorie-calculator/domain/fixtures';
 import { BarcodeScreen } from '../features/calorie-calculator/screens/BarcodeScreen';
 import { FoodReviewScreen } from '../features/calorie-calculator/screens/FoodReviewScreen';
 import { HomeScreen } from '../features/calorie-calculator/screens/HomeScreen';
 import { ManualEntryScreen } from '../features/calorie-calculator/screens/ManualEntryScreen';
 import { PhotoScreen } from '../features/calorie-calculator/screens/PhotoScreen';
-import { filterRecipes, removeCriterion, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
+import { activeCriteria, describeCriterion, filterRecipes, removeCriterion, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
 import { RecipeDetailsScreen, type RecipeDetailsState } from '../features/recipe-discovery/screens/RecipeDetailsScreen';
 import { RecipesScreen, type RecipesStatus } from '../features/recipe-discovery/screens/RecipesScreen';
 import { SearchScreen, type SearchResults, type SearchScope } from './screens/SearchScreen';
@@ -25,6 +26,7 @@ type FlowStepInput =
   | { kind: 'photo' }
   | { kind: 'manual' }
   | { kind: 'review'; candidate: FoodCandidate; from: EntryMethod }
+  | { kind: 'entry'; entryId: string }
   | { kind: 'recipe'; recipeId: string; criteriaSource: 'search' | 'browse' };
 type FlowStep = FlowStepInput & { id: number };
 
@@ -39,15 +41,23 @@ interface RequestState<T> extends SearchResults<T> {
 }
 const IDLE: RequestState<never> = { status: 'idle', results: [], query: '', criteriaKey: '' };
 
-/** The Portion runtime: in-memory navigation over fixture-backed screens. No persistence is promised. */
+/**
+ * The Portion runtime: in-memory navigation over fixture-backed screens. Today's entries
+ * and the optional goal live for the session only; no persistence is promised.
+ */
 export default function App() {
   const [root, setRoot] = useState<Destination>('home');
   const [flow, setFlow] = useState<FlowStep[]>([]);
   const [methodOpen, setMethodOpen] = useState(false);
   const keyboardOpen = useSoftwareKeyboard();
 
-  // Home / current calculation ------------------------------------------------
-  const [calculation, setCalculation] = useState<CurrentCalculation | null>(null);
+  // Daily record --------------------------------------------------------------
+  const [entries, setEntries] = useState<FoodEntry[]>([]);
+  const [goalKcal, setGoalKcal] = useState<number | null>(null);
+  // Re-evaluated on every render, so a day change shows the new day's (empty) list while
+  // earlier entries stay associated with their own day.
+  const todayKey = localDayKey();
+  const todayEntries = useMemo(() => entriesForDay(entries, todayKey), [entries, todayKey]);
 
   // Search ------------------------------------------------------------------
   const [scope, setScope] = useState<SearchScope>('food');
@@ -126,6 +136,7 @@ export default function App() {
   }, [browseToken]);
 
   const browseResults = useMemo(() => filterRecipes(browseRecipes, browseCriteria), [browseRecipes, browseCriteria]);
+  const browseCriteriaLabels = useMemo(() => activeCriteria(browseCriteria).map((key) => describeCriterion(browseCriteria, key)), [browseCriteria]);
 
   // Recipe details ----------------------------------------------------------
   const [details, setDetails] = useState<RecipeDetailsState>({ status: 'loading' });
@@ -168,6 +179,11 @@ export default function App() {
     setFlow([]);
     setRoot(destination);
   };
+  /** Close the food task to the surface it was started from, without logging. */
+  const closeTask = () => {
+    detailsRequestId.current += 1;
+    setFlow([]);
+  };
   const goToFoodSearch = () => {
     detailsRequestId.current += 1;
     setFlow([]);
@@ -186,12 +202,21 @@ export default function App() {
 
   const openReview = (candidate: FoodCandidate, from: EntryMethod) => push({ kind: 'review', candidate, from });
 
-  const confirmReview = (candidate: FoodCandidate, portion: Portion) => {
-    const next = commitCandidate(candidate, portion);
-    if (!next) return;
-    setCalculation(next);
-    setFlow([]);
-    setRoot('home');
+  const addToToday = (candidate: FoodCandidate, portion: Portion) => {
+    const entry = createEntry(candidate, portion);
+    if (!entry) return;
+    setEntries((list) => [...list, entry]);
+    switchRoot('home');
+  };
+
+  const updateEntry = (entryId: string, portion: Portion) => {
+    setEntries((list) => list.map((entry) => (entry.id === entryId ? (updateEntryPortion(entry, portion) ?? entry) : entry)));
+    switchRoot('home');
+  };
+
+  const removeEntry = (entryId: string) => {
+    setEntries((list) => list.filter((entry) => entry.id !== entryId));
+    switchRoot('home');
   };
 
   const openRecipe = (recipeId: string, criteriaSource: 'search' | 'browse') => {
@@ -233,12 +258,27 @@ export default function App() {
         return (
           <FoodReviewScreen
             candidate={step.candidate}
-            replaces={calculation?.candidate.name ?? null}
-            onConfirm={(portion) => confirmReview(step.candidate, portion)}
+            mode="new"
+            onAddToToday={(portion) => addToToday(step.candidate, portion)}
+            onDone={closeTask}
             onBack={pop}
             onChangeMatch={step.from === 'barcode' || step.from === 'photo' ? goToFoodSearch : pop}
           />
         );
+      case 'entry': {
+        const entry = entries.find((e) => e.id === step.entryId);
+        if (!entry) return null;
+        return (
+          <FoodReviewScreen
+            candidate={entry.candidate}
+            mode="existing"
+            initialPortion={entry.portion}
+            onUpdateEntry={(portion) => updateEntry(entry.id, portion)}
+            onRemoveEntry={() => removeEntry(entry.id)}
+            onBack={pop}
+          />
+        );
+      }
       case 'recipe':
         return (
           <RecipeDetailsScreen
@@ -256,11 +296,13 @@ export default function App() {
     <>
       <div data-screen="home" hidden={!rootVisible('home')}>
         <HomeScreen
-          current={calculation}
-          onPortionChange={(portion) => setCalculation((c) => (c ? updatePortion(c, portion) : c))}
-          onChangeFood={() => setMethodOpen(true)}
+          entries={todayEntries}
+          goalKcal={goalKcal}
+          onGoalChange={setGoalKcal}
+          onOpenEntry={(entryId) => push({ kind: 'entry', entryId })}
           onAddFood={() => setMethodOpen(true)}
           onFindRecipes={() => switchRoot('recipes')}
+          recipeCriteria={browseCriteriaLabels}
           navigation={navigation('home')}
         />
       </div>

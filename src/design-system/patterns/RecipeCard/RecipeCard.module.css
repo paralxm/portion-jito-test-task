@@ -1,19 +1,36 @@
+/* The card is the query container; the layout inside it is what reflows (an element
+   cannot query its own size). */
 .card {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  container: recipe-card / inline-size;
   border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
   border-radius: var(--portion-radius-card);
   background: var(--portion-color-background-canvas);
-  overflow: hidden;
   transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+/* Thumbnail beside text: a 7 rem (112 px) 4:3 image column and a flexible text column. */
+.layout {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  column-gap: var(--portion-ref-space-12);
+  padding: var(--portion-ref-space-12);
+}
+
+/* The thumbnail is nested inside the card, so it takes the control radius (12 − 12 of
+   padding would be 0; the control step keeps it visibly softened without echoing the
+   card's own corner). */
+.media {
+  align-self: start;
+  border-radius: var(--portion-radius-control);
+  overflow: hidden;
 }
 
 .body {
   display: flex;
   flex-direction: column;
   gap: var(--portion-spacing-title-to-secondary);
-  padding: var(--portion-spacing-card-padding);
+  min-inline-size: 0;
 }
 
 .titleRow {
@@ -21,7 +38,7 @@
 }
 
 /* The title is the card's single control. Its ::after covers the whole card so any
-   tap opens details; the focus ring is drawn on the card via the inset rule below. */
+   tap opens details; the focus ring is drawn on the card via the :has rule below. */
 .titleButton {
   display: block;
   inline-size: 100%;
@@ -60,11 +77,16 @@
   background: var(--portion-color-background-sunken);
 }
 
+/* Suitability evidence sits directly under the identity it qualifies. */
+.match {
+  margin-block-start: var(--portion-ref-space-4);
+}
+
 .values {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  column-gap: var(--portion-ref-space-8);
+  column-gap: var(--portion-ref-space-12);
   margin-block-start: var(--portion-ref-space-4);
 }
 
@@ -81,4 +103,22 @@
   align-items: center;
   gap: var(--portion-ref-space-4);
   color: var(--portion-color-text-secondary);
+}
+
+/* Narrow adaptation: under 19 rem (the 320 px viewport at 100 % text, 288 px of card)
+   the thumbnail drops to 6 rem so the text column keeps a comfortable measure. */
+@container recipe-card (max-width: 19rem) {
+  .layout {
+    grid-template-columns: 6rem minmax(0, 1fr);
+  }
+}
+
+/* Stacked adaptation: under 17 rem the text column would be too narrow beside any
+   thumbnail, so the image moves above the text at full width. 272 px at 100 % text —
+   below every supported viewport — and 544 px at 200 %, i.e. all of them. */
+@container recipe-card (max-width: 17rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--portion-ref-space-12);
+  }
 }

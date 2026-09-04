@@ -13,14 +13,17 @@ export type NutritionValueStatus =
   /** The draft amount is invalid, so no result belongs to it yet. */
   | 'stale';
 
+export type NutritionValueSize = 'main' | 'secondary' | 'compact' | 'inline';
+
 export interface NutritionValueProps {
   value: number | null;
   unit: NutrientUnit;
   /**
-   * `main` is the single 40/48 calorie result; `secondary` is a 24/32 summary metric;
-   * `inline` is the 16/24 value used in rows and cards.
+   * `main` is the single 40/48 calorie result; `secondary` is a 20/28 summary metric
+   * with its label above; `compact` is the same stacked shape at 16/24 for a subordinate
+   * row (Home's daily macros); `inline` is a 16/24 value on one line in rows and cards.
    */
-  size?: 'main' | 'secondary' | 'inline';
+  size?: NutritionValueSize;
   /** Category label rendered above or beside the value (label 14/20). */
   label?: ReactNode;
   /** Category marker colour; the number itself stays neutral. */
@@ -31,6 +34,9 @@ export interface NutritionValueProps {
   className?: string;
 }
 
+const VALUE_VARIANT = { main: 'main-result', secondary: 'metric-secondary', compact: 'metric-inline', inline: 'metric-inline' } as const;
+const UNIT_VARIANT = { main: 'body', secondary: 'supporting', compact: 'supporting', inline: 'metric-inline' } as const;
+
 /**
  * A value with its unit, category and basis kept together — visually and in the
  * accessible text. Tabular figures stabilise updates; the box is allowed to grow when
@@ -38,8 +44,8 @@ export interface NutritionValueProps {
  */
 export function NutritionValue({ value, unit, size = 'inline', label, category, basis, status = 'known', className }: NutritionValueProps) {
   const isKnown = status === 'known' && value !== null;
-  const valueVariant = size === 'main' ? 'main-result' : size === 'secondary' ? 'metric-secondary' : 'metric-inline';
-  const unitVariant = size === 'main' ? 'body' : size === 'secondary' ? 'supporting' : 'metric-inline';
+  const valueVariant = VALUE_VARIANT[size];
+  const unitVariant = UNIT_VARIANT[size];
 
   return (
     <div className={[styles.value, className].filter(Boolean).join(' ')} data-size={size} data-status={status}>

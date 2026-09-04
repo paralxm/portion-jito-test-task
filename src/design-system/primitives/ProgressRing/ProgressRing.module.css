@@ -1,0 +1,58 @@
+/* The ring is sized in rem so it scales with the user's text preference alongside the
+   numbers inside it; the SVG view box equals the 100 % size, so stroke widths stay true. */
+
+.ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--ring-size);
+  block-size: var(--ring-size);
+  flex-shrink: 0;
+}
+
+.ring[data-size='large'] {
+  /* 160 px at 100 % text. */
+  --ring-size: 10rem;
+}
+
+.ring[data-size='medium'] {
+  /* 96 px at 100 % text. */
+  --ring-size: 6rem;
+}
+
+/* Rotated so the arc starts at 12 o'clock and grows clockwise. */
+.svg {
+  grid-area: 1 / 1;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  transform: rotate(-90deg);
+}
+
+.track,
+.arc {
+  fill: none;
+}
+
+.track {
+  stroke: var(--portion-color-progress-track);
+}
+
+.arc {
+  stroke: var(--portion-color-progress-indicator);
+  transition: stroke-dashoffset var(--portion-motion-transition-async-result) var(--portion-motion-easing-standard);
+}
+
+/* Centre content sits inside the inner circle. The inline padding keeps text clear of
+   the stroke; the consumer decides what fits (see CalorieProgressRing's aside layout). */
+.center {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  min-inline-size: 0;
+  padding-inline: var(--portion-ref-space-16);
+  text-align: center;
+}

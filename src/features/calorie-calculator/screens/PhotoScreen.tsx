@@ -65,10 +65,10 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
 
   const otherMethods = (
     <>
-      <Button variant="secondary" size="compact" onClick={onSearchInstead}>
+      <Button variant="secondary" size="small" onClick={onSearchInstead}>
         Search by name
       </Button>
-      <Button variant="secondary" size="compact" onClick={onEnterManually}>
+      <Button variant="secondary" size="small" onClick={onEnterManually}>
         Enter manually
       </Button>
     </>
@@ -128,7 +128,7 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
               This prototype has no camera or recognition service. Take photo uses a sample image, and analysis returns fixed suggestions.
             </Text>
             <div className={styles.demoActions}>
-              <Button variant="secondary" size="compact" onClick={() => setPhase({ kind: 'denied' })}>
+              <Button variant="secondary" size="small" onClick={() => setPhase({ kind: 'denied' })}>
                 Simulate camera denied
               </Button>
             </div>
@@ -158,7 +158,7 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
               </Text>
             </legend>
             <div className={styles.demoActions}>
-              <Button variant="secondary" size="compact" onClick={() => run(phase.imageId, true)}>
+              <Button variant="secondary" size="small" onClick={() => run(phase.imageId, true)}>
                 Analyse with a simulated failure
               </Button>
             </div>
@@ -202,7 +202,7 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
             ))}
           </ul>
           <div className={styles.demoActions}>
-            <Button variant="text" size="compact" onClick={retake}>
+            <Button variant="text" size="small" onClick={retake}>
               Retake photo
             </Button>
             {otherMethods}
@@ -233,7 +233,7 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
           title="Analysis failed"
           actions={
             <>
-              <Button variant="primary" size="compact" onClick={() => run(phase.imageId, false)}>
+              <Button variant="primary" size="small" onClick={() => run(phase.imageId, false)}>
                 Try again
               </Button>
               {otherMethods}

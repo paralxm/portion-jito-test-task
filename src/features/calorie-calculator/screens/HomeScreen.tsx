@@ -1,197 +1,139 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
-import { AmountField } from '../../../design-system/components/AmountField/AmountField';
-import { InlineMessage } from '../../../design-system/components/InlineMessage/InlineMessage';
+import { FoodResultRow } from '../../../design-system/components/FoodResultRow/FoodResultRow';
+import { NutritionMacros } from '../../../design-system/components/NutritionMacros/NutritionMacros';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
-import { NutritionSummary } from '../../../design-system/patterns/NutritionSummary/NutritionSummary';
-import { UnitSheet } from '../../../design-system/patterns/UnitSheet/UnitSheet';
 import { Button } from '../../../design-system/primitives/Button/Button';
-import { Stack } from '../../../design-system/primitives/layout/Stack';
+import { Separator } from '../../../design-system/primitives/Separator/Separator';
 import { Surface } from '../../../design-system/primitives/Surface/Surface';
 import { Text } from '../../../design-system/primitives/Text/Text';
 import { RootScreenLayout } from '../../../design-system/templates/RootScreenLayout/RootScreenLayout';
-import { FoodIdentityHeader } from '../components/FoodIdentityHeader';
-import {
-  convertQuantity,
-  describePortionBasis,
-  findUnit,
-  formatQuantityDraft,
-  parseAmount,
-  scaleNutrition,
-  type CurrentCalculation,
-  type Portion,
-} from '../domain/calculation';
+import { CalorieProgressRing } from '../components/CalorieProgressRing';
+import { GoalSheet } from '../components/GoalSheet';
+import { describePortion } from '../domain/calculation';
+import { formatKcal, summarizeDay, type FoodEntry } from '../domain/daily-log';
+import styles from './HomeScreen.module.css';
 
 export interface HomeScreenProps {
-  /** The committed calculation, or `null` for a new session. */
-  current: CurrentCalculation | null;
-  /** Valid portion edits recalculate locally and in place; the caller stores the result. */
-  onPortionChange: (portion: Portion) => void;
-  /** Opens the shared method chooser to identify a different food. */
-  onChangeFood: () => void;
-  /** The body Add food CTA — the same action and O01 instance as the trailing plus. */
+  /** Today's committed entries only; the app selects the local day. */
+  entries: readonly FoodEntry[];
+  /** The committed optional goal. */
+  goalKcal: number | null;
+  /** Apply (number) or clear (null) from the contextual goal editor. */
+  onGoalChange: (goalKcal: number | null) => void;
+  /** A logged entry opens S07 in existing-entry mode. */
+  onOpenEntry: (entryId: string) => void;
+  /** The body Add food action — the same O01 instance as the trailing plus. */
   onAddFood: () => void;
-  /** Opens the existing Recipes browse destination (S03-1), unfiltered by the current food. */
+  /** Opens or restores the Recipes browse destination (S03). */
   onFindRecipes: () => void;
+  /** Labels of the criteria currently applied in Recipes browse; empty when none. */
+  recipeCriteria?: readonly string[];
   /** The four-control NavigationBar, owned by the app shell. */
   navigation: ReactNode;
 }
 
 /**
- * S01 — Home. A dashboard for both user stories: a food-calorie module (empty, or the
- * working calculation once a food is confirmed) and a recipe-discovery module, always
- * present. Editing a valid amount updates the result without a submit step; an invalid
- * draft shows a stale result instead of presenting the old number as current.
+ * S01 — Home, the daily overview. One focal point (today's calorie state), then the
+ * supporting macros, today's logged food with the primary Add food action, and the
+ * recipe-discovery entry point. S01-1 (no committed entries today) and S01-2 (one or
+ * more) share the same region order; only the food section changes. Logging and the
+ * goal are optional: neither job needs them.
  */
-export function HomeScreen({ current, onPortionChange, onChangeFood, onAddFood, onFindRecipes, navigation }: HomeScreenProps) {
-  const [quantity, setQuantity] = useState('');
-  const [unitId, setUnitId] = useState(current?.portion.unitId ?? '');
-  const [touched, setTouched] = useState(false);
-  const [unitSheetOpen, setUnitSheetOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+export function HomeScreen({ entries, goalKcal, onGoalChange, onOpenEntry, onAddFood, onFindRecipes, recipeCriteria = [], navigation }: HomeScreenProps) {
+  const [goalOpen, setGoalOpen] = useState(false);
+  const summary = useMemo(() => summarizeDay(entries, goalKcal), [entries, goalKcal]);
+  const populated = entries.length > 0;
 
-  // Resync the draft when a different calculation is committed (not on every edit).
-  const committedKey = current ? `${current.candidate.id}:${current.committedAt}` : 'none';
-  useEffect(() => {
-    if (current) {
-      setQuantity(formatQuantityDraft(current.portion.quantity));
-      setUnitId(current.portion.unitId);
-    }
-    setTouched(false);
-    setExpanded(false);
-  }, [committedKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  return (
+    <RootScreenLayout header={<AppHeader title="Home" showWordmark />} navigation={navigation}>
+      <Surface as="section" tone="surface" border="none" radius="grouped" padding={16} aria-labelledby="home-today-heading" className={styles.today}>
+        <div className={styles.groupHeader}>
+          <Text as="h2" id="home-today-heading" variant="section-title" color="primary">
+            Today
+          </Text>
+          <Button variant="text" size="small" onClick={() => setGoalOpen(true)} aria-haspopup="dialog">
+            {goalKcal === null ? 'Set a daily goal' : 'Edit daily goal'}
+          </Button>
+        </div>
+        <CalorieProgressRing summary={summary} />
+        <Separator />
+        <div aria-label="Nutrition logged today">
+          <NutritionMacros
+            size="compact"
+            protein={{ value: summary.protein.value, partial: !summary.protein.complete }}
+            carbohydrates={{ value: summary.carbohydrates.value, partial: !summary.carbohydrates.complete }}
+            fat={{ value: summary.fat.value, partial: !summary.fat.complete }}
+          />
+        </div>
+      </Surface>
 
-  const header = <AppHeader title="Home" showWordmark />;
-  const orientation = (
-    <Text as="p" variant="body" color="secondary">
-      Calculate a food&rsquo;s calories or find a recipe that fits your criteria.
-    </Text>
-  );
+      <section aria-labelledby="home-food-heading" className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <Text as="h2" id="home-food-heading" variant="section-title" color="primary">
+            Today&rsquo;s food
+          </Text>
+          {populated ? (
+            <Text as="p" variant="supporting" color="secondary">
+              {entries.length === 1 ? '1 entry' : `${entries.length} entries`} · {formatKcal(summary.energy.kcal)} kcal
+            </Text>
+          ) : null}
+        </div>
+        {populated ? (
+          <ul className={styles.entries}>
+            {entries.map((entry) => (
+              <li key={entry.id}>
+                <FoodResultRow name={entry.candidate.name} detail={describePortion(entry.candidate, entry.portion)} calories={entry.result.energyKcal} onClick={() => onOpenEntry(entry.id)} />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Text as="p" variant="body" color="secondary" wrap>
+            Nothing logged today. Add a food or dish to review its portion and nutrition; adding it to today is optional.
+          </Text>
+        )}
+        <Button variant="primary" block onClick={onAddFood}>
+          {populated ? 'Add food' : 'Add first food'}
+        </Button>
+      </section>
 
-  const recipeModule = (
-    <Surface as="section" aria-labelledby="home-recipes-heading" radius="card" padding={16}>
-      <Stack gap={12}>
+      <section aria-labelledby="home-recipes-heading" className={styles.section}>
         <Text as="h2" id="home-recipes-heading" variant="section-title" color="primary">
           Find a recipe
         </Text>
-        <Text as="p" variant="body" color="secondary">
-          Browse recipes, or narrow them by calories, protein, preparation time and dietary preference.
-        </Text>
-        <Button variant="secondary" block onClick={onFindRecipes}>
-          Find recipes
-        </Button>
-      </Stack>
-    </Surface>
-  );
-
-  if (!current) {
-    return (
-      <RootScreenLayout header={header} navigation={navigation}>
-        {orientation}
-        <Surface as="section" aria-labelledby="home-calculate-heading" radius="card" padding={16}>
-          <Stack gap={12}>
-            <Text as="h2" id="home-calculate-heading" variant="section-title" color="primary">
-              Calculate calories
+        {recipeCriteria.length > 0 ? (
+          <>
+            <Text as="p" variant="body" color="secondary" wrap>
+              Your applied filters: {recipeCriteria.join(', ')}.
             </Text>
-            <Text as="p" variant="body" color="secondary">
-              Add a product or dish to see the calories and nutrition for the portion you choose.
-            </Text>
-            <Button variant="primary" block onClick={onAddFood}>
-              Add food
+            <Button variant="secondary" block onClick={onFindRecipes}>
+              See matching recipes
             </Button>
-          </Stack>
-        </Surface>
-        {recipeModule}
-      </RootScreenLayout>
-    );
-  }
+          </>
+        ) : (
+          <>
+            <Text as="p" variant="body" color="secondary" wrap>
+              Browse recipes, or narrow them by calories, protein, preparation time and dietary preference.
+            </Text>
+            <Button variant="secondary" block onClick={onFindRecipes}>
+              Find recipes
+            </Button>
+          </>
+        )}
+      </section>
 
-  const { candidate } = current;
-  const parsed = parseAmount(quantity);
-  const draftPortion: Portion | null = parsed.ok ? { quantity: parsed.value, unitId } : null;
-  const preview = draftPortion ? scaleNutrition(candidate, draftPortion) : null;
-  const stale = !draftPortion || !preview;
-  const unit = findUnit(candidate, unitId);
-
-  const amountError =
-    touched && !parsed.ok
-      ? parsed.reason === 'empty'
-        ? 'Enter an amount to see the result'
-        : parsed.reason === 'not-positive'
-          ? 'Enter an amount greater than zero'
-          : 'Enter a number, for example 250 or 0.5'
-      : undefined;
-
-  const handleQuantity = (value: string) => {
-    setQuantity(value);
-    const next = parseAmount(value);
-    if (next.ok) onPortionChange({ quantity: next.value, unitId });
-  };
-
-  // Switching unit keeps the portion: the quantity is re-expressed in the new unit when
-  // the draft is valid; an invalid draft just changes the unit and stays stale.
-  const handleUnit = (nextUnitId: string) => {
-    setUnitSheetOpen(false);
-    if (nextUnitId === unitId) return;
-    setUnitId(nextUnitId);
-    if (!parsed.ok) return;
-    const converted = convertQuantity(candidate, parsed.value, unitId, nextUnitId);
-    if (converted === null || !(converted > 0)) return;
-    setQuantity(formatQuantityDraft(converted));
-    onPortionChange({ quantity: converted, unitId: nextUnitId });
-  };
-
-  const partial = [current.result.proteinG, current.result.carbohydratesG, current.result.fatG].some((v) => v === null);
-
-  return (
-    <RootScreenLayout header={header} navigation={navigation}>
-      {orientation}
-      <FoodIdentityHeader candidate={candidate} onChangeFood={onChangeFood} headingId="current-food-name" />
-
-      <AmountField
-        label="Amount"
-        value={quantity}
-        onChange={handleQuantity}
-        onBlur={() => setTouched(true)}
-        unit={unit?.label ?? unitId}
-        onRequestUnitChange={candidate.units.length > 1 ? () => setUnitSheetOpen(true) : undefined}
-        error={amountError}
-      />
-
-      <NutritionSummary
-        energy={stale ? null : (preview?.energyKcal ?? null)}
-        protein={stale ? null : (preview?.proteinG ?? null)}
-        carbohydrates={stale ? null : (preview?.carbohydratesG ?? null)}
-        fat={stale ? null : (preview?.fatG ?? null)}
-        basis={draftPortion ? describePortionBasis(candidate, draftPortion) : ''}
-        status={stale ? 'stale' : 'known'}
-        additional={
-          preview && (preview.fibreG !== undefined || preview.vitamins || preview.minerals)
-            ? {
-                fibre: preview.fibreG,
-                vitamins: preview.vitamins?.map((v) => ({ id: v.id, name: v.name, value: v.valueMg, unit: 'mg' as const })),
-                minerals: preview.minerals?.map((m) => ({ id: m.id, name: m.name, value: m.valueMg, unit: 'mg' as const })),
-              }
-            : undefined
-        }
-        expanded={expanded}
-        onToggleExpanded={setExpanded}
-      />
-
-      {partial ? (
-        <InlineMessage tone="info" announce="none">
-          Some nutrition values are not available for this food. They are shown as not available, not as zero.
-        </InlineMessage>
-      ) : null}
-
-      {recipeModule}
-
-      <UnitSheet
-        open={unitSheetOpen}
-        options={candidate.units.map((u) => ({ id: u.id, label: u.label, description: u.description }))}
-        value={unitId}
-        onConfirm={handleUnit}
-        onCancel={() => setUnitSheetOpen(false)}
+      <GoalSheet
+        open={goalOpen}
+        goalKcal={goalKcal}
+        onApply={(kcal) => {
+          onGoalChange(kcal);
+          setGoalOpen(false);
+        }}
+        onClear={() => {
+          onGoalChange(null);
+          setGoalOpen(false);
+        }}
+        onCancel={() => setGoalOpen(false)}
       />
     </RootScreenLayout>
   );

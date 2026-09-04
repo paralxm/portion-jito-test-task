@@ -8,17 +8,16 @@ import styles from './FoodIdentityHeader.module.css';
 
 export interface FoodIdentityHeaderProps {
   candidate: FoodCandidate;
-  /** Opens the shared method chooser (Home) or the correction route (Review). */
-  onChangeFood: () => void;
+  /** The correction route on review; omitted for an existing entry, whose identity is fixed. */
+  onChangeFood?: () => void;
   changeFoodLabel?: string;
   /** Id placed on the name heading; the caller's section points its `aria-labelledby` at it. */
   headingId: string;
 }
 
 /**
- * Name, optional detail, reference basis and a "Change food" action — the identity
- * block shared by Home's current-calculation module and Food review's candidate. Both
- * screens describe the same food the same way; only what surrounds this block differs.
+ * Name, optional detail, reference basis and an optional "Change food" action — the
+ * identity block at the top of Food review for a new candidate or an existing entry.
  */
 export function FoodIdentityHeader({ candidate, onChangeFood, changeFoodLabel = 'Change food', headingId }: FoodIdentityHeaderProps) {
   return (
@@ -36,9 +35,11 @@ export function FoodIdentityHeader({ candidate, onChangeFood, changeFoodLabel = 
           Nutrition basis: {describeReferenceBasis(candidate).toLowerCase()}
         </Text>
       </Stack>
-      <Button variant="secondary" icon={PencilSimple} onClick={onChangeFood}>
-        {changeFoodLabel}
-      </Button>
+      {onChangeFood ? (
+        <Button variant="secondary" size="small" icon={PencilSimple} onClick={onChangeFood}>
+          {changeFoodLabel}
+        </Button>
+      ) : null}
     </section>
   );
 }

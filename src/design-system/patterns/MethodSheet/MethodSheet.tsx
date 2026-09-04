@@ -1,8 +1,8 @@
 import { Barcode, Camera, MagnifyingGlass, PencilSimple } from '@phosphor-icons/react';
 
-import { MethodRow } from '../../components/MethodRow/MethodRow';
-import { Stack } from '../../primitives/layout/Stack';
+import { MethodOption } from '../../components/MethodOption/MethodOption';
 import { ModalSheet } from '../ModalSheet/ModalSheet';
+import styles from './MethodSheet.module.css';
 
 /** The four entry methods, in the order the low-fidelity contract fixes. */
 export type EntryMethod = 'search' | 'barcode' | 'photo' | 'manual';
@@ -17,17 +17,22 @@ export interface MethodSheetProps {
 
 /**
  * O01 — the shared Add food chooser, opened from every root and from recipe details.
- * Selecting a method starts identification only; it never commits food data.
+ * Four equal method tiles in a 2 × 2 grid (top-left to bottom-right: Search food, Scan
+ * barcode, Take a photo, Enter manually). Selecting a tile starts identification only;
+ * it never commits food data. The grid is a named container: below 20 rem of available
+ * width the tiles become full-width rows (see MethodOption).
  */
 export function MethodSheet({ open, onRequestClose, onChoose }: MethodSheetProps) {
   return (
-    <ModalSheet open={open} onRequestClose={onRequestClose} title="How would you like to add food?" description="Choose a method to identify your food. You can review it before anything changes.">
-      <Stack gap={8}>
-        <MethodRow icon={MagnifyingGlass} title="Search food" description="Type a name and pick from the results" onClick={() => onChoose('search')} />
-        <MethodRow icon={Barcode} title="Scan barcode" description="Point the camera at a product code" onClick={() => onChoose('barcode')} />
-        <MethodRow icon={Camera} title="Take a photo" description="Get a suggestion you can correct" onClick={() => onChoose('photo')} />
-        <MethodRow icon={PencilSimple} title="Enter manually" description="Type the nutrition you already know" onClick={() => onChoose('manual')} />
-      </Stack>
+    <ModalSheet open={open} onRequestClose={onRequestClose} title="Add food" description="Choose how to identify the food. You review it before anything is added.">
+      <div className={styles.frame}>
+        <div className={styles.grid}>
+          <MethodOption icon={MagnifyingGlass} title="Search food" description="Find a product or dish" onClick={() => onChoose('search')} />
+          <MethodOption icon={Barcode} title="Scan barcode" description="For packaged food" onClick={() => onChoose('barcode')} />
+          <MethodOption icon={Camera} title="Take a photo" description="Review suggested matches" onClick={() => onChoose('photo')} />
+          <MethodOption icon={PencilSimple} title="Enter manually" description="Use known label values" onClick={() => onChoose('manual')} />
+        </div>
+      </div>
     </ModalSheet>
   );
 }

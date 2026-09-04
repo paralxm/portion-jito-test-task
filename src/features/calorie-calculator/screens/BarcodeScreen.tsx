@@ -141,10 +141,10 @@ export function BarcodeScreen({ lookup, demoCodes, onFound, onBack, onSearchInst
           title="The barcode could not be read"
           actions={
             <>
-              <Button variant="primary" size="compact" onClick={rescan}>
+              <Button variant="primary" size="small" onClick={rescan}>
                 Try again
               </Button>
-              <Button variant="secondary" size="compact" onClick={onEnterManually}>
+              <Button variant="secondary" size="small" onClick={onEnterManually}>
                 Enter manually
               </Button>
             </>
@@ -160,13 +160,13 @@ export function BarcodeScreen({ lookup, demoCodes, onFound, onBack, onSearchInst
           title="Product not found"
           actions={
             <>
-              <Button variant="primary" size="compact" onClick={rescan}>
+              <Button variant="primary" size="small" onClick={rescan}>
                 Scan again
               </Button>
-              <Button variant="secondary" size="compact" onClick={onSearchInstead}>
+              <Button variant="secondary" size="small" onClick={onSearchInstead}>
                 Search by name
               </Button>
-              <Button variant="secondary" size="compact" onClick={onEnterManually}>
+              <Button variant="secondary" size="small" onClick={onEnterManually}>
                 Enter manually
               </Button>
             </>
@@ -182,10 +182,10 @@ export function BarcodeScreen({ lookup, demoCodes, onFound, onBack, onSearchInst
           title="Lookup failed"
           actions={
             <>
-              <Button variant="primary" size="compact" onClick={() => read(phase.code)}>
+              <Button variant="primary" size="small" onClick={() => read(phase.code)}>
                 Retry lookup
               </Button>
-              <Button variant="secondary" size="compact" onClick={onEnterManually}>
+              <Button variant="secondary" size="small" onClick={onEnterManually}>
                 Enter manually
               </Button>
             </>
@@ -206,19 +206,19 @@ export function BarcodeScreen({ lookup, demoCodes, onFound, onBack, onSearchInst
             This prototype has no camera or product database. These buttons simulate what a scan would produce.
           </Text>
           <div className={styles.demoActions}>
-            <Button variant="secondary" size="compact" onClick={() => read(demoCodes.found)}>
+            <Button variant="secondary" size="small" onClick={() => read(demoCodes.found)}>
               Simulate a matched product
             </Button>
-            <Button variant="secondary" size="compact" onClick={() => read(demoCodes.unknown)}>
+            <Button variant="secondary" size="small" onClick={() => read(demoCodes.unknown)}>
               Simulate an unknown product
             </Button>
-            <Button variant="secondary" size="compact" onClick={() => read(demoCodes.failing)}>
+            <Button variant="secondary" size="small" onClick={() => read(demoCodes.failing)}>
               Simulate a failed lookup
             </Button>
-            <Button variant="secondary" size="compact" onClick={() => setPhase({ kind: 'unreadable' })}>
+            <Button variant="secondary" size="small" onClick={() => setPhase({ kind: 'unreadable' })}>
               Simulate an unreadable code
             </Button>
-            <Button variant="secondary" size="compact" onClick={() => setPhase({ kind: 'denied' })}>
+            <Button variant="secondary" size="small" onClick={() => setPhase({ kind: 'denied' })}>
               Simulate camera denied
             </Button>
           </div>

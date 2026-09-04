@@ -1,7 +1,9 @@
-/* Button — one base, variants change treatment only, never type hierarchy.
-   Height is a minimum: a label may wrap and the control grows. */
+/* Button — one base, four treatments, two sizes. A treatment changes colour, never type
+   hierarchy; a size changes the label role and the drawn height, never the 48 px hit
+   area. Height is a minimum: a label may wrap and the control grows. */
 
 .button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -28,6 +30,22 @@
   inline-size: 100%;
 }
 
+/* Small: the drawn control is 40 px (its own fixed dimension, not a spacing value) for
+   in-context actions that must sit below a screen's primary action. The ::before
+   pseudo-element extends the hit area 4 px above and below, back to the 48 px minimum. */
+.button[data-size='small'] {
+  min-block-size: 40px;
+  padding-block: var(--portion-ref-space-8);
+  padding-inline: var(--portion-ref-space-12);
+}
+
+.button[data-size='small']::before {
+  content: '';
+  position: absolute;
+  inset-block: calc(var(--portion-ref-space-4) * -1);
+  inset-inline: 0;
+}
+
 .label {
   min-inline-size: 0;
   overflow-wrap: anywhere;
@@ -43,7 +61,7 @@
   flex-shrink: 0;
 }
 
-/* ---- variants ---- */
+/* ---- treatments ---- */
 
 .primary {
   background: var(--portion-color-action-primary);
@@ -51,9 +69,12 @@
   color: var(--portion-color-text-on-action);
 }
 
+/* Tinted, not outlined: the label identifies the control (WCAG 1.4.11 needs no boundary
+   contrast when the text does), and a soft fill keeps supporting actions from reading as
+   a row of competing frames. */
 .secondary {
-  background: var(--portion-color-background-canvas);
-  border-color: var(--portion-color-action-primary);
+  background: var(--portion-color-action-secondary-surface);
+  border-color: var(--portion-color-action-secondary-surface);
   color: var(--portion-color-action-primary);
 }
 
@@ -65,8 +86,8 @@
 }
 
 .destructive {
-  background: var(--portion-color-background-canvas);
-  border-color: var(--portion-color-feedback-error-foreground);
+  background: var(--portion-color-feedback-error-surface);
+  border-color: var(--portion-color-feedback-error-surface);
   color: var(--portion-color-feedback-error-foreground);
 }
 
@@ -77,13 +98,17 @@
     border-color: var(--portion-color-action-hover);
   }
 
-  .secondary:not(:disabled, [aria-busy='true']):hover,
+  .secondary:not(:disabled, [aria-busy='true']):hover {
+    color: var(--portion-color-action-hover);
+    border-color: var(--portion-color-action-primary);
+  }
+
   .text:not(:disabled, [aria-busy='true']):hover {
-    background: var(--portion-color-action-selected-surface);
+    background: var(--portion-color-action-secondary-surface);
   }
 
   .destructive:not(:disabled, [aria-busy='true']):hover {
-    background: var(--portion-color-feedback-error-surface);
+    border-color: var(--portion-color-feedback-error-foreground);
   }
 }
 
@@ -92,19 +117,18 @@
   border-color: var(--portion-color-action-pressed);
 }
 
-.secondary:not(:disabled, [aria-busy='true']):active,
-.text:not(:disabled, [aria-busy='true']):active {
-  background: var(--portion-color-action-selected-surface);
+.secondary:not(:disabled, [aria-busy='true']):active {
   color: var(--portion-color-action-pressed);
   border-color: var(--portion-color-action-pressed);
 }
 
 .text:not(:disabled, [aria-busy='true']):active {
-  border-color: transparent;
+  background: var(--portion-color-action-secondary-surface);
+  color: var(--portion-color-action-pressed);
 }
 
 .destructive:not(:disabled, [aria-busy='true']):active {
-  background: var(--portion-color-feedback-error-surface);
+  border-color: var(--portion-color-feedback-error-foreground);
 }
 
 /* ---- states ---- */
@@ -121,7 +145,7 @@
   border-color: transparent;
 }
 
-/* Loading keeps the variant's colours and size; activation is blocked in code. */
+/* Loading keeps the treatment's colours and size; activation is blocked in code. */
 .button[aria-busy='true'] {
   cursor: progress;
 }

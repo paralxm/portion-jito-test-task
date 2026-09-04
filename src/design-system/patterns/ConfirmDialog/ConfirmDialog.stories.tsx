@@ -12,7 +12,7 @@ const meta = {
   args: {
     open: true,
     title: 'Discard this entry?',
-    children: 'The values you typed will be lost. Your current calculation is not affected.',
+    children: 'The values you typed will be lost. Nothing already added to today changes.',
     confirmLabel: 'Discard',
     cancelLabel: 'Keep editing',
     destructive: true,
@@ -79,7 +79,7 @@ export const EscapeCancels: Story = {
 
 export const NonDestructive: Story = {
   name: 'Non-destructive confirmation',
-  args: { title: 'Replace the current calculation?', children: 'Vegetable rice bowl will be replaced by Oat drink. Foods are not added together.', confirmLabel: 'Replace', cancelLabel: 'Cancel', destructive: false },
+  args: { title: 'Leave the goal unchanged?', children: 'The daily goal stays at 2,200 kcal. Your entries are not affected.', confirmLabel: 'Leave unchanged', cancelLabel: 'Back', destructive: false },
 };
 
 export const FocusReturnsToOpener: Story = {
@@ -104,7 +104,7 @@ export const ClickInsideDoesNotClose: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Discard entry' }));
     const dialog = canvas.getByRole('alertdialog');
-    await userEvent.click(within(dialog).getByText('The values you typed will be lost. Your current calculation is not affected.'));
+    await userEvent.click(within(dialog).getByText('The values you typed will be lost. Nothing already added to today changes.'));
     await expect(dialog).toBeVisible();
     await expect(args.onCancel).not.toHaveBeenCalled();
   },

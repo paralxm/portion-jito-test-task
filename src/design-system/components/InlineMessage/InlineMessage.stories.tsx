@@ -35,8 +35,8 @@ export const Tones: Story = {
       <InlineMessage tone="info" announce="none">
         Matched from the barcode. If this is not the right product, change it before confirming.
       </InlineMessage>
-      <InlineMessage tone="warning" title="This replaces your current calculation" announce="none">
-        Confirming replaces “Vegetable rice bowl” with this food. Foods are not added together.
+      <InlineMessage tone="warning" title="Today’s total is partial" announce="none">
+        One entry has no calorie data, so the total is a known subtotal and the remaining amount is not available.
       </InlineMessage>
       <InlineMessage
         tone="error"
@@ -44,10 +44,10 @@ export const Tones: Story = {
         announce="none"
         actions={
           <>
-            <Button variant="primary" size="compact">
+            <Button variant="primary" size="small">
               Retry lookup
             </Button>
-            <Button variant="secondary" size="compact">
+            <Button variant="secondary" size="small">
               Enter manually
             </Button>
           </>

@@ -23,7 +23,8 @@ type Story = StoryObj<typeof meta>;
 const GROUPS: Record<string, string[]> = {
   Background: ['--portion-color-background-canvas', '--portion-color-background-surface', '--portion-color-background-sunken'],
   Text: ['--portion-color-text-primary', '--portion-color-text-secondary', '--portion-color-text-on-action', '--portion-color-text-disabled'],
-  Action: ['--portion-color-action-primary', '--portion-color-action-hover', '--portion-color-action-pressed', '--portion-color-action-selected-surface'],
+  Action: ['--portion-color-action-primary', '--portion-color-action-hover', '--portion-color-action-pressed', '--portion-color-action-selected-surface', '--portion-color-action-secondary-surface'],
+  Progress: ['--portion-color-progress-track', '--portion-color-progress-indicator'],
   Border: ['--portion-color-border-control', '--portion-color-border-decorative', '--portion-color-focus-ring'],
   Feedback: [
     '--portion-color-feedback-error-foreground',
@@ -69,6 +70,21 @@ const PAIRS: Pair[] = [
   { label: 'Control border on canvas (non-text boundary)', fg: '--portion-color-border-control', bg: '--portion-color-background-canvas', minimum: 3 },
   { label: 'Focus ring on canvas (non-text)', fg: '--portion-color-focus-ring', bg: '--portion-color-background-canvas', minimum: 3 },
   { label: 'Action primary on canvas (indicator, non-text)', fg: '--portion-color-action-primary', bg: '--portion-color-background-canvas', minimum: 3 },
+  { label: 'Primary text on surface (Home daily group, method tiles)', fg: '--portion-color-text-primary', bg: '--portion-color-background-surface', minimum: 4.5 },
+  { label: 'Primary text on sunken (segmented track, thumbnails)', fg: '--portion-color-text-primary', bg: '--portion-color-background-sunken', minimum: 4.5 },
+  { label: 'Secondary text on sunken (unselected segment, no-photo fallback, tags)', fg: '--portion-color-text-secondary', bg: '--portion-color-background-sunken', minimum: 4.5 },
+  { label: 'Secondary button: action text on secondary surface', fg: '--portion-color-action-primary', bg: '--portion-color-action-secondary-surface', minimum: 4.5 },
+  { label: 'Secondary button pressed: action pressed on secondary surface', fg: '--portion-color-action-pressed', bg: '--portion-color-action-secondary-surface', minimum: 4.5 },
+  { label: 'Selected chip / count badge: action pressed on selected surface', fg: '--portion-color-action-pressed', bg: '--portion-color-action-selected-surface', minimum: 4.5 },
+  { label: 'Selected segment boundary: control border on sunken track (non-text)', fg: '--portion-color-border-control', bg: '--portion-color-background-sunken', minimum: 3 },
+  { label: 'Control border on surface (tile hover boundary, non-text)', fg: '--portion-color-border-control', bg: '--portion-color-background-surface', minimum: 3 },
+  { label: 'Progress indicator on progress track (graphical object)', fg: '--portion-color-progress-indicator', bg: '--portion-color-progress-track', minimum: 3 },
+  { label: 'Progress indicator on surface (ring on the Home group)', fg: '--portion-color-progress-indicator', bg: '--portion-color-background-surface', minimum: 3 },
+  { label: 'Focus ring on surface (non-text)', fg: '--portion-color-focus-ring', bg: '--portion-color-background-surface', minimum: 3 },
+  { label: 'Focus ring on action primary (ring adjacent to a primary button, non-text)', fg: '--portion-color-focus-ring', bg: '--portion-color-action-primary', minimum: 0 },
+  { label: 'Disabled text on disabled surface (inactive component — exempt; must stay legible)', fg: '--portion-color-state-disabled-text', bg: '--portion-color-state-disabled-surface', minimum: 0 },
+  { label: 'Disabled text on canvas (disabled segment/chip — exempt)', fg: '--portion-color-state-disabled-text', bg: '--portion-color-background-canvas', minimum: 0 },
+  { label: 'Progress track on canvas (non-essential guide — not required)', fg: '--portion-color-progress-track', bg: '--portion-color-background-canvas', minimum: 0 },
   { label: 'Decorative border on canvas (decorative only — not required)', fg: '--portion-color-border-decorative', bg: '--portion-color-background-canvas', minimum: 0 },
 ];
 
@@ -143,7 +159,7 @@ export const ContrastPairs: Story = {
               </td>
               <td style={{ padding: '8px' }}>
                 <Text variant="supporting" color="secondary">
-                  {pair.minimum === 0 ? 'none (decorative)' : `${pair.minimum}:1 ${ok ? '— met' : '— NOT met'}`}
+                  {pair.minimum === 0 ? 'none (exempt or decorative)' : `${pair.minimum}:1 ${ok ? '— met' : '— NOT met'}`}
                 </Text>
               </td>
             </tr>

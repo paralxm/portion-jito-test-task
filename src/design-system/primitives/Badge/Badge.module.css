@@ -1,3 +1,4 @@
+/* A static tag. Compact-control radius: it is nested content, never a control. */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -5,11 +6,13 @@
   min-inline-size: 1.5em;
   padding-block: var(--portion-ref-space-0);
   padding-inline: var(--portion-ref-space-8);
-  border-radius: var(--portion-radius-control);
+  border-radius: var(--portion-radius-control-compact);
   background: var(--portion-color-background-sunken);
   white-space: nowrap;
 }
 
+/* Count: a 2 px inset (its own fixed dimension) keeps the tabular number optically
+   centred inside the 12/16 caption line. */
 .badge[data-kind='count'] {
   padding-block: 2px;
   background: var(--portion-color-action-selected-surface);

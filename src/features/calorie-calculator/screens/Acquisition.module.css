@@ -73,7 +73,7 @@
   margin: 0;
   padding: var(--portion-spacing-card-padding);
   border: var(--portion-border-width-default) dashed var(--portion-color-border-control);
-  border-radius: var(--portion-radius-card);
+  border-radius: var(--portion-radius-grouped);
   min-inline-size: 0;
 }
 

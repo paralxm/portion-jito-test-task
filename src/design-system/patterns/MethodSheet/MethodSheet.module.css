@@ -1,0 +1,22 @@
+/* The frame is the named query container the tiles read; the grid inside it is what
+   changes shape (an element cannot query its own size). */
+.frame {
+  container: method-grid / inline-size;
+  min-inline-size: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--portion-spacing-card-gap);
+  align-items: stretch;
+}
+
+/* Documented one-column condition: available width under 20 rem — the 320 px viewport at
+   100 % text (288 px of sheet body) and every supported width at 200 % text. */
+@container method-grid (max-width: 20rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--portion-spacing-related);
+  }
+}

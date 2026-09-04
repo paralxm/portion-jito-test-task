@@ -149,7 +149,7 @@ export function ManualEntryScreen({ initialDraft = EMPTY_MANUAL_DRAFT, onContinu
         }}
         onCancel={() => setDiscardOpen(false)}
       >
-        The values you typed will be lost. Your current calculation is not affected.
+        The values you typed will be lost. Nothing already added to today changes.
       </ConfirmDialog>
     </FocusedFlowLayout>
   );

@@ -2,9 +2,10 @@ import { useId, type ReactNode } from 'react';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
 
 import { NutrientRow } from '../../components/NutrientRow/NutrientRow';
+import { NutritionMacros } from '../../components/NutritionMacros/NutritionMacros';
 import { NutritionValue, type NutritionValueStatus } from '../../components/NutritionValue/NutritionValue';
 import { Button } from '../../primitives/Button/Button';
-import { NUTRIENT_CATEGORIES, type NutrientUnit } from '../../nutrition/nutrition';
+import type { NutrientUnit } from '../../nutrition/nutrition';
 import styles from './NutritionSummary.module.css';
 
 export interface NamedNutrient {
@@ -39,8 +40,9 @@ export interface NutritionSummaryProps {
 
 /**
  * The single nutrition presentation used by the calculator result and recipe details:
- * one main calorie value bound to its basis, three secondary macronutrient metrics, and
- * an optional expanded list behind one disclosure. Unknown values are named, never zero.
+ * one main calorie value bound to its basis, the three macronutrients one clear step
+ * below it, and an optional expanded list behind one disclosure. Unknown values are
+ * named, never zero.
  */
 export function NutritionSummary({ energy, protein, carbohydrates, fat, basis, status = 'known', additional, expanded = false, onToggleExpanded, className }: NutritionSummaryProps) {
   const id = useId();
@@ -52,25 +54,13 @@ export function NutritionSummary({ energy, protein, carbohydrates, fat, basis, s
   return (
     <section className={[styles.summary, className].filter(Boolean).join(' ')} aria-label="Nutrition">
       <NutritionValue size="main" value={energy} unit="kcal" basis={basis} status={status} label="Calories" />
-      <div className={styles.macros} role="list">
-        {(
-          [
-            ['protein', protein],
-            ['carbohydrates', carbohydrates],
-            ['fat', fat],
-          ] as const
-        ).map(([key, value]) => (
-          <div key={key} role="listitem" className={styles.macro}>
-            <NutritionValue size="secondary" value={value} unit={NUTRIENT_CATEGORIES[key].unit} label={NUTRIENT_CATEGORIES[key].label} category={key} status={status} />
-          </div>
-        ))}
-      </div>
+      <NutritionMacros size="secondary" protein={{ value: protein }} carbohydrates={{ value: carbohydrates }} fat={{ value: fat }} status={status} />
       {hasAdditional && status === 'known' ? (
-        <>
-          <Button variant="text" size="compact" icon={expanded ? CaretUp : CaretDown} aria-expanded={expanded} aria-controls={regionId} onClick={() => onToggleExpanded?.(!expanded)}>
+        <div className={styles.more}>
+          <Button variant="text" size="small" icon={expanded ? CaretUp : CaretDown} aria-expanded={expanded} aria-controls={regionId} onClick={() => onToggleExpanded?.(!expanded)}>
             {expanded ? 'Show less nutrition' : 'Show all nutrition'}
           </Button>
-          <div id={regionId} className={styles.more} hidden={!expanded} role="list" aria-label="Additional nutrition">
+          <div id={regionId} className={styles.list} hidden={!expanded} role="list" aria-label="Additional nutrition">
             {additional?.fibre !== undefined ? <NutrientRow name="of which fibre" value={additional.fibre} unit="g" category="fibre" nested /> : null}
             {additional?.vitamins && additional.vitamins.length > 0 ? (
               <>
@@ -89,7 +79,7 @@ export function NutritionSummary({ energy, protein, carbohydrates, fat, basis, s
               </>
             ) : null}
           </div>
-        </>
+        </div>
       ) : null}
     </section>
   );

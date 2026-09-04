@@ -18,9 +18,14 @@
   object-fit: cover;
 }
 
+/* The fallback is loaded content: a glyph and, where there is room, the words. Secondary
+   text on the sunken fill is 5.6:1. */
 .noPhoto {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--portion-ref-space-4);
   block-size: 100%;
+  color: var(--portion-color-text-secondary);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode, type SyntheticEvent } from 'react';
+import { useId, useLayoutEffect, useRef, type KeyboardEvent, type ReactNode, type SyntheticEvent } from 'react';
 
 import { Button } from '../../primitives/Button/Button';
 import { Inline } from '../../primitives/layout/Inline';
@@ -30,7 +30,9 @@ export function ConfirmDialog({ open, title, children, confirmLabel, cancelLabel
   const titleId = `confirm-title-${id}`;
   const bodyId = `confirm-body-${id}`;
 
-  useEffect(() => {
+  // Synchronous with the commit (see ModalSheet): the dialog is modal and the safe
+  // choice focused before the first paint.
+  useLayoutEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (open && !dialog.open) {
