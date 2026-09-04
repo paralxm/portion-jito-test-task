@@ -257,13 +257,13 @@ Navigation
 
 AppHeader, BackAction, NavigationBar
 
-Three destinations in one compact group and one separate circular Log food action (the plus; accessible name "Log food", implemented 2026-09-04); correct origin selection.
+Three destinations in one width-filling group and one separate circular Log food action (the plus; accessible name "Log food", implemented 2026-09-04); correct origin selection.
 
 Avoid copying an existing MethodRow into an unrelated new implementation merely to achieve a grid. Preserve a shared action pattern while adapting its layout. No voice method or Create a dish/ingredient builder is introduced.
 
 5. Navigation, overlays and state ownership
 
-One bottom row: Home | Search | Recipes | + Log food. Implemented 2026-09-04: the three destinations form one compact group that hugs its content; the plus is a separate 56 px circular action beside it, labelled Log food (superseding the earlier Add food label for the plus, the O01 title and Home's body action; Add to today remains the commit).
+One bottom row: Home | Search | Recipes | + Log food. Implemented 2026-09-04: the three destinations form one group of equal cells that fills the width beside the plus; the plus is a separate 56 px circular action after a 16 px gap, labelled Log food (superseding the earlier Add food label for the plus, the O01 title and Home's body action; Add to today remains the commit).
 
 Surface
 

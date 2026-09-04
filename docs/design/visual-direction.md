@@ -225,7 +225,7 @@ These are reference types and adaptations documented in the supplied board, not 
 
 ## 9. Applied navigation and component scope
 
-Use one bottom row: a compact group of the three destinations, **Home | Search | Recipes**, and beside it the separate circular **+ Log food** action. There are **three destinations and one action**; the group hugs its content and never spans the width, and only the action is a true circle in the action colour. Home is the initial destination. Log food opens O01 over the current screen and never becomes selected. Closing O01 dismisses it while preserving the underlying screen and its state.
+Use one bottom row: a compact group of the three destinations, **Home | Search | Recipes**, and beside it the separate circular **+ Log food** action. There are **three destinations and one action**; the group fills the width beside the action as three equal cells, a 16 px gap separates the action, and only the action is a true circle in the action colour. Home is the initial destination. Log food opens O01 over the current screen and never becomes selected. Closing O01 dismisses it while preserving the underlying screen and its state.
 
 O01 (titled Log food) presents four equal method tiles in a 2 × 2 grid at every supported width: Search food, Scan barcode, Take a photo and Enter manually. Labels remain visible and wrap; the grid becomes one column of rows only under enlarged text. Choosing a method starts that path immediately and does not log food.
 

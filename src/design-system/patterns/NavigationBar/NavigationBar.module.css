@@ -1,11 +1,12 @@
-/* One row: the compact destination group on the left, the circular Log food action on the
-   right. Neither spans the width; the row's inset and bottom safe area belong to the bar. */
+/* One row: the destination group fills the width beside the circular Log food action.
+   The 16 px gap between them is deliberately larger than the group's own 4 px rhythm and
+   equal to the page inset, so the action reads as a sibling of the group — separated by
+   function, not by distance — and the whole row reads as one navigation area. */
 
 .bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--portion-ref-space-12);
+  gap: var(--portion-ref-space-16);
   padding-block-start: var(--portion-ref-space-8);
   padding-block-end: max(var(--portion-ref-space-8), var(--portion-safe-area-bottom));
   padding-inline: var(--portion-spacing-page-inset);
@@ -17,30 +18,35 @@
   display: none;
 }
 
-/* The group hugs its three destinations; its 4 px padding keeps the active item's corner
-   concentric with its own (16 − 4 = 12). */
+/* The group takes all remaining width and shares it equally among the three destinations.
+   Its 4 px padding keeps the active cell's corner concentric with its own (16 − 4 = 12).
+   It is a named container so the active cell can adapt to the width it actually gets. */
 .group {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  flex: 1 1 0%;
+  align-items: stretch;
   gap: var(--portion-ref-space-4);
   min-inline-size: 0;
   padding: var(--portion-ref-space-4);
   background: var(--portion-color-navigation-surface);
   border: var(--portion-border-width-default) solid var(--portion-color-navigation-boundary);
   border-radius: var(--portion-radius-navigation-group);
+  container-type: inline-size;
+  container-name: nav-group;
 }
 
-/* A destination is a 48 px target. Inactive: the regular glyph alone. Active: bold glyph +
-   label on the contained selected surface; the label's appearance is the only width change,
-   and it happens only on a real selection change, never on hover or focus. */
+/* Each destination is an equal cell and a 48 px target. Inactive: the regular glyph alone.
+   Active: bold glyph + label on the contained selected surface, which is the whole cell, so
+   selection never changes any cell's width. */
 .destination {
   display: inline-flex;
+  flex: 1 1 0%;
   align-items: center;
   justify-content: center;
   gap: var(--portion-spacing-nav-icon-to-label);
   min-inline-size: var(--portion-size-target-minimum);
   min-block-size: var(--portion-size-target-minimum);
-  padding-inline: var(--portion-ref-space-12);
+  padding-inline: var(--portion-ref-space-4);
   border: 0;
   border-radius: var(--portion-radius-navigation-item);
   background: transparent;
@@ -53,13 +59,23 @@
 }
 
 .destination[data-selected] {
-  padding-inline: var(--portion-ref-space-16);
   background: var(--portion-color-navigation-selected-surface);
   color: var(--portion-color-navigation-selected-content);
 }
 
 .label {
   white-space: nowrap;
+}
+
+/* When a cell cannot hold glyph + label side by side — the group narrower than 16 rem:
+   the 320 px viewport, or any supported width under 200 % text — the active label stacks
+   under its glyph. The label never shrinks, truncates or disappears. */
+@container nav-group (max-width: 16rem) {
+  .destination[data-selected] {
+    flex-direction: column;
+    gap: var(--portion-ref-space-4);
+    padding-block: var(--portion-ref-space-4);
+  }
 }
 
 @media (hover: hover) {

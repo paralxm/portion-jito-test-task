@@ -53,7 +53,7 @@ The research emphasis on calculation without mandatory tracking remains valid. D
 
 3. Navigation contract
 
-One bottom row: Home | Search | Recipes | + Log food. There are three destinations, shown as one compact group, and one separate circular action. Implemented 2026-09-04: the plus's accessible name, the O01 title and Home's body action are Log food (superseding Add food); Add to today remains the commit. Calculate is a capability, not a navigation destination.
+One bottom row: Home | Search | Recipes | + Log food. There are three destinations, shown as one group of equal cells filling the width beside the plus, and one separate circular action. Implemented 2026-09-04: the plus's accessible name, the O01 title and Home's body action are Log food (superseding Add food); Add to today remains the commit. Calculate is a capability, not a navigation destination.
 
 Surface/action
 

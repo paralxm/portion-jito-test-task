@@ -36,7 +36,7 @@ software-keyboard and safe-area (`env(safe-area-inset-*)`) aware.
 
 ## Capabilities and Constraints
 
-**Navigation** — one bottom row, three destinations plus one action: **Home | Search | Recipes | + Log food** (the plus is labelled Log food; the three destinations form one compact group beside it). Log food opens the single O01 method-choice overlay (Search food, Scan barcode, Take a photo, Enter manually) above the current surface and never becomes a selected destination. Search keeps Food/Recipes scopes; Recipes is query-free browse with optional criteria; Recipe Details retains its originating Search/Recipes selection. Focused acquisition/review steps (S04–S07) have no bottom bar. "Calculate" is a capability, not a destination name.
+**Navigation** — one bottom row, three destinations plus one action: **Home | Search | Recipes | + Log food** (the plus is labelled Log food; the three destinations form one group of equal cells filling the width beside it). Log food opens the single O01 method-choice overlay (Search food, Scan barcode, Take a photo, Enter manually) above the current surface and never becomes a selected destination. Search keeps Food/Recipes scopes; Recipes is query-free browse with optional criteria; Recipe Details retains its originating Search/Recipes selection. Focused acquisition/review steps (S04–S07) have no bottom bar. "Calculate" is a capability, not a destination name.
 
 **Home states**
 

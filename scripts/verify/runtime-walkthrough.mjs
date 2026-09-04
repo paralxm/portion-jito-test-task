@@ -391,14 +391,17 @@ page = await newPage(320, 800, 'html { font-size: 200% !important; }');
 await addManualFood(page, 'Oatmeal with mixed berries', 550);
 await page.waitForTimeout(200);
 await shot(page, '51-home-320-200pct');
-await check(page, 'navigation group hugs its content and Log food stays a 56 px circle at 320 + 200%', async () =>
+await check(page, 'navigation group fills up to a 16 px gap before the 56 px Log food circle and stacks the active label at 320 + 200%', async () =>
   page.evaluate(() => {
     const nav = document.querySelector('nav:not([hidden])');
     const group = nav?.firstElementChild;
     const action = nav?.querySelector('button[aria-label="Log food"]');
-    if (!nav || !group || !action) return false;
+    const active = nav?.querySelector('button[aria-current="page"]');
+    if (!nav || !group || !action || !active) return false;
+    const g = group.getBoundingClientRect();
     const a = action.getBoundingClientRect();
-    return nav.scrollWidth <= nav.clientWidth + 1 && group.getBoundingClientRect().width < nav.clientWidth * 0.75 && Math.round(a.width) === 56 && Math.round(a.height) === 56;
+    const cells = Array.from(group.children).map((c) => c.getBoundingClientRect().width);
+    return nav.scrollWidth <= nav.clientWidth + 1 && Math.abs(a.left - g.right - 16) < 2 && Math.max(...cells) - Math.min(...cells) < 1.5 && Math.round(a.width) === 56 && Math.round(a.height) === 56 && getComputedStyle(active).flexDirection === 'column';
   }),
 );
 await check(page, 'calorie ring stacks its figure under a medium ring at 320 + 200%', async () => (await page.locator('[data-screen="home"] [data-layout]').first().getAttribute('data-layout')) === 'stacked');

@@ -285,11 +285,11 @@ Use one bottom row:
 [ Home | Search | Recipes ]   (+)
 ```
 
-This is **three destinations and one action**: the three destinations sit inside one compact group (navigation surface, hairline, `navigation-group` radius, 4 px padding) that hugs its content and never spans the width; the separate circular **+ Log food** action (`round`, 56 px, action fill, bold Plus, `aria-label="Log food"`, no visible caption) sits to its right. Both align in one row and read as one navigation area with two functions.
+This is **three destinations and one action**: the three destinations sit inside one group (navigation surface, hairline, `navigation-group` radius, 4 px padding) that fills the width beside the action as three equal cells; after a 16 px gap — larger than the group's 4 px rhythm, equal to the page inset, so the action reads as a sibling — the separate circular **+ Log food** action (`round`, 56 px, action fill, bold Plus, `aria-label="Log food"`, no visible caption) sits to its right. Both align in one row and read as one navigation area with two functions.
 
 Home is initial. Log food opens the shared entry sheet over the current screen from every root and from Recipe Details, and never becomes selected.
 
-The active destination shows its Phosphor bold glyph, its visible label (`nav-label-active`, 10 / 14, 700) and the contained selected surface (`navigation-selected-surface` / `navigation-selected-content`, `navigation-item` radius), and carries `aria-current="page"`. Inactive destinations show the regular glyph only and keep an accessible name. The selected destination stays visually subordinate to Log food, the bar's one filled element.
+The active destination shows its Phosphor bold glyph, its visible label (`nav-label-active`, 10 / 14, 700) and the contained selected surface (`navigation-selected-surface` / `navigation-selected-content`, `navigation-item` radius), and carries `aria-current="page"`. Inactive destinations show the regular glyph only and keep an accessible name. The selected destination stays visually subordinate to Log food, the bar's one filled element. While the group is narrower than 16 rem (320 px, or any width under 200 % text) the active label stacks under its glyph; it never shrinks or disappears.
 
 The reference for this structure (a compact destination group beside a separate primary action) was validated against the supplied reference image and Apple's tab-bar guidance; its blur, transparency, gradient, shadow, red colour, icons, dimensions, spacing, typography and exact radii were not copied.
 
@@ -540,7 +540,7 @@ Exact values live in the tokens and component CSS; this is the map of treatments
 - **NutritionValue / NutritionMacros / NutritionSummary**: main 40/48, secondary 20/28, compact 16/24 with short labels; markers 4 x 14 to 16 px; unknown = em dash + "Not available"; a partial subtotal is labelled.
 - **ProgressRing / CalorieProgressRing**: see section 11.
 - **ModalSheet / ConfirmDialog**: `sheet` radius (16), sheet shadow, scrim; native dialog focus containment.
-- **NavigationBar**: one compact group (navigation surface, hairline, `navigation-group` 16, 4 px padding) of three 48 px destinations — active = bold glyph + nav-label-active 10/14 700 + `navigation-selected-surface` at `navigation-item` 12; inactive = regular glyph only with `aria-label` — and, beside it, the separate circular 56 px Log food action (action fill, bold Plus, `aria-label="Log food"`). The group hugs content; nothing reflows.
+- **NavigationBar**: one compact group (navigation surface, hairline, `navigation-group` 16, 4 px padding) of three 48 px destinations — active = bold glyph + nav-label-active 10/14 700 + `navigation-selected-surface` at `navigation-item` 12; inactive = regular glyph only with `aria-label` — and, beside it, the separate circular 56 px Log food action (action fill, bold Plus, `aria-label="Log food"`). The group fills the remaining width as three equal cells; under 16 rem of group width the active label stacks under its glyph.
 - **Surface**: tones canvas/surface/sunken, borders none/decorative/control, radius structure/control/card/grouped.
 
 ---

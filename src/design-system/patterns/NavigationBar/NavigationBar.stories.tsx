@@ -14,9 +14,9 @@ const meta = {
     docs: {
       description: {
         component: `
-The bottom navigation for every root screen: a compact group of the three destinations — **Home, Search, Recipes** — and, beside it, the separate circular **Log food** action. One row, one navigation area, two functions.
+The bottom navigation for every root screen: one group of the three destinations — **Home, Search, Recipes** — filling the width beside the separate circular **Log food** action. One row, one navigation area, two functions.
 
-**Anatomy.** \`nav[aria-label="Main"]\` → a hugging group (navigation surface, hairline, \`navigation-group\` radius 16, 4 px padding) of three 48 px destination buttons, then a 56 px circular action button. The group never spans the width; the action sits to its right at the bar's inset.
+**Anatomy.** \`nav[aria-label="Main"]\` → a group (navigation surface, hairline, \`navigation-group\` radius 16, 4 px padding) that takes all remaining width and divides it into three equal destination cells (each at least 48 × 48), then — after a 16 px gap — the 56 px circular action button at the bar's inset. Gestalt: the three cells share one surface (common region) and equal widths (similarity); the gap to the action is larger than the group's 4 px rhythm but only the page inset's size (proximity), so the action reads as a sibling of the group rather than a stranger, and the row stays one aligned navigation area.
 
 **Active destination.** Bold Phosphor glyph + the visible label (\`nav-label-active\`, Inter 10/14, 700) + the contained selected surface (\`navigation-selected-surface\`, \`navigation-item\` radius 12) with \`navigation-selected-content\`, exposed as \`aria-current="page"\`. Selection is carried by surface, glyph weight and label together, never colour alone.
 
@@ -30,7 +30,7 @@ The bottom navigation for every root screen: a compact group of the three destin
 
 **Reference pattern (not copied).** The compact group + separate primary action structure is a mature mobile pattern (the supplied reference image; Apple HIG tab bars separate destinations from actions). Its blur, transparency, gradient, shadow, red colour, icons, dimensions, spacing, typography and exact radii were not used; Portion's tokens and these rules take priority.
 
-**Responsive.** The group hugs content, so nothing reflows at 320–430 px; at 200 % text the active label scales with rem and the row simply grows. The \`hidden\` prop removes the whole bar as one unit while a root text field has the software keyboard open.
+**Responsive.** The group fills whatever width the bar leaves beside the action, so the cells widen from 320 to 430 px instead of staying at content width. The group is a named container: while it is narrower than 16 rem — the 320 px viewport at 100 % text, or any supported width under 200 % text — the active cell stacks its label under the glyph (\`flex-direction: column\`); the label never shrinks, truncates or disappears, and every target stays at least 48 px tall. The \`hidden\` prop removes the whole bar as one unit while a root text field has the software keyboard open.
 
 **Accessibility.** Real buttons, logical Tab order (Home, Search, Recipes, Log food), the shared 3 px focus ring drawn outside each control, \`aria-current\` on exactly one destination, and the bottom safe area added to the bar's own padding.
 
@@ -136,7 +136,7 @@ export const LogFoodAction: Story = {
 };
 
 export const Selection: Story = {
-  name: 'Selection follows the destination; the group stays compact',
+  name: 'Selection follows the destination; cells stay equal',
   render: (args) => {
     const [selected, setSelected] = useState<Destination>('home');
     return <NavigationBar {...args} selected={selected} onSelect={setSelected} />;
@@ -148,10 +148,9 @@ export const Selection: Story = {
     await expect(recipes).toHaveAttribute('aria-current', 'page');
     await expect(visibleLabel(recipes)).toHaveTextContent('Recipes');
     await expect(visibleLabel(canvas.getByRole('button', { name: 'Home' }))).toBeNull();
-    // The group hugs its content: it never spans the bar.
-    const nav = canvas.getByRole('navigation');
-    const group = recipes.parentElement as HTMLElement;
-    await expect(group.getBoundingClientRect().width).toBeLessThan(nav.getBoundingClientRect().width * 0.75);
+    // Selecting never changes any cell's width: the cells stay equal.
+    const widths = ['Home', 'Search', 'Recipes'].map((name) => canvas.getByRole('button', { name }).getBoundingClientRect().width);
+    await expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(1.5);
   },
 };
 
@@ -181,26 +180,42 @@ export const KeyboardFocusVisible: Story = {
   },
 };
 
-const widthCheck = async (canvasElement: HTMLElement) => {
+/** Layout contract at every width: no overflow, equal 48 px cells, the group fills up to a 16 px gap before the 56 px action. */
+const widthCheck = async (canvasElement: HTMLElement, stacked: boolean) => {
   const canvas = within(canvasElement);
   const nav = canvas.getByRole('navigation');
   await expect(nav.scrollWidth).toBeLessThanOrEqual(nav.clientWidth + 1);
-  for (const name of ['Home', 'Search', 'Recipes']) await expect(canvas.getByRole('button', { name }).getBoundingClientRect().height).toBeGreaterThanOrEqual(48);
-  await expect(canvas.getByRole('button', { name: 'Log food' }).getBoundingClientRect().width).toBeGreaterThanOrEqual(56);
+  const cells = ['Home', 'Search', 'Recipes'].map((name) => canvas.getByRole('button', { name }).getBoundingClientRect());
+  for (const cell of cells) {
+    await expect(cell.height).toBeGreaterThanOrEqual(48);
+    await expect(cell.width).toBeGreaterThanOrEqual(48);
+  }
+  await expect(Math.max(...cells.map((c) => c.width)) - Math.min(...cells.map((c) => c.width))).toBeLessThan(1.5);
+  const group = (canvas.getByRole('button', { name: 'Home' }).parentElement as HTMLElement).getBoundingClientRect();
+  const action = canvas.getByRole('button', { name: 'Log food' }).getBoundingClientRect();
+  await expect(action.width).toBeGreaterThanOrEqual(56);
+  // The group starts at the bar's inset and ends exactly one 16 px gap before the action.
+  await expect(Math.abs(group.left - (nav.getBoundingClientRect().left + 16))).toBeLessThan(1.5);
+  await expect(Math.abs(action.left - group.right - 16)).toBeLessThan(1.5);
+  // The active cell stacks its label only when the group is narrower than 16 rem.
+  const home = canvas.getByRole('button', { name: 'Home' });
+  await expect(getComputedStyle(home).flexDirection).toBe(stacked ? 'column' : 'row');
+  const label = visibleLabel(home) as HTMLElement;
+  await expect(label.scrollWidth).toBeLessThanOrEqual(home.clientWidth + 1);
   await expectNoHorizontalOverflow();
 };
 
-export const Narrow320: Story = { name: 'Width — 320', globals: { viewport: { value: 'mobile320', isRotated: false } }, play: ({ canvasElement }) => widthCheck(canvasElement) };
-export const Reference390: Story = { name: 'Width — 390 (default viewport)', play: ({ canvasElement }) => widthCheck(canvasElement) };
-export const Check393: Story = { name: 'Width — 393', globals: { viewport: { value: 'mobile393', isRotated: false } }, play: ({ canvasElement }) => widthCheck(canvasElement) };
-export const Wide430: Story = { name: 'Width — 430', globals: { viewport: { value: 'mobile430', isRotated: false } }, play: ({ canvasElement }) => widthCheck(canvasElement) };
+export const Narrow320: Story = { name: 'Width — 320 (active label stacks)', globals: { viewport: { value: 'mobile320', isRotated: false } }, play: ({ canvasElement }) => widthCheck(canvasElement, true) };
+export const Reference390: Story = { name: 'Width — 390 (default viewport)', play: ({ canvasElement }) => widthCheck(canvasElement, false) };
+export const Check393: Story = { name: 'Width — 393', globals: { viewport: { value: 'mobile393', isRotated: false } }, play: ({ canvasElement }) => widthCheck(canvasElement, false) };
+export const Wide430: Story = { name: 'Width — 430', globals: { viewport: { value: 'mobile430', isRotated: false } }, play: ({ canvasElement }) => widthCheck(canvasElement, false) };
 
 export const EnlargedText: Story = {
   name: 'Enlarged text — 320 at 200 %',
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   decorators: [withRootFontSize(200)],
   play: async ({ canvasElement }) => {
-    await widthCheck(canvasElement);
+    await widthCheck(canvasElement, true);
     const label = visibleLabel(within(canvasElement).getByRole('button', { name: 'Home' })) as HTMLElement;
     await expect(Math.round(parseFloat(getComputedStyle(label).fontSize))).toBe(20);
   },
