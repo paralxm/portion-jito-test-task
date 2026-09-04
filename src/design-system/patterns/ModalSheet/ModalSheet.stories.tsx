@@ -5,7 +5,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button } from '../../primitives/Button/Button';
 import { Stack } from '../../primitives/layout/Stack';
 import { Text } from '../../primitives/Text/Text';
-import { expectNoHorizontalOverflow, withRootFontSize } from '../../storybook/decorators';
+import { expectNoHorizontalOverflow, iPhone16PortraitSafeAreas, withIPhone16PortraitSafeAreas, withRootFontSize } from '../../storybook/decorators';
 import { ModalSheet } from './ModalSheet';
 
 const meta = {
@@ -125,5 +125,20 @@ export const EnlargedText: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Open filters' }));
     await expect(canvas.getByRole('button', { name: 'Apply filters' })).toBeVisible();
     await expectNoHorizontalOverflow();
+  },
+};
+
+export const IPhone16PortraitSafeFooter: Story = {
+  name: 'iPhone 16 portrait - sheet footer owns bottom safe area once',
+  render: (args) => <Harness tall onRequestClose={args.onRequestClose} />,
+  globals: { viewport: { value: 'iPhone16Portrait', isRotated: false } },
+  decorators: [withIPhone16PortraitSafeAreas],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Open filters' }));
+    const footer = canvas.getByRole('button', { name: 'Apply filters' }).parentElement as HTMLElement;
+    const body = footer.previousElementSibling as HTMLElement;
+    await expect(parseFloat(getComputedStyle(footer).paddingBlockEnd)).toBe(iPhone16PortraitSafeAreas.bottom);
+    await expect(parseFloat(getComputedStyle(body).paddingBlockEnd)).toBe(16);
   },
 };

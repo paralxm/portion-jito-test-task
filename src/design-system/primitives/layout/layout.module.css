@@ -14,6 +14,55 @@
   min-inline-size: 0;
 }
 
+/* One mobile content boundary shared by headers, screen content, footers and navigation.
+   The 430 px cap is a fixed layout constraint, not a spacing token. Safe-area insets are
+   runtime environment values; the approved 16 px page inset remains a separate role. */
+.container {
+  inline-size: 100%;
+  max-inline-size: 430px;
+  margin-inline: auto;
+  min-inline-size: 0;
+  padding-inline-start: calc(var(--portion-safe-area-left) + var(--portion-spacing-page-inset));
+  padding-inline-end: calc(var(--portion-safe-area-right) + var(--portion-spacing-page-inset));
+}
+
+/* The four-column guide remains fluid. Full-width product content uses a four-track span;
+   paired controls opt into two tracks only when their labels and targets can still fit. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+  container-type: inline-size;
+  container-name: portion-grid;
+}
+
+.grid[data-grid-gap='0'] { gap: var(--portion-ref-space-0); }
+.grid[data-grid-gap='4'] { gap: var(--portion-ref-space-4); }
+.grid[data-grid-gap='8'] { gap: var(--portion-ref-space-8); }
+.grid[data-grid-gap='12'] { gap: var(--portion-ref-space-12); }
+.grid[data-grid-gap='16'] { gap: var(--portion-ref-space-16); }
+.grid[data-grid-gap='24'] { gap: var(--portion-ref-space-24); }
+.grid[data-grid-gap='32'] { gap: var(--portion-ref-space-32); }
+
+.gridItem {
+  grid-column: span 4;
+  min-inline-size: 0;
+}
+
+.gridItem[data-grid-span='1'] { grid-column: span 1; }
+.gridItem[data-grid-span='2'] { grid-column: span 2; }
+.gridItem[data-grid-span='3'] { grid-column: span 3; }
+.gridItem[data-grid-span='4'] { grid-column: span 4; }
+
+/* Two-track pairs are only an enhancement. At the first width where controls or long
+   labels would become cramped, they return to the normal full-width mobile row. */
+@container portion-grid (max-width: 20rem) {
+  .gridItem[data-collapse-at-narrow='true'] {
+    grid-column: span 4;
+  }
+}
+
 .inline[data-wrap='true'] {
   flex-wrap: wrap;
 }

@@ -1,9 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect } from 'storybook/test';
 
+import { Button } from '../primitives/Button/Button';
+import { Container } from '../primitives/layout/Container';
+import { Grid, GridItem } from '../primitives/layout/Grid';
 import { Stack } from '../primitives/layout/Stack';
+import { Surface } from '../primitives/Surface/Surface';
 import { Text } from '../primitives/Text/Text';
+import { AppHeader } from '../patterns/AppHeader/AppHeader';
+import { NavigationBar } from '../patterns/NavigationBar/NavigationBar';
+import { IPhone16PortraitReviewFrame, iPhone16PortraitSafeAreas, withIPhone16PortraitSafeAreas, withRootFontSize } from '../storybook/decorators';
 import { resolveVar } from '../storybook/contrast';
+import { RootScreenLayout } from '../templates/RootScreenLayout/RootScreenLayout';
 
 const meta = {
   title: 'Foundations/Spacing and layout',
@@ -30,7 +38,29 @@ never exposed through \`gap\` or any spacing token.
 Product and component styles consume semantic roles or the \`Stack\`/\`Inline\` primitives,
 never a raw \`reference.space\` value, outside of token definitions and this catalogue.
 \`full = 9999px\` is a radius token, not a spacing step. Safe-area insets are added on top
-of page spacing by the bar and focused footers.
+of page spacing by the owning header, navigation, footer, sheet, or Container boundary.
+
+### Four-column mobile alignment grid
+
+The primary review canvas is **393 x 852 CSS px**. Its content boundary has a 16 px page
+inset inside each runtime side safe area, then a real CSS grid with four fluid tracks and
+12 px gutters. With the iPhone 16 portrait fixture's 0 px side insets, the baseline is
+\`(393 - 2 x 16 - 3 x 12) / 4 = 81.25 px\` per track. CSS distributes fractional tracks;
+components never hardcode 81.25.
+
+This is an alignment guide, not a demand to make a normal mobile screen look four-column.
+Cards, long forms, search results and recipe lists use one full four-track span. A paired
+field may use two tracks only while its label, value and 48 px target fit; the real GridItem
+returns it to a full-width row below its content boundary. Nutrition summaries retain their
+own semantic track count.
+
+### Safe-area ownership
+
+Production reads \`env(safe-area-inset-*, 0px)\` through \`--portion-safe-area-*\`; it has
+no 59/34 fallback. The named **iPhone 16 portrait** Storybook fixture scopes 59 px top,
+34 px bottom and 0 px side insets only to the review story. Storybook viewport sizing alone
+does not emulate iOS safe areas. iOS owns the real Status Bar, Dynamic Island and Home
+Indicator: Portion reserves runtime insets but does not draw them.
         `,
       },
     },
@@ -158,4 +188,98 @@ export const FixedDimensionsAboveTheLayoutScale: Story = {
       </tbody>
     </table>
   ),
+};
+
+export const FourColumnGuide: Story = {
+  name: 'Four-column grid - 393 px baseline',
+  parameters: { layout: 'fullscreen' },
+  globals: { viewport: { value: 'iPhone16Portrait', isRotated: false } },
+  decorators: [withIPhone16PortraitSafeAreas],
+  render: () => (
+    <Container>
+      <Grid data-testid="four-column-grid">
+        {Array.from({ length: 4 }, (_, index) => (
+          <GridItem key={index} span={1}>
+            <Surface tone="sunken" border="none" radius="control" padding={12}>
+              <Text variant="label" numeric>
+                {index + 1}
+              </Text>
+            </Surface>
+          </GridItem>
+        ))}
+        <GridItem>
+          <Surface tone="surface" border="decorative" radius="card" padding={16}>
+            <Text variant="body">Normal mobile content spans all four alignment tracks.</Text>
+          </Surface>
+        </GridItem>
+      </Grid>
+    </Container>
+  ),
+  play: async ({ canvasElement }) => {
+    const grid = canvasElement.querySelector<HTMLElement>('[data-testid="four-column-grid"]');
+    await expect(grid).not.toBeNull();
+    if (!grid) return;
+    const tracks = getComputedStyle(grid).gridTemplateColumns.split(' ').map(parseFloat);
+    const expectedTrack = (grid.getBoundingClientRect().width - 3 * 12) / 4;
+    await expect(grid.getBoundingClientRect().width).toBeCloseTo(361, 1);
+    await expect(tracks).toHaveLength(4);
+    for (const track of tracks) await expect(track).toBeCloseTo(expectedTrack, 1);
+    await expect(parseFloat(getComputedStyle(grid).gap)).toBe(12);
+  },
+};
+
+export const TwoTrackPairsReflow: Story = {
+  name: 'Grid - paired fields stack at narrow and 200% text',
+  parameters: { layout: 'fullscreen' },
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  decorators: [withRootFontSize(200)],
+  render: () => (
+    <Container>
+      <Grid data-testid="paired-grid">
+        <GridItem span={2} collapseAtNarrow>
+          <Button block variant="secondary">Use grams as the portion unit</Button>
+        </GridItem>
+        <GridItem span={2} collapseAtNarrow>
+          <Button block variant="secondary">Use millilitres as the portion unit</Button>
+        </GridItem>
+      </Grid>
+    </Container>
+  ),
+  play: async ({ canvasElement }) => {
+    const items = Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-collapse-at-narrow]'));
+    await expect(items).toHaveLength(2);
+    for (const item of items) await expect(getComputedStyle(item).gridColumnStart).toBe('span 4');
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1);
+  },
+};
+
+export const IPhone16PortraitSafeAreaReference: Story = {
+  name: 'iPhone 16 portrait - 59/34 safe-area reference',
+  parameters: { layout: 'fullscreen' },
+  globals: { viewport: { value: 'iPhone16Portrait', isRotated: false } },
+  render: () => (
+    <IPhone16PortraitReviewFrame>
+      <RootScreenLayout
+        header={<AppHeader title="Safe-area reference" showWordmark />}
+        navigation={<NavigationBar selected="home" onSelect={() => undefined} onLogFood={() => undefined} />}
+      >
+        <Surface tone="surface" border="decorative" radius="card" padding={16}>
+          <Stack gap={8}>
+            <Text as="h2" variant="section-title">Usable content region</Text>
+            <Text as="p" variant="body" wrap>
+              The labelled bands are review-only fixture regions. They are neither spacing tokens nor production system chrome.
+            </Text>
+          </Stack>
+        </Surface>
+      </RootScreenLayout>
+    </IPhone16PortraitReviewFrame>
+  ),
+  play: async ({ canvasElement }) => {
+    const fixture = canvasElement.querySelector<HTMLElement>('[data-device-fixture="iphone-16-portrait"]');
+    await expect(fixture).not.toBeNull();
+    if (!fixture) return;
+    const computed = getComputedStyle(fixture);
+    await expect(computed.getPropertyValue('--portion-safe-area-top').trim()).toBe(`${iPhone16PortraitSafeAreas.top}px`);
+    await expect(computed.getPropertyValue('--portion-safe-area-bottom').trim()).toBe(`${iPhone16PortraitSafeAreas.bottom}px`);
+  },
 };

@@ -5,6 +5,8 @@ import { Button } from '../Button/Button';
 import { Surface } from '../Surface/Surface';
 import { Text } from '../Text/Text';
 import { expectNoHorizontalOverflow, withRootFontSize } from '../../storybook/decorators';
+import { Container } from './Container';
+import { Grid, GridItem } from './Grid';
 import { Inline } from './Inline';
 import { Stack, type SpaceStep } from './Stack';
 
@@ -38,10 +40,13 @@ action uses \`Button\`'s own \`block\` prop instead — \`Button\` always hugs i
 content by default, and it's the surrounding layout, not the button, that decides
 whether it should expand.
 
-There is no separate \`Container\` primitive: on this mobile-only prototype (320–430 CSS
-px, no desktop layout in scope) the page-inset responsibility a "container" would carry
-is already owned by \`RootScreenLayout\`/\`FocusedFlowLayout\`'s own content padding, so a
-generic centring/max-width wrapper has no real consumer to serve yet.
+\`Container\` owns the repeated mobile content boundary for headers, template content,
+footers and navigation: runtime side safe areas plus the 16 px page inset, with a centred
+430 px maximum at wider previews. \`Grid\` is the shared four-track alignment guide used by
+the templates; normal content stays a full span. \`GridItem collapseAtNarrow\` is the
+explicit opt-in for a two-track pair that must return to a full-width row before targets or
+long labels become cramped. The full reference metrics and safe-area fixture are documented
+in Foundations/Spacing and layout.
         `,
       },
     },
@@ -156,6 +161,30 @@ export const InlineFillEnlargedText: Story = {
     const discard = canvas.getByRole('button', { name: 'Discard everything I typed' });
     await expect(Math.abs(keep.getBoundingClientRect().width - discard.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
     await expect(keep.getBoundingClientRect().height).toBeGreaterThanOrEqual(48);
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const ContainerAndGrid: Story = {
+  name: 'Container and Grid - full span remains normal mobile content',
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <Container>
+      <Grid>
+        <GridItem>
+          <Surface tone="surface" border="decorative" radius="card" padding={16}>
+            <Text as="p" variant="body">
+              This full-span card aligns to the four-column guide without pretending that ordinary mobile content is four separate columns.
+            </Text>
+          </Surface>
+        </GridItem>
+      </Grid>
+    </Container>
+  ),
+  globals: { viewport: { value: 'widerPreview', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    const container = canvasElement.firstElementChild as HTMLElement;
+    await expect(container.getBoundingClientRect().width).toBeLessThanOrEqual(430);
     await expectNoHorizontalOverflow();
   },
 };

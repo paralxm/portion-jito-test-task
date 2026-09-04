@@ -30,8 +30,10 @@
   display: flex;
   flex-direction: column;
   inline-size: 100%;
-  max-inline-size: 640px;
-  max-block-size: 90dvh;
+  /* Matches the app's phone-focused content constraint. The surface still reaches the
+     viewport bottom; its usable height observes a runtime top inset on real devices. */
+  max-inline-size: 430px;
+  max-block-size: calc(100dvh - var(--portion-safe-area-top));
   background: var(--portion-color-background-canvas);
   color: var(--portion-color-text-primary);
   border-start-start-radius: var(--portion-radius-sheet);
@@ -69,7 +71,8 @@
   align-items: start;
   column-gap: var(--portion-ref-space-8);
   padding-block: var(--portion-ref-space-8) var(--portion-ref-space-12);
-  padding-inline: var(--portion-spacing-page-inset) var(--portion-ref-space-8);
+  padding-inline-start: calc(var(--portion-safe-area-left) + var(--portion-spacing-page-inset));
+  padding-inline-end: calc(var(--portion-safe-area-right) + var(--portion-ref-space-8));
   flex-shrink: 0;
 }
 
@@ -88,7 +91,8 @@
   min-block-size: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-inline: var(--portion-spacing-page-inset);
+  padding-inline-start: calc(var(--portion-safe-area-left) + var(--portion-spacing-page-inset));
+  padding-inline-end: calc(var(--portion-safe-area-right) + var(--portion-spacing-page-inset));
   padding-block-end: var(--portion-ref-space-16);
   scroll-padding-block-end: var(--portion-ref-space-16);
 }
@@ -97,7 +101,8 @@
   flex-shrink: 0;
   padding-block: var(--portion-ref-space-12);
   padding-block-end: max(var(--portion-ref-space-12), var(--portion-safe-area-bottom));
-  padding-inline: var(--portion-spacing-page-inset);
+  padding-inline-start: calc(var(--portion-safe-area-left) + var(--portion-spacing-page-inset));
+  padding-inline-end: calc(var(--portion-safe-area-right) + var(--portion-spacing-page-inset));
   border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
   background: var(--portion-color-background-canvas);
 }

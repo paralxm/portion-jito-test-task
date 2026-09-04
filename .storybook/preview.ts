@@ -6,6 +6,9 @@ import type { Preview } from '@storybook/react-vite';
 import '../src/design-system/styles/global.css';
 
 const viewports = {
+  iPhone16Portrait: { name: 'iPhone 16 portrait (393 x 852)', styles: { width: '393px', height: '852px' }, type: 'mobile' },
+  widerPreview: { name: 'Centered preview (768 x 900)', styles: { width: '768px', height: '900px' }, type: 'desktop' },
+  landscape: { name: 'Landscape (852 x 393)', styles: { width: '852px', height: '393px' }, type: 'mobile' },
   mobile320: { name: 'Narrow — 320', styles: { width: '320px', height: '568px' }, type: 'mobile' },
   mobile390: { name: 'Reference — 390', styles: { width: '390px', height: '844px' }, type: 'mobile' },
   mobile393: { name: 'Check — 393', styles: { width: '393px', height: '852px' }, type: 'mobile' },
