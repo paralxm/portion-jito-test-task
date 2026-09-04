@@ -77,14 +77,16 @@ Approved hierarchy:
 | `detail-heading` | 24 / 32 | 600 |
 | `section-title` | 20 / 28 | 600 |
 | `compact-title` | 18 / 24 | 600 |
-| `action` | 16 / 24 | 600 |
+| `action-md` | 16 / 24 | 600 |
 | `body` | 16 / 24 | 400 |
 | `label` | 14 / 20 | 500 |
 | `supporting` | 14 / 20 | 400 |
-| `compact-action` | 14 / 20 | 600 |
+| `action-sm` | 14 / 20 | 600 |
 | `caption` | 12 / 16 | 500 |
 | `caption-strong` | 12 / 16 | 600 |
 | `wordmark` | 24 / 32 | 600 |
+
+Aliases: `item-title`, `method-title` and `metric-inline` resolve to `action-md`; `metric-secondary` resolves to `section-title` (20 / 28) so the three macros sit one clear step below the 40 / 48 main result. `action-md` is the medium button label, `action-sm` the small button label and the selected segment of a segmented control. `caption` (12 px) is the smallest authored size: nothing goes below it, and a 10 px compact navigation label would be a verified fallback only; none exists, because the shipped fallback is the bar's measured 2 x 2 reflow at 12 / 16.
 
 Use one `main-result` value per screen where a primary calorie result exists.
 
@@ -94,19 +96,19 @@ Negative tracking is reserved for the lowercase `portion` wordmark.
 
 ---
 
-## 5. Color
+## 5. Colors
 
 Canonical tokens own exact values. This document owns role relationships.
 
 Foundation:
-- white canvas;
-- cool light surfaces;
-- neutral primary/secondary text;
-- subtle structural borders;
-- blue interaction family;
-- explicit focus treatment.
+- white canvas (`#FFFFFF`); light surface (`#F7F8FA`) for the one grouped surface per screen and for method tiles; sunken (`#F2F4F7`) for tracks, media fallbacks and pressed rows;
+- neutral primary (`#17212B`) and secondary (`#52606D`) text; disabled text is the lighter `#77818B` so an unavailable control never reads as an enabled secondary one;
+- control boundary `#77818B` (3.9:1 on canvas) and decorative boundary `#E4E8EC` (never an essential boundary);
+- blue interaction family: `action.primary` `#2855D9` fills the primary button and colours action text, tile glyphs and the selected navigation destination; `action.secondary-surface` `#EAF0FF` is the tinted fill of the secondary button and the text button's hover; `action.selected-surface` (same step) marks selected and applied chips and the count badge; the destructive button uses the error pair;
+- focus ring `#19368F`, 3 px outside the control with a 2 px canvas gap;
+- progress: `progress.track` `#E5E7EB` (a non-essential guide) and `progress.indicator` = the energy category accent `#17212B`. The calorie ring is neutral ink, not an action blue and never a success or error colour (12.6:1 on its track).
 
-Blue is primarily for actions, selection, focus, and information where clearly differentiated from controls. Do not color the primary calorie value blue merely for emphasis.
+Blue is primarily for actions, selection, focus, and information where clearly differentiated from controls. Do not color the primary calorie value blue merely for emphasis. The generated pair-by-pair evidence is `docs/design-system/contrast-matrix.md`.
 
 Operational feedback roles remain distinct:
 - error;
@@ -133,13 +135,16 @@ Values and units remain primarily neutral. Category color is supporting identifi
 
 Use current canonical tokens.
 
-Visual-direction reference:
-- structure radius: `0`
-- control radius: `4`
-- card radius: `8`
-- sheet radius: `12`
+Semantic radius roles (values from the unchanged canonical scale):
+- `structure` `0`: full-bleed regions only (viewfinder, media breakouts, bars); never the visible corner of an independent component surface;
+- `control-compact` `4`: elements nested inside another control or non-interactive tags: segmented-control segments, badges, checkbox boxes;
+- `control` `8`: buttons, inputs, search field, chips, the segmented-control track, inline messages, recipe-card thumbnails, the Add food glyph;
+- `card` `12`: independent content cards and tiles: recipe card, entry-method tile;
+- `grouped` `16`: a surface that holds a whole section: Home's daily overview group, prototype-control groups;
+- `sheet` `16`: top corners of bottom sheets and every corner of a centred dialog;
+- `round` `full`: true circles only: radio marks, step-number discs, the progress ring's caps.
 
-Typical mobile inset: `16 px`, plus safe-area accommodation where needed.
+Nested corners stay concentric (outer minus padding equals inner). Typical mobile inset: `16 px`, plus safe-area accommodation where needed.
 
 Spacing should communicate relationship:
 
@@ -167,6 +172,8 @@ Canvas
 → Interactive surface
 → Overlay / modal
 ```
+
+Each screen has at most one grouped surface (light surface, `grouped` radius, no border): on Home it holds the daily calorie state. Everything else sits on the canvas as plain sections; recipe cards and method tiles are the only bordered or tinted cards, because each is one tappable object. Buttons never rely on an outline: primary is filled, secondary and destructive are tinted, text is bare.
 
 A card must represent real grouping or a distinct interactive object.
 
@@ -254,9 +261,9 @@ CalorieProgressRing
 → calorie/Home-specific composition
 ```
 
-`ProgressRing` owns geometry, normalized progress, visual states, accessible value semantics, and rendering.
+`ProgressRing` (`src/design-system/primitives/ProgressRing/`) owns geometry (SVG, view box equal to the 100 % size, `large` 10 rem / 12 px stroke and `medium` 6 rem / 8 px stroke), clamping, the unavailable presentation (`value: null` draws the track only, never 0 % or 100 %), the over-limit full ring with the same geometry, the accessible image name, and the one short length transition that reduced motion removes.
 
-`CalorieProgressRing` owns consumed/remaining/target semantics, calorie labels, center content, and Home data.
+`CalorieProgressRing` (`src/features/calorie-calculator/components/`) owns the calorie wording and Home data. **The centre figure is remaining (goal minus logged) while a goal exists and the total is complete**; above the goal it is the excess ("kcal over goal"); without a goal or with a partial total it is the logged amount. Logged and Goal are always stated beneath. Under 16 rem of container width, or with a six-character figure, the ring switches to `medium` and the figure sits below it.
 
 The ring must communicate meaning without color alone.
 
@@ -288,13 +295,13 @@ Navigation must remain visually subordinate to content and respect safe areas, k
 
 ## 13. Add Food
 
-The shared Add food sheet offers:
-- Search food;
-- Scan barcode;
-- Take a photo;
-- Enter manually.
+The shared Add food sheet offers, as a 2 x 2 grid of equal tiles (`MethodOption`: action-coloured glyph, method-title, one-line description on the light surface with the card radius):
+- Search food (Find a product or dish);
+- Scan barcode (For packaged food);
+- Take a photo (Review suggested matches);
+- Enter manually (Use known label values).
 
-Methods are equal entry choices. Choosing one starts that path; it does not log food.
+Under 20 rem of available width (320 px at 100 % text; every width at 200 %) the grid becomes one column of rows through a container query, never an accidental collapse. Methods are equal entry choices. Choosing one starts that path; it does not log food.
 
 Food becomes part of today's committed entries only after the explicit current commit action succeeds.
 
@@ -322,7 +329,7 @@ Missing nutrition is unknown, not zero.
 
 Do not invent conversions between grams, milliliters, pieces, and servings.
 
-The calorie task is complete when the intended portion result is available. Adding it to today is optional and explicit.
+The calorie task is complete when the intended portion result is available. Adding it to today is optional and explicit: **Add to today** is the primary action, **Done** closes the task without logging. Opened from a Home row the same screen is in existing-entry mode ("Edit entry"): **Update entry** commits to the same entry and **Remove entry** asks first; Back with a changed amount offers Keep editing / Discard.
 
 ---
 
@@ -510,6 +517,27 @@ Use explicit status terms:
 - **Superseded** — replaced by newer authority.
 
 Do not describe accepted-but-unimplemented behavior as implemented.
+
+---
+
+## Components
+
+Exact values live in the tokens and component CSS; this is the map of treatments.
+
+- **Button**: `medium` 48 px / action-md, `small` 40 px drawn with a 48 px hit area / action-sm; `primary` filled blue with white text, `secondary` tinted blue-50 with blue text, `text` bare, `destructive` tinted red-50 with red-700 text; all `control` radius; disabled = disabled surface + disabled text; loading = spinner in the icon slot, activation ignored.
+- **IconButton**: 48 x 48 (56 x 56 for Add food), plain or outlined, same base as Button.
+- **Input / AmountField / SearchField**: 48 px, canvas fill, control boundary, `control` radius, body text; invalid = error boundary plus 1 px inset; focus ring outside.
+- **SegmentedControl**: sunken track (`control` radius, 4 px padding); selected segment = canvas fill + control boundary + primary text at action-sm; unselected = secondary text at label; disabled = disabled text + 0.6 opacity; radio-group semantics with roving tabindex.
+- **Chips**: `control` radius; selected = selected-surface + action boundary + check; the applied chip carries its own 48 px remove target.
+- **Badge**: `control-compact` radius, sunken fill, caption 12/16; count = selected-surface + action-pressed.
+- **MethodOption / MethodSheet**: surface-tinted tiles with the `card` radius in a 2 x 2 grid; rows under 20 rem.
+- **RecipeCard**: canvas card, decorative boundary, `card` radius, 12 px padding; 7 rem 4:3 thumbnail beside the text (6 rem under 19 rem, stacked under 17 rem); order: title, match evidence, calories and protein, basis, time and tags.
+- **MediaFrame**: sunken fallback with an image glyph; "No photo" visible in wide frames, assistive-only in compact thumbnails; a failed image shows the same fallback.
+- **NutritionValue / NutritionMacros / NutritionSummary**: main 40/48, secondary 20/28, compact 16/24 with short labels; markers 4 x 14 to 16 px; unknown = em dash + "Not available"; a partial subtotal is labelled.
+- **ProgressRing / CalorieProgressRing**: see section 11.
+- **ModalSheet / ConfirmDialog**: `sheet` radius (16), sheet shadow, scrim; native dialog focus containment.
+- **NavigationBar**: three destinations + Add food; selected = bold glyph, action colour, 2 px indicator, caption-strong label; measured 2 x 2 reflow under enlargement.
+- **Surface**: tones canvas/surface/sunken, borders none/decorative/control, radius structure/control/card/grouped.
 
 ---
 

@@ -124,7 +124,7 @@
   --portion-color-action-secondary-surface: var(--portion-ref-color-blue-50); /* Tinted fill of the secondary button and the text button's hover. Same step as selected-surface; a separate role so a later change to one does not silently restyle the other. */
   --portion-color-focus-ring: var(--portion-ref-color-blue-800);
   --portion-color-state-disabled-surface: var(--portion-ref-color-neutral-200);
-  --portion-color-state-disabled-text: var(--portion-ref-color-neutral-500); /* Label of a disabled control. 2.9:1 on the disabled surface, 3.9:1 on canvas — inactive components are exempt from the 4.5:1 minimum, and this step is deliberately lighter than text.secondary so a disabled control no longer reads as active. */
+  --portion-color-state-disabled-text: var(--portion-ref-color-neutral-500); /* Label of a disabled control. 3.2:1 on the disabled surface, 4.0:1 on canvas — inactive components are exempt from the 4.5:1 minimum, and this step is deliberately lighter than text.secondary so a disabled control no longer reads as active. */
   --portion-color-overlay-scrim: var(--portion-ref-color-neutral-900-alpha-40);
   --portion-color-feedback-error-foreground: var(--portion-ref-color-red-700);
   --portion-color-feedback-error-surface: var(--portion-ref-color-red-50);

@@ -75,18 +75,19 @@ The accepted scale (2026-09-03) is the one implemented in `src/design-system/tok
 | detail-heading | 24 / 32 | 600 | Food or recipe title on a detail screen |
 | section-title | 20 / 28 | 600 | Section and sheet titles |
 | compact-title | 18 / 24 | 600 | Focused bar titles, card and empty-state titles |
-| action | 16 / 24 | 600 | Button labels, unit selector |
+| action-md | 16 / 24 | 600 | Medium (default) button labels, unit selector |
 | body | 16 / 24 | 400 | Paragraphs, inputs, list items |
-| label | 14 / 20 | 500 | Field labels, chips, nutrient category labels |
+| label | 14 / 20 | 500 | Field labels, chips, nutrient category labels, unselected segments |
 | supporting | 14 / 20 | 400 | Helper, error, basis, secondary lines |
-| compact-action | 14 / 20 | 600 | Compact standalone actions (Reset, Clear) |
-| caption | 12 / 16 | 500 | Navigation labels |
+| action-sm | 14 / 20 | 600 | Small button labels (Filters, Reset all, Show all nutrition, Change food); the selected segment |
+| caption | 12 / 16 | 500 | Unselected navigation labels, dietary tags |
 | caption-strong | 12 / 16 | 600 | Selected navigation labels, count badge |
-| item-title, method-title, metric-inline | → action | | Row titles and inline values |
-| metric-secondary | → detail-heading | | Secondary macro values |
+| item-title, method-title, metric-inline | → action-md | | Row titles, method-tile titles and inline values |
+| metric-secondary | → section-title (20 / 28) | | Secondary macro values, one clear step below the 40 px result (renamed from the 24 px alias on 2026-09-04: the 24 px macros competed with the main result) |
 | wordmark | 24 / 32, −0.03em | 600 | The lowercase wordmark only |
 
-- Reserve the 40 px main-result style for one primary calorie value per screen, including the Home ring value; card and row values use metric-inline (16) and secondary metrics use 24.
+- Reserve the 40 px main-result style for one primary calorie value per screen, including the Home ring value; card and row values use metric-inline (16) and secondary metrics use 20.
+- 12 px (`caption`) is the smallest authored size. Apple recommends at least 11 pt for native iOS text; CSS px in this browser prototype are not iOS points, and no 10 px navigation fallback exists: the bar reflows to 2 x 2 at 12 / 16 instead.
 - Keep interface tracking normal. Keep a number and its unit together where possible, without creating overflow.
 - Use tabular figures on updating values and aligned numeric columns: `font-variant-numeric: tabular-nums` or the equivalent `"tnum"` feature. Align with layout, never inserted spaces.
 - The board reports tabular figures were not enabled through its authoring workflow. Treat them as unverified in Figma and required in code; do not turn that report into a general claim that Figma cannot support them.
@@ -130,12 +131,15 @@ Keep foundation/interaction, operational feedback and nutrition categories separ
 | `action/hover` | `#2147B6` |
 | `action/pressed` | `#19368F` |
 | `action/surfaceSelected` | `#EAF0FF` |
+| `action/surfaceSecondary` | `#EAF0FF` (added 2026-09-04): tinted fill of the secondary button and the text button's hover; the same step as `surfaceSelected`, kept as a separate role so one can change without the other |
 | `focus/ring` | `#19368F` |
 | `state/disabled/surface` | `#E5E7EB` |
-| `state/disabled/text` | `#59636E` |
+| `state/disabled/text` | `#77818B` (changed 2026-09-04 from `#59636E`, which was one neutral step from secondary text and made disabled controls read as enabled; inactive components are exempt from the text minimum and this step stays legible at 3.2:1 on the disabled surface) |
+| `progress/track` | `#E5E7EB` (added 2026-09-04): the ring's unfilled guide |
+| `progress/indicator` | `#17212B` (added 2026-09-04): the energy accent; the calorie arc is neutral ink, never blue or a feedback colour |
 | `scrim/base` | `#17212B` at 40% opacity |
 
-Blue is for actions, selection and focus—not the calorie value. Decorative borders may separate already-understandable regions, but cannot be the only essential control boundary.
+Blue is for actions, selection and focus—not the calorie value. Decorative borders may separate already-understandable regions, but cannot be the only essential control boundary. Secondary actions are tinted, not outlined: an outline made every supporting action a frame competing with the fields beside it, and a row of three outlined actions read as three equal calls to action. With a tinted fill the label identifies the control (WCAG 1.4.11 needs no boundary contrast when the text does) and the primary action stays the only filled one.
 
 ### Operational feedback
 
@@ -173,15 +177,18 @@ All six non-energy category accents exceed 4.5:1 against their listed subtle sur
 
 | Token / rule | Value | Use |
 | --- | --- | --- |
-| `radius/structure` | 0 px | Structural regions and separators |
-| `radius/control` | 4 px | Buttons, fields, chips, small callouts |
-| `radius/card` | 8 px | Cards and grouped data |
-| `radius/sheet` | 12 px | Sheet top corners |
-| Spacing scale | 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 px | Shared spacing values |
+| `radius/structure` | 0 px | Full-bleed structural regions only (viewfinder, media breakouts, bars); never the visible corner of an independent component |
+| `radius/control-compact` | 4 px | Elements nested inside another control, and non-interactive tags: segmented-control segments, badges, checkbox boxes |
+| `radius/control` | 8 px | Buttons, fields, chips, the segmented-control track, inline messages, recipe-card thumbnails, the Add food glyph |
+| `radius/card` | 12 px | Independent content cards and tiles: recipe card, entry-method tile |
+| `radius/grouped` | 16 px | A surface holding a whole section: Home's daily overview group, prototype-control groups |
+| `radius/sheet` | 16 px | Bottom-sheet top corners and centred dialogs |
+| `radius/round` | full | True circles only: radio marks, step-number discs, the progress ring's caps |
+| Spacing scale | 0 / 4 / 8 / 12 / 16 / 24 / 32 px | Shared spacing values (narrowed 2026-09-07; see the design-system guide, section 13) |
 | Mobile page inset / typical card padding | 16 px | Baseline; safe-area padding is additional |
 | Related items / form groups / major groups | 8 / 16 / 24 px | Visual hierarchy |
 
-No pill-shaped controls or 20–32 px card corners. A circular glyph does not change its target's geometry. Controls grow with content and text scaling.
+No pill-shaped controls or 20–32 px card corners. The seven roles were introduced on 2026-09-04 because every independent surface previously shared the 4 px control radius, so controls, tiles, cards and sheets could not be told apart by shape; the primitive scale itself is unchanged, and nested corners stay concentric (outer minus padding equals inner). A circular glyph does not change its target's geometry. Controls grow with content and text scaling.
 
 Ordinary surfaces use spacing and borders. The one overlay shadow is `0 -2px 24px 0 rgba(23, 33, 43, 0.16)`, for sheets only. Avoid decorative calorie rings, blobs, gradients, celebration graphics and unexplained gauges. Low-fidelity placeholder geometry does not override these visual tokens. The Home calorie ring is a functional visualization of explicitly logged calories against an optional user-set goal. Keep its value and progress arc neutral, provide equivalent text, and do not use an error color for exceeding the goal. Its no-goal and other states follow the UI contract.
 
@@ -222,7 +229,7 @@ Selection uses the Phosphor bold glyph, action color, a 2 px indicator and label
 
 Use one shared component implementation for the product and Storybook, with shared tokens. Reuse or extend an existing ring component where suitable; create one only if coverage is missing. Keep daily-food and goal logic outside the visual component. Figma specimens do not establish component availability or implementation status.
 
-Home presents today's explicitly logged food, a daily calorie summary, available macros and recipe discovery. Reviewing the identified food, correcting it, adjusting the portion and reading its calorie result belong in S07 — Food review.
+Home presents today's explicitly logged food, a daily calorie summary, available macros and recipe discovery. The daily group is the one grouped surface on Home (light surface, 16 px radius): the ring with the remaining figure inside it, Logged and Goal beneath, the contextual Set/Edit daily goal action in the group's own header row, and the compact Protein / Carbs / Fat row after a hairline. Today's food and Find a recipe are plain sections on the canvas with one primary and one tinted secondary action respectively. Reviewing the identified food, correcting it, adjusting the portion and reading its calorie result belong in S07 — Food review.
 
 The calorie task is complete when the intended portion's result is available. **Add to today** is an optional, explicit action; previewing or cancelling adds nothing. Older `Save result`, `Saving…` and `Result saved` specimens do not define current behavior. Use `Added to today` only after the corresponding action succeeds.
 

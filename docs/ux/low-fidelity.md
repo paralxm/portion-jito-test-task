@@ -127,7 +127,7 @@ Content and purpose
 
 Header
 
-Home, Today, and a contextual Set/Edit daily goal action. No Profile dependency.
+Home, Today, and a contextual Set/Edit daily goal action. No Profile dependency. Implementation note (2026-09-04): the app header carries the wordmark and the Home title; "Today" is the heading of the daily-calories group and the Set/Edit daily goal action sits in that group's header row, next to the goal it edits, rather than in the app header (same region order, one row lower).
 
 Daily calories
 
@@ -297,7 +297,7 @@ S06
 
 At the 393 px reference width, use four equal neutral outlined tiles in a 2×2 grid, approximately 16 px side insets, 12 px gaps and 108 px tile height. Each has icon, label and helper regions. Selecting a tile immediately enters that method: no radio state or extra Continue. Grid versus rows is a design hypothesis, not proven superior usability.
 
-At 320 px or enlarged text, increase height or reflow to full-width rows. Maintain readable content and at least 48×48 target areas. The narrower adaptation remains a verification task.
+At 320 px or enlarged text, increase height or reflow to full-width rows. Maintain readable content and at least 48×48 target areas. Verified in code 2026-09-04: under 20 rem of available width (320 px at 100 % text, every width at 200 %) the grid becomes one column of rows through a named container query; Storybook and the runtime walkthrough assert the column count at 390, 430, 320 and 200 %.
 
 Opening O01 leaves the underlying screen, query, filters, input and scroll intact. Close, backdrop and supported Escape dismiss only the sheet. Swipe is optional. The background is inactive. Method selection does not log food; camera permission is requested only when a camera method needs it.
 
@@ -317,13 +317,13 @@ Obtain result without logging
 
 Review/correct identity and portion in S07, read the result, then close to the invoking surface. Entries remain unchanged.
 
-S07 result/exit behavior needs alignment.
+Aligned in code 2026-09-04: Done closes to the invoking surface; nothing is logged.
 
 Add a new entry
 
 After reviewing a valid result, explicitly activate Add to today once. Append one entry and return to Home with updated totals.
 
-New intent must replace the old replacement confirmation.
+Implemented 2026-09-04: Add to today replaced the old replacement confirmation; one activation creates one entry.
 
 Inspect/edit a logged entry
 
