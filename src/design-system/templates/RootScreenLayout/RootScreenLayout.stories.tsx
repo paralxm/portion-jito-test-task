@@ -5,6 +5,7 @@ import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { AppHeader } from '../../patterns/AppHeader/AppHeader';
 import { NavigationBar } from '../../patterns/NavigationBar/NavigationBar';
 import { Text } from '../../primitives/Text/Text';
+import { iPhone16PortraitSafeAreas, withIPhone16PortraitSafeAreas } from '../../storybook/decorators';
 import { RootScreenLayout } from './RootScreenLayout';
 
 const meta = {
@@ -50,4 +51,18 @@ export const LongContent: Story = {
     )),
   },
   globals: { viewport: { value: 'shortHeight', isRotated: false } },
+};
+
+export const IPhone16PortraitSafeAreas: Story = {
+  name: 'iPhone 16 portrait - header and navigation own 59/34 once',
+  globals: { viewport: { value: 'iPhone16Portrait', isRotated: false } },
+  decorators: [withIPhone16PortraitSafeAreas],
+  play: async ({ canvasElement }) => {
+    const header = canvasElement.querySelector('header') as HTMLElement;
+    const navigation = within(canvasElement).getByRole('navigation', { name: 'Main' });
+    await expect(parseFloat(getComputedStyle(header).paddingBlockStart)).toBe(16 + iPhone16PortraitSafeAreas.top);
+    await expect(parseFloat(getComputedStyle(navigation).paddingBlockEnd)).toBe(iPhone16PortraitSafeAreas.bottom);
+    const main = within(canvasElement).getByRole('main');
+    await expect(parseFloat(getComputedStyle(main).paddingBlockStart)).toBe(0);
+  },
 };

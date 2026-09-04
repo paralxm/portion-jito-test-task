@@ -5,6 +5,7 @@ import { AmountField } from '../../components/AmountField/AmountField';
 import { TextField } from '../../components/TextField/TextField';
 import { AppHeader } from '../../patterns/AppHeader/AppHeader';
 import { Button } from '../../primitives/Button/Button';
+import { iPhone16PortraitSafeAreas, withIPhone16PortraitSafeAreas } from '../../storybook/decorators';
 import { FocusedFlowLayout } from './FocusedFlowLayout';
 
 const meta = {
@@ -46,7 +47,7 @@ export const Form: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('navigation')).toBeNull();
-    const footer = canvas.getByRole('button', { name: 'Continue to review' }).parentElement as HTMLElement;
+    const footer = canvas.getByRole('button', { name: 'Continue to review' }).parentElement?.parentElement as HTMLElement;
     await expect(getComputedStyle(footer).position).toBe('sticky');
   },
 };
@@ -58,7 +59,19 @@ export const ShortViewport: Story = {
     const canvas = within(canvasElement);
     const error = canvas.getByText('Enter fat in grams, or leave it blank');
     error.scrollIntoView({ block: 'end' });
-    const footer = canvas.getByRole('button', { name: 'Continue to review' }).parentElement as HTMLElement;
+    const footer = canvas.getByRole('button', { name: 'Continue to review' }).parentElement?.parentElement as HTMLElement;
     await expect(error.getBoundingClientRect().bottom).toBeLessThanOrEqual(footer.getBoundingClientRect().top + 1);
+  },
+};
+
+export const IPhone16PortraitSafeFooter: Story = {
+  name: 'iPhone 16 portrait - focused header/footer own 59/34 once',
+  globals: { viewport: { value: 'iPhone16Portrait', isRotated: false } },
+  decorators: [withIPhone16PortraitSafeAreas],
+  play: async ({ canvasElement }) => {
+    const header = canvasElement.querySelector('header') as HTMLElement;
+    const footer = within(canvasElement).getByRole('button', { name: 'Continue to review' }).parentElement?.parentElement as HTMLElement;
+    await expect(parseFloat(getComputedStyle(header).paddingBlockStart)).toBe(iPhone16PortraitSafeAreas.top);
+    await expect(parseFloat(getComputedStyle(footer).paddingBlockEnd)).toBe(iPhone16PortraitSafeAreas.bottom);
   },
 };

@@ -81,6 +81,11 @@ const CAPTURES = [
   ['35-navigationbar-keyboard-focus', 'Patterns/NavigationBar', 'Keyboard — focus order and focus-visible ring', 390, 100],
   ['36-segmentedcontrol-tabs', 'Components/SegmentedControl', 'Tabs pattern with a real tabpanel (as Search uses it)', 390, 100],
   ['37-methodsheet-rows-390-200', 'Patterns/MethodSheet', 'Enlarged text — 390 at 200 %: one column of rows', 390, 200],
+  ['38-grid-393-baseline', 'Foundations/Spacing and layout', 'Four-column grid - 393 px baseline', 393, 100],
+  ['39-iphone16-safe-reference', 'Foundations/Spacing and layout', 'iPhone 16 portrait - 59/34 safe-area reference', 393, 100],
+  ['40-root-safe-areas', 'Templates/RootScreenLayout', 'iPhone 16 portrait - header and navigation own 59/34 once', 393, 100],
+  ['41-focused-safe-footer', 'Templates/FocusedFlowLayout', 'iPhone 16 portrait - focused header/footer own 59/34 once', 393, 100],
+  ['42-sheet-safe-footer', 'Patterns/ModalSheet', 'iPhone 16 portrait - sheet footer owns bottom safe area once', 393, 100],
 ];
 
 const browser = await chromium.launch();
