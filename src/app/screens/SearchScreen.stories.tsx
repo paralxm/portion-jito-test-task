@@ -10,7 +10,7 @@ import { recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures
 import { filterRecipes, removeCriterion, searchRecipes, type RecipeCriteria } from '../../features/recipe-discovery/domain/matching';
 import { SearchScreen, type SearchScope } from './SearchScreen';
 
-const navigation = <NavigationBar selected="search" onSelect={fn()} onAddFood={fn()} />;
+const navigation = <NavigationBar selected="search" onSelect={fn()} onLogFood={fn()} />;
 const idle = { status: 'idle', results: [] } as const;
 
 function Harness({
@@ -93,7 +93,7 @@ export const Idle: Story = {
   name: 'Idle — Food scope, no query',
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('radio', { name: 'Food' })).toHaveAttribute('aria-checked', 'true');
+    await expect(canvas.getByRole('tab', { name: 'Food' })).toHaveAttribute('aria-selected', 'true');
     await expect(canvas.getByText('Search for a food or dish')).toBeInTheDocument();
     await expect(canvas.queryByRole('button', { name: /^Filters/ })).toBeNull();
   },
@@ -106,13 +106,13 @@ export const Interactive: Story = {
     const canvas = within(canvasElement);
     await userEvent.type(canvas.getByRole('searchbox'), 'lentil');
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('1 food found');
-    await userEvent.click(canvas.getByRole('radio', { name: 'Recipes' }));
+    await userEvent.click(canvas.getByRole('tab', { name: 'Recipes' }));
     await expect(canvas.getByRole('searchbox')).toHaveValue('lentil');
     await expect(canvas.getByRole('button', { name: /^Filters/ })).toBeInTheDocument();
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('1 recipe found');
     await userEvent.click(canvas.getByRole('button', { name: 'Lentil soup' }));
     await expect(args.onOpenRecipe).toHaveBeenCalledWith('recipe-lentil-soup');
-    await userEvent.click(canvas.getByRole('radio', { name: 'Food' }));
+    await userEvent.click(canvas.getByRole('tab', { name: 'Food' }));
     await userEvent.click(canvas.getByRole('button', { name: /Lentil soup/ }));
     await expect(args.onOpenFood).toHaveBeenCalledTimes(1);
   },
@@ -175,7 +175,7 @@ export const RecipesScopeWithCriteria: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('button', { name: 'Remove filter: Under 460 kcal' })).toBeInTheDocument();
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('match your filters');
-    await userEvent.click(canvas.getByRole('radio', { name: 'Food' }));
+    await userEvent.click(canvas.getByRole('tab', { name: 'Food' }));
     await expect(canvas.queryByRole('button', { name: /Remove filter/ })).toBeNull();
   },
 };

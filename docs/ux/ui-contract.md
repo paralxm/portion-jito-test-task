@@ -257,13 +257,13 @@ Navigation
 
 AppHeader, BackAction, NavigationBar
 
-Three destinations and one Add food action; correct origin selection.
+Three destinations in one compact group and one separate circular Log food action (the plus; accessible name "Log food", implemented 2026-09-04); correct origin selection.
 
 Avoid copying an existing MethodRow into an unrelated new implementation merely to achieve a grid. Preserve a shared action pattern while adapting its layout. No voice method or Create a dish/ingredient builder is introduced.
 
 5. Navigation, overlays and state ownership
 
-One bottom row: Home | Search | Recipes | + Add food.
+One bottom row: Home | Search | Recipes | + Log food. Implemented 2026-09-04: the three destinations form one compact group that hugs its content; the plus is a separate 56 px circular action beside it, labelled Log food (superseding the earlier Add food label for the plus, the O01 title and Home's body action; Add to today remains the commit).
 
 Surface
 
@@ -309,7 +309,9 @@ Background and bar inactive.
 
 Plus is a trailing button, never a selected tab or floating duplicate. Retain the project's 56×56 plus target. Other interactive controls have at least 48×48 CSS px targets. Use current-page/selected semantics appropriate to the actual implemented navigation pattern.
 
-O01 opens over Home, Search, Recipes or Recipe Details where Add food is present. Closing it preserves screen, input, criteria and scroll; selecting a method retains its origin and starts that flow. Camera permission is requested only when the chosen camera flow needs it.
+O01 opens over Home, Search, Recipes or Recipe Details where Log food is present. Closing it preserves screen, input, criteria and scroll; selecting a method retains its origin and starts that flow. Camera permission is requested only when the chosen camera flow needs it.
+
+Implemented 2026-09-04: Search's Food | Recipes switch is exposed as a tablist whose selected tab controls the results tabpanel (automatic activation, arrow keys move focus and selection together); it was a radio group before. Recipe criteria still never filter Food results.
 
 First Search entry uses Food and no query. Scope changes retain the query, while recipe criteria remain Recipes-specific. Tab switches retain contexts without duplicating navigation entries. New queries reset result scroll; returning from details restores it.
 

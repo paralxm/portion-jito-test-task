@@ -14,14 +14,15 @@ export interface MethodOptionProps extends Omit<ButtonHTMLAttributes<HTMLButtonE
 }
 
 /**
- * One entry-method choice inside the Add food sheet — the whole surface is the single
+ * One entry-method choice inside the Log food sheet — the whole surface is the single
  * control, so there is nothing nested to focus or mis-tap. Selecting it starts a
  * journey; it never commits food data.
  *
  * Layout is decided by the container it sits in: inside the sheet's `method-grid`
- * container it is a tile (icon above title) while the container is at least 20 rem
- * wide, and a full-width row (icon beside title) below that — 320 px viewports and
- * enlarged text — so four options always keep legible labels and 48 px targets.
+ * container it is a tile (icon above title) while the container is at least 17 rem
+ * wide — every supported viewport at 100 % text — and a full-width row (icon beside
+ * title) below that, i.e. under enlarged text, so four options always keep legible
+ * labels and 48 px targets.
  */
 export function MethodOption({ icon, title, description, className, ...rest }: MethodOptionProps) {
   return (

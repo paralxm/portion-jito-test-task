@@ -1,14 +1,13 @@
-/* One bar, four controls as direct grid items. Three destinations share the available
-   width equally; the Add food action is a fixed-width target in the same row. Height is
-   content-driven and includes the bottom safe area. */
+/* One row: the compact destination group on the left, the circular Log food action on the
+   right. Neither spans the width; the row's inset and bottom safe area belong to the bar. */
 
 .bar {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-  align-items: stretch;
-  column-gap: var(--portion-ref-space-4);
-  padding-block-start: var(--portion-ref-space-4);
-  padding-block-end: max(var(--portion-ref-space-4), var(--portion-safe-area-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-12);
+  padding-block-start: var(--portion-ref-space-8);
+  padding-block-end: max(var(--portion-ref-space-8), var(--portion-safe-area-bottom));
   padding-inline: var(--portion-spacing-page-inset);
   background: var(--portion-color-background-canvas);
   border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
@@ -18,116 +17,87 @@
   display: none;
 }
 
-.destination,
-.addFood {
-  position: relative;
-  display: flex;
-  flex-direction: column;
+/* The group hugs its three destinations; its 4 px padding keeps the active item's corner
+   concentric with its own (16 − 4 = 12). */
+.group {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--portion-spacing-nav-icon-to-label);
+  gap: var(--portion-ref-space-4);
   min-inline-size: 0;
-  min-block-size: var(--portion-size-target-minimum);
-  padding-block: var(--portion-ref-space-8) var(--portion-ref-space-4);
-  padding-inline: var(--portion-ref-space-4);
-  border: 0;
-  border-radius: var(--portion-radius-control);
-  background: transparent;
-  color: var(--portion-color-text-secondary);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+  padding: var(--portion-ref-space-4);
+  background: var(--portion-color-navigation-surface);
+  border: var(--portion-border-width-default) solid var(--portion-color-navigation-boundary);
+  border-radius: var(--portion-radius-navigation-group);
 }
 
-.destination[data-selected] {
-  color: var(--portion-color-action-primary);
-}
-
-/* 2 px indicator above the selected destination. */
-.indicator {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline: var(--portion-ref-space-12);
-  block-size: var(--portion-border-width-navigation-indicator);
-  border-radius: 1px;
-  background: transparent;
-}
-
-.destination[data-selected] .indicator {
-  background: var(--portion-color-action-primary);
-}
-
-/* The label slot lays out the bold weight invisibly so the width is stable when the
-   visible label switches between 500 and 600. */
-.labelSlot {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: center;
-  inline-size: 100%;
-  min-inline-size: 0;
-}
-
-.labelSlot > * {
-  grid-area: 1 / 1;
-}
-
-.labelGhost {
-  visibility: hidden;
-}
-
-/* The label is as wide as its cell, so an unbreakable word that does not fit is
-   measurable (scrollWidth > clientWidth) instead of silently widening the cell. */
-.label {
-  inline-size: 100%;
-  min-inline-size: 0;
-  text-align: center;
-  overflow-wrap: normal;
-}
-
-/* Invisible nowrap copy of each label, used only to measure its natural width. */
-.measure {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  visibility: hidden;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-/* Add food: a labelled action, visually distinct from the destinations. */
-.addFood {
-  min-inline-size: var(--portion-size-target-add-food);
-  min-block-size: var(--portion-size-target-add-food);
-  padding-inline: var(--portion-ref-space-8);
-  color: var(--portion-color-text-primary);
-}
-
-.addGlyph {
+/* A destination is a 48 px target. Inactive: the regular glyph alone. Active: bold glyph +
+   label on the contained selected surface; the label's appearance is the only width change,
+   and it happens only on a real selection change, never on hover or focus. */
+.destination {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  inline-size: var(--portion-ref-space-32);
-  block-size: var(--portion-ref-space-32);
-  border-radius: var(--portion-radius-control);
-  background: var(--portion-color-action-primary);
-  color: var(--portion-color-text-on-action);
+  gap: var(--portion-spacing-nav-icon-to-label);
+  min-inline-size: var(--portion-size-target-minimum);
+  min-block-size: var(--portion-size-target-minimum);
+  padding-inline: var(--portion-ref-space-12);
+  border: 0;
+  border-radius: var(--portion-radius-navigation-item);
+  background: transparent;
+  color: var(--portion-color-navigation-content);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.destination[data-selected] {
+  padding-inline: var(--portion-ref-space-16);
+  background: var(--portion-color-navigation-selected-surface);
+  color: var(--portion-color-navigation-selected-content);
+}
+
+.label {
+  white-space: nowrap;
 }
 
 @media (hover: hover) {
-  .destination:hover,
-  .addFood:hover {
-    background: var(--portion-color-background-surface);
+  .destination:not([data-selected]):hover {
+    background: var(--portion-color-background-sunken);
+    color: var(--portion-color-text-primary);
   }
 }
 
-.destination:active,
-.addFood:active {
+.destination:not([data-selected]):active {
   background: var(--portion-color-background-sunken);
+  color: var(--portion-color-text-primary);
 }
 
-/* Enlargement-only fallback: two rows of two, same reading order
-   (Home, Search / Recipes, Add food). */
-.bar[data-layout='stacked'] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  row-gap: var(--portion-ref-space-4);
+/* Log food: the one filled element in the bar, a true circle at the 56 px action target. */
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: var(--portion-size-target-add-food);
+  block-size: var(--portion-size-target-add-food);
+  padding: 0;
+  border: 0;
+  border-radius: var(--portion-radius-round);
+  background: var(--portion-color-navigation-action-surface);
+  color: var(--portion-color-navigation-action-content);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+@media (hover: hover) {
+  .action:hover {
+    background: var(--portion-color-action-hover);
+  }
+}
+
+.action:active {
+  background: var(--portion-color-action-pressed);
 }

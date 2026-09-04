@@ -11,7 +11,7 @@ const meta = {
   component: EmptyState,
   args: {
     title: 'No recipes available',
-    children: 'There is nothing to show yet. Use Add food below to search, scan a barcode, take a photo or enter values yourself.',
+    children: 'There is nothing to show yet. Use Log food below to search, scan a barcode, take a photo or enter values yourself.',
   },
   parameters: {
     docs: {

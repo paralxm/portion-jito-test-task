@@ -36,7 +36,7 @@ software-keyboard and safe-area (`env(safe-area-inset-*)`) aware.
 
 ## Capabilities and Constraints
 
-**Navigation** — one bottom row, three destinations plus one action: **Home | Search | Recipes | + Add food**. Add food opens the single O01 method-choice overlay (Search food, Scan barcode, Take a photo, Enter manually) above the current surface and never becomes a selected destination. Search keeps Food/Recipes scopes; Recipes is query-free browse with optional criteria; Recipe Details retains its originating Search/Recipes selection. Focused acquisition/review steps (S04–S07) have no bottom bar. "Calculate" is a capability, not a destination name.
+**Navigation** — one bottom row, three destinations plus one action: **Home | Search | Recipes | + Log food** (the plus is labelled Log food; the three destinations form one compact group beside it). Log food opens the single O01 method-choice overlay (Search food, Scan barcode, Take a photo, Enter manually) above the current surface and never becomes a selected destination. Search keeps Food/Recipes scopes; Recipes is query-free browse with optional criteria; Recipe Details retains its originating Search/Recipes selection. Focused acquisition/review steps (S04–S07) have no bottom bar. "Calculate" is a capability, not a destination name.
 
 **Home states**
 
@@ -57,7 +57,7 @@ Accepted supporting scope:
 - consumed and remaining calories when a goal is defined;
 - compact nutrition context;
 - an optional list of today's explicitly committed food entries with edit/removal;
-- Add food;
+- Log food;
 - recipe-discovery entry point.
 
 These are optional, non-prerequisite supporting capabilities.
@@ -87,7 +87,7 @@ that is an implementation gap, not an unresolved product decision: a daily-overv
 1. **Correctability over automation.** Every identification (search, barcode, photo, manual) produces a reviewable candidate; the product never treats an estimate as a committed fact.
 2. **Neutral numbers, judged nowhere.** Calorie/nutrition values stay visually neutral and are never colored, scored, or framed as praise/shame.
 3. **Optional context, not mandatory tracking.** Daily overview, goals, and logging (where accepted) are supporting context — both core jobs complete fully without them.
-4. **One destination, one truth.** Exactly one navigation destination is selected at a time; Add food is always an action, never a fourth destination.
+4. **One destination, one truth.** Exactly one navigation destination is selected at a time; Log food is always an action, never a fourth destination.
 5. **Code is the implementation source.** Figma/Storybook document and present the same product; they never substitute for the runtime implementation.
 
 ## Accessibility & Inclusion
@@ -110,7 +110,7 @@ It may include:
 - calorie progress;
 - compact nutrition context;
 - today's explicitly committed food entries;
-- Add food;
+- Log food;
 - recipe discovery.
 
 Daily logging and goal-setting remain optional supporting capabilities.

@@ -12,7 +12,7 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
   label: string;
   /** `plain` has no boundary (inside headers); `outlined` uses the control border. */
   variant?: 'plain' | 'outlined';
-  /** 48 × 48 by default; `large` is the 56 × 56 Add food target. */
+  /** 48 × 48 by default; `large` is the 56 × 56 action target (the size of the bar's Log food action). */
   size?: 'default' | 'large';
   loading?: boolean;
 }

@@ -77,17 +77,19 @@ The accepted scale (2026-09-03) is the one implemented in `src/design-system/tok
 | compact-title | 18 / 24 | 600 | Focused bar titles, card and empty-state titles |
 | action-md | 16 / 24 | 600 | Medium (default) button labels, unit selector |
 | body | 16 / 24 | 400 | Paragraphs, inputs, list items |
-| label | 14 / 20 | 500 | Field labels, chips, nutrient category labels, unselected segments |
+| label | 14 / 20 | 500 | Chips, nutrient category labels; control labels (`control-label` alias) and unselected segments (`segmented-label` alias) |
 | supporting | 14 / 20 | 400 | Helper, error, basis, secondary lines |
-| action-sm | 14 / 20 | 600 | Small button labels (Filters, Reset all, Show all nutrition, Change food); the selected segment |
-| caption | 12 / 16 | 500 | Unselected navigation labels, dietary tags |
-| caption-strong | 12 / 16 | 600 | Selected navigation labels, count badge |
+| action-sm | 14 / 20 | 600 | Small button labels (Filters, Reset all, Show all nutrition, Change food); the selected segment (`segmented-label-selected` alias, same metrics as the unselected one) |
+| caption | 12 / 16 | 500 | Dietary tags, incidental metadata — the floor for content text |
+| caption-strong | 12 / 16 | 600 | Count badge |
+| nav-label-active | 10 / 14 | 700 | The active bottom-navigation label only (added 2026-09-04): the sole role below 12 px, beside a bold glyph on the selected surface at 5.4:1 |
+| action-lg | → action-md | | Large (56 px) button label — the dominant action of a screen; the size is geometry, not type |
 | item-title, method-title, metric-inline | → action-md | | Row titles, method-tile titles and inline values |
 | metric-secondary | → section-title (20 / 28) | | Secondary macro values, one clear step below the 40 px result (renamed from the 24 px alias on 2026-09-04: the 24 px macros competed with the main result) |
 | wordmark | 24 / 32, −0.03em | 600 | The lowercase wordmark only |
 
 - Reserve the 40 px main-result style for one primary calorie value per screen, including the Home ring value; card and row values use metric-inline (16) and secondary metrics use 20.
-- 12 px (`caption`) is the smallest authored size. Apple recommends at least 11 pt for native iOS text; CSS px in this browser prototype are not iOS points, and no 10 px navigation fallback exists: the bar reflows to 2 x 2 at 12 / 16 instead.
+- 12 px (`caption`) is the floor for content text. The one exception is `nav-label-active` (10 / 14, 700), restricted to the active bottom-navigation label, which is redundant with the bold glyph and the selected surface and never carries content. Apple recommends at least 11 pt for native iOS text; CSS px in this browser prototype are not iOS points.
 - Keep interface tracking normal. Keep a number and its unit together where possible, without creating overflow.
 - Use tabular figures on updating values and aligned numeric columns: `font-variant-numeric: tabular-nums` or the equivalent `"tnum"` feature. Align with layout, never inserted spaces.
 - The board reports tabular figures were not enabled through its authoring workflow. Treat them as unverified in Figma and required in code; do not turn that report into a general claim that Figma cannot support them.
@@ -102,7 +104,7 @@ Official weights are `thin`, `light`, `regular`, `bold`, `fill`, `duotone`. Ther
 | Use | Rule |
 | --- | --- |
 | Default icon | `regular`, 24 px |
-| Selected navigation destination | `bold` plus action color, 2 px indicator and visible label |
+| Selected navigation destination | `bold` plus the selected surface and the visible 10 / 14 label; inactive destinations are regular glyphs only, with an accessible name |
 | Hover / pressed / focus | Retain regular unless already selected; change the control surface or focus ring |
 | Loading | Progress feedback, not a weight change; prevent repeated activation |
 | Static metadata | A documented 16 px icon may be used; not a smaller interactive target |
@@ -179,11 +181,13 @@ All six non-energy category accents exceed 4.5:1 against their listed subtle sur
 | --- | --- | --- |
 | `radius/structure` | 0 px | Full-bleed structural regions only (viewfinder, media breakouts, bars); never the visible corner of an independent component |
 | `radius/control-compact` | 4 px | Elements nested inside another control, and non-interactive tags: segmented-control segments, badges, checkbox boxes |
-| `radius/control` | 8 px | Buttons, fields, chips, the segmented-control track, inline messages, recipe-card thumbnails, the Add food glyph |
+| `radius/control` | 8 px | Buttons, fields, chips, the segmented-control track, inline messages, recipe-card thumbnails |
 | `radius/card` | 12 px | Independent content cards and tiles: recipe card, entry-method tile |
 | `radius/grouped` | 16 px | A surface holding a whole section: Home's daily overview group, prototype-control groups |
 | `radius/sheet` | 16 px | Bottom-sheet top corners and centred dialogs |
-| `radius/round` | full | True circles only: radio marks, step-number discs, the progress ring's caps |
+| `radius/navigation-group` | 16 px | The bottom navigation's compact destination group (chosen after rendering 12 and 16: 12 read as a card, 16 as a container) |
+| `radius/navigation-item` | 12 px | The active destination's contained surface inside the group (16 − 4 px padding, concentric) |
+| `radius/round` | full | True circles only: the Log food action, radio marks, step-number discs, the progress ring's caps |
 | Spacing scale | 0 / 4 / 8 / 12 / 16 / 24 / 32 px | Shared spacing values (narrowed 2026-09-07; see the design-system guide, section 13) |
 | Mobile page inset / typical card padding | 16 px | Baseline; safe-area padding is additional |
 | Related items / form groups / major groups | 8 / 16 / 24 px | Visual hierarchy |
@@ -221,11 +225,11 @@ These are reference types and adaptations documented in the supplied board, not 
 
 ## 9. Applied navigation and component scope
 
-Use one bottom row: **Home | Search | Recipes | + Add food**. There are **three destinations and one action**. Home is the initial destination. The trailing plus opens O01 over the current screen and never becomes selected. Closing O01 dismisses it while preserving the underlying screen and its state.
+Use one bottom row: a compact group of the three destinations, **Home | Search | Recipes**, and beside it the separate circular **+ Log food** action. There are **three destinations and one action**; the group hugs its content and never spans the width, and only the action is a true circle in the action colour. Home is the initial destination. Log food opens O01 over the current screen and never becomes selected. Closing O01 dismisses it while preserving the underlying screen and its state.
 
-O01 presents four equal method buttons in a 2 × 2 grid: Search food, Scan barcode, Take a photo and Enter manually. Labels remain visible and the layout grows or reflows when needed. Choosing a method starts that path immediately and does not log food.
+O01 (titled Log food) presents four equal method tiles in a 2 × 2 grid at every supported width: Search food, Scan barcode, Take a photo and Enter manually. Labels remain visible and wrap; the grid becomes one column of rows only under enlarged text. Choosing a method starts that path immediately and does not log food.
 
-Selection uses the Phosphor bold glyph, action color, a 2 px indicator and label. Details retain the originating tab. Search remains selected in both Food and Recipes scopes. Detailed visibility, keyboard, modal and return rules belong in the UI contract and low-fidelity document.
+Selection uses the Phosphor bold glyph, the contained selected surface and the visible 10 / 14 label; inactive destinations show the regular glyph only and keep an accessible name. Details retain the originating tab. Search remains selected in both Food and Recipes scopes. Detailed visibility, keyboard, modal and return rules belong in the UI contract and low-fidelity document.
 
 Use one shared component implementation for the product and Storybook, with shared tokens. Reuse or extend an existing ring component where suitable; create one only if coverage is missing. Keep daily-food and goal logic outside the visual component. Figma specimens do not establish component availability or implementation status.
 

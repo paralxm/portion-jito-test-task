@@ -9,7 +9,7 @@ import { foodCatalogue } from '../domain/fixtures';
 import { homeEntries } from '../domain/home-fixtures';
 import { HomeScreen } from './HomeScreen';
 
-const navigation = <NavigationBar selected="home" onSelect={fn()} onAddFood={fn()} />;
+const navigation = <NavigationBar selected="home" onSelect={fn()} onLogFood={fn()} />;
 
 /** Demonstration data only: the ui-contract §1 Home fixtures (1,350 of 2,200 kcal). */
 const populated = homeEntries();
@@ -31,13 +31,13 @@ function Harness(props: Omit<Parameters<typeof HomeScreen>[0], 'onGoalChange'> &
 const meta = {
   title: 'Product compositions/Home (S01)',
   component: HomeScreen,
-  args: { entries: [], goalKcal: null, onGoalChange: fn(), onOpenEntry: fn(), onAddFood: fn(), onFindRecipes: fn(), recipeCriteria: [], navigation },
+  args: { entries: [], goalKcal: null, onGoalChange: fn(), onOpenEntry: fn(), onLogFood: fn(), onFindRecipes: fn(), recipeCriteria: [], navigation },
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         component: `
-S01 — Home, the daily overview. Region order in both states: header → **Today** (the grouped focal surface: calorie ring with remaining/logged figure, Logged and Goal, the contextual Set/Edit daily goal action, and the compact Protein / Carbs / Fat aggregate) → **Today's food** (empty guidance + Add first food, or the logged rows + Add food) → **Find a recipe** (Find recipes, or the applied Recipes-browse filters with See matching recipes) → the bottom bar with Home current.
+S01 — Home, the daily overview. Region order in both states: header → **Today** (the grouped focal surface: calorie ring with remaining/logged figure, Logged and Goal, the contextual Set/Edit daily goal action, and the compact Protein / Carbs / Fat aggregate) → **Today's food** (empty guidance + Add first food, or the logged rows + Log food) → **Find a recipe** (Find recipes, or the applied Recipes-browse filters with See matching recipes) → the bottom bar with Home current.
 
 **S01-1** is "no committed entries today", **S01-2** "one or more" — decided by entry count, never by the energy sum, so a valid zero-kcal entry still populates the list. No goal is set by default; 2,200 kcal is a demonstration value. Home has no inline calculator: identify, correct and calculate a portion in S07, and add it to today from there.
         `,
@@ -59,12 +59,12 @@ export const EmptyNoGoal: Story = {
     await expect(canvas.getByText('Not set')).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Set a daily goal' })).toBeVisible();
     await expect(canvas.getByText(/Nothing logged today/)).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: 'Add first food' }));
-    await expect(args.onAddFood).toHaveBeenCalledTimes(1);
+    await userEvent.click(canvas.getByRole('button', { name: 'Log first food' }));
+    await expect(args.onLogFood).toHaveBeenCalledTimes(1);
     await userEvent.click(canvas.getByRole('button', { name: 'Find recipes' }));
     await expect(args.onFindRecipes).toHaveBeenCalledTimes(1);
-    // Exactly one body Add food CTA plus the nav's trailing action.
-    await expect(canvas.getAllByRole('button', { name: /Add (first )?food/ })).toHaveLength(2);
+    // Exactly one body Log food CTA plus the bar's Log food action.
+    await expect(canvas.getAllByRole('button', { name: /Log (first )?food/ })).toHaveLength(2);
   },
 };
 
@@ -94,8 +94,8 @@ export const Populated: Story = {
     await expect(row).toHaveTextContent('550 kcal');
     await userEvent.click(row);
     await expect(args.onOpenEntry).toHaveBeenCalledWith('demo-oatmeal');
-    // The body CTA and the nav's trailing action share the "Add food" name: one O01.
-    await expect(canvas.getAllByRole('button', { name: 'Add food' })).toHaveLength(2);
+    // The body CTA and the bar's action share the "Log food" name: one O01.
+    await expect(canvas.getAllByRole('button', { name: 'Log food' })).toHaveLength(2);
   },
 };
 

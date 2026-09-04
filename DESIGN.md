@@ -84,9 +84,10 @@ Approved hierarchy:
 | `action-sm` | 14 / 20 | 600 |
 | `caption` | 12 / 16 | 500 |
 | `caption-strong` | 12 / 16 | 600 |
+| `nav-label-active` | 10 / 14 | 700 |
 | `wordmark` | 24 / 32 | 600 |
 
-Aliases: `item-title`, `method-title` and `metric-inline` resolve to `action-md`; `metric-secondary` resolves to `section-title` (20 / 28) so the three macros sit one clear step below the 40 / 48 main result. `action-md` is the medium button label, `action-sm` the small button label and the selected segment of a segmented control. `caption` (12 px) is the smallest authored size: nothing goes below it, and a 10 px compact navigation label would be a verified fallback only; none exists, because the shipped fallback is the bar's measured 2 x 2 reflow at 12 / 16.
+Aliases: `item-title`, `method-title` and `metric-inline` resolve to `action-md`; `metric-secondary` resolves to `section-title` (20 / 28) so the three macros sit one clear step below the 40 / 48 main result. `action-lg` (large button) resolves to `action-md`: the 56 px size is geometry, not type. `action-md` is the medium button label, `action-sm` the small button label; `control-label` and `segmented-label` resolve to `label`, `segmented-label-selected` to `action-sm`, so a segment never reflows when selected. `caption` (12 px) is the floor for content text. The one role below it, `nav-label-active` (10 / 14, 700), is restricted to the active bottom-navigation label, where it sits beside a bold glyph on the selected surface at 5.4:1; nothing else goes below 12 px.
 
 Use one `main-result` value per screen where a primary calorie result exists.
 
@@ -138,11 +139,12 @@ Use current canonical tokens.
 Semantic radius roles (values from the unchanged canonical scale):
 - `structure` `0`: full-bleed regions only (viewfinder, media breakouts, bars); never the visible corner of an independent component surface;
 - `control-compact` `4`: elements nested inside another control or non-interactive tags: segmented-control segments, badges, checkbox boxes;
-- `control` `8`: buttons, inputs, search field, chips, the segmented-control track, inline messages, recipe-card thumbnails, the Add food glyph;
+- `control` `8`: buttons, inputs, search field, chips, the segmented-control track, inline messages, recipe-card thumbnails;
 - `card` `12`: independent content cards and tiles: recipe card, entry-method tile;
 - `grouped` `16`: a surface that holds a whole section: Home's daily overview group, prototype-control groups;
+- `navigation-group` `16` and `navigation-item` `12`: the bottom navigation's compact destination group and the active destination inside it (16 − 4 px padding, concentric); chosen after rendering 12/8, 16/8, 12/12 and 16/12 — 12 read as a card, 16 as a container;
 - `sheet` `16`: top corners of bottom sheets and every corner of a centred dialog;
-- `round` `full`: true circles only: radio marks, step-number discs, the progress ring's caps.
+- `round` `full`: true circles only: the Log food action, radio marks, step-number discs, the progress ring's arc caps.
 
 Nested corners stay concentric (outer minus padding equals inner). Typical mobile inset: `16 px`, plus safe-area accommodation where needed.
 
@@ -240,7 +242,7 @@ Home may include:
 - calorie progress;
 - compact nutrition/macros;
 - today's committed entries;
-- Add food;
+- Log food;
 - recipe discovery.
 
 Logging and goal setup are optional. Neither is required to calculate a food result or evaluate a recipe.
@@ -280,22 +282,24 @@ Verify zero, partial, near target, target, supported over-target/no-goal states,
 Use one bottom row:
 
 ```text
-Home | Search | Recipes | + Add food
+[ Home | Search | Recipes ]   (+)
 ```
 
-This is **three destinations and one action**.
+This is **three destinations and one action**: the three destinations sit inside one compact group (navigation surface, hairline, `navigation-group` radius, 4 px padding) that hugs its content and never spans the width; the separate circular **+ Log food** action (`round`, 56 px, action fill, bold Plus, `aria-label="Log food"`, no visible caption) sits to its right. Both align in one row and read as one navigation area with two functions.
 
-Home is initial. `+ Add food` opens the shared entry sheet over the current screen and never becomes selected.
+Home is initial. Log food opens the shared entry sheet over the current screen from every root and from Recipe Details, and never becomes selected.
 
-Selected destinations use the current selected-state system: Phosphor bold, action color, visible label, and indicator.
+The active destination shows its Phosphor bold glyph, its visible label (`nav-label-active`, 10 / 14, 700) and the contained selected surface (`navigation-selected-surface` / `navigation-selected-content`, `navigation-item` radius), and carries `aria-current="page"`. Inactive destinations show the regular glyph only and keep an accessible name. The selected destination stays visually subordinate to Log food, the bar's one filled element.
 
-Navigation must remain visually subordinate to content and respect safe areas, keyboard behavior, readable labels, and current UX return/origin rules.
+The reference for this structure (a compact destination group beside a separate primary action) was validated against the supplied reference image and Apple's tab-bar guidance; its blur, transparency, gradient, shadow, red colour, icons, dimensions, spacing, typography and exact radii were not copied.
+
+Navigation must remain visually subordinate to content and respect safe areas (added to the bar's own padding), software-keyboard hiding (the whole bar as one unit), and the current UX return/origin rules.
 
 ---
 
-## 13. Add Food
+## 13. Log Food
 
-The shared Add food sheet offers, as a 2 x 2 grid of equal tiles (`MethodOption`: action-coloured glyph, method-title, one-line description on the light surface with the card radius):
+The shared Log food sheet (title "Log food") offers, as a 2 x 2 grid of equal tiles (`MethodOption`: action-coloured glyph, method-title, one-line description on the light surface with the card radius):
 - Search food (Find a product or dish);
 - Scan barcode (For packaged food);
 - Take a photo (Review suggested matches);
@@ -524,19 +528,19 @@ Do not describe accepted-but-unimplemented behavior as implemented.
 
 Exact values live in the tokens and component CSS; this is the map of treatments.
 
-- **Button**: `medium` 48 px / action-md, `small` 40 px drawn with a 48 px hit area / action-sm; `primary` filled blue with white text, `secondary` tinted blue-50 with blue text, `text` bare, `destructive` tinted red-50 with red-700 text; all `control` radius; disabled = disabled surface + disabled text; loading = spinner in the icon slot, activation ignored.
-- **IconButton**: 48 x 48 (56 x 56 for Add food), plain or outlined, same base as Button.
+- **Button**: `large` 56 px, 24 px inline padding, 24 px glyph / action-lg (the dominant action of a screen: footer Add to today / Update entry / Continue to review, Home's Log food); `medium` 48 px / action-md; `small` 40 px drawn with a 48 px hit area / action-sm; `primary` filled blue with white text, `secondary` tinted blue-50 with blue text, `text` bare, `destructive` tinted red-50 with red-700 text; all `control` radius; disabled = disabled surface + disabled text; loading = spinner in the icon slot, activation ignored.
+- **IconButton**: 48 x 48 (56 x 56 at `size="large"`), plain or outlined, same base as Button.
 - **Input / AmountField / SearchField**: 48 px, canvas fill, control boundary, `control` radius, body text; invalid = error boundary plus 1 px inset; focus ring outside.
-- **SegmentedControl**: sunken track (`control` radius, 4 px padding); selected segment = canvas fill + control boundary + primary text at action-sm; unselected = secondary text at label; disabled = disabled text + 0.6 opacity; radio-group semantics with roving tabindex.
+- **SegmentedControl**: sunken track (`control` radius, 4 px padding); selected segment = action fill + on-action text at segmented-label-selected (600); unselected = primary text at segmented-label (500), hover lifts to the surface tint, pressed to canvas; disabled = disabled text, no hover/press; selected + disabled = disabled surface + disabled text (still contained); `pattern="radio"` (radiogroup) or `pattern="tabs"` (tablist + `aria-controls`, the Search scope switch) with roving tabindex and automatic activation.
 - **Chips**: `control` radius; selected = selected-surface + action boundary + check; the applied chip carries its own 48 px remove target.
 - **Badge**: `control-compact` radius, sunken fill, caption 12/16; count = selected-surface + action-pressed.
-- **MethodOption / MethodSheet**: surface-tinted tiles with the `card` radius in a 2 x 2 grid; rows under 20 rem.
+- **MethodOption / MethodSheet**: surface-tinted tiles with the `card` radius in a 2 x 2 grid at every supported width (titles wrap at 320); rows only under 17 rem, i.e. enlarged text.
 - **RecipeCard**: canvas card, decorative boundary, `card` radius, 12 px padding; 7 rem 4:3 thumbnail beside the text (6 rem under 19 rem, stacked under 17 rem); order: title, match evidence, calories and protein, basis, time and tags.
 - **MediaFrame**: sunken fallback with an image glyph; "No photo" visible in wide frames, assistive-only in compact thumbnails; a failed image shows the same fallback.
 - **NutritionValue / NutritionMacros / NutritionSummary**: main 40/48, secondary 20/28, compact 16/24 with short labels; markers 4 x 14 to 16 px; unknown = em dash + "Not available"; a partial subtotal is labelled.
 - **ProgressRing / CalorieProgressRing**: see section 11.
 - **ModalSheet / ConfirmDialog**: `sheet` radius (16), sheet shadow, scrim; native dialog focus containment.
-- **NavigationBar**: three destinations + Add food; selected = bold glyph, action colour, 2 px indicator, caption-strong label; measured 2 x 2 reflow under enlargement.
+- **NavigationBar**: one compact group (navigation surface, hairline, `navigation-group` 16, 4 px padding) of three 48 px destinations — active = bold glyph + nav-label-active 10/14 700 + `navigation-selected-surface` at `navigation-item` 12; inactive = regular glyph only with `aria-label` — and, beside it, the separate circular 56 px Log food action (action fill, bold Plus, `aria-label="Log food"`). The group hugs content; nothing reflows.
 - **Surface**: tones canvas/surface/sunken, borders none/decorative/control, radius structure/control/card/grouped.
 
 ---

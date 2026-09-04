@@ -110,7 +110,7 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
   const footer =
     mode === 'existing' ? (
       <Stack gap={8}>
-        <Button variant="primary" block onClick={() => commit(onUpdateEntry)} disabled={!energyAvailable}>
+        <Button variant="primary" size="large" block onClick={() => commit(onUpdateEntry)} disabled={!energyAvailable}>
           Update entry
         </Button>
         <Button variant="destructive" block onClick={() => setRemoveOpen(true)}>
@@ -119,7 +119,7 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
       </Stack>
     ) : (
       <Stack gap={8}>
-        <Button variant="primary" block onClick={() => commit(onAddToToday)} disabled={!energyAvailable}>
+        <Button variant="primary" size="large" block onClick={() => commit(onAddToToday)} disabled={!energyAvailable}>
           Add to today
         </Button>
         <Button variant="text" block onClick={onDone ?? onBack}>

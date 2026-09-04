@@ -44,7 +44,7 @@ It may include:
 - consumed and remaining calories;
 - compact nutrition summary;
 - today's committed food entries;
-- Add food;
+- Log food;
 - recipe-discovery entry point.
 
 Authoritative states:

@@ -12,9 +12,10 @@
   align-items: stretch;
 }
 
-/* Documented one-column condition: available width under 20 rem — the 320 px viewport at
-   100 % text (288 px of sheet body) and every supported width at 200 % text. */
-@container method-grid (max-width: 20rem) {
+/* Documented one-column condition: available width under 17 rem (272 px). Every supported
+   viewport at 100 % text keeps the 2 x 2 grid (320 px leaves 288 px of sheet body); 200 %
+   text on every supported width falls to one column of rows. */
+@container method-grid (max-width: 17rem) {
   .grid {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--portion-spacing-related);

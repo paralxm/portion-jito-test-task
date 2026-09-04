@@ -5,7 +5,7 @@ import { NavigationBar } from '../../../design-system/patterns/NavigationBar/Nav
 import { fixtureR, recipeCatalogue } from '../domain/fixtures';
 import { RecipeDetailsScreen } from './RecipeDetailsScreen';
 
-const navigation = <NavigationBar selected="recipes" onSelect={fn()} onAddFood={fn()} />;
+const navigation = <NavigationBar selected="recipes" onSelect={fn()} onLogFood={fn()} />;
 
 const meta = {
   title: 'Product compositions/Recipe details (S08)',
@@ -98,7 +98,7 @@ export const Unavailable: Story = {
 
 export const FromSearch: Story = {
   name: 'Opened from Search — Search stays selected',
-  args: { navigation: <NavigationBar selected="search" onSelect={fn()} onAddFood={fn()} /> },
+  args: { navigation: <NavigationBar selected="search" onSelect={fn()} onLogFood={fn()} /> },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByRole('button', { name: 'Search' })).toHaveAttribute('aria-current', 'page');
   },
