@@ -1,0 +1,61 @@
+/* Tile by default: icon above a title/description pair, on the light surface with the
+   card radius. Inside a `method-grid` container narrower than 20 rem the same element
+   becomes a row (icon beside text) — the documented one-column adaptation. */
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--portion-spacing-icon-to-label);
+  inline-size: 100%;
+  min-block-size: var(--portion-size-target-minimum);
+  padding: var(--portion-spacing-card-padding);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-surface);
+  color: var(--portion-color-text-primary);
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+/* The glyph is the one accent on the tile: it says "this is an action" in the action
+   colour, while the title stays neutral so four tiles read as a calm set, not four CTAs. */
+.glyph {
+  display: inline-flex;
+  color: var(--portion-color-action-primary);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}
+
+@media (hover: hover) {
+  .option:hover {
+    background: var(--portion-color-background-sunken);
+    border-color: var(--portion-color-border-control);
+  }
+}
+
+.option:active {
+  background: var(--portion-color-background-sunken);
+  border-color: var(--portion-color-border-control);
+}
+
+/* One-column adaptation: below 20 rem of container width the tile becomes a row. At 100 %
+   text this is the 320 px viewport (288 px of sheet body); at 200 % text it is every
+   supported width. */
+@container method-grid (max-width: 20rem) {
+  .option {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--portion-ref-space-12);
+    padding-block: var(--portion-ref-space-12);
+  }
+}

@@ -1,0 +1,40 @@
+/* The daily group is the one grouped surface on Home: the focal point gets the light
+   surface and the grouped radius; every other section sits directly on the canvas. */
+.today {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-16);
+}
+
+/* Section title and its contextual action share one row; the action stays a small text
+   button so the title leads. */
+.groupHeader,
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.sectionHeader {
+  align-items: baseline;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-section-title-to-content);
+  min-inline-size: 0;
+}
+
+/* Logged entries: the rows carry their own dividers; the list breaks out to the page
+   edge so a row's hover surface and hit area span the full width like Search results. */
+.entries {
+  list-style: none;
+  margin: 0;
+  margin-inline: calc(var(--portion-spacing-page-inset) * -1);
+  padding: 0;
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}

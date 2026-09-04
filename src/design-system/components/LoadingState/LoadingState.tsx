@@ -33,7 +33,7 @@ export function LoadingState({ label, children, onCancel, cancelLabel = 'Cancel'
         </Text>
       ) : null}
       {onCancel ? (
-        <Button variant="text" size="compact" onClick={onCancel}>
+        <Button variant="text" size="small" onClick={onCancel}>
           {cancelLabel}
         </Button>
       ) : null}

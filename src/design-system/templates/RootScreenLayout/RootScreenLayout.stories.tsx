@@ -14,7 +14,7 @@ const meta = {
     header: <AppHeader title="Home" showWordmark />,
     navigation: <NavigationBar selected="home" onSelect={fn()} onAddFood={fn()} />,
     children: (
-      <EmptyState title="Nothing calculated yet">Add a food or dish to see the calories and nutrition for the amount you choose.</EmptyState>
+      <EmptyState title="Nothing logged today">Add a food or dish to review its portion and nutrition. Adding it to today is optional.</EmptyState>
     ),
   },
   parameters: {

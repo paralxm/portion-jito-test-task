@@ -9,18 +9,19 @@ import { Meta } from '@storybook/addon-docs/blocks';
 ## How this Storybook is organised
 
 - **Foundations** — tokens resolved in the browser, colour roles with recomputed contrast, the Inter typography catalogue with stress specimens at 320/390/393/430 px and 100–200 % text, the Phosphor icon catalogue, spacing, radius, borders/focus/layers, motion, and the accessibility and platform ledger.
-- **Primitives** — Text, layout, Button, IconButton, Input, Checkbox/Radio, Badge, Surface, Separator, Spinner, VisuallyHidden.
-- **Components** — fields, chips, nutrition values and rows, match criteria, feedback states, method and result rows.
-- **Patterns** — navigation bar, headers, sheets and dialogs, nutrition summary, recipe card.
+- **Primitives** — Text, layout, Button, IconButton, Input, Checkbox/Radio, Badge, Surface, Separator, Spinner, ProgressRing, VisuallyHidden.
+- **Components** — fields, chips, segmented control, nutrition values, macros and rows, match criteria, media frame, feedback states, entry-method options and food rows.
+- **Patterns** — navigation bar, headers, sheets and dialogs, the 2 × 2 Add food sheet, nutrition summary, recipe card.
 - **Templates** — root and focused-flow layouts.
-- **Product compositions** — the actual feature screens and the full runtime app rendered with fixtures.
+- **Product compositions** — the actual feature screens (Home with its calorie ring and goal editor, review, manual entry, barcode, photo, search, recipes, details) and the full runtime app rendered with fixtures.
 
 Every story with behaviour has a play function; the Storybook Vitest project runs them in headless Chromium with the accessibility addon set to fail on violations.
 
 ## Rules the components enforce
 
 - Measurements are CSS px. The iOS column in the platform ledger is a mapping, never a relabel.
-- Spacing steps are 0/4/8/12/16/24/32/36/40/44/48/52/56/60/64 px; `full` is a radius.
+- Spacing steps are 0/4/8/12/16/24/32 px. Radius roles are compact control 4, control 8, card 12, grouped surface and sheet 16, and `full` only for true circles.
+- Home's ring shows *remaining* while a goal exists; unknown energy is never drawn as 0 %.
 - Unknown nutrition is named “Not available”, never zero; a known zero is a value.
 - Nutrition numbers stay neutral; category markers carry labelled colour.
 - Add food is an action in the bottom row, never a tab; one modal at a time; a gesture is never the only exit.

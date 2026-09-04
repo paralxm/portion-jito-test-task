@@ -113,7 +113,7 @@
   --portion-color-background-sunken: var(--portion-ref-color-neutral-100);
   --portion-color-text-primary: var(--portion-ref-color-neutral-900);
   --portion-color-text-secondary: var(--portion-ref-color-neutral-650);
-  --portion-color-text-disabled: var(--portion-ref-color-neutral-600);
+  --portion-color-text-disabled: var(--portion-ref-color-neutral-500); /* Inactive control text. Visibly lighter than text.secondary; exempt from the text-contrast minimum as an inactive component (WCAG 1.4.3), 3.9:1 on canvas. */
   --portion-color-text-on-action: var(--portion-ref-color-neutral-0);
   --portion-color-border-control: var(--portion-ref-color-neutral-500);
   --portion-color-border-decorative: var(--portion-ref-color-neutral-175);
@@ -121,9 +121,10 @@
   --portion-color-action-hover: var(--portion-ref-color-blue-700);
   --portion-color-action-pressed: var(--portion-ref-color-blue-800);
   --portion-color-action-selected-surface: var(--portion-ref-color-blue-50);
+  --portion-color-action-secondary-surface: var(--portion-ref-color-blue-50); /* Tinted fill of the secondary button and the text button's hover. Same step as selected-surface; a separate role so a later change to one does not silently restyle the other. */
   --portion-color-focus-ring: var(--portion-ref-color-blue-800);
   --portion-color-state-disabled-surface: var(--portion-ref-color-neutral-200);
-  --portion-color-state-disabled-text: var(--portion-ref-color-neutral-600);
+  --portion-color-state-disabled-text: var(--portion-ref-color-neutral-500); /* Label of a disabled control. 3.2:1 on the disabled surface, 4.0:1 on canvas — inactive components are exempt from the 4.5:1 minimum, and this step is deliberately lighter than text.secondary so a disabled control no longer reads as active. */
   --portion-color-overlay-scrim: var(--portion-ref-color-neutral-900-alpha-40);
   --portion-color-feedback-error-foreground: var(--portion-ref-color-red-700);
   --portion-color-feedback-error-surface: var(--portion-ref-color-red-50);
@@ -147,12 +148,14 @@
   --portion-color-nutrition-vitamins-surface: var(--portion-ref-color-rose-50);
   --portion-color-nutrition-minerals-accent: var(--portion-ref-color-taupe-700);
   --portion-color-nutrition-minerals-surface: var(--portion-ref-color-taupe-50);
+  --portion-color-progress-track: var(--portion-ref-color-neutral-200); /* Unfilled portion of the progress ring. A non-essential guide (1.29:1 on canvas); the arc, centre text and labels carry the meaning. */
+  --portion-color-progress-indicator: var(--portion-color-nutrition-energy-accent); /* Filled arc of the calorie progress ring: the energy category accent (neutral ink), never an action blue or a success/error colour. 12.6:1 on the track. */
   --portion-typography-main-result-font-family: var(--portion-ref-font-family-ui); /* One main calculated calorie value in a result composition. 40/48, 600. */
   --portion-typography-main-result-font-size: var(--portion-ref-font-size-40);
   --portion-typography-main-result-font-weight: var(--portion-ref-font-weight-semibold);
   --portion-typography-main-result-line-height: var(--portion-ref-font-line-height-main-result);
   --portion-typography-main-result-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
-  --portion-typography-screen-heading-font-family: var(--portion-ref-font-family-ui); /* Root screen title: Calculate, Search, Recipes. 28/36, 600. */
+  --portion-typography-screen-heading-font-family: var(--portion-ref-font-family-ui); /* Root screen title: Home, Search, Recipes. 28/36, 600. */
   --portion-typography-screen-heading-font-size: var(--portion-ref-font-size-28);
   --portion-typography-screen-heading-font-weight: var(--portion-ref-font-weight-semibold);
   --portion-typography-screen-heading-line-height: var(--portion-ref-font-line-height-screen-heading);
@@ -172,11 +175,11 @@
   --portion-typography-compact-title-font-weight: var(--portion-ref-font-weight-semibold);
   --portion-typography-compact-title-line-height: var(--portion-ref-font-line-height-compact-title);
   --portion-typography-compact-title-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
-  --portion-typography-action-font-family: var(--portion-ref-font-family-ui); /* Standard actions; prominent list-row titles through aliases. 16/24, 600. */
-  --portion-typography-action-font-size: var(--portion-ref-font-size-16);
-  --portion-typography-action-font-weight: var(--portion-ref-font-weight-semibold);
-  --portion-typography-action-line-height: var(--portion-ref-font-line-height-body);
-  --portion-typography-action-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-action-md-font-family: var(--portion-ref-font-family-ui); /* Medium (default) button label and the unit selector; prominent list-row titles and inline metrics through aliases. 16/24, 600. */
+  --portion-typography-action-md-font-size: var(--portion-ref-font-size-16);
+  --portion-typography-action-md-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-action-md-line-height: var(--portion-ref-font-line-height-body);
+  --portion-typography-action-md-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
   --portion-typography-body-font-family: var(--portion-ref-font-family-ui); /* Reading text; input, textarea and search values. 16/24, 400. */
   --portion-typography-body-font-size: var(--portion-ref-font-size-16);
   --portion-typography-body-font-weight: var(--portion-ref-font-weight-regular);
@@ -192,12 +195,12 @@
   --portion-typography-supporting-font-weight: var(--portion-ref-font-weight-regular);
   --portion-typography-supporting-line-height: var(--portion-ref-font-line-height-supporting);
   --portion-typography-supporting-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
-  --portion-typography-compact-action-font-family: var(--portion-ref-font-family-ui); /* Compact standalone text action: Clear, Reset, View all. 14/20, 600. */
-  --portion-typography-compact-action-font-size: var(--portion-ref-font-size-14);
-  --portion-typography-compact-action-font-weight: var(--portion-ref-font-weight-semibold);
-  --portion-typography-compact-action-line-height: var(--portion-ref-font-line-height-supporting);
-  --portion-typography-compact-action-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
-  --portion-typography-caption-font-family: var(--portion-ref-font-family-ui); /* Unselected bottom-navigation label; short incidental metadata. 12/16, 500. */
+  --portion-typography-action-sm-font-family: var(--portion-ref-font-family-ui); /* Small button label for in-context actions (Filters, Reset all, Show all nutrition, Clear) and the selected segment of a segmented control. 14/20, 600. */
+  --portion-typography-action-sm-font-size: var(--portion-ref-font-size-14);
+  --portion-typography-action-sm-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-action-sm-line-height: var(--portion-ref-font-line-height-supporting);
+  --portion-typography-action-sm-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-caption-font-family: var(--portion-ref-font-family-ui); /* Unselected bottom-navigation label; short static tags and incidental metadata. 12/16, 500. The smallest authored size: nothing in the product goes below 12 px, and a 10 px compact navigation label would be a verified fallback only — none exists today. */
   --portion-typography-caption-font-size: var(--portion-ref-font-size-12);
   --portion-typography-caption-font-weight: var(--portion-ref-font-weight-medium);
   --portion-typography-caption-line-height: var(--portion-ref-font-line-height-caption);
@@ -207,26 +210,26 @@
   --portion-typography-caption-strong-font-weight: var(--portion-ref-font-weight-semibold);
   --portion-typography-caption-strong-line-height: var(--portion-ref-font-line-height-caption);
   --portion-typography-caption-strong-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
-  --portion-typography-item-title-font-family: var(--portion-typography-action-font-family); /* Alias: food search-result row title and photo suggestion name. */
-  --portion-typography-item-title-font-size: var(--portion-typography-action-font-size);
-  --portion-typography-item-title-font-weight: var(--portion-typography-action-font-weight);
-  --portion-typography-item-title-line-height: var(--portion-typography-action-line-height);
-  --portion-typography-item-title-letter-spacing: var(--portion-typography-action-letter-spacing);
-  --portion-typography-method-title-font-family: var(--portion-typography-action-font-family); /* Alias: entry-method row title. */
-  --portion-typography-method-title-font-size: var(--portion-typography-action-font-size);
-  --portion-typography-method-title-font-weight: var(--portion-typography-action-font-weight);
-  --portion-typography-method-title-line-height: var(--portion-typography-action-line-height);
-  --portion-typography-method-title-letter-spacing: var(--portion-typography-action-letter-spacing);
-  --portion-typography-metric-inline-font-family: var(--portion-typography-action-font-family); /* Alias: compact calorie or nutrient value in a row; pair with the numeric modifier. */
-  --portion-typography-metric-inline-font-size: var(--portion-typography-action-font-size);
-  --portion-typography-metric-inline-font-weight: var(--portion-typography-action-font-weight);
-  --portion-typography-metric-inline-line-height: var(--portion-typography-action-line-height);
-  --portion-typography-metric-inline-letter-spacing: var(--portion-typography-action-letter-spacing);
-  --portion-typography-metric-secondary-font-family: var(--portion-typography-detail-heading-font-family); /* Alias: macro value in a nutrition summary; not an HTML heading. */
-  --portion-typography-metric-secondary-font-size: var(--portion-typography-detail-heading-font-size);
-  --portion-typography-metric-secondary-font-weight: var(--portion-typography-detail-heading-font-weight);
-  --portion-typography-metric-secondary-line-height: var(--portion-typography-detail-heading-line-height);
-  --portion-typography-metric-secondary-letter-spacing: var(--portion-typography-detail-heading-letter-spacing);
+  --portion-typography-item-title-font-family: var(--portion-typography-action-md-font-family); /* Alias: food search-result row title and photo suggestion name. */
+  --portion-typography-item-title-font-size: var(--portion-typography-action-md-font-size);
+  --portion-typography-item-title-font-weight: var(--portion-typography-action-md-font-weight);
+  --portion-typography-item-title-line-height: var(--portion-typography-action-md-line-height);
+  --portion-typography-item-title-letter-spacing: var(--portion-typography-action-md-letter-spacing);
+  --portion-typography-method-title-font-family: var(--portion-typography-action-md-font-family); /* Alias: entry-method row title. */
+  --portion-typography-method-title-font-size: var(--portion-typography-action-md-font-size);
+  --portion-typography-method-title-font-weight: var(--portion-typography-action-md-font-weight);
+  --portion-typography-method-title-line-height: var(--portion-typography-action-md-line-height);
+  --portion-typography-method-title-letter-spacing: var(--portion-typography-action-md-letter-spacing);
+  --portion-typography-metric-inline-font-family: var(--portion-typography-action-md-font-family); /* Alias: compact calorie or nutrient value in a row; pair with the numeric modifier. */
+  --portion-typography-metric-inline-font-size: var(--portion-typography-action-md-font-size);
+  --portion-typography-metric-inline-font-weight: var(--portion-typography-action-md-font-weight);
+  --portion-typography-metric-inline-line-height: var(--portion-typography-action-md-line-height);
+  --portion-typography-metric-inline-letter-spacing: var(--portion-typography-action-md-letter-spacing);
+  --portion-typography-metric-secondary-font-family: var(--portion-typography-section-title-font-family); /* Alias: macro value in a nutrition summary (20/28) — one clear step below the 40/48 main result and above inline metrics; not an HTML heading. */
+  --portion-typography-metric-secondary-font-size: var(--portion-typography-section-title-font-size);
+  --portion-typography-metric-secondary-font-weight: var(--portion-typography-section-title-font-weight);
+  --portion-typography-metric-secondary-line-height: var(--portion-typography-section-title-line-height);
+  --portion-typography-metric-secondary-letter-spacing: var(--portion-typography-section-title-letter-spacing);
   --portion-typography-wordmark-font-family: var(--portion-ref-font-family-ui); /* Lowercase 'portion' wordmark in a header. 24/32, 600, -0.03em tracking, isolated to the wordmark. */
   --portion-typography-wordmark-font-size: var(--portion-ref-font-size-24);
   --portion-typography-wordmark-font-weight: var(--portion-ref-font-weight-semibold);
@@ -247,11 +250,13 @@
   --portion-spacing-instruction-item: var(--portion-ref-space-16);
   --portion-spacing-icon-to-label: var(--portion-ref-space-8);
   --portion-spacing-nav-icon-to-label: var(--portion-ref-space-4);
-  --portion-radius-structure: var(--portion-ref-radius-0);
-  --portion-radius-control: var(--portion-ref-radius-4);
-  --portion-radius-card: var(--portion-ref-radius-8);
-  --portion-radius-sheet: var(--portion-ref-radius-12);
-  --portion-radius-round: var(--portion-ref-radius-full); /* Use only for true circles when required. */
+  --portion-radius-structure: var(--portion-ref-radius-0); /* Full-bleed structural regions only (viewfinder, media breakouts, bars). Never the authored corner of an independent component surface. */
+  --portion-radius-control-compact: var(--portion-ref-radius-4); /* Elements nested inside another control, or non-interactive tags: segmented-control segments (track 8 minus 4 padding), badges, category markers. */
+  --portion-radius-control: var(--portion-ref-radius-8); /* Interactive controls and inline notices: buttons, inputs, search field, chips, the segmented-control track, inline messages, the Add food glyph. */
+  --portion-radius-card: var(--portion-ref-radius-12); /* Independent content cards and tiles: recipe card, entry-method tile, logged-entry row, media thumbnails. */
+  --portion-radius-grouped: var(--portion-ref-radius-16); /* Grouped surfaces that hold a whole section: Home's daily-overview group, prototype-control groups. */
+  --portion-radius-sheet: var(--portion-ref-radius-16); /* Top corners of bottom sheets and every corner of a centred dialog. */
+  --portion-radius-round: var(--portion-ref-radius-full); /* True circles only: radio marks, step-number discs, the progress ring's arc caps. */
   --portion-size-icon-compact: var(--portion-ref-size-icon-16);
   --portion-size-icon-small-action: var(--portion-ref-size-icon-20);
   --portion-size-icon-default: var(--portion-ref-size-icon-24);

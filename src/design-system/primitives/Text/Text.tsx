@@ -7,11 +7,13 @@ export type TextVariant =
   | 'detail-heading'
   | 'section-title'
   | 'compact-title'
-  | 'action'
+  /** Medium (default) button label, 16/24 600. */
+  | 'action-md'
   | 'body'
   | 'label'
   | 'supporting'
-  | 'compact-action'
+  /** Small button label, 14/20 600. */
+  | 'action-sm'
   | 'caption'
   | 'caption-strong'
   | 'item-title'

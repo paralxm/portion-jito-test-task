@@ -1,15 +1,17 @@
 /**
  * Storybook-only helpers. Not part of the design-system public entry point.
  */
-import { useEffect, type ReactNode } from 'react';
+import { useLayoutEffect, type ReactNode } from 'react';
 import type { Decorator } from '@storybook/react-vite';
 
 /**
  * Applies a root font-size percentage for the life of the story, the way a browser or
- * OS text-size preference would. Every rem-based token scales with it.
+ * OS text-size preference would. Every rem-based token scales with it. A layout effect
+ * applies it synchronously with the commit, so a play function that runs right after
+ * render already measures the enlarged layout.
  */
 export function RootFontSize({ percent, children }: { percent: number; children: ReactNode }) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
     const previous = root.style.fontSize;
     root.style.fontSize = `${percent}%`;

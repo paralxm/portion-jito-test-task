@@ -40,7 +40,7 @@ export function InlineMessage({ tone, title, children, actions, announce, classN
       </span>
       <div className={styles.body}>
         {title ? (
-          <Text as="p" variant="action" color="inherit" wrap>
+          <Text as="p" variant="action-md" color="inherit" wrap>
             {title}
           </Text>
         ) : null}

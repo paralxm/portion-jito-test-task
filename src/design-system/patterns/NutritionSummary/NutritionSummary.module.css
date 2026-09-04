@@ -1,3 +1,5 @@
+/* Main value, then the macro row one clear step below it, then the disclosure. The
+   disclosure is left-aligned with the values so the eye never has to hunt for it. */
 .summary {
   display: flex;
   flex-direction: column;
@@ -5,42 +7,20 @@
   min-inline-size: 0;
 }
 
-/* Three secondary metrics share the row; each may wrap its label and grow. */
-.macros {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: var(--portion-ref-space-12);
-  row-gap: var(--portion-ref-space-12);
-}
-
-.macro {
-  min-inline-size: 0;
-}
-
-/* At narrow widths or enlarged text the macros stack into two then one column. The
-   thresholds are in rem so they scale with the user's text size: 21.25rem is 340 px at
-   100 % and 680 px at 200 %, which is what makes 320 px + 200 % fall back to one column. */
-@container (max-width: 21.25rem) {
-  .macros {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@container (max-width: 15rem) {
-  .macros {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.summary {
-  container-type: inline-size;
-}
-
 .more {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
 }
 
-.more[hidden] {
+.list {
+  display: flex;
+  flex-direction: column;
+  inline-size: 100%;
+}
+
+.list[hidden] {
   display: none;
 }

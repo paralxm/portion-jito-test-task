@@ -1,0 +1,43 @@
+/* The root is the query container; the grid inside it is what reflows (an element
+   cannot query its own size). Thresholds are in rem so they scale with the user's text
+   size. */
+.root {
+  container-type: inline-size;
+  min-inline-size: 0;
+}
+
+.macros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--portion-ref-space-12);
+  row-gap: var(--portion-ref-space-12);
+}
+
+.macro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-0);
+  min-inline-size: 0;
+}
+
+/* Secondary size: two then one column as the row narrows. 21.25 rem is 340 px at 100 %
+   and 680 px at 200 %, which is what makes 320 px + 200 % fall back to one column. */
+@container (max-width: 21.25rem) {
+  .macros[data-size='secondary'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 15rem) {
+  .macros[data-size='secondary'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Compact size keeps three short-labelled columns down to 14 rem (224 px at 100 %; the
+   Home group is 256 px wide at 320 px), then stacks — every supported width at 200 %. */
+@container (max-width: 14rem) {
+  .macros[data-size='compact'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

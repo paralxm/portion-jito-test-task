@@ -26,8 +26,17 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component:
-          'Scannable recipe card with a 4:3 image, wrapping title, calories and protein on the stated basis, preparation time and dietary tags. The title is the single control; its hit area stretches over the card. A missing photo is usable loaded content, not a skeleton. With active criteria the card shows a compact match summary; with none it makes no match claim.',
+        component: `
+**Purpose.** A scannable recipe card in the order a person judges a recipe: identity → why it qualifies (only with active criteria) → calories · protein on the stated basis → time and declared dietary types → a supporting 4:3 thumbnail. The thumbnail sits beside the text, not above it, so a list of five recipes fits in about two screens.
+
+**Anatomy.** \`article\` → thumbnail column (\`MediaFrame\`, compact fallback) + text column: \`h3\` with the single \`button\` control, \`MatchCriteria\` summary, values line, basis, meta (time + \`Badge\` tags). The button's hit area stretches over the whole card; nothing else inside is interactive.
+
+**States.** rest, hover (surface fill, pointer only), pressed (sunken fill), focus-visible (3 px ring on the card), no photo / failed photo (same loaded fallback), unknown calories or protein ("not available" in words, never a dash or a zero), no active criteria (no match claim at all).
+
+**Responsive.** Under 17 rem of card width the thumbnail moves above the text — 200 % text on every supported viewport; every viewport at 100 % keeps the side-by-side layout.
+
+**Token usage.** \`radius-card\` (card), \`radius-control\` (thumbnail), \`border-decorative\`, \`background-canvas/surface/sunken\`, \`spacing-title-to-secondary\`, \`compact-title\`, \`metric-inline\`, \`supporting\`, \`caption\` (tags).
+        `,
       },
     },
   },
@@ -41,6 +50,8 @@ export const WithPhoto: Story = {
     const canvas = within(canvasElement);
     const title = canvas.getByRole('button', { name: 'Lentil soup' });
     await expect(getComputedStyle(title, '::after').position).toBe('absolute');
+    const layout = title.closest('article')?.firstElementChild as HTMLElement;
+    await expect(getComputedStyle(layout).gridTemplateColumns.split(' ')).toHaveLength(2);
     await userEvent.click(title);
     await expect(args.onOpen).toHaveBeenCalledTimes(1);
     await expect(canvas.queryByText(/Matches/)).toBeNull();
@@ -53,14 +64,16 @@ export const NoPhotoLongTitle: Story = {
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('No photo')).toBeVisible();
+    // Compact fallback: the words are for assistive technology; the glyph is visible.
+    await expect(canvas.getByText('No photo')).toHaveClass('portion-visually-hidden');
     const title = canvas.getByRole('button', { name: /Wholegrain pasta/ });
     await expect(title.getBoundingClientRect().height).toBeGreaterThan(24);
+    await expectNoHorizontalOverflow();
   },
 };
 
 export const WithCriteria: Story = {
-  name: 'With active criteria',
+  name: 'With active criteria — evidence directly under the title',
   args: {
     dietary: ['Vegan', 'Gluten-free', 'Dairy-free'],
     criteria: [
@@ -69,7 +82,12 @@ export const WithCriteria: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText('Matches all 2 filters')).toBeInTheDocument();
+    const canvas = within(canvasElement);
+    const evidence = canvas.getByText('Matches all 2 filters');
+    await expect(evidence).toBeInTheDocument();
+    const title = canvas.getByRole('button', { name: 'Lentil soup' });
+    await expect(evidence.getBoundingClientRect().top).toBeGreaterThanOrEqual(title.getBoundingClientRect().bottom);
+    await expect(evidence.getBoundingClientRect().top).toBeLessThan(canvas.getByText(/450/).getBoundingClientRect().top);
   },
 };
 
@@ -89,16 +107,31 @@ export const MissingProtein: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Protein Not available')).toBeInTheDocument();
+    await expect(canvas.getByText('Protein not available')).toBeVisible();
     await expect(canvas.getByText('Matches 1 of 2 filters')).toBeInTheDocument();
   },
 };
 
+export const FocusVisible: Story = {
+  name: 'Keyboard focus-visible on the whole card',
+  play: async ({ canvasElement }) => {
+    await userEvent.tab();
+    const title = within(canvasElement).getByRole('button', { name: 'Lentil soup' });
+    await expect(document.activeElement).toBe(title);
+    const card = title.closest('article') as HTMLElement;
+    await expect(getComputedStyle(card).outlineStyle).toBe('solid');
+    await expect(parseFloat(getComputedStyle(card).outlineWidth)).toBe(3);
+  },
+};
+
 export const EnlargedText: Story = {
-  name: 'Enlarged text — 200 %',
+  name: 'Enlarged text — 200 % stacks the thumbnail above the text',
   decorators: [withRootFontSize(200)],
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: 'Lentil soup' })).toBeVisible();
+    const title = within(canvasElement).getByRole('button', { name: 'Lentil soup' });
+    await expect(title).toBeVisible();
+    const layout = title.closest('article')?.firstElementChild as HTMLElement;
+    await expect(getComputedStyle(layout).gridTemplateColumns.split(' ')).toHaveLength(1);
     await expectNoHorizontalOverflow();
   },
 };

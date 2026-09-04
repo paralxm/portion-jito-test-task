@@ -110,15 +110,15 @@ Add to today is optional and enabled only for valid, reviewed identity/reference
 
 Prevent duplicate activation for the same submission. Deliberately adding the same food again in a new acquisition is allowed and creates a separate entry; duplicate protection must not collapse legitimate repeated portions.
 
-Back returns to the previous acquisition step. Close exits the food task to its invoking surface without logging. A read-only visit or new portion preview does not require a warning solely because it was not logged. Meaningful unsaved manual-reference work uses the existing Keep editing/Discard rule.
+Back returns to the previous acquisition step. Close, labelled **Done** in the implementation (2026-09-04), exits the food task to its invoking surface without logging. A read-only visit or new portion preview does not require a warning solely because it was not logged. Meaningful unsaved manual-reference work uses the existing Keep editing/Discard rule.
 
 2.3 Existing-entry review and removal
 
 Open a Home food row into S07 existing-entry mode. Load the entry's committed data into a draft. The calorie preview updates locally, but Home totals continue to use the committed entry until Update entry is activated.
 
-Update entry preserves the entry ID and logged day; it does not append another food or replace unrelated entries. Cancel/Close preserves committed data; changed edit drafts offer Keep editing/Discard, while an unchanged visit closes directly.
+Update entry preserves the entry ID and logged day; it does not append another food or replace unrelated entries. Cancel/Close preserves committed data; changed edit drafts offer Keep editing/Discard, while an unchanged visit closes directly. Implemented 2026-09-04: S07 in existing-entry mode is titled "Edit entry", offers no Change food (identity is fixed for a logged entry), and its footer is Update entry + Remove entry.
 
-Remove entry is an explicit action in existing-entry mode. Use a concise confirmation identifying the food; confirmation removes that record and returns Home, cancellation changes nothing. This confirmation is a pending supporting design state, not a claim that a reusable removal dialog exists today.
+Remove entry is an explicit action in existing-entry mode. Use a concise confirmation identifying the food; confirmation removes that record and returns Home, cancellation changes nothing. Implemented 2026-09-04 with the existing `ConfirmDialog` ("Remove {food} from today?", Keep entry / Remove).
 
 The proposed target for the former S07-3 replacement specimen is existing-entry editing. Its canvas and code changes remain pending. The old single-current-calculation replacement model is superseded.
 
@@ -169,7 +169,9 @@ Feature logic
 
 Own entries, goal, arithmetic, completeness, local-day selection and add/edit/remove commands.
 
-First inspect the existing component library; reuse/extend a suitable ring if available. These names express responsibilities and do not establish that new files/components already exist. Keep one implementation for the product and Storybook.
+First inspect the existing component library; reuse/extend a suitable ring if available. Keep one implementation for the product and Storybook.
+
+Implemented 2026-09-04 (`feat/navigation-hifi`): the reusable ring is `ProgressRing` (design-system primitive; `value: null` is the unavailable presentation), the Home composition is `CalorieProgressRing` (feature component; the centre figure is remaining while a goal exists and the total is complete, the excess above the goal, otherwise the logged amount), the contextual editor is `GoalSheet` (ModalSheet + AmountField; Apply / Cancel / Clear goal), and the feature logic is `domain/daily-log.ts` (`summarizeDay`, `createEntry`, `updateEntryPortion`, `localDayKey`). With no entries every nutrient total is a recorded 0; with entries, an unknown constituent makes the total a labelled partial subtotal.
 
 Use the approved visual tokens. Values remain neutral, and text communicates the quantity and state without depending on arc color. The ring represents a quantity relative to a goal, not a loading task. Provide an equivalent accessible text description with units and state; do not expose the decorative arc as another focusable control or announce every animation frame. Respect reduced motion and avoid counting effects that obscure the actual value.
 

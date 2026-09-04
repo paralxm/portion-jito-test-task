@@ -28,7 +28,7 @@ function Disclosure() {
   const [open, setOpen] = useState(false);
   return (
     <Stack gap={8} align="start">
-      <Button variant="secondary" size="compact" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+      <Button variant="secondary" size="small" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         {open ? 'Show less' : 'Show more'}
       </Button>
       <div

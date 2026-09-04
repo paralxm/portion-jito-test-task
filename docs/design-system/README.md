@@ -14,16 +14,16 @@ Authority: `docs/ux/ui-contract.md` and `docs/ux/low-fidelity.md` own behaviour;
 | Global styles | `src/design-system/styles/` | Inter registration, generated tokens, reset, focus ring, `[hidden]`, reduced motion, safe areas, type classes | Foundations/Typography |
 | Icons | `src/design-system/icons/` | `Icon` wrapper; Storybook-only `catalogue.ts` (134 verified Phosphor glyphs) | Foundations/Icons |
 | Nutrition rules | `src/design-system/nutrition/` | Categories, ordering, formatting (`formatQuantity`), "Not available" wording | — (unit tests) |
-| Primitives | `src/design-system/primitives/` | Text, Stack/Inline, Surface, Separator, Spinner, Button, IconButton, Input, Checkbox/Radio, Badge, VisuallyHidden | Primitives/* |
-| Components | `src/design-system/components/` | FormField, TextField, AmountField, UnitControl, SearchField, chips, SegmentedControl, NutritionValue, NutrientRow, MatchCriteria, MediaFrame, ResultsHeading, InlineMessage, EmptyState, LoadingState, MethodRow, FoodResultRow | Components/* |
-| Patterns | `src/design-system/patterns/` | NavigationBar, AppHeader, ModalSheet, ConfirmDialog, MethodSheet, UnitSheet, NutritionSummary, RecipeCard (composes MediaFrame) | Patterns/* |
+| Primitives | `src/design-system/primitives/` | Text, Stack/Inline, Surface, Separator, Spinner, Button, IconButton, Input, Checkbox/Radio, Badge, ProgressRing, VisuallyHidden | Primitives/* |
+| Components | `src/design-system/components/` | FormField, TextField, AmountField, UnitControl, SearchField, chips, SegmentedControl, NutritionValue, NutritionMacros, NutrientRow, MatchCriteria, MediaFrame, ResultsHeading, InlineMessage, EmptyState, LoadingState, MethodOption, FoodResultRow | Components/* |
+| Patterns | `src/design-system/patterns/` | NavigationBar, AppHeader, ModalSheet, ConfirmDialog, MethodSheet (2 × 2 of MethodOption), UnitSheet, NutritionSummary (composes NutritionMacros), RecipeCard (composes MediaFrame) | Patterns/* |
 | Templates | `src/design-system/templates/` | RootScreenLayout, FocusedFlowLayout | Templates/* |
 | Public entry | `src/design-system/index.ts` | Supported exports only (no fixtures, catalogue or stories) | — |
-| Calculator feature | `src/features/calorie-calculator/` | `domain/` (calculation, manual entry, fixtures, tests), `components/` (`FoodIdentityHeader`, shared by Home's current-calculation module and Food review), `screens/` (Home, Food review, Manual entry, Barcode, Photo) | Product compositions |
+| Calculator feature | `src/features/calorie-calculator/` | `domain/` (calculation, manual entry, daily log, fixtures incl. Home demo entries, tests), `components/` (`FoodIdentityHeader`, `CalorieProgressRing`, `GoalSheet`), `screens/` (Home daily overview, Food review with new/existing modes, Manual entry, Barcode, Photo) | Product compositions |
 | Recipe feature | `src/features/recipe-discovery/` | `domain/` (matching, fixtures, tests), `components/` (filters sheet, criteria toolbar, list), `screens/` (Recipes, Recipe details, composes MediaFrame + ResultsHeading) | Product compositions |
-| App shell | `src/app/` | `App.tsx` navigation, shared `SearchScreen` (composes `SegmentedControl` for the Food/Recipes scope switch), simulated `services.ts`, keyboard and scroll hooks | Product compositions/App |
+| App shell | `src/app/` | `App.tsx` navigation and the session daily record (entries, goal, local day), shared `SearchScreen` (composes `SegmentedControl`), simulated `services.ts`, keyboard and scroll hooks | Product compositions/App |
 | Storybook helpers | `src/design-system/storybook/` | Enlarged-text and text-spacing decorators, contrast helpers (not exported) | — |
-| Verification | `scripts/verify/runtime-walkthrough.mjs` | Playwright walkthrough of both journeys with screenshots to `.verification/runtime/` (ignored) | — |
+| Verification | `scripts/verify/` | `runtime-walkthrough.mjs` (both journeys, screenshots to `.verification/runtime/`, ignored), `storybook-captures.mjs` (representative stories from `storybook-static/` to `.verification/storybook/`, ignored), `contrast-matrix.mjs` (token-derived WCAG pairs → `docs/design-system/contrast-matrix.md`); the curated tracked evidence set is `verification/` with its manifest | — |
 
 The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same `global.css`; there is one active preview file.
 
@@ -53,7 +53,7 @@ The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same
 
 `SegmentedControl` and the radio-mode `FilterChip` look similar (both are "pick one of several") but answer different questions: `SegmentedControl` is for a small, fixed, always-visible set of task-level modes where the surrounding content itself is what changes; `FilterChip` is for a longer or more open-ended set of values being narrowed, filtered or wrapped, where selection is one input among several rather than the entire visible context.
 
-**Radius** — catalogue 0/4/8/12/16/20/24/28/32/36/40/44/48/52/56/60/64 + `full`; semantic `structure`, `control`, `card`, `sheet`, `round` (actual circles only).
+**Radius** — catalogue 0/4/8/12/16/20/24/28/32/36/40/44/48/52/56/60/64 + `full` (unchanged); seven semantic roles since 2026-09-04 (§16.5): `structure` 0 (full-bleed regions only), `control-compact` 4 (nested segments, badges, checkbox boxes), `control` 8 (buttons, fields, chips, segmented track, inline messages, thumbnails), `card` 12 (recipe card, method tile), `grouped` 16 (Home daily group, prototype fieldsets), `sheet` 16 (sheets and dialogs), `round` full (true circles only). Nested corners stay concentric.
 
 **Typography** — Inter Variable (wght + opsz) registered by `@fontsource-variable/inter/opsz.css`; `reference.font.family.ui` = `['Inter Variable', 'Inter', 'system-ui', 'sans-serif']`, so the token names the registered `@font-face` family.
 
@@ -64,22 +64,22 @@ The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same
 | detail-heading | 24 / 32 | 600 | Food or recipe title on a detail screen |
 | section-title | 20 / 28 | 600 | Section and sheet titles |
 | compact-title | 18 / 24 | 600 | Focused bar titles, card and empty-state titles |
-| action | 16 / 24 | 600 | Button labels, unit selector |
+| action-md | 16 / 24 | 600 | Medium (default) button labels, unit selector |
 | body | 16 / 24 | 400 | Paragraphs, inputs, list items |
-| label | 14 / 20 | 500 | Field labels, chips, category labels |
+| label | 14 / 20 | 500 | Field labels, chips, category labels, unselected segments |
 | supporting | 14 / 20 | 400 | Helper, error, basis, secondary lines |
-| compact-action | 14 / 20 | 600 | Compact standalone actions |
-| caption | 12 / 16 | 500 | Navigation labels |
+| action-sm | 14 / 20 | 600 | Small button labels, selected segment |
+| caption | 12 / 16 | 500 | Unselected navigation labels, dietary tags (the 12 px floor) |
 | caption-strong | 12 / 16 | 600 | Selected navigation labels, count badge |
-| item-title, method-title, metric-inline | → action | | Row titles and inline values |
-| metric-secondary | → detail-heading | | Secondary macro values |
+| item-title, method-title, metric-inline | → action-md | | Row titles, tile titles and inline values |
+| metric-secondary | → section-title (20 / 28) | | Secondary macro values |
 | wordmark | 24 / 32, −0.03em | 600 | The lowercase wordmark only |
 
 `font-variant-numeric: tabular-nums` is applied only through `Text numeric` / `.portion-numeric` on values that update or align. No all-caps, negative tracking (except the wordmark) or ellipsis on essential text.
 
 **Icons** — `@phosphor-icons/react`, regular by default, bold only for the persistently selected navigation destination; there is no `medium` weight. The approved primitive icon-size catalogue is 16/20/24/28/32/40/48/56/64 px (`reference.size.icon`), preserved in full regardless of which sizes a semantic role currently aliases — the same "catalogue survives even where a step has no current consumer" rule already applied to radius and spacing. Six of the nine are aliased to `Icon`'s semantic roles (16→compact, 20→small-action, 24→default, 32→emphasis, 48→empty-state, 64→large-illustrative); 28 and 40 remain supported, unaliased reference sizes, and 56/64 are rare/exceptional sizes. A 24 px glyph sits inside a 48 × 48 target, 56 × 56 for Add food. Foundations/Icons → "Size catalogue (reference)" renders all nine.
 
-**Colour** — semantic background, text, action, border, feedback, nutrition-category, state and overlay roles. Contrast for the pairs the product actually uses is recomputed in the browser in Foundations/Colors (all required pairs meet 4.5:1 text or 3:1 non-text; the decorative border is 1.23:1 and never a control's only boundary).
+**Colour** — semantic background, text, action (incl. `secondary-surface`), border, feedback, nutrition-category, progress (`track`, `indicator` = the energy accent), state and overlay roles. Contrast for the pairs the product actually uses is recomputed in the browser in Foundations/Colors and generated from the token source into `contrast-matrix.md` (54 pairs; every required pair meets 4.5:1 text or 3:1 non-text; the decorative border is 1.23:1 and never a control's only boundary; disabled text is an exempt inactive state at 3.2:1 on its surface).
 
 **Motion** — press/selection/validation use the feedback duration, disclosure/async-result the disclosure duration, sheet/navigation the overlay duration, one standard easing. `prefers-reduced-motion` and `[data-portion-motion="reduced"]` collapse every transition token to 0 ms.
 
@@ -123,17 +123,20 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | Reduced motion | `prefers-reduced-motion` → 0 ms | `isReduceMotionEnabled` | Verified through the data attribute path |
 | Typeface | Inter Variable | SF Pro | Inter is the approved brand face |
 
-## 6. Verification status (last executed 2026-09-08, after §15's rebase onto current `main`)
+## 6. Verification status (last executed 2026-09-04 for the Hi-Fi migration, §16.9; the table below is the current state)
 
 | Check | Command | Result |
 | --- | --- | --- |
 | Typecheck | `npx tsc --noEmit -p tsconfig.json` | exit 0 |
-| Token validity and drift | `node scripts/tokens/build.mjs --check` | 213 tokens validated; generated output current |
-| Unit tests (node) | `npx vitest run --project=unit` | 4 files, 38 tests passed |
-| Storybook tests (headless Chromium, axe at `error`) | `npx vitest run --project=storybook` | 59 files, 257 tests passed |
+| Token validity and drift | `node scripts/tokens/build.mjs --check` | 218 tokens validated; generated output current |
+| Unit tests (node) | `npx vitest run --project=unit` | 5 files, 50 tests passed |
+| Storybook tests (headless Chromium, axe at `error`) | `npx vitest run --project=storybook` | 63 files, 311 tests passed |
 | App build | `npm run build` | success (Inter opsz woff2 + CSS + JS bundles) |
 | Storybook build | `npm run build-storybook` | success (`storybook-static/`, ignored) |
-| Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | Not re-run this pass (unchanged since its last recorded execution) — 24/24 checks passed, 0 console/page errors, screenshots in `.verification/runtime/` |
+| Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | 37/37 checks passed, 0 console/page errors, 55 screenshots in `.verification/runtime/` |
+| Storybook captures | `npm run build-storybook` then `node scripts/verify/storybook-captures.mjs` | 31 captures, 0 page errors, in `.verification/storybook/` |
+| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 54 pairs, 0 failing |
+| Impeccable detector | `node .claude/skills/impeccable/scripts/detect.mjs --json src` | no findings |
 
 Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %); re-read after §10's refactor for Calculate result, Food review, Recipes filtered, Recipe details and Search results (no pixel changed); after §11, screenshotting Components/SegmentedControl, Foundations/Icons → Size catalogue and Search's Interactive story directly from `storybook-static`; and after §12, re-reading the manual-entry discard dialog and unit-sheet screenshots specifically to confirm Cancel/Confirm now render as a real equal-width side-by-side pair. The unit-change and 2 × 2 fallback defects found by the original inspection were fixed and re-verified; §10–§12 list what each pass found and fixed.
 
@@ -148,7 +151,7 @@ Not verified: manual screen-reader pass (NVDA/VoiceOver), real-device software k
 
 ## 8. Resumable status
 
-Done across this branch's history: tokens and generator, global styles, primitives, components, patterns, templates, both feature domains with fixtures and tests, all runtime screens, the app shell with simulated services, Storybook consolidation and 59 story files, the runtime walkthrough script, a pre-Hi-Fi audit pass (§10), a named-capability completion pass adding `SegmentedControl` and restoring the icon-size catalogue (§11) and this guide.
+Done across this branch's history: tokens and generator, global styles, primitives, components, patterns, templates, both feature domains with fixtures and tests, all runtime screens, the app shell with simulated services, Storybook consolidation (63 story files), the runtime walkthrough and capture scripts, a pre-Hi-Fi audit pass (§10), a named-capability completion pass (§11), the layout and spacing refinements (§12–§13), the Home rename (§14), the Hi-Fi NavigationBar (§15), the Hi-Fi migration of the whole system with the daily-overview Home (§16) and this guide.
 
 `feat/design-system` has already been merged into `main` twice (PR #1, PR #2 in the repository history) before this pass began; §11's work was committed on top of that same branch name, which has therefore diverged from `main` again and needs its own new pull request if it is to be merged.
 
@@ -329,3 +332,179 @@ The first component taken to explicit production-quality Hi-Fi sign-off. This br
 **Verification actually run after the rebase:** token JSON syntax + `tokens:build`/`--check`; `tsc --noEmit`; unit tests; the full Storybook suite; both builds — see §6 for the current pass/fail counts (folded in there rather than duplicated here).
 
 **Not run this session:** a manual, eyes-on visual-quality pass (alignment, optical centering, whitespace, hierarchy) and any interactive/screenshot browser check — no browser-automation or screenshot tool resolved in this session (only Figma-related MCP tools were available). The real-Chromium Storybook assertions are genuine rendered-browser checks, not simulation, but they are not a substitute for eyes-on review; that remains open.
+
+## 16. Hi-Fi migration of the design system (2026-09-04, `feat/navigation-hifi`)
+
+An in-place visual and structural migration of the whole system: no parallel implementation, no rebrand, no scope expansion. This section is the audit, the redesign contract, the migration record and the verification status for that pass; sections 1, 3, 6 and 8 above were updated in place to the same state.
+
+### 16.1 Scope conflict and resolution
+
+`AGENTS.md` §3 lists "daily calorie goals" among the boundaries "unless a newer authoritative document says otherwise". `PRODUCT.md` (Resolved Product Decisions), `DESIGN.md` §10 and `docs/ux/low-fidelity.md` §4 all state the daily-overview Home, with an optional goal, logged entries and a calorie ring, as accepted scope, and `PRODUCT.md` says a runtime that still renders the older current-calculation Home is an implementation gap. The exception clause applies: the daily overview is implemented here, bounded exactly to what those documents allow (optional goal, explicit Add to today, today's entries with edit and removal, no diary history, no analytics, no recommendations). The older `HomeScreen` current-calculation module, the "Confirm and calculate / Replace and calculate" review actions and the replacement warning are removed as superseded.
+
+### 16.2 Skills and tooling actually used
+
+- `feature-dev`, `frontend-design`, `impeccable`, `portion-design-system` and `portion-visual-quality` are installed; their instructions were read and applied directly. Impeccable slash commands were not invoked as commands: `context.mjs` ran once (session context), `doctor.mjs` reported one `mention` (DESIGN.md lacked canonical Colors/Components sections, now added), and the `shape`, `critique`, `audit`, `typeset`, `layout`, `distill`, `adapt`, `harden`, `polish` and `document` references were applied inline in that order. The critique/audit passes therefore ran **degraded (single context, no sub-agents)**; their findings are folded into 16.3 and 16.9 rather than written as separate reports.
+- The Impeccable design-detector hook is active (`.claude/settings.local.json`) and scanned every touched UI file on write; the final full scan `node .claude/skills/impeccable/scripts/detect.mjs --json src` returned no findings.
+- No browser-automation MCP was usable (the Chrome DevTools server found no Chrome binary), so rendered verification uses the repository's own Playwright Chromium: the Storybook Vitest project, `scripts/verify/runtime-walkthrough.mjs` and the new `scripts/verify/storybook-captures.mjs`. All captures were inspected by reading the PNGs at full resolution.
+
+### 16.3 Baseline audit (before editing)
+
+Evidence: the 47 pre-redesign runtime captures in `.verification/runtime/` (now replaced), the 11 Storybook captures of the previous pass, and every component source and story. "Current stories" are the pre-migration files.
+
+| Item | Current consumer | Current stories | Visual problems | State/UX problems | Decision | Files affected |
+| --- | --- | --- | --- | --- | --- | --- |
+| Tokens: typography | every component | Foundations/Typography, Text | `action` 16/24/600 doubled as button label, row title and inline metric; `metric-secondary` at 24/32 competed with the 40/48 result | no small/medium button distinction in the type roles | rename `action`→`action-md`, `compact-action`→`action-sm`; `metric-secondary`→section-title 20/28; describe every role | `tokens.json`, `typography.css`, `Text.tsx`, generated tokens |
+| Tokens: radius | every surface | Foundations/Radius | every independent surface used the 4 px control step; cards 8; sheets 12; no compact/grouped roles | none | seven semantic roles 0/4/8/12/16/16/full over the unchanged scale | `tokens.json`, Radius stories, Surface |
+| Tokens: colour | every component | Foundations/Colors | disabled text `#59636E` one step from secondary `#52606D` (disabled looked enabled); no progress roles; secondary button used an outline | disabled and enabled-unselected indistinguishable | `state.disabled.text`/`text.disabled`→neutral-500; `action.secondary-surface`; `progress.track`/`progress.indicator` | `tokens.json`, Colors stories, contrast matrix |
+| Text | all | Primitives/Text | variant names encoded size, not role | — | variant union renamed | `Text.tsx`, `Text.stories.tsx` |
+| Stack / Inline / Surface / Separator / Spinner / VisuallyHidden | all | Primitives/* | Surface lacked the grouped radius | — | Surface `radius: 'grouped'`; others verified unchanged | `Surface.tsx/.module.css` |
+| Button | every screen | Primitives/Button | secondary = blue outline on white; three outlined actions per screen (photo suggestions, barcode controls) read as equal CTAs; one radius for all | `compact` size only changed the label; disabled looked like a grey enabled button | treatments primary filled / secondary tinted / text bare / destructive tinted; sizes `medium` 48 and `small` 40 (+48 hit area); control radius 8 | `Button.tsx/.module.css/.stories.tsx`, 10 consumers |
+| IconButton | headers, search clear, sheet close | Primitives/IconButton | inherits Button base | — | radius follows control (8); no API change | via Button CSS |
+| Input / FormField / TextField / AmountField / UnitControl / SearchField | manual entry, review, filters, search, goal editor | Components/* | 4 px corners; otherwise sound | — | control radius 8 through the token; behaviour unchanged | via token |
+| Checkbox / Radio | unit sheet | Primitives/Choice | 24 px box would become a bubble at 8 px | — | checkbox box uses `control-compact` | `Choice.module.css` |
+| Badge | recipe cards, filter count | Primitives/Badge | dietary tags at 14/20 competed with values; three tags wrapped to two rows | — | caption 12/16, `control-compact` radius | `Badge.tsx/.module.css` |
+| FilterChip / AppliedCriterionChip | filters sheet, toolbar | Components/Chip | 4 px corners | — | control radius 8 via token; check mark and boundary kept | via token |
+| SegmentedControl | Search scope | Components/SegmentedControl | control-bordered track with a white "outlined button" as the selected segment; blue text | disabled ≈ unselected | sunken track, contained selected indicator (canvas + control boundary + 600 weight), disabled = disabled text + opacity, 40 px segments in a 48 px track | `SegmentedControl.*` |
+| NutritionValue / NutrientRow / NutritionSummary | review, details, Home | Components/*, Patterns/NutritionSummary | macros at 24/32 as loud as the main result | no compact form for Home | secondary 20/28; new `compact` size; macro row extracted to `NutritionMacros` (secondary + compact) | `NutritionValue.*`, `NutritionMacros/*` (new), `NutritionSummary.*` |
+| MatchCriteria / ResultsHeading / InlineMessage / EmptyState / LoadingState | recipes, search, acquisition | Components/* | inline messages at 4 px | — | control radius via token; copy specimens updated; no API change | stories |
+| MediaFrame | recipe card, details | Components/MediaFrame | a failed image showed the browser broken-image glyph (contradicting its doc); "No photo" words too large for a thumbnail | image failure indistinguishable from a valid photo state | `onError` fallback; `compact` glyph-only fallback with assistive text | `MediaFrame.*` |
+| RecipeCard | recipe list (browse, search) | Patterns/RecipeCard | full-width 4:3 image dominated (five cards ≈ 5,250 px tall at 390); evidence below the facts; "—" for unknown protein | — | thumbnail beside text (7 rem, 6 rem under 19 rem, stacked under 17 rem); order identity → evidence → facts → meta; "Protein not available" in words | `RecipeCard.*` |
+| MethodRow → MethodOption / MethodSheet | O01 | Components/MethodRow, Patterns/MethodSheet | four full-width rows with chevrons and a 1.23:1 border; contract wants a 2 × 2 grid | — | `MethodOption` tile/row via named container query; `MethodSheet` 2 × 2 grid, rows under 20 rem; low-fidelity helper copy | `MethodOption/*` (new), `MethodSheet.*`, `MethodRow` removed |
+| ModalSheet / ConfirmDialog / UnitSheet | O01, O02, O04, discard, remove | Patterns/* | 12 px sheet corners | — | sheet radius 16 via token; ConfirmDialog copy specimens updated | via token, stories |
+| NavigationBar / AppHeader | roots, focused steps | Patterns/* | Hi-Fi already (section 15) | — | Add food glyph and hover pads follow the control radius; verified unchanged otherwise | — |
+| RootScreenLayout / FocusedFlowLayout | all screens | Templates/* | — | — | verified unchanged | — |
+| ProgressRing (missing) | — | — | no ring existed | Home focal point missing | new design-system primitive (large/medium, clamping, unavailable presentation, over-limit, reduced motion) | `ProgressRing/*` (new) |
+| CalorieProgressRing (missing) | — | — | — | — | new feature composition on ProgressRing; remaining/over/logged semantics; stacked layout under 16 rem or six-character figures | `components/CalorieProgressRing.*` (new) |
+| HomeScreen (S01) | App | Product compositions/Home | current-calculation module + two equal bordered cards; dead space; superseded model | Home held an inline calculator | daily overview: grouped surface (ring, stats, goal action, compact macros) → Today's food (rows or guidance + primary action) → Find a recipe (tinted secondary; See matching recipes when browse criteria are applied) | `HomeScreen.*`, `GoalSheet.*` (new), `daily-log.ts` (new), `home-fixtures.ts` (new) |
+| FoodReviewScreen (S07) | App | Product compositions/Food review | outlined Change food competed with the result | "Confirm and calculate / Replace and calculate" and a replacement warning (superseded) | `mode: 'new' | 'existing'`; Add to today + Done; Update entry + Remove entry (confirmation); dirty-back dialog; duplicate-activation guard; Change food small and tinted | `FoodReviewScreen.*`, `FoodIdentityHeader.tsx` |
+| ManualEntryScreen / BarcodeScreen / PhotoScreen | App | Product compositions/* | rows of outlined actions | — | small tinted actions; discard copy no longer names a "current calculation"; prototype fieldset uses the grouped radius | screens, `Acquisition.module.css` |
+| SearchScreen / RecipesScreen / RecipeDetailsScreen / CriteriaToolbar / RecipeFiltersSheet / RecipeList | App | Product compositions/* | inherit the above | — | migrated through the shared components; no screen-specific change | size-name migration only |
+| App | runtime | Product compositions/App | — | held one "current calculation" | session daily record (entries, goal, local-day key), `entry` review step, Add to today / Done / Update / Remove wiring, Home receives applied browse-criteria labels | `App.tsx`, `App.stories.tsx` |
+
+### 16.4 Reference register
+
+Sources used while choosing the treatments (accessed 2026-09-04). Portion's own documents come first; external references informed anatomy, states and conventions only. Nothing was copied. "Inspected" means the page text was fetched and read in this session; the Apple HIG pages returned only their titles to the text fetcher (they are rendered client-side), so those rows record the convention as applied, not a fresh reading, and the decisions in those rows stand on the Portion contract and the WCAG rows.
+
+| Reference | What was observed | Why it applies | Not copied | Resulting decision |
+| --- | --- | --- | --- | --- |
+| `docs/ux/low-fidelity.md` §4–§6, `docs/ux/ui-contract.md` §2–§3 (inspected) | Home region order; ring shows logged ÷ goal with *Remaining* at the centre; 2 × 2 method tiles with helper copy; Add to today / Done; existing-entry mode | authoritative Portion contract | — | region order, centre semantics, tile copy, review actions |
+| Apple HIG: Tab bars (convention; page not readable by the fetcher) | tab bars hold destinations, not actions | the bar is three destinations plus one action | native `UITabBar` | Add food stays a labelled action with its own 56 px target (unchanged from §15) |
+| Apple HIG: Segmented controls (convention; page not readable) | one grouped control, one selected segment, equal segments | Search scope switch | native chrome | sunken track, contained selected segment, equal widths |
+| Apple HIG: Buttons (convention; page not readable) | filled, tinted and plain styles carry decreasing prominence | button hierarchy | exact iOS styling | primary filled, secondary tinted, text bare |
+| Apple HIG: Typography and Layout (convention; page not readable) | small text around 11 pt as a floor; 44 pt targets; safe areas | type floor and targets, documented as a mapping, not a conversion | pt as px | 12 px caption floor; 48 px targets (stricter than 44 pt) |
+| WCAG 2.2 Understanding 1.4.3 Contrast (Minimum) (inspected; quotes: "at least 4.5:1", "at least 3:1" for large text, "Text or images of text that are part of an inactive user interface component … have no contrast requirement") | thresholds and the inactive-component exemption | every text pair | — | contrast matrix; disabled exemption documented and kept legible |
+| WCAG 2.2 Understanding 1.4.11 Non-text Contrast (inspected; quotes: "at least 3:1 against adjacent color(s)"; "If a control has visible content (such as text …) … a border or other indication of the overall boundary of the hit area is not required"; focus indicators "must have sufficient contrast against the adjacent background"; "Parts of graphics required to understand the content") | boundaries, states, focus, graphical objects | tinted buttons, segment boundary, ring arc | — | tinted secondary without a boundary, control boundary on the selected segment, focus ring 3:1 on every surface, indicator vs track 12.6:1 |
+| WCAG 2.2 Understanding 1.4.10 Reflow (inspected; quote: "without requiring scrolling in two dimensions for: Vertical scrolling content at a width equivalent to 320 CSS pixels") | reflow at 320 px | 320 px and 200 % checks | — | container-query adaptations for tiles, cards, ring, macros; no horizontal overflow assertions |
+| WAI-ARIA APG: Radio group (inspected; quotes: "Right Arrow and Down Arrow: move focus to the next radio button in the group, uncheck the previously focused button, and check the newly focused button"; "If focus is on the last button, focus moves to the first button"; roles `radiogroup` / `radio` with `aria-checked`) | roving tabindex, arrows move focus and selection together, wrapping | SegmentedControl | tabs pattern | documented pattern; "unselected + focus" cannot occur |
+
+### 16.5 Redesign contract
+
+**Typography roles** (Inter Variable, rem sizes, unitless line heights; verified loading 400/500/600 in app and Storybook):
+
+| Role | Size / line | Weight | Components |
+| --- | --- | --- | --- |
+| main-result | 40/48 | 600 | NutritionValue main; CalorieProgressRing figure |
+| screen-heading | 28/36 | 600 | AppHeader root |
+| detail-heading | 24/32 | 600 | FoodIdentityHeader, RecipeDetails title |
+| section-title | 20/28 | 600 | section and sheet titles; metric-secondary alias |
+| compact-title | 18/24 | 600 | focused bar title, RecipeCard title, EmptyState title |
+| action-md | 16/24 | 600 | Button medium, UnitControl; item-title, method-title, metric-inline aliases |
+| body | 16/24 | 400 | paragraphs, inputs, Radio/Checkbox labels |
+| label | 14/20 | 500 | field labels, chips, NutritionValue labels, unselected segments |
+| supporting | 14/20 | 400 | helper, error, basis, descriptions |
+| action-sm | 14/20 | 600 | Button small, selected segment |
+| caption | 12/16 | 500 | unselected navigation label, Badge tags, "Partial total" |
+| caption-strong | 12/16 | 600 | selected navigation label, count badge |
+| wordmark | 24/32, −0.03em | 600 | wordmark only |
+
+No 10 px role was added: `nav-label-compact` would be a verified fallback only, and the shipped fallback (the bar's measured 2 × 2 reflow at 12/16) makes it unnecessary; 12 px is the floor.
+
+**Radius roles**: `structure` 0 · `control-compact` 4 · `control` 8 · `card` 12 · `grouped` 16 · `sheet` 16 · `round` full (see section 3 and Foundations/Radius). The primitive scale is unchanged.
+
+**Colour**: added `action.secondary-surface` (blue-50), `progress.track` (neutral-200), `progress.indicator` (→ `nutrition.energy.accent`, neutral-900); changed `text.disabled` and `state.disabled.text` to neutral-500. Every other value is untouched. The matrix in `docs/design-system/contrast-matrix.md` covers 54 real pairs, 46 with a required threshold, all met.
+
+**State model** (axes are independent; precedence for intersecting states):
+
+| Axis | Values | Precedence rule |
+| --- | --- | --- |
+| Availability | enabled, disabled | disabled removes hover/pressed and activation; it never changes selection |
+| Selection | unselected (inactive), selected | drawn by fill + boundary + weight/check, never colour alone |
+| Interaction | rest, hover (pointer only), pressed, focus-visible | focus ring is drawn outside the control on top of any state |
+| Validation | neutral, invalid | invalid boundary + inset, message replaces helper; keeps availability |
+| Request | idle, loading, success, failure | loading blocks activation and keeps geometry (Button, LoadingState); failure keeps input |
+| Content | populated, empty, unknown | unknown = "Not available"; empty ≠ loading; image failure = the same "No photo" fallback |
+
+**Spacing**: scale and insets unchanged; the only reselected values are the recipe card's 12 px padding (card-gap step) and the small button's 8/12 padding.
+
+### 16.6 Old API → revised implementation
+
+| Old | Revised | Migrated consumers | Compatibility |
+| --- | --- | --- | --- |
+| `Text variant="action"` / `"compact-action"` | `"action-md"` / `"action-sm"` | InlineMessage, UnitControl, RecipeDetailsScreen, stories | breaking rename; TypeScript caught every use |
+| `Button size="default" \| "compact"` | `size="medium" \| "small"` (`ButtonSize`) | NutritionSummary, LoadingState, CriteriaToolbar, RecipeFiltersSheet, FoodReviewScreen, FoodIdentityHeader, BarcodeScreen, PhotoScreen, stories | breaking rename; small now has its own 40 px geometry |
+| `MethodRow` (+ stories) | `MethodOption` (tile/row by container) | MethodSheet | removed; export renamed |
+| `MethodSheet` list, title "How would you like to add food?" | 2 × 2 grid, title "Add food", low-fidelity helper copy | App | walkthrough and stories updated |
+| `MediaFrame` | + `compact`, + load-failure fallback | RecipeCard | additive |
+| `NutritionValue size` | + `'compact'`; `secondary` now 20/28 | NutritionMacros, NutritionSummary | additive; visual change |
+| `NutritionSummary` macro row | extracted `NutritionMacros` (secondary/compact, partial subtotals) | NutritionSummary, HomeScreen | additive export |
+| `FoodResultRow basis` required | optional | HomeScreen entries | additive |
+| `Surface radius` | + `'grouped'` | HomeScreen | additive |
+| `HomeScreen { current, onPortionChange, onChangeFood, onAddFood, onFindRecipes }` | `{ entries, goalKcal, onGoalChange, onOpenEntry, onAddFood, onFindRecipes, recipeCriteria }` | App, stories | breaking (superseded model) |
+| `FoodReviewScreen { replaces, onConfirm }` | `{ mode, initialPortion, onAddToToday, onDone, onUpdateEntry, onRemoveEntry }` | App, stories | breaking (superseded model) |
+| `calculation.commitCandidate / updatePortion / CurrentCalculation` | retained (used by calculation tests); the app uses `daily-log.ts` | — | no runtime consumer of the old current calculation |
+| — | new: `ProgressRing`, `progressRatio`, `CalorieProgressRing`, `GoalSheet`, `daily-log.ts`, `home-fixtures.ts`, `describePortion` | Home, review | additive |
+
+### 16.7 Component → roles → states → stories → verification
+
+| Component | Type roles | Colour / surface pairs | Radius | Spacing roles | States | Stories (title → names) | Verification |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Button | action-md, action-sm | on-action/primary; primary/secondary-surface; error fg/error surface; disabled text/surface | control | icon-to-label; 12/16 inline | rest, hover, pressed, focus-visible, disabled, loading, block | Primitives/Button → Primary, Treatments × sizes, Small hit area, Loading, Disabled, Keyboard focus-visible, Block long label 320 | story assertions; captures 01–03 |
+| SegmentedControl | label, action-sm | secondary/sunken; primary/canvas; control border/sunken | control + control-compact | 4 padding, 12/8 | selected, unselected, hover, focus-visible, disabled, selected+disabled | Components/SegmentedControl → Default, Recipes selected, Click, Keyboard, Selected + focus-visible, Disabled option, Selected + disabled, Long labels, 320, 200 %, Illustrative | story assertions; captures 04–08; Search walkthrough |
+| MethodOption / MethodSheet | method-title, supporting | primary text/surface; action glyph/surface | card (tiles), sheet | card-padding, card-gap, related | rest, hover, pressed, focus-visible; rows under 20 rem | Components/MethodOption (6), Patterns/MethodSheet → 2 × 2 at 390, 430, Dismiss, Keyboard, 320 rows, 200 % rows | story assertions; captures 09–11; walkthrough 02/54/55 |
+| ProgressRing | — (consumer text) | indicator/track; indicator/surface | round (caps) | — | zero, partial, complete, over, unavailable, invalid input, reduced motion, 200 % | Primitives/ProgressRing (11) | story assertions incl. contrast; capture 12–13 |
+| CalorieProgressRing | main-result, label, supporting, metric-inline, caption | primary/surface; secondary/surface | — | 16/8 internal | below, reached, exceeded, no goal, incomplete, zero-kcal entry, six-character figure, 320, 320 + 200 % | Product compositions/Home (S01)/CalorieProgressRing (10) | story assertions; captures 14–18; walkthrough 14/51 |
+| RecipeCard | compact-title, metric-inline, supporting, caption | primary/canvas; decorative border | card, control (thumbnail) | 12 padding, title-to-secondary | rest, hover, pressed, focus-visible, no photo, unknown values, criteria, 320, 200 % | Patterns/RecipeCard (7) | story assertions; captures 19–21; walkthrough 31/34 |
+| MediaFrame | supporting | secondary/sunken | inherits | — | image, no photo, compact, failed image | Components/MediaFrame (6) | story assertions; capture 22 |
+| NutritionMacros / NutritionValue | metric-secondary, metric-inline, label, supporting, caption | primary/canvas or surface; markers/surface | — | 12 grid gap | known, unknown, partial, stale, zero | Components/NutritionMacros (6), NutritionValue (4) | story assertions; capture 23 |
+| HomeScreen + GoalSheet | screen-heading, section-title, body, supporting, action-* | surface group; canvas sections | grouped | section, section-title-to-content | S01-1/S01-2 × goal states, partial macros, criteria applied, editor apply/cancel/clear/invalid, 320, 200 % | Product compositions/Home (S01) (12), Goal editor (6) | story assertions; captures 24–27; walkthrough 01/07/13/14/40/47/50–51 |
+| FoodReviewScreen | detail-heading, body, action-* | — | — | section | new/existing, invalid, no energy, partial, remove, dirty back, 320, 200 % | Product compositions/Food review (S07) (13) | story assertions; capture 28; walkthrough 05–12/17/23/29/46 |
+| Badge, Chip, Input family, Choice, Sheets, Nav, layouts | unchanged roles | unchanged pairs | migrated roles | unchanged | unchanged | existing stories | full Storybook suite; walkthrough |
+
+### 16.8 Coverage gaps closed
+
+| Required capability | Previous implementation | Gap | Decision | Owner and consumer | Story and verification |
+| --- | --- | --- | --- | --- | --- |
+| Reusable determinate ring | none | missing | create | `ProgressRing` (design system) ← CalorieProgressRing | Primitives/ProgressRing; contrast assertion |
+| Home calorie composition | none | missing | compose | `CalorieProgressRing` (feature) ← HomeScreen | Home (S01)/CalorieProgressRing |
+| Daily record and goal arithmetic | none | missing | create (domain) | `daily-log.ts` ← App, Home, stories | `daily-log.test.ts` (12 tests) |
+| Contextual goal editor | none | missing | compose | `GoalSheet` ← HomeScreen | Home (S01)/Goal editor |
+| Logged-entry row | `FoodResultRow` required a basis | extend | extend | `FoodResultRow basis?` ← HomeScreen | Home (S01) Populated |
+| Existing-entry review, removal | none | missing | extend | `FoodReviewScreen mode="existing"` ← App | Food review (S07) Existing entry, Remove, Dirty back |
+| 2 × 2 method chooser | rows | layout | extend (adapt layout, per ui-contract §4) | `MethodOption` / `MethodSheet` ← App | MethodSheet stories |
+| Compact macro row | none | missing | extend | `NutritionMacros compact` ← HomeScreen | NutritionMacros stories |
+| Small vs medium button | label-only `compact` | geometry | extend | `Button size` ← 10 consumers | Button Small hit area |
+| Image-failure fallback | none | missing | extend | `MediaFrame onError` ← RecipeCard, details | MediaFrame Failed image |
+
+### 16.9 Verification (executed 2026-09-04)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Token validity and drift | `npm run tokens:check` | 218 tokens validated; generated output current |
+| Typecheck | `npm run typecheck` | exit 0 |
+| Unit tests (node) | `npx vitest run --project unit` | 5 files, 50 tests passed (12 new in `daily-log.test.ts`) |
+| Storybook tests (headless Chromium, axe at `error`) | `npx vitest run --project storybook` | 63 files, 311 tests passed; one run under parallel build load produced a single timing failure in `PhotoScreen.stories.tsx` that passed alone and on the final rerun |
+| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 54 pairs, 0 failing required thresholds |
+| Impeccable detector | `node .claude/skills/impeccable/scripts/detect.mjs --json src` | no findings |
+| App build | `npm run build` | success |
+| Storybook build | `npm run build-storybook` | success |
+| Runtime walkthrough | `npm run build && npx vite preview --port 4173`, then `node scripts/verify/runtime-walkthrough.mjs` | 37 checks passed, 0 console/page errors; 55 captures |
+| Storybook captures | `node scripts/verify/storybook-captures.mjs` | 31 captures, 0 page errors |
+| Lint | — | no lint script exists in the repository (unchanged) |
+
+Rendered inspection: every capture listed in `verification/manifest.md` was read at full resolution; the manifest records the per-image result. Visual defects found during inspection and fixed before the final captures: empty-day macros showed "Not available" instead of the contract's recorded 0 g; the ring's Logged/Goal stats broke a value from its unit at 320 px + 200 %; the recipe card kept a five-line title column at 320 px; the compact macro row and the food row queried their own size (a container query cannot do that) so neither reflowed at 320 px + 200 %; the Home group header cramped its goal action beside "Today" at 200 %. Two problems appeared only in the static Storybook build, which the Vitest runner never showed: the sheet and dialog opened in a passive effect, so a play function starting right after render could not find the dialog's controls (fixed with a layout effect in `ModalSheet`, `ConfirmDialog` and the enlarged-text decorator), and the Foundations/Colors helper rejected the minified `#fff` the production CSS emits (fixed in `storybook/contrast.ts`). The capture script now records a play-function exception as a failed capture, so a capture can no longer silently predate its story's end state.
+
+**Not verified / limitations.** No manual screen-reader pass (NVDA/VoiceOver) and no real-device software-keyboard or safe-area check; both remain open as before. Passing axe on every story is not a WCAG conformance claim. The Impeccable critique and audit ran degraded (inline, no sub-agents). No deployed URLs exist yet. Figma capture of the final screens remains open (no code-to-canvas capability in this session).
+
+### 16.10 CSS px versus iOS points, and sources
+
+All values in this repository are CSS px in a browser prototype. The iOS column of section 5 is a mapping: nothing here converts to points, and Apple's guidance is used as a design reference, not as evidence of native compliance. Sources consulted: [Apple UI design tips](https://developer.apple.com/design/tips/), [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/), [HIG Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility), [HIG Layout](https://developer.apple.com/design/human-interface-guidelines/layout), [WCAG 2.2 Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), [WCAG 2.2 Non-text Contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html), [WCAG 2.2 Reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html), and the WAI-ARIA Authoring Practices radio-group pattern for SegmentedControl only.

@@ -11,6 +11,12 @@ export function resolveVar(name: string, element: Element = document.documentEle
 
 export function parseColor(input: string): RGBA | null {
   const text = input.trim();
+  // A production build minifies #ffffff to #fff, so short hex forms must parse too.
+  const shortHex = /^#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])?$/i.exec(text);
+  if (shortHex) {
+    const [, r, g, b, a] = shortHex;
+    return { r: parseInt(r + r, 16), g: parseInt(g + g, 16), b: parseInt(b + b, 16), a: a ? parseInt(a + a, 16) / 255 : 1 };
+  }
   const hex = /^#([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(text);
   if (hex) {
     const n = parseInt(hex[1], 16);

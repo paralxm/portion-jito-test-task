@@ -145,16 +145,22 @@ export function canCalculateEnergy(candidate: FoodCandidate): boolean {
   return candidate.nutrition.energyKcal !== null && candidate.reference.quantity > 0;
 }
 
-/** Human-readable basis line, e.g. "For 250 g" or "For 1 serving (300 g)". */
-export function describePortionBasis(candidate: FoodCandidate, portion: Portion): string {
+/** The portion itself, e.g. "250 g" or "1 serving (300 g)". */
+export function describePortion(candidate: FoodCandidate, portion: Portion): string {
   const unit = findUnit(candidate, portion.unitId);
   if (!unit) return '';
   const ref = findUnit(candidate, candidate.reference.unitId);
   const q = trimNumber(portion.quantity);
-  if (unit.id === candidate.reference.unitId || !ref) return `For ${q} ${unit.label}`;
+  if (unit.id === candidate.reference.unitId || !ref) return `${q} ${unit.label}`;
   const inRef = trimNumber(portion.quantity * unit.toReference);
   const plural = portion.quantity === 1 ? unit.label : `${unit.label}s`;
-  return `For ${q} ${plural} (${inRef} ${ref.label})`;
+  return `${q} ${plural} (${inRef} ${ref.label})`;
+}
+
+/** Human-readable basis line, e.g. "For 250 g" or "For 1 serving (300 g)". */
+export function describePortionBasis(candidate: FoodCandidate, portion: Portion): string {
+  const portionText = describePortion(candidate, portion);
+  return portionText === '' ? '' : `For ${portionText}`;
 }
 
 export function describeReferenceBasis(candidate: FoodCandidate): string {

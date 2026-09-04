@@ -12,19 +12,24 @@ export interface FoodResultRowProps extends Omit<ButtonHTMLAttributes<HTMLButton
   name: ReactNode;
   /** Brand, source or distinguishing detail (supporting 14/20). */
   detail?: ReactNode;
-  /** Calories for the reference basis, or `null` when unknown. */
+  /** Calories for the stated basis, or `null` when unknown. */
   calories: number | null;
-  /** The basis the calories belong to, e.g. "per 100 g". */
-  basis: ReactNode;
+  /**
+   * The basis the calories belong to, e.g. "per 100 g". Omit when the calories already
+   * belong to the portion named in `detail` (a logged entry on Home).
+   */
+  basis?: ReactNode;
 }
 
 /**
- * Compact search-result row. Selecting it opens review — it does not replace the
- * current calculation. Identity wraps; the calorie value stays inline at 16/24.
+ * Compact food row: a search result (selecting it opens review of a candidate) or, on
+ * Home, a logged entry (selecting it opens that entry for editing). Identity wraps; the
+ * calorie value stays inline at 16/24 with the basis beneath it when one is given.
  */
 export function FoodResultRow({ name, detail, calories, basis, className, ...rest }: FoodResultRowProps) {
   return (
-    <button type="button" className={[styles.row, className].filter(Boolean).join(' ')} {...rest}>
+    <div className={[styles.frame, className].filter(Boolean).join(' ')}>
+      <button type="button" className={styles.row} {...rest}>
       <span className={styles.identity}>
         <Text variant="item-title" color="primary" wrap>
           {name}
@@ -48,13 +53,16 @@ export function FoodResultRow({ name, detail, calories, basis, className, ...res
             {formatQuantity(calories, 'kcal')} kcal
           </Text>
         )}
-        <Text variant="supporting" color="secondary">
-          {basis}
-        </Text>
+        {basis ? (
+          <Text variant="supporting" color="secondary">
+            {basis}
+          </Text>
+        ) : null}
       </span>
       <span className={styles.chevron}>
         <Icon icon={CaretRight} size="small-action" />
       </span>
-    </button>
+      </button>
+    </div>
   );
 }

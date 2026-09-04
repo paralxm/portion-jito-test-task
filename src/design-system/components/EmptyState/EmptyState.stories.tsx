@@ -10,8 +10,8 @@ const meta = {
   title: 'Components/EmptyState',
   component: EmptyState,
   args: {
-    title: 'Nothing calculated yet',
-    children: 'Add a food or dish to see the calories and nutrition for the amount you choose. Use Add food below to search, scan a barcode, take a photo or enter values yourself.',
+    title: 'No recipes available',
+    children: 'There is nothing to show yet. Use Add food below to search, scan a barcode, take a photo or enter values yourself.',
   },
   parameters: {
     docs: {

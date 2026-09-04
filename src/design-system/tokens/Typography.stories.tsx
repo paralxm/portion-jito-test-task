@@ -35,17 +35,17 @@ const STYLES: StyleSpec[] = [
   { variant: 'detail-heading', spec: '24/32 · 600', use: 'Food or recipe title on a detail screen' },
   { variant: 'section-title', spec: '20/28 · 600', use: 'Section and sheet titles' },
   { variant: 'compact-title', spec: '18/24 · 600', use: 'Focused bar titles, card titles, empty-state titles' },
-  { variant: 'action', spec: '16/24 · 600', use: 'Button labels, unit selector' },
+  { variant: 'action-md', spec: '16/24 · 600', use: 'Medium (default) button labels, unit selector' },
   { variant: 'body', spec: '16/24 · 400', use: 'Paragraphs, inputs, list items' },
   { variant: 'label', spec: '14/20 · 500', use: 'Field labels, chips, nutrient category labels' },
   { variant: 'supporting', spec: '14/20 · 400', use: 'Helper, error, basis and secondary lines' },
-  { variant: 'compact-action', spec: '14/20 · 600', use: 'Compact standalone actions (Reset, Clear)' },
-  { variant: 'caption', spec: '12/16 · 500', use: 'Navigation labels (unselected)' },
+  { variant: 'action-sm', spec: '14/20 · 600', use: 'Small button labels (Filters, Reset all, Show all nutrition), selected segment' },
+  { variant: 'caption', spec: '12/16 · 500', use: 'Navigation labels (unselected), dietary tags' },
   { variant: 'caption-strong', spec: '12/16 · 600', use: 'Navigation labels (selected), count badge' },
-  { variant: 'item-title', spec: '→ action', use: 'Result row titles' },
-  { variant: 'method-title', spec: '→ action', use: 'Method row titles' },
-  { variant: 'metric-inline', spec: '→ action', use: 'Inline values in rows and cards' },
-  { variant: 'metric-secondary', spec: '→ detail-heading', use: 'Secondary macro values' },
+  { variant: 'item-title', spec: '→ action-md', use: 'Result row titles' },
+  { variant: 'method-title', spec: '→ action-md', use: 'Entry-method tile titles' },
+  { variant: 'metric-inline', spec: '→ action-md', use: 'Inline values in rows and cards' },
+  { variant: 'metric-secondary', spec: '→ section-title', use: 'Secondary macro values (20/28)' },
   { variant: 'wordmark', spec: '24/32 · 600 · −0.03em', use: 'The lowercase wordmark only' },
 ];
 
@@ -80,11 +80,12 @@ export const Catalogue: Story = {
       'detail-heading': [24, 32, 600],
       'section-title': [20, 28, 600],
       'compact-title': [18, 24, 600],
-      action: [16, 24, 600],
+      'action-md': [16, 24, 600],
       body: [16, 24, 400],
       label: [14, 20, 500],
       supporting: [14, 20, 400],
-      'compact-action': [14, 20, 600],
+      'action-sm': [14, 20, 600],
+      'metric-secondary': [20, 28, 600],
       caption: [12, 16, 500],
       'caption-strong': [12, 16, 600],
       wordmark: [24, 32, 600],
@@ -129,7 +130,7 @@ function Specimen() {
       <AmountField label="Amount to calculate" value="300" onChange={() => {}} unit="g" onRequestUnitChange={() => {}} helper="The result updates as you type a valid amount." />
       <NutritionSummary energy={540} protein={18} carbohydrates={63} fat={24} basis="For 300 g" />
       <Button variant="primary" block>
-        Confirm and calculate
+        Add to today
       </Button>
     </Stack>
   );

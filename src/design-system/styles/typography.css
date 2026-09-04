@@ -4,11 +4,11 @@
  * classes (or the underlying custom properties) rather than restating sizes.
  *
  * Base styles:  main-result 40/48 · screen-heading 28/36 · detail-heading 24/32 ·
- *               section-title 20/28 · compact-title 18/24 · action 16/24 · body 16/24 ·
- *               label 14/20 · supporting 14/20 · compact-action 14/20 · caption 12/16 ·
+ *               section-title 20/28 · compact-title 18/24 · action-md 16/24 · body 16/24 ·
+ *               label 14/20 · supporting 14/20 · action-sm 14/20 · caption 12/16 ·
  *               caption-strong 12/16
- * Aliases:      item-title, method-title, metric-inline → action;
- *               metric-secondary → detail-heading; wordmark → 24/32 with -0.03em.
+ * Aliases:      item-title, method-title, metric-inline → action-md;
+ *               metric-secondary → section-title; wordmark → 24/32 with -0.03em.
  */
 
 .portion-type-main-result,
@@ -16,11 +16,11 @@
 .portion-type-detail-heading,
 .portion-type-section-title,
 .portion-type-compact-title,
-.portion-type-action,
+.portion-type-action-md,
 .portion-type-body,
 .portion-type-label,
 .portion-type-supporting,
-.portion-type-compact-action,
+.portion-type-action-sm,
 .portion-type-caption,
 .portion-type-caption-strong,
 .portion-type-item-title,
@@ -76,12 +76,12 @@
   --portion-type-letter-spacing: var(--portion-typography-compact-title-letter-spacing);
 }
 
-.portion-type-action {
-  --portion-type-family: var(--portion-typography-action-font-family);
-  --portion-type-size: var(--portion-typography-action-font-size);
-  --portion-type-weight: var(--portion-typography-action-font-weight);
-  --portion-type-line-height: var(--portion-typography-action-line-height);
-  --portion-type-letter-spacing: var(--portion-typography-action-letter-spacing);
+.portion-type-action-md {
+  --portion-type-family: var(--portion-typography-action-md-font-family);
+  --portion-type-size: var(--portion-typography-action-md-font-size);
+  --portion-type-weight: var(--portion-typography-action-md-font-weight);
+  --portion-type-line-height: var(--portion-typography-action-md-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-action-md-letter-spacing);
 }
 
 .portion-type-body {
@@ -108,12 +108,12 @@
   --portion-type-letter-spacing: var(--portion-typography-supporting-letter-spacing);
 }
 
-.portion-type-compact-action {
-  --portion-type-family: var(--portion-typography-compact-action-font-family);
-  --portion-type-size: var(--portion-typography-compact-action-font-size);
-  --portion-type-weight: var(--portion-typography-compact-action-font-weight);
-  --portion-type-line-height: var(--portion-typography-compact-action-line-height);
-  --portion-type-letter-spacing: var(--portion-typography-compact-action-letter-spacing);
+.portion-type-action-sm {
+  --portion-type-family: var(--portion-typography-action-sm-font-family);
+  --portion-type-size: var(--portion-typography-action-sm-font-size);
+  --portion-type-weight: var(--portion-typography-action-sm-font-weight);
+  --portion-type-line-height: var(--portion-typography-action-sm-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-action-sm-letter-spacing);
 }
 
 .portion-type-caption {

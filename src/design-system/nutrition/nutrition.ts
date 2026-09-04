@@ -11,6 +11,8 @@ export type NutrientCategory = 'energy' | 'protein' | 'carbohydrates' | 'fat' | 
 
 export interface NutrientCategoryMeta {
   label: string;
+  /** Short name for compact rows where the full name would wrap a narrow column (Home). */
+  compactLabel?: string;
   unit: NutrientUnit;
   /** Fixed display order across calculator, cards and details. */
   order: number;
@@ -21,7 +23,7 @@ export interface NutrientCategoryMeta {
 export const NUTRIENT_CATEGORIES: Record<NutrientCategory, NutrientCategoryMeta> = {
   energy: { label: 'Calories', unit: 'kcal', order: 0, macro: false },
   protein: { label: 'Protein', unit: 'g', order: 1, macro: true },
-  carbohydrates: { label: 'Carbohydrates', unit: 'g', order: 2, macro: true },
+  carbohydrates: { label: 'Carbohydrates', compactLabel: 'Carbs', unit: 'g', order: 2, macro: true },
   fat: { label: 'Fat', unit: 'g', order: 3, macro: true },
   fibre: { label: 'Fibre', unit: 'g', order: 4, macro: false },
   vitamins: { label: 'Vitamins', unit: 'mg', order: 5, macro: false },

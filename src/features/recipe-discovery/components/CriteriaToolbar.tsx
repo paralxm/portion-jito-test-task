@@ -29,7 +29,7 @@ export function CriteriaToolbar({ criteria, sheetOpen, onOpenSheet, onCloseSheet
   const active = activeCriteria(criteria);
   return (
     <div className={styles.toolbar}>
-      <Button variant="secondary" size="compact" icon={SlidersHorizontal} onClick={onOpenSheet} aria-haspopup="dialog" aria-expanded={sheetOpen}>
+      <Button variant="secondary" size="small" icon={SlidersHorizontal} onClick={onOpenSheet} aria-haspopup="dialog" aria-expanded={sheetOpen}>
         Filters
         {active.length > 0 ? (
           <>

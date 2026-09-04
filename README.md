@@ -19,6 +19,9 @@ npm run storybook         # Storybook on http://localhost:6006
 | Both test projects | `npm test` |
 | Everything above plus builds | `npm run verify` |
 | Build app / Storybook | `npm run build` / `npm run build-storybook` |
+| Contrast matrix from the token source | `node scripts/verify/contrast-matrix.mjs --check` (regenerate `docs/design-system/contrast-matrix.md` without the flag) |
+| Runtime walkthrough with screenshots | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` |
+| Storybook captures from the static build | `npm run build-storybook` then `node scripts/verify/storybook-captures.mjs` |
 | Runtime walkthrough with screenshots | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` |
 
 Guide, coverage register and verification status: [docs/design-system/README.md](docs/design-system/README.md). Behaviour contracts: [docs/ux/ui-contract.md](docs/ux/ui-contract.md) and [docs/ux/low-fidelity.md](docs/ux/low-fidelity.md).

@@ -22,7 +22,7 @@ and internal gaps, never an external margin reaching for a sibling it doesn't co
 
 A handful of components have their own fixed dimension in this numeric neighbourhood —
 \`Chip\`'s minimum height (40 px), \`ModalSheet\`'s drag handle width (40 px), and
-\`FoodResultRow\`/\`MethodRow\`/\`AppHeader\`'s minimum row height (56 px) — but these are
+\`FoodResultRow\`/\`AppHeader\`'s minimum row height (56 px), \`Button\`'s and \`SegmentedControl\`'s small drawn height (40 px) — but these are
 plain pixel literals written directly in the component's own CSS, not \`reference.space\`
 tokens. A fixed dimension is a different concept from spacing between siblings, so it is
 never exposed through \`gap\` or any spacing token.
@@ -66,7 +66,8 @@ const ROLES = [
 const FIXED_DIMENSION_USES = [
   { step: 40, owner: 'Chip', use: 'minimum height' },
   { step: 40, owner: 'ModalSheet', use: 'drag handle width' },
-  { step: 56, owner: 'FoodResultRow / MethodRow', use: 'minimum row height' },
+  { step: 40, owner: 'Button (small) / SegmentedControl segment', use: 'drawn height; hit area extends to 48' },
+  { step: 56, owner: 'FoodResultRow', use: 'minimum row height' },
   { step: 56, owner: 'AppHeader', use: 'minimum height (plus safe-area-top)' },
 ] as const;
 

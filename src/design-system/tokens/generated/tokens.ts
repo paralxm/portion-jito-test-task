@@ -124,6 +124,7 @@ export const tokenVars = {
   "semantic.color.action.hover": "--portion-color-action-hover",
   "semantic.color.action.pressed": "--portion-color-action-pressed",
   "semantic.color.action.selected-surface": "--portion-color-action-selected-surface",
+  "semantic.color.action.secondary-surface": "--portion-color-action-secondary-surface",
   "semantic.color.focus.ring": "--portion-color-focus-ring",
   "semantic.color.state.disabled.surface": "--portion-color-state-disabled-surface",
   "semantic.color.state.disabled.text": "--portion-color-state-disabled-text",
@@ -150,6 +151,8 @@ export const tokenVars = {
   "semantic.color.nutrition.vitamins.surface": "--portion-color-nutrition-vitamins-surface",
   "semantic.color.nutrition.minerals.accent": "--portion-color-nutrition-minerals-accent",
   "semantic.color.nutrition.minerals.surface": "--portion-color-nutrition-minerals-surface",
+  "semantic.color.progress.track": "--portion-color-progress-track",
+  "semantic.color.progress.indicator": "--portion-color-progress-indicator",
   "semantic.typography.main-result.fontFamily": "--portion-typography-main-result-font-family",
   "semantic.typography.main-result.fontSize": "--portion-typography-main-result-font-size",
   "semantic.typography.main-result.fontWeight": "--portion-typography-main-result-font-weight",
@@ -175,11 +178,11 @@ export const tokenVars = {
   "semantic.typography.compact-title.fontWeight": "--portion-typography-compact-title-font-weight",
   "semantic.typography.compact-title.lineHeight": "--portion-typography-compact-title-line-height",
   "semantic.typography.compact-title.letterSpacing": "--portion-typography-compact-title-letter-spacing",
-  "semantic.typography.action.fontFamily": "--portion-typography-action-font-family",
-  "semantic.typography.action.fontSize": "--portion-typography-action-font-size",
-  "semantic.typography.action.fontWeight": "--portion-typography-action-font-weight",
-  "semantic.typography.action.lineHeight": "--portion-typography-action-line-height",
-  "semantic.typography.action.letterSpacing": "--portion-typography-action-letter-spacing",
+  "semantic.typography.action-md.fontFamily": "--portion-typography-action-md-font-family",
+  "semantic.typography.action-md.fontSize": "--portion-typography-action-md-font-size",
+  "semantic.typography.action-md.fontWeight": "--portion-typography-action-md-font-weight",
+  "semantic.typography.action-md.lineHeight": "--portion-typography-action-md-line-height",
+  "semantic.typography.action-md.letterSpacing": "--portion-typography-action-md-letter-spacing",
   "semantic.typography.body.fontFamily": "--portion-typography-body-font-family",
   "semantic.typography.body.fontSize": "--portion-typography-body-font-size",
   "semantic.typography.body.fontWeight": "--portion-typography-body-font-weight",
@@ -195,11 +198,11 @@ export const tokenVars = {
   "semantic.typography.supporting.fontWeight": "--portion-typography-supporting-font-weight",
   "semantic.typography.supporting.lineHeight": "--portion-typography-supporting-line-height",
   "semantic.typography.supporting.letterSpacing": "--portion-typography-supporting-letter-spacing",
-  "semantic.typography.compact-action.fontFamily": "--portion-typography-compact-action-font-family",
-  "semantic.typography.compact-action.fontSize": "--portion-typography-compact-action-font-size",
-  "semantic.typography.compact-action.fontWeight": "--portion-typography-compact-action-font-weight",
-  "semantic.typography.compact-action.lineHeight": "--portion-typography-compact-action-line-height",
-  "semantic.typography.compact-action.letterSpacing": "--portion-typography-compact-action-letter-spacing",
+  "semantic.typography.action-sm.fontFamily": "--portion-typography-action-sm-font-family",
+  "semantic.typography.action-sm.fontSize": "--portion-typography-action-sm-font-size",
+  "semantic.typography.action-sm.fontWeight": "--portion-typography-action-sm-font-weight",
+  "semantic.typography.action-sm.lineHeight": "--portion-typography-action-sm-line-height",
+  "semantic.typography.action-sm.letterSpacing": "--portion-typography-action-sm-letter-spacing",
   "semantic.typography.caption.fontFamily": "--portion-typography-caption-font-family",
   "semantic.typography.caption.fontSize": "--portion-typography-caption-font-size",
   "semantic.typography.caption.fontWeight": "--portion-typography-caption-font-weight",
@@ -251,8 +254,10 @@ export const tokenVars = {
   "semantic.spacing.icon-to-label": "--portion-spacing-icon-to-label",
   "semantic.spacing.nav-icon-to-label": "--portion-spacing-nav-icon-to-label",
   "semantic.radius.structure": "--portion-radius-structure",
+  "semantic.radius.control-compact": "--portion-radius-control-compact",
   "semantic.radius.control": "--portion-radius-control",
   "semantic.radius.card": "--portion-radius-card",
+  "semantic.radius.grouped": "--portion-radius-grouped",
   "semantic.radius.sheet": "--portion-radius-sheet",
   "semantic.radius.round": "--portion-radius-round",
   "semantic.size.icon.compact": "--portion-size-icon-compact",
@@ -475,7 +480,7 @@ export const tokens = {
       "text": {
         "primary": "#17212b",
         "secondary": "#52606d",
-        "disabled": "#59636e",
+        "disabled": "#77818b",
         "on-action": "#ffffff"
       },
       "border": {
@@ -486,7 +491,8 @@ export const tokens = {
         "primary": "#2855d9",
         "hover": "#2147b6",
         "pressed": "#19368f",
-        "selected-surface": "#eaf0ff"
+        "selected-surface": "#eaf0ff",
+        "secondary-surface": "#eaf0ff"
       },
       "focus": {
         "ring": "#19368f"
@@ -494,7 +500,7 @@ export const tokens = {
       "state": {
         "disabled": {
           "surface": "#e5e7eb",
-          "text": "#59636e"
+          "text": "#77818b"
         }
       },
       "overlay": {
@@ -547,6 +553,10 @@ export const tokens = {
           "accent": "#6b6259",
           "surface": "#f3f0ed"
         }
+      },
+      "progress": {
+        "track": "#e5e7eb",
+        "indicator": "#17212b"
       }
     },
     "typography": {
@@ -585,7 +595,7 @@ export const tokens = {
         "lineHeight": "1.333333",
         "letterSpacing": "0px"
       },
-      "action": {
+      "action-md": {
         "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
         "fontSize": "1rem",
         "fontWeight": "600",
@@ -613,7 +623,7 @@ export const tokens = {
         "lineHeight": "1.428571",
         "letterSpacing": "0px"
       },
-      "compact-action": {
+      "action-sm": {
         "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
         "fontSize": "0.875rem",
         "fontWeight": "600",
@@ -657,9 +667,9 @@ export const tokens = {
       },
       "metric-secondary": {
         "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
-        "fontSize": "1.5rem",
+        "fontSize": "1.25rem",
         "fontWeight": "600",
-        "lineHeight": "1.333333",
+        "lineHeight": "1.4",
         "letterSpacing": "0px"
       },
       "wordmark": {
@@ -689,9 +699,11 @@ export const tokens = {
     },
     "radius": {
       "structure": "0px",
-      "control": "4px",
-      "card": "8px",
-      "sheet": "12px",
+      "control-compact": "4px",
+      "control": "8px",
+      "card": "12px",
+      "grouped": "16px",
+      "sheet": "16px",
       "round": "9999px"
     },
     "size": {

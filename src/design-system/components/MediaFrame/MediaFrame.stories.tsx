@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 
 import { Stack } from '../../primitives/layout/Stack';
 import { MediaFrame } from './MediaFrame';
@@ -17,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Fixed-aspect media region shared by RecipeCard (4:3) and recipe details (16:9). A missing photo is usable loaded content — a quiet neutral fill with "No photo" — never a skeleton or a broken-image glyph. The details hero loads eagerly; card thumbnails lazy-load by default.',
+          'Fixed-aspect media region shared by RecipeCard (4:3 thumbnail, `compact` fallback) and recipe details (16:9 hero). A missing photo — absent, or present but failed to load — is usable loaded content: a quiet neutral fill with an image glyph and "No photo" (visible in wide frames, assistive-technology-only in compact thumbnails). Never a skeleton and never the browser broken-image icon. The details hero loads eagerly; card thumbnails lazy-load by default.',
       },
     },
   },
@@ -53,6 +53,32 @@ export const NoPhoto: Story = {
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByText('No photo')).toBeVisible();
     await expect(within(canvasElement).queryByRole('img')).toBeNull();
+  },
+};
+
+export const CompactNoPhoto: Story = {
+  name: 'No photo — compact thumbnail (glyph only, words for assistive technology)',
+  args: { imageUrl: undefined, compact: true },
+  render: (args) => (
+    <div style={{ inlineSize: 112 }}>
+      <MediaFrame {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const words = within(canvasElement).getByText('No photo');
+    await expect(words).toHaveClass('portion-visually-hidden');
+  },
+};
+
+export const FailedImage: Story = {
+  name: 'Image fails to load → same fallback, not a broken-image icon',
+  args: { imageUrl: 'data:image/png;base64,not-an-image', eager: true },
+  play: async ({ canvasElement }) => {
+    await waitFor(async () => {
+      await expect(canvasElement.querySelector('img')).toBeNull();
+      await expect(within(canvasElement).getByText('No photo')).toBeVisible();
+    });
+    await expect(canvasElement.querySelector('[data-fallback]')).not.toBeNull();
   },
 };
 

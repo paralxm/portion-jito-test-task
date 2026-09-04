@@ -6,16 +6,25 @@ import { Spinner } from '../Spinner/Spinner';
 import { Text } from '../Text/Text';
 import styles from './Button.module.css';
 
+/**
+ * `primary` is the one filled action a screen leads with. `secondary` is a tinted
+ * (blue-50) fill for supporting actions — visibly a button, quieter than primary, and
+ * never an outline competing with fields. `text` is a bare label for tertiary actions
+ * such as Cancel. `destructive` is the tinted red treatment for Discard/Remove.
+ */
 export type ButtonVariant = 'primary' | 'secondary' | 'text' | 'destructive';
+
+/**
+ * `medium` (default) is the 48 px control with the action-md 16/24 label — screen-level
+ * actions. `small` is the 40 px in-context control with the action-sm 14/20 label
+ * (Filters, Reset all, Show all nutrition); its hit area still reaches 48 px.
+ */
+export type ButtonSize = 'medium' | 'small';
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   children: ReactNode;
   variant?: ButtonVariant;
-  /**
-   * `compact` uses the 14/20 compact-action style for standalone actions such as
-   * Clear, Reset or View all. The minimum hit area does not shrink.
-   */
-  size?: 'default' | 'compact';
+  size?: ButtonSize;
   /** Optional leading glyph, rendered decoratively at 20 px. */
   icon?: PhosphorIcon;
   /**
@@ -30,14 +39,14 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 }
 
 /**
- * Button — the single action primitive. Variants change treatment, not hierarchy; the
- * label always uses the action type style, may wrap onto more than one line, and is
- * never truncated, capitalised or condensed to fit.
+ * Button — the single action primitive. Variants change treatment, sizes change the
+ * label role and visual height; neither changes hierarchy on its own. The label may
+ * wrap onto more than one line and is never truncated, capitalised or condensed to fit.
  */
 export function Button({
   children,
   variant = 'primary',
-  size = 'default',
+  size = 'medium',
   icon,
   loading = false,
   block = false,
@@ -61,6 +70,7 @@ export function Button({
       ref={ref}
       type={type}
       className={[styles.button, styles[variant], className].filter(Boolean).join(' ')}
+      data-size={size}
       data-block={block ? 'true' : undefined}
       disabled={disabled}
       aria-busy={loading || undefined}
@@ -73,7 +83,7 @@ export function Button({
           {loading ? <Spinner size="small-action" label="Working" announce={false} /> : icon ? <Icon icon={icon} size="small-action" /> : null}
         </span>
       )}
-      <Text variant={size === 'compact' ? 'compact-action' : 'action'} className={styles.label}>
+      <Text variant={size === 'small' ? 'action-sm' : 'action-md'} className={styles.label}>
         {children}
       </Text>
     </button>

@@ -82,7 +82,9 @@ export function SegmentedControl<T extends string>({ value, options, onValueChan
             }}
             onKeyDown={(event) => handleKeyDown(event, index)}
           >
-            <Text as="span" variant="label" color="inherit" className={styles.label} wrap>
+            {/* Selected = action-sm (600), unselected = label (500): same 14/20 metrics,
+                so the weight change never reflows the equal-width segments. */}
+            <Text as="span" variant={selected ? 'action-sm' : 'label'} color="inherit" className={styles.label} wrap>
               {option.label}
             </Text>
           </button>

@@ -1,16 +1,21 @@
+/* A sunken track with one contained, raised segment. The track's corner is the control
+   radius; each segment sits 4 px inside it, so its corner is the compact-control radius
+   (8 − 4) and the two curves stay concentric. */
+
 .control {
   display: flex;
   align-items: stretch;
   gap: var(--portion-ref-space-4);
   padding: var(--portion-ref-space-4);
-  background: var(--portion-color-background-surface);
-  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
+  background: var(--portion-color-background-sunken);
   border-radius: var(--portion-radius-control);
   min-inline-size: 0;
 }
 
-/* Each option is a flexible segment of the shared track; its own label wraps under
-   enlarged text or long labels instead of the segment breaking onto its own row. */
+/* Each option is a flexible segment of the shared track. The drawn segment is 40 px
+   (its own fixed dimension, not a spacing value); its ::before extends the hit area 4 px
+   above and below, to the full 48 px height of the track. A long label wraps and the
+   segment grows instead of breaking onto its own row. */
 .option {
   position: relative;
   display: inline-flex;
@@ -18,11 +23,11 @@
   justify-content: center;
   flex: 1 1 0%;
   min-inline-size: 0;
-  min-block-size: var(--portion-size-target-minimum);
+  min-block-size: 40px;
   padding-inline: var(--portion-ref-space-12);
   padding-block: var(--portion-ref-space-8);
-  border: 0;
-  border-radius: var(--portion-radius-control);
+  border: var(--portion-border-width-default) solid transparent;
+  border-radius: var(--portion-radius-control-compact);
   background: transparent;
   color: var(--portion-color-text-secondary);
   text-align: center;
@@ -30,8 +35,15 @@
   -webkit-tap-highlight-color: transparent;
   transition:
     background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
-    color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
-    box-shadow var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+    border-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.option::before {
+  content: '';
+  position: absolute;
+  inset-block: calc(var(--portion-ref-space-4) * -1);
+  inset-inline: 0;
 }
 
 .label {
@@ -41,24 +53,30 @@
 
 @media (hover: hover) {
   .option:not(:disabled):not([data-selected]):hover {
-    background: var(--portion-color-background-sunken);
+    background: var(--portion-color-background-surface);
+    color: var(--portion-color-text-primary);
   }
 }
 
-/* Selection is a real boundary and background change, not a colour swap alone: the
-   selected segment visibly "raises" off the track. */
+/* Selected: a contained indicator — canvas fill, the control boundary (3.3:1 on the
+   track) and primary text at the action-sm weight. Never a colour swap alone, never a
+   capsule, never an outlined-button look. */
 .option[data-selected] {
   background: var(--portion-color-background-canvas);
-  color: var(--portion-color-action-primary);
-  box-shadow: inset 0 0 0 1px var(--portion-color-action-primary);
+  border-color: var(--portion-color-border-control);
+  color: var(--portion-color-text-primary);
 }
 
+/* Disabled: the disabled text step plus reduced opacity so it is visibly different from
+   an enabled, unselected segment (whose text is only one neutral step darker). */
 .option:disabled {
   color: var(--portion-color-state-disabled-text);
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .option:focus-visible {
   outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
   outline-offset: var(--portion-focus-ring-offset);
+  z-index: 1;
 }

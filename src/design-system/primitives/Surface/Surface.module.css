@@ -17,6 +17,7 @@
 .surface[data-radius='structure'] { border-radius: var(--portion-radius-structure); }
 .surface[data-radius='control'] { border-radius: var(--portion-radius-control); }
 .surface[data-radius='card'] { border-radius: var(--portion-radius-card); }
+.surface[data-radius='grouped'] { border-radius: var(--portion-radius-grouped); }
 
 .surface[data-padding='0'] { padding: 0; }
 .surface[data-padding='12'] { padding: var(--portion-ref-space-12); }

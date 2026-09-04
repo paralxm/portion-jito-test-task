@@ -7,7 +7,12 @@ export interface SurfaceProps {
   tone?: 'canvas' | 'surface' | 'sunken';
   /** Essential boundaries use the control border; ordinary grouping uses the decorative one. */
   border?: 'none' | 'decorative' | 'control';
-  radius?: 'structure' | 'control' | 'card';
+  /**
+   * Semantic radius role: `structure` (0) only for full-bleed regions, `control` (8),
+   * `card` (12) for an independent content card, `grouped` (16) for a surface that holds
+   * a whole section such as Home's daily overview.
+   */
+  radius?: 'structure' | 'control' | 'card' | 'grouped';
   padding?: 0 | 12 | 16 | 24;
 }
 
