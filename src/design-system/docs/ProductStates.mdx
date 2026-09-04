@@ -1,0 +1,57 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Product states/00 Index — the 41 low-fi states" />
+
+# The 41 low-fi states
+
+Every frame of the Figma low-fidelity section **175:2 “Low-fidelity — Complete Core Journeys”** maps to exactly one story under *Product states*. Each story renders the production screen with deterministic fixtures (baseline `2026-09-04T12:00:00Z`) and is captured at 393 × 852. The design ledger — inventory columns, transition matrix, reference synthesis, content model, asset register and decisions — is `docs/design/hifi-decisions.md`; this page is the Storybook-side index, not a second specification.
+
+**Verification mode.** *runtime + story*: the state occurs in the real app flow and is also frozen here. *story*: a passive or hard-to-trigger state that the prototype cannot reach honestly (no camera, no failing catalogue recipe, no scriptable keyboard), reproduced deterministically from production code.
+
+| # | Portion ID | Figma frame · node | Story (Product states / …) | Mode |
+| --- | --- | --- | --- | --- |
+| 1 | S01-1 | Home / Today — No food logged · 175:10 | Lane A → S01-1 | runtime + story |
+| 2 | S01-2 | Home / Today — Food logged · 175:38 | Lane A → S01-2 | runtime + story |
+| 3 | S02-1 | Search / Food scope · results · 175:93 | Lane A → S02-1 | runtime + story |
+| 4 | S03-1 | Recipes / Browse · 175:158 | Lane A → S03-1 | runtime + story |
+| 5 | O01 | Add food / Choose a method (overlay) · 176:20 | Lane B → O01 | runtime + story |
+| 6 | S02-2 | Search / Food · loading · 176:43 | Lane B → S02-2 | runtime + story |
+| 7 | S02-3 | Search / Food · no matches · 176:77 | Lane B → S02-3 | runtime + story |
+| 8 | S02-4 | Search / Food · request failure · 176:118 | Lane B → S02-4 | runtime + story |
+| 9 | S07-1 | Food review / From search · 176:157 | Lane B → S07-1 | runtime + story |
+| 10 | S07-2 | Food review / Invalid portion · 176:201 | Lane B → S07-2 | runtime + story |
+| 11 | S07-3 | Food review / Replaces current calculation · 176:247 (repurposed: Edit logged entry) | Lane B → S07-3 | runtime + story |
+| 12 | S04-1 | Barcode / Scanning · 178:5 | Lane C1 → S04-1 | runtime + story |
+| 13 | S04-2 | Barcode / Code read · lookup pending · 178:20 | Lane C1 → S04-2 | runtime + story |
+| 14 | S04-3 | Barcode / Code not readable · 178:31 | Lane C1 → S04-3 | runtime + story |
+| 15 | S04-4 | Barcode / Product not found · 178:47 | Lane C1 → S04-4 | runtime + story |
+| 16 | S04-5 | Barcode / Lookup service failure · 178:65 | Lane C1 → S04-5 | runtime + story |
+| 17 | P01 | Conceptual system permission request · 178:81 | Lane C1 → P01 | story |
+| 18 | S04-6 | Barcode / Camera access denied · 178:94 | Lane C1 → S04-6 | runtime + story |
+| 19 | S07-4 | Food review / From barcode · 178:109 | Lane C1 → S07-4 | runtime + story |
+| 20 | S05-1 | Photo / Capture · 179:5 | Lane C2 → S05-1 | runtime + story |
+| 21 | S05-2 | Photo / Preview · 179:12 | Lane C2 → S05-2 | runtime + story |
+| 22 | S05-3 | Photo / Analysing · 179:21 | Lane C2 → S05-3 | runtime + story |
+| 23 | S05-4 | Photo / Suggested matches · 179:31 | Lane C2 → S05-4 | runtime + story |
+| 24 | S05-5 | Photo / No usable match · 179:57 | Lane C2 → S05-5 | story |
+| 25 | S05-6 | Photo / Analysis failure · 179:70 | Lane C2 → S05-6 | runtime + story |
+| 26 | S07-5 | Food review / From photo · estimate · 179:81 | Lane C2 → S07-5 | runtime + story |
+| 27 | S06-1 | Manual entry / Empty · 180:5 | Lane D → S06-1 | runtime + story |
+| 28 | S06-2 | Manual entry / Filled · keyboard inset · 180:43 | Lane D → S06-2 | story |
+| 29 | S06-3 | Manual entry / Field error · 180:71 | Lane D → S06-3 | runtime + story |
+| 30 | O03 | Discard unsaved entry · 180:111 | Lane D → O03 | runtime + story |
+| 31 | O04 | Supported unit chooser · 180:134 | Lane D → O04 | runtime + story |
+| 32 | S07-6 | Food review / From manual entry · 180:162 | Lane D → S07-6 | runtime + story |
+| 33 | S03-2 | Recipes / Filtered results · 181:5 | Lane E → S03-2 | runtime + story |
+| 34 | O02 | Recipe filters / Applied values · 181:72 | Lane E → O02 | runtime + story |
+| 35 | O02-2 | Recipe filters / Invalid range (crop) · 181:117 | Lane E → O02-2 | runtime + story |
+| 36 | S02-5 | Search / Recipes scope · results · 181:133 | Lane E → S02-5 | runtime + story |
+| 37 | S08-2 | Recipe details / Loading · 181:289 | Lane E → S08-2 | runtime + story |
+| 38 | S08-1 | Recipe details / Loaded · 181:237 | Lane E → S08-1 | runtime + story |
+| 39 | S08-3 | Recipe details / Unavailable · 181:317 | Lane E → S08-3 | story |
+| 40 | S08-4 | Recipe details / No photo · long title · partial nutrition (crop) · 181:350 | Lane E → S08-4 | runtime + story |
+| 41 | S02-6 | Search / Recipes · no matches · 181:193 | Lane E → S02-6 | runtime + story |
+
+Excluded on purpose: **176:5** (a board reference behind O01) and **185:2** (S01-3, a superseded 320 px Home composition outside this section; the 320 px capture of S01-2 is the narrow witness).
+
+Beyond the 41 baseline captures, each lane carries representative variants at 320 and 430 px, at 200 % text, and with the iPhone 16 safe-area fixture (59 / 34) for the root, focused and sheet families.

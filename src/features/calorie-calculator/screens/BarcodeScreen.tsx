@@ -21,6 +21,21 @@ export interface BarcodeDemoCodes {
   failing: string;
 }
 
+/**
+ * The barcode step's phases. `permission-pending` is the app-side state while the system
+ * camera prompt (P01) is showing; the prototype has no camera, so it is reached only
+ * through `initialPhase`.
+ */
+export type BarcodePhase =
+  | { kind: 'permission-pending' }
+  | { kind: 'scanning' }
+  | { kind: 'looking-up'; code: string }
+  | { kind: 'paused'; code: string }
+  | { kind: 'unreadable' }
+  | { kind: 'not-found'; code: string }
+  | { kind: 'lookup-failed'; code: string }
+  | { kind: 'denied' };
+
 export interface BarcodeScreenProps {
   /** Product lookup for a read code. The screen ignores responses that arrive after a rescan or Back. */
   lookup: (code: string) => Promise<BarcodeLookupResult>;
@@ -30,16 +45,11 @@ export interface BarcodeScreenProps {
   onBack: () => void;
   onSearchInstead: () => void;
   onEnterManually: () => void;
+  /** Deterministic starting phase for stories and tests; the runtime always starts scanning. */
+  initialPhase?: BarcodePhase;
 }
 
-type Phase =
-  | { kind: 'scanning' }
-  | { kind: 'looking-up'; code: string }
-  | { kind: 'paused'; code: string }
-  | { kind: 'unreadable' }
-  | { kind: 'not-found'; code: string }
-  | { kind: 'lookup-failed'; code: string }
-  | { kind: 'denied' };
+type Phase = BarcodePhase;
 
 /**
  * S04 — Barcode. Capture pauses after one read so a product is looked up once. Each
@@ -47,8 +57,8 @@ type Phase =
  * another read, an unknown product keeps the code visible, a failed lookup can be
  * retried for the same code, and camera denial offers the other methods.
  */
-export function BarcodeScreen({ lookup, demoCodes, onFound, onBack, onSearchInstead, onEnterManually }: BarcodeScreenProps) {
-  const [phase, setPhase] = useState<Phase>({ kind: 'scanning' });
+export function BarcodeScreen({ lookup, demoCodes, onFound, onBack, onSearchInstead, onEnterManually, initialPhase }: BarcodeScreenProps) {
+  const [phase, setPhase] = useState<Phase>(initialPhase ?? { kind: 'scanning' });
   const request = useRef(0);
 
   useEffect(() => {
@@ -101,6 +111,26 @@ export function BarcodeScreen({ lookup, demoCodes, onFound, onBack, onSearchInst
         >
           Allow camera access in your browser or system settings, or add the food another way.
         </EmptyState>
+      ) : phase.kind === 'permission-pending' ? (
+        <>
+          <div className={styles.viewfinder} aria-live="polite">
+            <div className={styles.frame} data-paused />
+            <Text as="p" variant="body" color="primary">
+              Waiting for camera permission
+            </Text>
+            <Text as="p" variant="supporting" color="secondary" wrap>
+              Allow access in the system prompt to continue, or add the food another way.
+            </Text>
+          </div>
+          <div className={styles.demoActions}>
+            <Button variant="secondary" size="small" onClick={onSearchInstead}>
+              Search by name
+            </Button>
+            <Button variant="secondary" size="small" onClick={onEnterManually}>
+              Enter manually
+            </Button>
+          </div>
+        </>
       ) : (
         <div className={styles.viewfinder} aria-live="polite">
           <div className={styles.frame} data-paused={phase.kind !== 'scanning' || undefined} />

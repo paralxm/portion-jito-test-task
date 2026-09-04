@@ -96,7 +96,7 @@ Rescan, search, enter manually or switch method as appropriate to the cause.
 
 Take a photo
 
-S05 → capture → preview → analyse → review suggestions → select a candidate → S07-5
+S05 → capture → preview → analyse → review suggestions → mark a candidate and choose Review selected match → S07-5
 
 Retake, search, enter manually or switch method.
 

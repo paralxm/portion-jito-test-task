@@ -72,7 +72,12 @@ export function SearchScreen({
   let countText = '';
   if (current.status === 'ready' && current.results.length > 0) {
     const n = current.results.length;
-    countText = scope === 'food' ? `${n} ${n === 1 ? 'food' : 'foods'} found` : `${n} ${n === 1 ? 'recipe' : 'recipes'} ${active > 0 ? 'match your filters' : 'found'}`;
+    countText =
+      scope === 'food'
+        ? `${n} ${n === 1 ? 'food' : 'foods'} found`
+        : active > 0
+          ? `${n} ${n === 1 ? 'recipe matches' : 'recipes match'} your filters`
+          : `${n} ${n === 1 ? 'recipe' : 'recipes'} found`;
   }
   // Announced when results change; loading and failure announce themselves.
   const summary = current.status !== 'ready' ? '' : current.results.length === 0 ? `No ${scope === 'food' ? 'foods' : 'recipes'} match “${trimmed}”` : countText;

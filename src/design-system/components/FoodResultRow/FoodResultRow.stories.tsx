@@ -8,7 +8,7 @@ import { FoodResultRow } from './FoodResultRow';
 const meta = {
   title: 'Components/FoodResultRow',
   component: FoodResultRow,
-  args: { name: 'Lentil soup', detail: 'Homemade · per 100 g', calories: 150, basis: 'per 100 g', onClick: fn() },
+  args: { name: 'Lentil soup', detail: 'Homemade', calories: 150, basis: 'per 100 g', onClick: fn() },
   parameters: {
     docs: {
       description: {
@@ -32,9 +32,9 @@ export const LongNameAndMissingCalories: Story = {
   name: 'Long name and missing calories at 320',
   render: () => (
     <Stack gap={0}>
-      <FoodResultRow name="Wholegrain pasta with roasted vegetables and tahini dressing" detail="Prepared dish · per 100 g" calories={152} basis="per 100 g" />
-      <FoodResultRow name="Mixed salad leaves" detail="Fresh · per 100 g · partial nutrition" calories={null} basis="per 100 g" />
-      <FoodResultRow name="Sparkling water" detail="Drink · per 100 ml" calories={0} basis="per 100 ml" />
+      <FoodResultRow name="Wholegrain pasta with roasted vegetables and tahini dressing" detail="Prepared dish" calories={152} basis="per 100 g" />
+      <FoodResultRow name="Mixed salad leaves" detail="Fresh · partial nutrition" calories={null} basis="per 100 g" />
+      <FoodResultRow name="Sparkling water" detail="Drink" calories={0} basis="per 100 ml" />
     </Stack>
   ),
   globals: { viewport: { value: 'mobile320', isRotated: false } },

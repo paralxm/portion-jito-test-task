@@ -103,6 +103,13 @@ Limit grouped surfaces. On Home, one grouped daily-overview surface is appropria
 - Use a 2 x 2 grid when space permits and one-column rows at narrow/200% text through the shared responsive pattern.
 - Choosing a method starts acquisition; it does not commit food.
 
+### Photo suggestions
+
+- Suggested foods are radio rows (name, kcal per basis) inside one group; the selected row carries the mark, the selected surface and the action boundary — never colour alone.
+- `Review selected match` is the single primary action and stays unavailable until a suggestion is marked; nothing is auto-accepted.
+- `None of these` discloses Retake photo, Search by name and Enter manually in place; it never navigates on its own.
+- The captured frame is a labelled sample photograph in this prototype; the copy says it is not the user's food and does not measure the portion.
+
 ### Food review
 
 - Keep food identity, amount, unit, basis, calorie result, and available nutrition understandable and correctable.

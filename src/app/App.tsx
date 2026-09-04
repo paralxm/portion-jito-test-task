@@ -49,6 +49,9 @@ export default function App() {
   const [root, setRoot] = useState<Destination>('home');
   const [flow, setFlow] = useState<FlowStep[]>([]);
   const [methodOpen, setMethodOpen] = useState(false);
+  // Where the food task was started from (root + focused stack when Log food was opened),
+  // so Done can return there even after Search food switched the root to Search.
+  const [taskOrigin, setTaskOrigin] = useState<{ root: Destination; flow: FlowStep[] } | null>(null);
   const keyboardOpen = useSoftwareKeyboard();
 
   // Daily record --------------------------------------------------------------
@@ -176,13 +179,29 @@ export default function App() {
   };
   const switchRoot = (destination: Destination) => {
     detailsRequestId.current += 1;
+    setTaskOrigin(null);
     setFlow([]);
     setRoot(destination);
   };
-  /** Close the food task to the surface it was started from, without logging. */
+  /** Opens the shared Log food chooser and remembers the invoking surface. */
+  const openLogFood = () => {
+    setTaskOrigin({ root, flow });
+    setMethodOpen(true);
+  };
+  /**
+   * Close the food task to the surface it was started from, without logging: the root
+   * and focused stack recorded when Log food was opened (Recipe Details included), or the
+   * current root when the task began on the Search tab itself.
+   */
   const closeTask = () => {
     detailsRequestId.current += 1;
-    setFlow([]);
+    if (taskOrigin) {
+      setRoot(taskOrigin.root);
+      setFlow(taskOrigin.flow);
+      setTaskOrigin(null);
+    } else {
+      setFlow([]);
+    }
   };
   const goToFoodSearch = () => {
     detailsRequestId.current += 1;
@@ -224,7 +243,7 @@ export default function App() {
     loadDetails(recipeId);
   };
 
-  const navigation = (selected: Destination) => <NavigationBar selected={selected} onSelect={switchRoot} onLogFood={() => setMethodOpen(true)} hidden={keyboardOpen} />;
+  const navigation = (selected: Destination) => <NavigationBar selected={selected} onSelect={switchRoot} onLogFood={openLogFood} hidden={keyboardOpen} />;
 
   const rootVisible = (destination: Destination) => flow.length === 0 && root === destination;
 
@@ -300,7 +319,7 @@ export default function App() {
           goalKcal={goalKcal}
           onGoalChange={setGoalKcal}
           onOpenEntry={(entryId) => push({ kind: 'entry', entryId })}
-          onLogFood={() => setMethodOpen(true)}
+          onLogFood={openLogFood}
           onFindRecipes={() => switchRoot('recipes')}
           recipeCriteria={browseCriteriaLabels}
           navigation={navigation('home')}

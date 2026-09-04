@@ -3,13 +3,14 @@
  * others are fictional recipes with synthetic values used to exercise filtering, long
  * titles, missing data and the no-photo treatment. None is nutrition advice.
  *
- * No photographs ship with the repository: the asset-licence review for the board
- * images has not been completed (see docs/design/visual-direction.md §8). One recipe
- * carries an inline SVG placeholder so the 4:3 / 16:9 crop behaviour can be verified.
+ * Photographs are local, licensed assets registered in docs/design/hifi-decisions.md §5.
+ * The traybake and the long-title pasta deliberately have no photo: they exercise the
+ * No photo treatment on cards (S03-1) and details (S08-4).
  */
+import { chickenSaladPhoto, lentilSoupPhoto, tofuStirFryPhoto } from '../../../assets/images';
 import type { Recipe } from './matching';
 
-/** A neutral, clearly artificial placeholder image (not a photograph). */
+/** A neutral, clearly artificial placeholder image (not a photograph), kept for component stories. */
 export const placeholderImage =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
@@ -20,7 +21,7 @@ export const placeholderImage =
 export const fixtureR: Recipe = {
   id: 'recipe-lentil-soup',
   title: 'Lentil soup',
-  imageUrl: placeholderImage,
+  imageUrl: lentilSoupPhoto,
   servingGrams: 300,
   energyKcal: 450,
   proteinG: 24,
@@ -78,6 +79,7 @@ export const recipeCatalogue: readonly Recipe[] = [
   {
     id: 'recipe-chicken-salad',
     title: 'Grilled chicken salad with lemon dressing',
+    imageUrl: chickenSaladPhoto,
     servingGrams: 320,
     energyKcal: 380,
     proteinG: 38,
@@ -92,6 +94,7 @@ export const recipeCatalogue: readonly Recipe[] = [
   {
     id: 'recipe-tofu',
     title: 'Quick tofu stir-fry',
+    imageUrl: tofuStirFryPhoto,
     servingGrams: 300,
     energyKcal: 395,
     proteinG: null,

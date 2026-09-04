@@ -42,7 +42,7 @@ function storyId(title, name) {
   return entry.id;
 }
 
-/** [file, title, story name, viewport width, root font-size %] */
+/** [file, title, story name, viewport width, root font-size %, viewport height = 844] */
 const CAPTURES = [
   ['01-button-treatments-sizes', 'Primitives/Button', 'Treatments × sizes', 390, 100],
   ['02-button-disabled', 'Primitives/Button', 'Disabled — every treatment, no activation', 390, 100],
@@ -86,13 +86,74 @@ const CAPTURES = [
   ['40-root-safe-areas', 'Templates/RootScreenLayout', 'iPhone 16 portrait - header and navigation own 59/34 once', 393, 100],
   ['41-focused-safe-footer', 'Templates/FocusedFlowLayout', 'iPhone 16 portrait - focused header/footer own 59/34 once', 393, 100],
   ['42-sheet-safe-footer', 'Patterns/ModalSheet', 'iPhone 16 portrait - sheet footer owns bottom safe area once', 393, 100],
+  // ---- The 41 mapped low-fi states (docs/design/hifi-decisions.md §1), 393 × 852 -----
+  ['states/S01-1-175-10', "Product states/Lane A — Core navigation", "S01-1 · 175:10 — Home / Today — No food logged", 393, 100, 852],
+  ['states/S01-2-175-38', "Product states/Lane A — Core navigation", "S01-2 · 175:38 — Home / Today — Food logged", 393, 100, 852],
+  ['states/S02-1-175-93', "Product states/Lane A — Core navigation", "S02-1 · 175:93 — Search / Food scope · results", 393, 100, 852],
+  ['states/S03-1-175-158', "Product states/Lane A — Core navigation", "S03-1 · 175:158 — Recipes / Browse", 393, 100, 852],
+  ['states/O01-176-20', "Product states/Lane B — Home through search and review", "O01 · 176:20 — Log food / Choose a method (overlay)", 393, 100, 852],
+  ['states/S02-2-176-43', "Product states/Lane B — Home through search and review", "S02-2 · 176:43 — Search / Food · loading", 393, 100, 852],
+  ['states/S02-3-176-77', "Product states/Lane B — Home through search and review", "S02-3 · 176:77 — Search / Food · no matches", 393, 100, 852],
+  ['states/S02-4-176-118', "Product states/Lane B — Home through search and review", "S02-4 · 176:118 — Search / Food · request failure", 393, 100, 852],
+  ['states/S07-1-176-157', "Product states/Lane B — Home through search and review", "S07-1 · 176:157 — Food review / From search", 393, 100, 852],
+  ['states/S07-2-176-201', "Product states/Lane B — Home through search and review", "S07-2 · 176:201 — Food review / Invalid portion", 393, 100, 852],
+  ['states/S07-3-176-247', "Product states/Lane B — Home through search and review", "S07-3 · 176:247 — Food review / Edit logged entry (repurposed)", 393, 100, 852],
+  ['states/S04-1-178-5', "Product states/Lane C1 — Barcode acquisition", "S04-1 · 178:5 — Barcode / Scanning", 393, 100, 852],
+  ['states/S04-2-178-20', "Product states/Lane C1 — Barcode acquisition", "S04-2 · 178:20 — Barcode / Code read · lookup pending", 393, 100, 852],
+  ['states/S04-3-178-31', "Product states/Lane C1 — Barcode acquisition", "S04-3 · 178:31 — Barcode / Code not readable", 393, 100, 852],
+  ['states/S04-4-178-47', "Product states/Lane C1 — Barcode acquisition", "S04-4 · 178:47 — Barcode / Product not found", 393, 100, 852],
+  ['states/S04-5-178-65', "Product states/Lane C1 — Barcode acquisition", "S04-5 · 178:65 — Barcode / Lookup service failure", 393, 100, 852],
+  ['states/P01-178-81', "Product states/Lane C1 — Barcode acquisition", "P01 · 178:81 — Conceptual system permission request (app side)", 393, 100, 852],
+  ['states/S04-6-178-94', "Product states/Lane C1 — Barcode acquisition", "S04-6 · 178:94 — Barcode / Camera access denied", 393, 100, 852],
+  ['states/S07-4-178-109', "Product states/Lane C1 — Barcode acquisition", "S07-4 · 178:109 — Food review / From barcode", 393, 100, 852],
+  ['states/S05-1-179-5', "Product states/Lane C2 — Photo acquisition", "S05-1 · 179:5 — Photo / Capture", 393, 100, 852],
+  ['states/S05-2-179-12', "Product states/Lane C2 — Photo acquisition", "S05-2 · 179:12 — Photo / Preview", 393, 100, 852],
+  ['states/S05-3-179-21', "Product states/Lane C2 — Photo acquisition", "S05-3 · 179:21 — Photo / Analysing", 393, 100, 852],
+  ['states/S05-4-179-31', "Product states/Lane C2 — Photo acquisition", "S05-4 · 179:31 — Photo / Suggested matches", 393, 100, 852],
+  ['states/S05-5-179-57', "Product states/Lane C2 — Photo acquisition", "S05-5 · 179:57 — Photo / No usable match", 393, 100, 852],
+  ['states/S05-6-179-70', "Product states/Lane C2 — Photo acquisition", "S05-6 · 179:70 — Photo / Analysis failure", 393, 100, 852],
+  ['states/S07-5-179-81', "Product states/Lane C2 — Photo acquisition", "S07-5 · 179:81 — Food review / From photo · estimate", 393, 100, 852],
+  ['states/S06-1-180-5', "Product states/Lane D — Manual entry and correction", "S06-1 · 180:5 — Manual entry / Empty", 393, 100, 852],
+  ['states/S06-2-180-43', "Product states/Lane D — Manual entry and correction", "S06-2 · 180:43 — Manual entry / Filled · keyboard inset", 393, 100, 552],
+  ['states/S06-3-180-71', "Product states/Lane D — Manual entry and correction", "S06-3 · 180:71 — Manual entry / Field error", 393, 100, 852],
+  ['states/O03-180-111', "Product states/Lane D — Manual entry and correction", "O03 · 180:111 — Discard unsaved entry", 393, 100, 852],
+  ['states/O04-180-134', "Product states/Lane D — Manual entry and correction", "O04 · 180:134 — Supported unit chooser", 393, 100, 852],
+  ['states/S07-6-180-162', "Product states/Lane D — Manual entry and correction", "S07-6 · 180:162 — Food review / From manual entry", 393, 100, 852],
+  ['states/S03-2-181-5', "Product states/Lane E — Recipe browse, criteria, details and return", "S03-2 · 181:5 — Recipes / Filtered results", 393, 100, 852],
+  ['states/O02-181-72', "Product states/Lane E — Recipe browse, criteria, details and return", "O02 · 181:72 — Recipe filters / Applied values", 393, 100, 852],
+  ['states/O02-2-181-117', "Product states/Lane E — Recipe browse, criteria, details and return", "O02-2 · 181:117 — Recipe filters / Invalid range", 393, 100, 852],
+  ['states/S02-5-181-133', "Product states/Lane E — Recipe browse, criteria, details and return", "S02-5 · 181:133 — Search / Recipes scope · results", 393, 100, 852],
+  ['states/S08-2-181-289', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-2 · 181:289 — Recipe details / Loading", 393, 100, 852],
+  ['states/S08-1-181-237', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-1 · 181:237 — Recipe details / Loaded", 393, 100, 852],
+  ['states/S08-3-181-317', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-3 · 181:317 — Recipe details / Unavailable", 393, 100, 852],
+  ['states/S08-4-181-350', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-4 · 181:350 — Recipe details / No photo · long title · partial nutrition", 393, 100, 852],
+  ['states/S02-6-181-193', "Product states/Lane E — Recipe browse, criteria, details and return", "S02-6 · 181:193 — Search / Recipes · no matches", 393, 100, 852],
+  // ---- Representative and risk-bearing variants: 320 / 430, 200 % text, safe-area fixture -----
+  ['states/V-S01-2-320', "Product states/Lane A — Core navigation", "S01-2 at 320 (narrow witness, replaces the superseded 185:2 frame)", 320, 100, 800],
+  ['states/V-S01-2-430', "Product states/Lane A — Core navigation", "S01-2 at 430", 430, 100, 932],
+  ['states/V-S01-2-320-200', "Product states/Lane A — Core navigation", "S01-2 at 320 and 200 % text", 320, 200, 800],
+  ['states/V-S01-2-safe-areas', "Product states/Lane A — Core navigation", "S01-2 with the iPhone 16 safe-area fixture (59 / 34)", 393, 100, 852],
+  ['states/V-O01-320', "Product states/Lane B — Home through search and review", "O01 at 320 keeps the 2 × 2 grid", 320, 100, 800],
+  ['states/V-S07-1-320', "Product states/Lane B — Home through search and review", "S07-1 at 320", 320, 100, 800],
+  ['states/V-S07-1-200', "Product states/Lane B — Home through search and review", "S07-1 at 200 % text — footer still reachable", 393, 200, 852],
+  ['states/V-S07-1-safe-areas', "Product states/Lane B — Home through search and review", "S07-1 with the iPhone 16 safe-area fixture — footer owns the bottom inset", 393, 100, 852],
+  ['states/V-S04-1-320', "Product states/Lane C1 — Barcode acquisition", "S04-1 at 320", 320, 100, 800],
+  ['states/V-S04-4-200', "Product states/Lane C1 — Barcode acquisition", "S04-4 at 200 % text — every recovery action still reachable", 393, 200, 852],
+  ['states/V-S05-4-320', "Product states/Lane C2 — Photo acquisition", "S05-4 at 320", 320, 100, 800],
+  ['states/V-S05-4-200', "Product states/Lane C2 — Photo acquisition", "S05-4 at 200 % text", 393, 200, 852],
+  ['states/V-S06-1-320', "Product states/Lane D — Manual entry and correction", "S06-1 at 320", 320, 100, 800],
+  ['states/V-S06-3-200', "Product states/Lane D — Manual entry and correction", "S06-3 at 200 % text", 393, 200, 852],
+  ['states/V-S03-2-320', "Product states/Lane E — Recipe browse, criteria, details and return", "S03-2 at 320", 320, 100, 800],
+  ['states/V-S08-1-430', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-1 at 430", 430, 100, 932],
+  ['states/V-S03-2-320-200', "Product states/Lane E — Recipe browse, criteria, details and return", "S03-2 at 320 and 200 % text", 320, 200, 800],
+  ['states/V-O02-safe-areas', "Product states/Lane E — Recipe browse, criteria, details and return", "O02 with the iPhone 16 safe-area fixture — sheet footer owns the bottom inset", 393, 100, 852],
 ];
 
 const browser = await chromium.launch();
 let failures = 0;
-for (const [file, title, name, width, fontPercent] of CAPTURES) {
+for (const [file, title, name, width, fontPercent, height = 844] of CAPTURES) {
   const id = storyId(title, name);
-  const ctx = await browser.newContext({ viewport: { width, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
   const page = await ctx.newPage();
   const pageErrors = [];
   page.on('pageerror', (e) => pageErrors.push(e.message));
@@ -128,7 +189,12 @@ for (const [file, title, name, width, fontPercent] of CAPTURES) {
   // A capture that is not about focus should not carry the play function's last focus ring.
   if (!/focus/i.test(name)) await page.evaluate(() => (document.activeElement instanceof HTMLElement ? document.activeElement.blur() : undefined));
   await page.waitForTimeout(100);
-  await page.screenshot({ path: path.join(out, `${file}.png`), fullPage: true });
+  mkdirSync(path.dirname(path.join(out, `${file}.png`)), { recursive: true });
+  // A fixed backdrop or a sticky bar cannot reach past the viewport, so a full-page capture
+  // of an open dialog (or of the keyboard-inset fixture) would show what no user sees:
+  // those captures are the viewport. Everything else is captured full-page.
+  const modal = await page.evaluate(() => Boolean(document.querySelector('dialog[open]')));
+  await page.screenshot({ path: path.join(out, `${file}.png`), fullPage: !modal && height !== 552 });
   const storyErrors = await page.evaluate(() => globalThis.__portionStory?.errors ?? []);
   const problems = [...(finished ? [] : ['render did not finish within 30 s']), ...pageErrors.map((m) => `pageerror: ${m}`), ...storyErrors];
   if (problems.length) failures++;

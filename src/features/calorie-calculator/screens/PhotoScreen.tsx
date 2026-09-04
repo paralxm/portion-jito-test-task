@@ -1,31 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { EmptyState } from '../../../design-system/components/EmptyState/EmptyState';
-import { FoodResultRow } from '../../../design-system/components/FoodResultRow/FoodResultRow';
 import { InlineMessage } from '../../../design-system/components/InlineMessage/InlineMessage';
 import { LoadingState } from '../../../design-system/components/LoadingState/LoadingState';
 import { Button } from '../../../design-system/primitives/Button/Button';
+import { Radio } from '../../../design-system/primitives/Choice/Radio';
 import { Text } from '../../../design-system/primitives/Text/Text';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
 import { FocusedFlowLayout } from '../../../design-system/templates/FocusedFlowLayout/FocusedFlowLayout';
+import { formatWithUnit } from '../../../design-system/nutrition/nutrition';
 import { describeReferenceBasis, type FoodCandidate } from '../domain/calculation';
 import styles from './Acquisition.module.css';
 
 export type PhotoAnalysisResult = { kind: 'suggestions'; candidates: FoodCandidate[] } | { kind: 'failed' };
 
-export interface PhotoScreenProps {
-  /** Analysis for a captured image. Responses after Cancel, Retake or Back are ignored. */
-  analyse: (imageId: string, options: { simulateFailure: boolean }) => Promise<PhotoAnalysisResult>;
-  /** The image the simulated capture produces. */
-  sampleImageUrl: string;
-  /** A chosen suggestion goes to review as a photo-sourced candidate. */
-  onSuggestionChosen: (candidate: FoodCandidate) => void;
-  onBack: () => void;
-  onSearchInstead: () => void;
-  onEnterManually: () => void;
-}
-
-type Phase =
+/**
+ * The photo step's phases. `permission-pending` is the app-side state while the system
+ * camera prompt (P01) is showing: capture is paused and the other methods stay reachable.
+ * The prototype has no camera, so that phase is reached only through `initialPhase`.
+ */
+export type PhotoPhase =
+  | { kind: 'permission-pending' }
   | { kind: 'capture' }
   | { kind: 'preview'; imageId: string }
   | { kind: 'analysing'; imageId: string }
@@ -33,14 +28,31 @@ type Phase =
   | { kind: 'failed'; imageId: string }
   | { kind: 'denied' };
 
+export interface PhotoScreenProps {
+  /** Analysis for a captured image. Responses after Cancel, Retake or Back are ignored. */
+  analyse: (imageId: string, options: { simulateFailure: boolean }) => Promise<PhotoAnalysisResult>;
+  /** The image the simulated capture produces. */
+  sampleImageUrl: string;
+  /** The suggestion the user selected and asked to review goes to S07 as a photo-sourced candidate. */
+  onSuggestionChosen: (candidate: FoodCandidate) => void;
+  onBack: () => void;
+  onSearchInstead: () => void;
+  onEnterManually: () => void;
+  /** Deterministic starting phase for stories and tests; the runtime always starts at capture. */
+  initialPhase?: PhotoPhase;
+}
+
 /**
- * S05 — Photo. Capture → preview with retake → analysis → suggestions the user must
- * review. A suggestion is never a measurement; the amount is set on review. Failure
- * keeps the image so the same analysis can be retried.
+ * S05 — Photo. Capture → preview with retake → analysis → suggestions with an explicit
+ * selection, reviewed only when the user asks. A suggestion is never a measurement; the
+ * amount is set on review. Failure keeps the image so the same analysis can be retried.
  */
-export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBack, onSearchInstead, onEnterManually }: PhotoScreenProps) {
-  const [phase, setPhase] = useState<Phase>({ kind: 'capture' });
+export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBack, onSearchInstead, onEnterManually, initialPhase }: PhotoScreenProps) {
+  const [phase, setPhase] = useState<PhotoPhase>(initialPhase ?? { kind: 'capture' });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [noneOpen, setNoneOpen] = useState(false);
   const request = useRef(0);
+  const groupId = useId();
 
   useEffect(() => {
     return () => {
@@ -50,6 +62,8 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
 
   const run = (imageId: string, simulateFailure: boolean) => {
     const id = ++request.current;
+    setSelectedId(null);
+    setNoneOpen(false);
     setPhase({ kind: 'analysing', imageId });
     analyse(imageId, { simulateFailure }).then((result) => {
       if (id !== request.current) return;
@@ -60,6 +74,8 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
 
   const retake = () => {
     request.current += 1;
+    setSelectedId(null);
+    setNoneOpen(false);
     setPhase({ kind: 'capture' });
   };
 
@@ -74,12 +90,14 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
     </>
   );
 
-  const preview =
-    phase.kind !== 'capture' && phase.kind !== 'denied' ? (
-      <figure className={styles.preview}>
-        <img className={styles.previewImage} src={sampleImageUrl} alt="Sample image standing in for your photo" />
-      </figure>
-    ) : null;
+  const showsImage = phase.kind === 'preview' || phase.kind === 'analysing' || phase.kind === 'suggestions' || phase.kind === 'failed';
+  const preview = showsImage ? (
+    <figure className={styles.preview}>
+      <img className={styles.previewImage} src={sampleImageUrl} alt="Sample image standing in for your photo" />
+    </figure>
+  ) : null;
+
+  const selected = phase.kind === 'suggestions' ? phase.candidates.find((c) => c.id === selectedId) : undefined;
 
   return (
     <FocusedFlowLayout header={<AppHeader variant="focused" title="Take a photo" onBack={onBack} />}>
@@ -102,6 +120,21 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
         </EmptyState>
       ) : null}
 
+      {phase.kind === 'permission-pending' ? (
+        <>
+          <div className={styles.viewfinder} aria-live="polite">
+            <div className={styles.frame} data-paused />
+            <Text as="p" variant="body" color="primary">
+              Waiting for camera permission
+            </Text>
+            <Text as="p" variant="supporting" color="secondary" wrap>
+              Allow access in the system prompt to continue, or add the food another way.
+            </Text>
+          </div>
+          <div className={styles.demoActions}>{otherMethods}</div>
+        </>
+      ) : null}
+
       {phase.kind === 'capture' ? (
         <>
           <div className={styles.viewfinder}>
@@ -114,7 +147,7 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
             </Text>
           </div>
           <div className={styles.actions}>
-            <Button variant="primary" block onClick={() => setPhase({ kind: 'preview', imageId: 'sample-1' })}>
+            <Button variant="primary" size="large" block onClick={() => setPhase({ kind: 'preview', imageId: 'sample-1' })}>
               Take photo
             </Button>
           </div>
@@ -144,7 +177,7 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
             Sample image used by this prototype. It is not a photo of your food and it does not measure the portion.
           </Text>
           <div className={styles.actions}>
-            <Button variant="primary" block onClick={() => run(phase.imageId, false)}>
+            <Button variant="primary" size="large" block onClick={() => run(phase.imageId, false)}>
               Analyse photo
             </Button>
             <Button variant="secondary" block onClick={retake}>
@@ -179,35 +212,57 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
       ) : null}
 
       {phase.kind === 'suggestions' && phase.candidates.length > 0 ? (
-        <section className={styles.section} aria-labelledby="photo-suggestions">
-          <div>
-            <Text as="h2" id="photo-suggestions" variant="section-title" color="primary">
-              Suggested foods
-            </Text>
-            <Text as="p" variant="supporting" color="secondary" wrap>
+        <>
+          <fieldset className={styles.suggestions} aria-describedby={`${groupId}-hint`}>
+            <legend className={styles.suggestionsLegend}>
+              <Text as="span" variant="section-title" color="primary">
+                Suggested foods
+              </Text>
+            </legend>
+            <Text as="p" id={`${groupId}-hint`} variant="supporting" color="secondary" wrap>
               Pick the closest match. You set the amount next, and you can change the food at any point.
             </Text>
-          </div>
-          <ul className={styles.list}>
-            {phase.candidates.map((candidate) => (
-              <li key={candidate.id}>
-                <FoodResultRow
-                  name={candidate.name}
-                  detail={candidate.detail}
-                  calories={candidate.nutrition.energyKcal}
-                  basis={describeReferenceBasis(candidate).toLowerCase()}
-                  onClick={() => onSuggestionChosen(candidate)}
-                />
-              </li>
-            ))}
-          </ul>
-          <div className={styles.demoActions}>
-            <Button variant="text" size="small" onClick={retake}>
-              Retake photo
+            <div className={styles.suggestionList}>
+              {phase.candidates.map((candidate) => (
+                <div key={candidate.id} className={styles.suggestion} data-selected={candidate.id === selectedId || undefined}>
+                  <Radio
+                    id={`${groupId}-${candidate.id}`}
+                    name={`${groupId}-suggestion`}
+                    value={candidate.id}
+                    checked={candidate.id === selectedId}
+                    onChange={() => setSelectedId(candidate.id)}
+                    label={candidate.name}
+                    description={`${candidate.nutrition.energyKcal === null ? 'Calories not available' : `${formatWithUnit(candidate.nutrition.energyKcal, 'kcal')}`} · ${describeReferenceBasis(candidate).toLowerCase()}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </fieldset>
+          <div className={styles.actions}>
+            <Button variant="primary" size="large" block disabled={!selected} onClick={() => selected && onSuggestionChosen(selected)}>
+              Review selected match
             </Button>
-            {otherMethods}
+            <Button variant="secondary" block aria-expanded={noneOpen} onClick={() => setNoneOpen((open) => !open)}>
+              None of these
+            </Button>
           </div>
-        </section>
+          {noneOpen ? (
+            <InlineMessage
+              tone="info"
+              announce="none"
+              actions={
+                <>
+                  <Button variant="secondary" size="small" onClick={retake}>
+                    Retake photo
+                  </Button>
+                  {otherMethods}
+                </>
+              }
+            >
+              Take another photo, search by name or enter the values yourself. Nothing has been calculated from this photo.
+            </InlineMessage>
+          ) : null}
+        </>
       ) : null}
 
       {phase.kind === 'suggestions' && phase.candidates.length === 0 ? (
@@ -235,6 +290,9 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
             <>
               <Button variant="primary" size="small" onClick={() => run(phase.imageId, false)}>
                 Try again
+              </Button>
+              <Button variant="secondary" size="small" onClick={retake}>
+                Retake photo
               </Button>
               {otherMethods}
             </>

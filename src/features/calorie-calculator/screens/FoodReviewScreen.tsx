@@ -78,6 +78,9 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
   const energyAvailable = canCalculateEnergy(candidate);
   const partial = [candidate.nutrition.proteinG, candidate.nutrition.carbohydratesG, candidate.nutrition.fatG].some((v) => v === null);
   const dirty = mode === 'existing' && (!portion || portion.quantity !== startPortion.quantity || portion.unitId !== startPortion.unitId);
+  // The commit is available only for a valid portion with a calculable result; an invalid
+  // draft keeps the field editable and the guidance beside it.
+  const committable = energyAvailable && portion !== null && result !== null && result.energyKcal !== null;
 
   const amountError =
     touched && !parsed.ok
@@ -110,7 +113,7 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
   const footer =
     mode === 'existing' ? (
       <Stack gap={8}>
-        <Button variant="primary" size="large" block onClick={() => commit(onUpdateEntry)} disabled={!energyAvailable}>
+        <Button variant="primary" size="large" block onClick={() => commit(onUpdateEntry)} disabled={!committable}>
           Update entry
         </Button>
         <Button variant="destructive" block onClick={() => setRemoveOpen(true)}>
@@ -119,7 +122,7 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
       </Stack>
     ) : (
       <Stack gap={8}>
-        <Button variant="primary" size="large" block onClick={() => commit(onAddToToday)} disabled={!energyAvailable}>
+        <Button variant="primary" size="large" block onClick={() => commit(onAddToToday)} disabled={!committable}>
           Add to today
         </Button>
         <Button variant="text" block onClick={onDone ?? onBack}>
