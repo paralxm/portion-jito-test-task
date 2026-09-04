@@ -15,11 +15,16 @@ import styles from './Button.module.css';
 export type ButtonVariant = 'primary' | 'secondary' | 'text' | 'destructive';
 
 /**
- * `medium` (default) is the 48 px control with the action-md 16/24 label — screen-level
- * actions. `small` is the 40 px in-context control with the action-sm 14/20 label
- * (Filters, Reset all, Show all nutrition); its hit area still reaches 48 px.
+ * `large` is the 56 px control for the one dominant action of a screen (a sticky footer's
+ * Add to today, Continue to review; Home's Log food) with the action-lg label — the same
+ * 16/24 600 as medium, so the size is carried by geometry. `medium` (default) is the 48 px
+ * control for screen-level actions. `small` is the 40 px in-context control with the
+ * action-sm 14/20 label (Filters, Reset all, Show all nutrition); its hit area still
+ * reaches 48 px.
  */
-export type ButtonSize = 'medium' | 'small';
+export type ButtonSize = 'large' | 'medium' | 'small';
+
+const LABEL_VARIANT: Record<ButtonSize, 'action-lg' | 'action-md' | 'action-sm'> = { large: 'action-lg', medium: 'action-md', small: 'action-sm' };
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
   children: ReactNode;
@@ -80,10 +85,14 @@ export function Button({
     >
       {(icon || loading) && (
         <span className={styles.slot}>
-          {loading ? <Spinner size="small-action" label="Working" announce={false} /> : icon ? <Icon icon={icon} size="small-action" /> : null}
+          {loading ? (
+            <Spinner size={size === 'large' ? 'default' : 'small-action'} label="Working" announce={false} />
+          ) : icon ? (
+            <Icon icon={icon} size={size === 'large' ? 'default' : 'small-action'} />
+          ) : null}
         </span>
       )}
-      <Text variant={size === 'small' ? 'action-sm' : 'action-md'} className={styles.label}>
+      <Text variant={LABEL_VARIANT[size]} className={styles.label}>
         {children}
       </Text>
     </button>

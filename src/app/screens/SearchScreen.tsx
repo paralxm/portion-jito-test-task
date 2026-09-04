@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from 'react';
 
-import { AppHeader, Button, EmptyState, FoodResultRow, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl } from '../../design-system';
+import { AppHeader, Button, EmptyState, FoodResultRow, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl, segmentedOptionId } from '../../design-system';
 import { describeReferenceBasis, type FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { CriteriaToolbar } from '../../features/recipe-discovery/components/CriteriaToolbar';
 import { RecipeList } from '../../features/recipe-discovery/components/RecipeList';
@@ -63,6 +63,8 @@ export function SearchScreen({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const id = useId();
   const resultsId = `search-results-${id}`;
+  const scopeId = `search-scope-${id}`;
+  const panelId = `search-panel-${id}`;
   const active = activeCriteriaCount(criteria);
   const current = scope === 'food' ? food : recipes;
   const trimmed = query.trim();
@@ -166,7 +168,11 @@ export function SearchScreen({
         placeholder={scope === 'food' ? 'Food or dish name' : 'Recipe name or ingredient'}
       />
 
+      {/* The scope switch owns the results panel below, so it is exposed as tabs. */}
       <SegmentedControl
+        id={scopeId}
+        pattern="tabs"
+        controls={panelId}
         value={scope}
         onValueChange={onScopeChange}
         ariaLabel="Search in"
@@ -187,7 +193,7 @@ export function SearchScreen({
         />
       ) : null}
 
-      <section className={styles.results} aria-labelledby={resultsId}>
+      <section role="tabpanel" id={panelId} className={styles.results} aria-labelledby={segmentedOptionId(scopeId, scope)}>
         <ResultsHeading id={resultsId} heading="Results" summary={summary} countText={countText} hidden={current.status === 'idle'} />
         {content}
       </section>

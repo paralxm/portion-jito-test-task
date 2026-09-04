@@ -53,7 +53,7 @@ The research emphasis on calculation without mandatory tracking remains valid. D
 
 3. Navigation contract
 
-One bottom row: Home | Search | Recipes | + Add food. There are three destinations and one action. Calculate is a capability, not a navigation destination.
+One bottom row: Home | Search | Recipes | + Log food. There are three destinations, shown as one group of equal cells filling the width beside the plus, and one separate circular action. Implemented 2026-09-04: the plus's accessible name, the O01 title and Home's body action are Log food (superseding Add food); Add to today remains the commit. Calculate is a capability, not a navigation destination.
 
 Surface/action
 
@@ -75,9 +75,9 @@ Recipe details, S08
 
 Retain the originating Search or Recipes selection. Back returns to that list.
 
-+ Add food
++ Log food
 
-Open the single O01 overlay above the current surface. Never become selected.
+Open the single O01 overlay above the current surface. Never become selected. Inactive destinations show their glyph only with an accessible name; the active one shows glyph, label and a contained selected surface.
 
 S04–S07 focused steps
 
@@ -251,7 +251,7 @@ When Recipes already has applied criteria, See matching recipes restores that fi
 
 The supplied prototype report says the current Home button is labeled Choose criteria while navigating to S03-1. Relabel it Find recipes to match the existing browse destination. Opening filters is a separate explicit action in Recipes/Search. This document does not claim the Figma label has already been updated.
 
-5. O01 — Add food / Choose a method (overlay)
+5. O01 — Log food / Choose a method (overlay)
 
 Existing node: 176:20. Use one shared bottom sheet.
 
@@ -297,7 +297,7 @@ S06
 
 At the 393 px reference width, use four equal neutral outlined tiles in a 2×2 grid, approximately 16 px side insets, 12 px gaps and 108 px tile height. Each has icon, label and helper regions. Selecting a tile immediately enters that method: no radio state or extra Continue. Grid versus rows is a design hypothesis, not proven superior usability.
 
-At 320 px or enlarged text, increase height or reflow to full-width rows. Maintain readable content and at least 48×48 target areas. Verified in code 2026-09-04: under 20 rem of available width (320 px at 100 % text, every width at 200 %) the grid becomes one column of rows through a named container query; Storybook and the runtime walkthrough assert the column count at 390, 430, 320 and 200 %.
+At 320 px or enlarged text, increase height or reflow to full-width rows. Maintain readable content and at least 48×48 target areas. Verified in code 2026-09-04 (revised the same day): the 2 × 2 grid holds at every supported width at 100 % text, including 320 px, with titles wrapping; only under 17 rem of available width (200 % text) does the grid become one column of rows through a named container query. Storybook and the runtime walkthrough assert the column count at 320, 390, 430 and 200 %.
 
 Opening O01 leaves the underlying screen, query, filters, input and scroll intact. Close, backdrop and supported Escape dismiss only the sheet. Swipe is optional. The background is inactive. Method selection does not log food; camera permission is requested only when a camera method needs it.
 

@@ -14,6 +14,16 @@ export type TextVariant =
   | 'supporting'
   /** Small button label, 14/20 600. */
   | 'action-sm'
+  /** Large button label: same 16/24 600 as action-md (the size differs by geometry). */
+  | 'action-lg'
+  /** Persistent form-control label, 14/20 500 (alias of label). */
+  | 'control-label'
+  /** Unselected segment, 14/20 500 (alias of label). */
+  | 'segmented-label'
+  /** Selected segment, 14/20 600 (alias of action-sm). */
+  | 'segmented-label-selected'
+  /** Active bottom-navigation label only, 10/14 700 — the sole role below 12 px. */
+  | 'nav-label-active'
   | 'caption'
   | 'caption-strong'
   | 'item-title'

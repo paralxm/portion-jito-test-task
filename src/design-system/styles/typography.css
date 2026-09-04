@@ -7,7 +7,9 @@
  *               section-title 20/28 · compact-title 18/24 · action-md 16/24 · body 16/24 ·
  *               label 14/20 · supporting 14/20 · action-sm 14/20 · caption 12/16 ·
  *               caption-strong 12/16
- * Aliases:      item-title, method-title, metric-inline → action-md;
+ *               nav-label-active 10/14 (the active bottom-navigation label only)
+ * Aliases:      item-title, method-title, metric-inline, action-lg → action-md;
+ *               control-label, segmented-label → label; segmented-label-selected → action-sm;
  *               metric-secondary → section-title; wordmark → 24/32 with -0.03em.
  */
 
@@ -27,6 +29,11 @@
 .portion-type-method-title,
 .portion-type-metric-inline,
 .portion-type-metric-secondary,
+.portion-type-nav-label-active,
+.portion-type-action-lg,
+.portion-type-control-label,
+.portion-type-segmented-label,
+.portion-type-segmented-label-selected,
 .portion-type-wordmark {
   font-family: var(--portion-type-family);
   font-size: var(--portion-type-size);
@@ -162,6 +169,46 @@
   --portion-type-weight: var(--portion-typography-metric-secondary-font-weight);
   --portion-type-line-height: var(--portion-typography-metric-secondary-line-height);
   --portion-type-letter-spacing: var(--portion-typography-metric-secondary-letter-spacing);
+}
+
+.portion-type-nav-label-active {
+  --portion-type-family: var(--portion-typography-nav-label-active-font-family);
+  --portion-type-size: var(--portion-typography-nav-label-active-font-size);
+  --portion-type-weight: var(--portion-typography-nav-label-active-font-weight);
+  --portion-type-line-height: var(--portion-typography-nav-label-active-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-nav-label-active-letter-spacing);
+}
+
+.portion-type-action-lg {
+  --portion-type-family: var(--portion-typography-action-lg-font-family);
+  --portion-type-size: var(--portion-typography-action-lg-font-size);
+  --portion-type-weight: var(--portion-typography-action-lg-font-weight);
+  --portion-type-line-height: var(--portion-typography-action-lg-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-action-lg-letter-spacing);
+}
+
+.portion-type-control-label {
+  --portion-type-family: var(--portion-typography-control-label-font-family);
+  --portion-type-size: var(--portion-typography-control-label-font-size);
+  --portion-type-weight: var(--portion-typography-control-label-font-weight);
+  --portion-type-line-height: var(--portion-typography-control-label-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-control-label-letter-spacing);
+}
+
+.portion-type-segmented-label {
+  --portion-type-family: var(--portion-typography-segmented-label-font-family);
+  --portion-type-size: var(--portion-typography-segmented-label-font-size);
+  --portion-type-weight: var(--portion-typography-segmented-label-font-weight);
+  --portion-type-line-height: var(--portion-typography-segmented-label-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-segmented-label-letter-spacing);
+}
+
+.portion-type-segmented-label-selected {
+  --portion-type-family: var(--portion-typography-segmented-label-selected-font-family);
+  --portion-type-size: var(--portion-typography-segmented-label-selected-font-size);
+  --portion-type-weight: var(--portion-typography-segmented-label-selected-font-weight);
+  --portion-type-line-height: var(--portion-typography-segmented-label-selected-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-segmented-label-selected-letter-spacing);
 }
 
 .portion-type-wordmark {

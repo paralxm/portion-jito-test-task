@@ -1,6 +1,6 @@
-/* A sunken track with one contained, raised segment. The track's corner is the control
-   radius; each segment sits 4 px inside it, so its corner is the compact-control radius
-   (8 − 4) and the two curves stay concentric. */
+/* One sunken track with one contained, action-coloured selected segment. The track's
+   corner is the control radius; each segment sits 4 px inside it, so its corner is the
+   compact-control radius (8 − 4) and the two curves stay concentric. */
 
 .control {
   display: flex;
@@ -12,9 +12,9 @@
   min-inline-size: 0;
 }
 
-/* Each option is a flexible segment of the shared track. The drawn segment is 40 px
-   (its own fixed dimension, not a spacing value); its ::before extends the hit area 4 px
-   above and below, to the full 48 px height of the track. A long label wraps and the
+/* Each option is an equal, flexible segment of the shared track. The drawn segment is
+   40 px (its own fixed dimension, not a spacing value); its ::before extends the hit area
+   4 px above and below, to the full 48 px height of the track. A long label wraps and the
    segment grows instead of breaking onto its own row. */
 .option {
   position: relative;
@@ -29,7 +29,7 @@
   border: var(--portion-border-width-default) solid transparent;
   border-radius: var(--portion-radius-control-compact);
   background: transparent;
-  color: var(--portion-color-text-secondary);
+  color: var(--portion-color-text-primary);
   text-align: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -51,30 +51,44 @@
   overflow-wrap: anywhere;
 }
 
+/* Enabled, unselected: primary text on the track; hover (pointer only) lifts it. */
 @media (hover: hover) {
   .option:not(:disabled):not([data-selected]):hover {
     background: var(--portion-color-background-surface);
-    color: var(--portion-color-text-primary);
   }
 }
 
-/* Selected: a contained indicator — canvas fill, the control boundary (3.3:1 on the
-   track) and primary text at the action-sm weight. Never a colour swap alone, never a
-   capsule, never an outlined-button look. */
-.option[data-selected] {
+.option:not(:disabled):not([data-selected]):active {
   background: var(--portion-color-background-canvas);
-  border-color: var(--portion-color-border-control);
-  color: var(--portion-color-text-primary);
 }
 
-/* Disabled: the disabled text step plus reduced opacity so it is visibly different from
-   an enabled, unselected segment (whose text is only one neutral step darker). */
+/* Selected: the contained indicator is the action colour with on-action text at the
+   selected weight — surface, boundary and weight together, never colour alone. */
+.option[data-selected] {
+  background: var(--portion-color-action-primary);
+  border-color: var(--portion-color-action-primary);
+  color: var(--portion-color-text-on-action);
+}
+
+.option[data-selected]:not(:disabled):active {
+  background: var(--portion-color-action-pressed);
+  border-color: var(--portion-color-action-pressed);
+}
+
+/* Disabled: dedicated disabled tokens, no hover or press, never activates. A disabled
+   selected segment keeps a contained (now neutral) surface, so both meanings survive. */
 .option:disabled {
   color: var(--portion-color-state-disabled-text);
-  opacity: 0.6;
   cursor: not-allowed;
 }
 
+.option:disabled[data-selected] {
+  background: var(--portion-color-state-disabled-surface);
+  border-color: var(--portion-color-state-disabled-surface);
+  color: var(--portion-color-state-disabled-text);
+}
+
+/* The ring is drawn outside the segment, over the track's 4 px padding. */
 .option:focus-visible {
   outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
   outline-offset: var(--portion-focus-ring-offset);

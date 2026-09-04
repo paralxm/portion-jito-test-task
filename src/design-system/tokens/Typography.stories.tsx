@@ -36,12 +36,17 @@ const STYLES: StyleSpec[] = [
   { variant: 'section-title', spec: '20/28 · 600', use: 'Section and sheet titles' },
   { variant: 'compact-title', spec: '18/24 · 600', use: 'Focused bar titles, card titles, empty-state titles' },
   { variant: 'action-md', spec: '16/24 · 600', use: 'Medium (default) button labels, unit selector' },
+  { variant: 'action-lg', spec: '→ action-md', use: 'Large (56 px) button labels — the dominant footer action; same type, larger geometry' },
   { variant: 'body', spec: '16/24 · 400', use: 'Paragraphs, inputs, list items' },
-  { variant: 'label', spec: '14/20 · 500', use: 'Field labels, chips, nutrient category labels' },
+  { variant: 'label', spec: '14/20 · 500', use: 'Chips, nutrient category labels' },
+  { variant: 'control-label', spec: '→ label', use: 'Form-control labels (FormField)' },
+  { variant: 'segmented-label', spec: '→ label', use: 'Unselected segment of a segmented control' },
   { variant: 'supporting', spec: '14/20 · 400', use: 'Helper, error, basis and secondary lines' },
-  { variant: 'action-sm', spec: '14/20 · 600', use: 'Small button labels (Filters, Reset all, Show all nutrition), selected segment' },
-  { variant: 'caption', spec: '12/16 · 500', use: 'Navigation labels (unselected), dietary tags' },
-  { variant: 'caption-strong', spec: '12/16 · 600', use: 'Navigation labels (selected), count badge' },
+  { variant: 'action-sm', spec: '14/20 · 600', use: 'Small button labels (Filters, Reset all, Show all nutrition)' },
+  { variant: 'segmented-label-selected', spec: '→ action-sm', use: 'Selected segment of a segmented control (same metrics as segmented-label)' },
+  { variant: 'caption', spec: '12/16 · 500', use: 'Dietary tags, incidental metadata — the floor for content text' },
+  { variant: 'caption-strong', spec: '12/16 · 600', use: 'Count badge' },
+  { variant: 'nav-label-active', spec: '10/14 · 700', use: 'The active bottom-navigation label only — the sole role below 12 px' },
   { variant: 'item-title', spec: '→ action-md', use: 'Result row titles' },
   { variant: 'method-title', spec: '→ action-md', use: 'Entry-method tile titles' },
   { variant: 'metric-inline', spec: '→ action-md', use: 'Inline values in rows and cards' },
@@ -88,6 +93,11 @@ export const Catalogue: Story = {
       'metric-secondary': [20, 28, 600],
       caption: [12, 16, 500],
       'caption-strong': [12, 16, 600],
+      'nav-label-active': [10, 14, 700],
+      'action-lg': [16, 24, 600],
+      'control-label': [14, 20, 500],
+      'segmented-label': [14, 20, 500],
+      'segmented-label-selected': [14, 20, 600],
       wordmark: [24, 32, 600],
     };
     for (const style of STYLES) {
@@ -199,9 +209,10 @@ export const FontLoading: Story = {
   ),
   play: async ({ canvasElement }) => {
     await document.fonts.ready;
-    const loaded = document.fonts.check('600 24px "Inter Variable"');
+    const weights = [400, 500, 600, 700];
+    const loaded = weights.every((w) => document.fonts.check(`${w} 16px "Inter Variable"`));
     const status = canvasElement.querySelector<HTMLElement>('[data-font-status]')!;
-    status.textContent = `document.fonts.check('600 24px "Inter Variable"') → ${loaded}; faces registered: ${Array.from(document.fonts).filter((f) => f.family.replace(/"/g, '') === 'Inter Variable').length}`;
+    status.textContent = `document.fonts.check for weights ${weights.join('/')} of "Inter Variable" → ${loaded}; faces registered: ${Array.from(document.fonts).filter((f) => f.family.replace(/"/g, '') === 'Inter Variable').length}`;
     await expect(loaded).toBe(true);
     const sample = within(canvasElement).getAllByText('Lentil soup 1234567890 kcal')[0];
     await expect(getComputedStyle(sample).fontFamily.startsWith('"Inter Variable"')).toBe(true);

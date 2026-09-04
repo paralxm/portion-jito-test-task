@@ -48,10 +48,9 @@
   border-color: var(--portion-color-border-control);
 }
 
-/* One-column adaptation: below 20 rem of container width the tile becomes a row. At 100 %
-   text this is the 320 px viewport (288 px of sheet body); at 200 % text it is every
-   supported width. */
-@container method-grid (max-width: 20rem) {
+/* One-column adaptation: below 17 rem of container width the tile becomes a row — 200 %
+   text on every supported width; every width at 100 % text stays a tile. */
+@container method-grid (max-width: 17rem) {
   .option {
     flex-direction: row;
     align-items: center;

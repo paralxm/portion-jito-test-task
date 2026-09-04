@@ -39,6 +39,8 @@
   --portion-ref-font-weight-regular: 400;
   --portion-ref-font-weight-medium: 500;
   --portion-ref-font-weight-semibold: 600;
+  --portion-ref-font-weight-bold: 700; /* Active bottom-navigation label only. Rendered from the same Inter Variable file (wght 100-900). */
+  --portion-ref-font-size-10: 0.625rem; /* Active bottom-navigation label only; never instructions, labels, inputs, errors or nutrition values. */
   --portion-ref-font-size-12: 0.75rem;
   --portion-ref-font-size-14: 0.875rem;
   --portion-ref-font-size-16: 1rem;
@@ -50,6 +52,7 @@
   --portion-ref-font-letter-spacing-normal: 0px;
   --portion-ref-font-letter-spacing-wordmark: -0.03em; /* Wordmark tracking ratio, authored unitless per DTCG 2025.10 (the dimension type accepts only px or rem, not em). The generator emits this specific token as -0.03em, the approved CSS value, never as px or rem. Wordmark only; never applied to interface text. */
   --portion-ref-font-line-height-caption: 1.333333; /* 16 px line height at 12 px text (16/12). */
+  --portion-ref-font-line-height-nav-label: 1.4; /* 14 px line height at 10 px text (14/10). */
   --portion-ref-font-line-height-supporting: 1.428571; /* 20 px line height at 14 px text (20/14). */
   --portion-ref-font-line-height-body: 1.5; /* 24 px line height at 16 px text (24/16). */
   --portion-ref-font-line-height-compact-title: 1.333333; /* 24 px line height at 18 px text (24/18). */
@@ -92,7 +95,7 @@
   --portion-ref-size-icon-56: 56px;
   --portion-ref-size-icon-64: 64px;
   --portion-ref-size-target-minimum: 48px; /* Product interaction-target baseline. */
-  --portion-ref-size-target-add-food: 56px; /* Trailing Add food action target. */
+  --portion-ref-size-target-add-food: 56px; /* The separate circular Log food action's target (56 x 56). */
   --portion-ref-border-width-default: 1px;
   --portion-ref-border-width-indicator: 2px;
   --portion-ref-focus-ring-width: 3px;
@@ -150,6 +153,13 @@
   --portion-color-nutrition-minerals-surface: var(--portion-ref-color-taupe-50);
   --portion-color-progress-track: var(--portion-ref-color-neutral-200); /* Unfilled portion of the progress ring. A non-essential guide (1.29:1 on canvas); the arc, centre text and labels carry the meaning. */
   --portion-color-progress-indicator: var(--portion-color-nutrition-energy-accent); /* Filled arc of the calorie progress ring: the energy category accent (neutral ink), never an action blue or a success/error colour. 12.6:1 on the track. */
+  --portion-color-navigation-surface: var(--portion-color-background-surface); /* The compact destination group's fill. */
+  --portion-color-navigation-boundary: var(--portion-color-border-decorative); /* The destination group's hairline; the group's fill and its contents identify it, so the hairline is not an essential boundary. */
+  --portion-color-navigation-content: var(--portion-color-text-secondary); /* Inactive destination glyphs. 6.1:1 on the group surface. */
+  --portion-color-navigation-selected-surface: var(--portion-color-action-selected-surface); /* The active destination's contained surface. */
+  --portion-color-navigation-selected-content: var(--portion-color-action-primary); /* The active destination's bold glyph and 10/14 label. 5.4:1 on the selected surface. */
+  --portion-color-navigation-action-surface: var(--portion-color-action-primary); /* The separate circular Log food action — the one filled element in the bar. */
+  --portion-color-navigation-action-content: var(--portion-color-text-on-action); /* The Log food glyph. 6.2:1 on the action surface. */
   --portion-typography-main-result-font-family: var(--portion-ref-font-family-ui); /* One main calculated calorie value in a result composition. 40/48, 600. */
   --portion-typography-main-result-font-size: var(--portion-ref-font-size-40);
   --portion-typography-main-result-font-weight: var(--portion-ref-font-weight-semibold);
@@ -200,7 +210,7 @@
   --portion-typography-action-sm-font-weight: var(--portion-ref-font-weight-semibold);
   --portion-typography-action-sm-line-height: var(--portion-ref-font-line-height-supporting);
   --portion-typography-action-sm-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
-  --portion-typography-caption-font-family: var(--portion-ref-font-family-ui); /* Unselected bottom-navigation label; short static tags and incidental metadata. 12/16, 500. The smallest authored size: nothing in the product goes below 12 px, and a 10 px compact navigation label would be a verified fallback only — none exists today. */
+  --portion-typography-caption-font-family: var(--portion-ref-font-family-ui); /* Short static tags, count badges' companions and incidental metadata. 12/16, 500. The floor for content text: the only smaller role is nav-label-active (10/14, 700), restricted to the active bottom-navigation label. */
   --portion-typography-caption-font-size: var(--portion-ref-font-size-12);
   --portion-typography-caption-font-weight: var(--portion-ref-font-weight-medium);
   --portion-typography-caption-line-height: var(--portion-ref-font-line-height-caption);
@@ -210,6 +220,31 @@
   --portion-typography-caption-strong-font-weight: var(--portion-ref-font-weight-semibold);
   --portion-typography-caption-strong-line-height: var(--portion-ref-font-line-height-caption);
   --portion-typography-caption-strong-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-nav-label-active-font-family: var(--portion-ref-font-family-ui); /* The visible label of the active bottom-navigation destination beside its bold glyph. 10/14, 700. The only role below 12 px; never used for content. */
+  --portion-typography-nav-label-active-font-size: var(--portion-ref-font-size-10);
+  --portion-typography-nav-label-active-font-weight: var(--portion-ref-font-weight-bold);
+  --portion-typography-nav-label-active-line-height: var(--portion-ref-font-line-height-nav-label);
+  --portion-typography-nav-label-active-letter-spacing: var(--portion-ref-font-letter-spacing-normal);
+  --portion-typography-action-lg-font-family: var(--portion-typography-action-md-font-family); /* Alias: large button label. Same 16/24, 600 as action-md; the large size differs by geometry (56 px control, 24 px inline padding), not by type. */
+  --portion-typography-action-lg-font-size: var(--portion-typography-action-md-font-size);
+  --portion-typography-action-lg-font-weight: var(--portion-typography-action-md-font-weight);
+  --portion-typography-action-lg-line-height: var(--portion-typography-action-md-line-height);
+  --portion-typography-action-lg-letter-spacing: var(--portion-typography-action-md-letter-spacing);
+  --portion-typography-control-label-font-family: var(--portion-typography-label-font-family); /* Alias: the persistent label of a form control (FormField), 14/20, 500. */
+  --portion-typography-control-label-font-size: var(--portion-typography-label-font-size);
+  --portion-typography-control-label-font-weight: var(--portion-typography-label-font-weight);
+  --portion-typography-control-label-line-height: var(--portion-typography-label-line-height);
+  --portion-typography-control-label-letter-spacing: var(--portion-typography-label-letter-spacing);
+  --portion-typography-segmented-label-font-family: var(--portion-typography-label-font-family); /* Alias: an unselected segment of a segmented control, 14/20, 500. */
+  --portion-typography-segmented-label-font-size: var(--portion-typography-label-font-size);
+  --portion-typography-segmented-label-font-weight: var(--portion-typography-label-font-weight);
+  --portion-typography-segmented-label-line-height: var(--portion-typography-label-line-height);
+  --portion-typography-segmented-label-letter-spacing: var(--portion-typography-label-letter-spacing);
+  --portion-typography-segmented-label-selected-font-family: var(--portion-typography-action-sm-font-family); /* Alias: the selected segment of a segmented control, 14/20, 600 — same metrics as segmented-label so selection never reflows the track. */
+  --portion-typography-segmented-label-selected-font-size: var(--portion-typography-action-sm-font-size);
+  --portion-typography-segmented-label-selected-font-weight: var(--portion-typography-action-sm-font-weight);
+  --portion-typography-segmented-label-selected-line-height: var(--portion-typography-action-sm-line-height);
+  --portion-typography-segmented-label-selected-letter-spacing: var(--portion-typography-action-sm-letter-spacing);
   --portion-typography-item-title-font-family: var(--portion-typography-action-md-font-family); /* Alias: food search-result row title and photo suggestion name. */
   --portion-typography-item-title-font-size: var(--portion-typography-action-md-font-size);
   --portion-typography-item-title-font-weight: var(--portion-typography-action-md-font-weight);
@@ -256,7 +291,9 @@
   --portion-radius-card: var(--portion-ref-radius-12); /* Independent content cards and tiles: recipe card, entry-method tile, logged-entry row, media thumbnails. */
   --portion-radius-grouped: var(--portion-ref-radius-16); /* Grouped surfaces that hold a whole section: Home's daily-overview group, prototype-control groups. */
   --portion-radius-sheet: var(--portion-ref-radius-16); /* Top corners of bottom sheets and every corner of a centred dialog. */
-  --portion-radius-round: var(--portion-ref-radius-full); /* True circles only: radio marks, step-number discs, the progress ring's arc caps. */
+  --portion-radius-navigation-group: var(--portion-ref-radius-16); /* The compact destination group of the bottom navigation — the grouped step, chosen after rendering 12 and 16 (12 read as a card, 16 as a container; neither is a capsule). */
+  --portion-radius-navigation-item: var(--portion-ref-radius-12); /* The active destination's contained surface inside the group (16 minus the 4 px padding keeps the corners concentric). */
+  --portion-radius-round: var(--portion-ref-radius-full); /* True circles only: the Log food action, radio marks, step-number discs, the progress ring's arc caps. */
   --portion-size-icon-compact: var(--portion-ref-size-icon-16);
   --portion-size-icon-small-action: var(--portion-ref-size-icon-20);
   --portion-size-icon-default: var(--portion-ref-size-icon-24);

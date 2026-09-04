@@ -224,7 +224,7 @@ export default function App() {
     loadDetails(recipeId);
   };
 
-  const navigation = (selected: Destination) => <NavigationBar selected={selected} onSelect={switchRoot} onAddFood={() => setMethodOpen(true)} hidden={keyboardOpen} />;
+  const navigation = (selected: Destination) => <NavigationBar selected={selected} onSelect={switchRoot} onLogFood={() => setMethodOpen(true)} hidden={keyboardOpen} />;
 
   const rootVisible = (destination: Destination) => flow.length === 0 && root === destination;
 
@@ -300,7 +300,7 @@ export default function App() {
           goalKcal={goalKcal}
           onGoalChange={setGoalKcal}
           onOpenEntry={(entryId) => push({ kind: 'entry', entryId })}
-          onAddFood={() => setMethodOpen(true)}
+          onLogFood={() => setMethodOpen(true)}
           onFindRecipes={() => switchRoot('recipes')}
           recipeCriteria={browseCriteriaLabels}
           navigation={navigation('home')}

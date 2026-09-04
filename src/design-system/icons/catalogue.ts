@@ -174,7 +174,7 @@ export const iconCatalogue: readonly CatalogueEntry[] = [
   entry('Calculator', Calculator, 'Navigation', 'Calculation remains a capability, not a navigation destination'),
   entry('MagnifyingGlass', MagnifyingGlass, 'Navigation', 'Search destination and search fields'),
   entry('CookingPot', CookingPot, 'Navigation', 'Recipes destination; bold when selected'),
-  entry('Plus', Plus, 'Navigation', 'Add food — the trailing action in the bottom row'),
+  entry('Plus', Plus, 'Navigation', 'Log food — the separate circular action beside the destination group'),
   entry('ArrowLeft', ArrowLeft, 'Navigation', 'Back in focused flows'),
   entry('X', X, 'Navigation', 'Close a sheet or dialog; clear a field'),
   entry('CaretDown', CaretDown, 'Navigation', 'Disclosure and unit selector'),

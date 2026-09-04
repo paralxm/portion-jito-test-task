@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The evaluator-facing runtime composed from the same components: three roots, the Add food chooser, focused steps that stay mounted for Back, simulated services, fixture data, and the session-only daily record (entries and the optional goal). This story renders the real `App`; the runtime walkthrough script covers the full journeys with screenshots.',
+          'The evaluator-facing runtime composed from the same components: three roots, the Log food chooser, focused steps that stay mounted for Back, simulated services, fixture data, and the session-only daily record (entries and the optional goal). This story renders the real `App`; the runtime walkthrough script covers the full journeys with screenshots.',
       },
     },
   },
@@ -26,11 +26,11 @@ export const Launch: Story = {
     await expect(canvas.getByRole('heading', { level: 1, name: 'Home' })).toBeInTheDocument();
     await expect(canvas.getByRole('button', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
     await expect(canvas.getByText(/Nothing logged today/)).toBeVisible();
-    // Home's body CTA and the nav's trailing action share one O01 instance. Click the
-    // trailing one, matching the original journey.
-    const addFoodButtons = canvas.getAllByRole('button', { name: /Add (first )?food/ });
+    // Home's body CTA and the bar's Log food action share one O01 instance. Click the
+    // bar's, matching the original journey.
+    const addFoodButtons = canvas.getAllByRole('button', { name: /Log (first )?food/ });
     await userEvent.click(addFoodButtons[addFoodButtons.length - 1]);
-    await expect(canvas.getByRole('dialog', { name: 'Add food' })).toBeVisible();
+    await expect(canvas.getByRole('dialog', { name: 'Log food' })).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: /Enter manually/ }));
     await expect(canvas.getByRole('heading', { level: 1, name: 'Enter manually' })).toBeInTheDocument();
     await expect(canvas.queryByRole('navigation')).toBeNull();
@@ -43,7 +43,7 @@ export const AddToTodayJourney: Story = {
   name: 'Search → review → Add to today → Home populated → edit entry',
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Add first food' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Log first food' }));
     await userEvent.click(await canvas.findByRole('button', { name: /Search food/ }));
     await userEvent.type(canvas.getByRole('searchbox'), 'rice');
     await userEvent.click(await canvas.findByRole('button', { name: /Vegetable rice bowl/ }, { timeout: 3000 }));

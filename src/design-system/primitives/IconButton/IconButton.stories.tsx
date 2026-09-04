@@ -12,7 +12,7 @@ const meta = {
   parameters: {
     docs: {
       description: {
-        component: 'Icon-only control with a required accessible name and a 48 × 48 CSS px target (56 × 56 for the Add food action). The glyph stays 24 px in both sizes.',
+        component: 'Icon-only control with a required accessible name and a 48 × 48 CSS px target (56 × 56 for the Log food action). The glyph stays 24 px in both sizes.',
       },
     },
   },
@@ -37,13 +37,13 @@ export const SizesAndVariants: Story = {
     <Inline gap={12} wrap>
       <IconButton {...args} icon={ArrowLeft} label="Back" />
       <IconButton {...args} icon={X} label="Close" variant="outlined" />
-      <IconButton {...args} icon={Plus} label="Add food" size="large" variant="outlined" />
+      <IconButton {...args} icon={Plus} label="Log food" size="large" variant="outlined" />
       <IconButton {...args} icon={X} label="Clear search" disabled />
       <IconButton {...args} icon={X} label="Working" loading />
     </Inline>
   ),
   play: async ({ canvasElement }) => {
-    const large = within(canvasElement).getByRole('button', { name: 'Add food' });
+    const large = within(canvasElement).getByRole('button', { name: 'Log food' });
     await expect(large.getBoundingClientRect().width).toBeGreaterThanOrEqual(56);
   },
 };

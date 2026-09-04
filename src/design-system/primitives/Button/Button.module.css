@@ -30,6 +30,20 @@
   inline-size: 100%;
 }
 
+/* Large: the 56 px control (the Log food target size) with a 24 px glyph and 24 px inline
+   padding, for the one dominant action of a screen. Its label keeps the 16/24 role; the
+   size is geometry, not type. */
+.button[data-size='large'] {
+  min-block-size: var(--portion-size-target-add-food);
+  padding-block: var(--portion-ref-space-16);
+  padding-inline: var(--portion-ref-space-24);
+}
+
+.button[data-size='large'] .slot {
+  inline-size: var(--portion-size-icon-default);
+  block-size: var(--portion-size-icon-default);
+}
+
 /* Small: the drawn control is 40 px (its own fixed dimension, not a spacing value) for
    in-context actions that must sit below a screen's primary action. The ::before
    pseudo-element extends the hit area 4 px above and below, back to the 48 px minimum. */

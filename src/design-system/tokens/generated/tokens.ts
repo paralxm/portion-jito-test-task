@@ -42,6 +42,8 @@ export const tokenVars = {
   "reference.font.weight.regular": "--portion-ref-font-weight-regular",
   "reference.font.weight.medium": "--portion-ref-font-weight-medium",
   "reference.font.weight.semibold": "--portion-ref-font-weight-semibold",
+  "reference.font.weight.bold": "--portion-ref-font-weight-bold",
+  "reference.font.size.10": "--portion-ref-font-size-10",
   "reference.font.size.12": "--portion-ref-font-size-12",
   "reference.font.size.14": "--portion-ref-font-size-14",
   "reference.font.size.16": "--portion-ref-font-size-16",
@@ -53,6 +55,7 @@ export const tokenVars = {
   "reference.font.letter-spacing.normal": "--portion-ref-font-letter-spacing-normal",
   "reference.font.letter-spacing.wordmark": "--portion-ref-font-letter-spacing-wordmark",
   "reference.font.line-height.caption": "--portion-ref-font-line-height-caption",
+  "reference.font.line-height.nav-label": "--portion-ref-font-line-height-nav-label",
   "reference.font.line-height.supporting": "--portion-ref-font-line-height-supporting",
   "reference.font.line-height.body": "--portion-ref-font-line-height-body",
   "reference.font.line-height.compact-title": "--portion-ref-font-line-height-compact-title",
@@ -153,6 +156,13 @@ export const tokenVars = {
   "semantic.color.nutrition.minerals.surface": "--portion-color-nutrition-minerals-surface",
   "semantic.color.progress.track": "--portion-color-progress-track",
   "semantic.color.progress.indicator": "--portion-color-progress-indicator",
+  "semantic.color.navigation.surface": "--portion-color-navigation-surface",
+  "semantic.color.navigation.boundary": "--portion-color-navigation-boundary",
+  "semantic.color.navigation.content": "--portion-color-navigation-content",
+  "semantic.color.navigation.selected-surface": "--portion-color-navigation-selected-surface",
+  "semantic.color.navigation.selected-content": "--portion-color-navigation-selected-content",
+  "semantic.color.navigation.action-surface": "--portion-color-navigation-action-surface",
+  "semantic.color.navigation.action-content": "--portion-color-navigation-action-content",
   "semantic.typography.main-result.fontFamily": "--portion-typography-main-result-font-family",
   "semantic.typography.main-result.fontSize": "--portion-typography-main-result-font-size",
   "semantic.typography.main-result.fontWeight": "--portion-typography-main-result-font-weight",
@@ -213,6 +223,31 @@ export const tokenVars = {
   "semantic.typography.caption-strong.fontWeight": "--portion-typography-caption-strong-font-weight",
   "semantic.typography.caption-strong.lineHeight": "--portion-typography-caption-strong-line-height",
   "semantic.typography.caption-strong.letterSpacing": "--portion-typography-caption-strong-letter-spacing",
+  "semantic.typography.nav-label-active.fontFamily": "--portion-typography-nav-label-active-font-family",
+  "semantic.typography.nav-label-active.fontSize": "--portion-typography-nav-label-active-font-size",
+  "semantic.typography.nav-label-active.fontWeight": "--portion-typography-nav-label-active-font-weight",
+  "semantic.typography.nav-label-active.lineHeight": "--portion-typography-nav-label-active-line-height",
+  "semantic.typography.nav-label-active.letterSpacing": "--portion-typography-nav-label-active-letter-spacing",
+  "semantic.typography.action-lg.fontFamily": "--portion-typography-action-lg-font-family",
+  "semantic.typography.action-lg.fontSize": "--portion-typography-action-lg-font-size",
+  "semantic.typography.action-lg.fontWeight": "--portion-typography-action-lg-font-weight",
+  "semantic.typography.action-lg.lineHeight": "--portion-typography-action-lg-line-height",
+  "semantic.typography.action-lg.letterSpacing": "--portion-typography-action-lg-letter-spacing",
+  "semantic.typography.control-label.fontFamily": "--portion-typography-control-label-font-family",
+  "semantic.typography.control-label.fontSize": "--portion-typography-control-label-font-size",
+  "semantic.typography.control-label.fontWeight": "--portion-typography-control-label-font-weight",
+  "semantic.typography.control-label.lineHeight": "--portion-typography-control-label-line-height",
+  "semantic.typography.control-label.letterSpacing": "--portion-typography-control-label-letter-spacing",
+  "semantic.typography.segmented-label.fontFamily": "--portion-typography-segmented-label-font-family",
+  "semantic.typography.segmented-label.fontSize": "--portion-typography-segmented-label-font-size",
+  "semantic.typography.segmented-label.fontWeight": "--portion-typography-segmented-label-font-weight",
+  "semantic.typography.segmented-label.lineHeight": "--portion-typography-segmented-label-line-height",
+  "semantic.typography.segmented-label.letterSpacing": "--portion-typography-segmented-label-letter-spacing",
+  "semantic.typography.segmented-label-selected.fontFamily": "--portion-typography-segmented-label-selected-font-family",
+  "semantic.typography.segmented-label-selected.fontSize": "--portion-typography-segmented-label-selected-font-size",
+  "semantic.typography.segmented-label-selected.fontWeight": "--portion-typography-segmented-label-selected-font-weight",
+  "semantic.typography.segmented-label-selected.lineHeight": "--portion-typography-segmented-label-selected-line-height",
+  "semantic.typography.segmented-label-selected.letterSpacing": "--portion-typography-segmented-label-selected-letter-spacing",
   "semantic.typography.item-title.fontFamily": "--portion-typography-item-title-font-family",
   "semantic.typography.item-title.fontSize": "--portion-typography-item-title-font-size",
   "semantic.typography.item-title.fontWeight": "--portion-typography-item-title-font-weight",
@@ -259,6 +294,8 @@ export const tokenVars = {
   "semantic.radius.card": "--portion-radius-card",
   "semantic.radius.grouped": "--portion-radius-grouped",
   "semantic.radius.sheet": "--portion-radius-sheet",
+  "semantic.radius.navigation-group": "--portion-radius-navigation-group",
+  "semantic.radius.navigation-item": "--portion-radius-navigation-item",
   "semantic.radius.round": "--portion-radius-round",
   "semantic.size.icon.compact": "--portion-size-icon-compact",
   "semantic.size.icon.small-action": "--portion-size-icon-small-action",
@@ -365,9 +402,11 @@ export const tokens = {
       "weight": {
         "regular": 400,
         "medium": 500,
-        "semibold": 600
+        "semibold": 600,
+        "bold": 700
       },
       "size": {
+        "10": "0.625rem",
         "12": "0.75rem",
         "14": "0.875rem",
         "16": "1rem",
@@ -383,6 +422,7 @@ export const tokens = {
       },
       "line-height": {
         "caption": 1.333333,
+        "nav-label": 1.4,
         "supporting": 1.428571,
         "body": 1.5,
         "compact-title": 1.333333,
@@ -557,6 +597,15 @@ export const tokens = {
       "progress": {
         "track": "#e5e7eb",
         "indicator": "#17212b"
+      },
+      "navigation": {
+        "surface": "#f7f8fa",
+        "boundary": "#e4e8ec",
+        "content": "#52606d",
+        "selected-surface": "#eaf0ff",
+        "selected-content": "#2855d9",
+        "action-surface": "#2855d9",
+        "action-content": "#ffffff"
       }
     },
     "typography": {
@@ -644,6 +693,41 @@ export const tokens = {
         "lineHeight": "1.333333",
         "letterSpacing": "0px"
       },
+      "nav-label-active": {
+        "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
+        "fontSize": "0.625rem",
+        "fontWeight": "700",
+        "lineHeight": "1.4",
+        "letterSpacing": "0px"
+      },
+      "action-lg": {
+        "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
+        "fontSize": "1rem",
+        "fontWeight": "600",
+        "lineHeight": "1.5",
+        "letterSpacing": "0px"
+      },
+      "control-label": {
+        "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
+        "fontSize": "0.875rem",
+        "fontWeight": "500",
+        "lineHeight": "1.428571",
+        "letterSpacing": "0px"
+      },
+      "segmented-label": {
+        "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
+        "fontSize": "0.875rem",
+        "fontWeight": "500",
+        "lineHeight": "1.428571",
+        "letterSpacing": "0px"
+      },
+      "segmented-label-selected": {
+        "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
+        "fontSize": "0.875rem",
+        "fontWeight": "600",
+        "lineHeight": "1.428571",
+        "letterSpacing": "0px"
+      },
       "item-title": {
         "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
         "fontSize": "1rem",
@@ -704,6 +788,8 @@ export const tokens = {
       "card": "12px",
       "grouped": "16px",
       "sheet": "16px",
+      "navigation-group": "16px",
+      "navigation-item": "12px",
       "round": "9999px"
     },
     "size": {

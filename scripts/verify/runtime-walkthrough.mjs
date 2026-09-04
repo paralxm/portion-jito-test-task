@@ -31,7 +31,13 @@ async function newPage(width, height, extraCss) {
 const scoped = () => page.locator('[data-screen]:not([hidden]), dialog[open]');
 const visibleText = () => page.locator('[data-screen]:not([hidden])').innerText();
 
-const shot = (page, name) => page.screenshot({ path: `${out}${name}.png`, fullPage: true });
+// Full-page captures extend the document past the viewport, where a fixed dialog backdrop
+// cannot reach; while a dialog is open the capture is the viewport, so the scrim in the
+// image is the scrim a user sees.
+const shot = async (page, name) => {
+  const modal = await page.evaluate(() => Boolean(document.querySelector('dialog[open]')));
+  await page.screenshot({ path: `${out}${name}.png`, fullPage: !modal });
+};
 
 async function check(page, name, fn) {
   try {
@@ -46,7 +52,7 @@ async function check(page, name, fn) {
 
 /** Adds a manually entered food to today so populated states can be captured on any page. */
 async function addManualFood(page, name, kcal) {
-  await scoped().getByRole('button', { name: /Add (first )?food/ }).first().click();
+  await scoped().getByRole('button', { name: /Log (first )?food/ }).first().click();
   await scoped().getByRole('button', { name: /Enter manually/ }).click();
   await scoped().getByLabel('Food or dish name').fill(name);
   await scoped().getByLabel('Calories').fill(String(kcal));
@@ -60,7 +66,7 @@ let page = await newPage(390, 844);
 await shot(page, '01-home-empty');
 await check(page, 'rendered font is Inter Variable', async () => {
   const fam = await page.evaluate(() => getComputedStyle(document.querySelector('h1')).fontFamily);
-  const loaded = await page.evaluate(() => document.fonts.check('600 28px "Inter Variable"') && document.fonts.check('400 16px "Inter Variable"') && document.fonts.check('500 14px "Inter Variable"'));
+  const loaded = await page.evaluate(() => [400, 500, 600, 700].every((w) => document.fonts.check(`${w} 16px "Inter Variable"`)));
   log('   font-family:', fam, '| 400/500/600 loaded:', loaded);
   return loaded;
 });
@@ -70,7 +76,7 @@ await check(page, 'launch is S01-1: no entries, no goal, Home current', async ()
   return t.includes('Nothing logged today') && t.includes('Not set') && current.includes('Home');
 });
 
-await scoped().getByRole('button', { name: 'Add first food' }).click();
+await scoped().getByRole('button', { name: 'Log first food' }).click();
 await page.waitForTimeout(350);
 await shot(page, '02-method-sheet');
 await check(page, 'method sheet is a modal dialog with focus inside, laid out 2 × 2', async () => {
@@ -153,7 +159,7 @@ await check(page, 'goal 2,200 with 540 logged shows 1,660 remaining and 25 %', a
 });
 
 // Barcode → review → back, unknown, failed lookup, manual entry, discard
-await scoped().getByRole('button', { name: 'Add food' }).first().click();
+await scoped().getByRole('button', { name: 'Log food' }).first().click();
 await scoped().getByRole('button', { name: /Scan barcode/ }).click();
 await page.waitForTimeout(300);
 await shot(page, '15-barcode-scanning');
@@ -206,7 +212,7 @@ await page.waitForTimeout(150);
 await check(page, "today's entry survives the cancelled journey", async () => (await visibleText()).includes('1 entry · 540 kcal'));
 
 // Photo → suggestions → review → Done (no logging); failure
-await scoped().getByRole('button', { name: 'Add food' }).first().click();
+await scoped().getByRole('button', { name: 'Log food' }).first().click();
 await scoped().getByRole('button', { name: /Take a photo/ }).click();
 await page.waitForTimeout(300);
 await shot(page, '25-photo-capture');
@@ -227,7 +233,7 @@ await check(page, 'Done closes the task to Home without logging', async () => {
   const t = await visibleText();
   return (await page.locator('h1:visible').innerText()).includes('Home') && t.includes('1 entry · 540 kcal');
 });
-await scoped().getByRole('button', { name: 'Add food' }).first().click();
+await scoped().getByRole('button', { name: 'Log food' }).first().click();
 await scoped().getByRole('button', { name: /Take a photo/ }).click();
 await scoped().getByRole('button', { name: 'Take photo' }).click();
 await scoped().getByRole('button', { name: 'Analyse with a simulated failure' }).click();
@@ -312,12 +318,12 @@ await page.waitForTimeout(150);
 await shot(page, '41-search-recipes-scope-snapshot');
 await check(page, 'search opens in Recipes scope with snapshot criteria', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('Under 460 kcal') && (await scoped().getByRole('radio', { name: 'Recipes' }).getAttribute('aria-checked')) === 'true';
+  return t.includes('Under 460 kcal') && (await scoped().getByRole('tab', { name: 'Recipes' }).getAttribute('aria-selected')) === 'true';
 });
 await scoped().getByRole('searchbox').fill('lentil');
 await page.waitForTimeout(1000);
 await shot(page, '42-search-recipes-results');
-await scoped().getByRole('radio', { name: 'Food' }).click();
+await scoped().getByRole('tab', { name: 'Food' }).click();
 await page.waitForTimeout(1000);
 await shot(page, '43-search-food-scope-keeps-query');
 await check(page, 'food scope keeps the query and is unfiltered', async () => {
@@ -367,13 +373,15 @@ for (const width of [320, 393, 430]) {
   await shot(page, `50-home-${width}`);
   await check(page, `no horizontal overflow on Home at ${width}`, async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   if (width === 320) {
-    await scoped().getByRole('button', { name: 'Add food' }).first().click();
+    await scoped().getByRole('button', { name: 'Log food' }).first().click();
     await page.waitForTimeout(350);
     await shot(page, '54-method-sheet-320');
-    await check(page, 'method sheet falls back to one column at 320', async () =>
+    await check(page, 'method sheet keeps the 2 x 2 grid at 320 with no tile overflow', async () =>
       page.evaluate(() => {
-        const tile = document.querySelector('dialog[open] button:not([aria-label="Close"])');
-        return tile ? getComputedStyle(tile.parentElement).gridTemplateColumns.split(' ').length === 1 : false;
+        const tiles = Array.from(document.querySelectorAll('dialog[open] button:not([aria-label="Close"])'));
+        if (tiles.length !== 4) return false;
+        const columns = getComputedStyle(tiles[0].parentElement).gridTemplateColumns.split(' ').length;
+        return columns === 2 && tiles.every((t) => t.scrollWidth <= t.clientWidth + 1 && getComputedStyle(t).flexDirection === 'column');
       }),
     );
   }
@@ -383,7 +391,19 @@ page = await newPage(320, 800, 'html { font-size: 200% !important; }');
 await addManualFood(page, 'Oatmeal with mixed berries', 550);
 await page.waitForTimeout(200);
 await shot(page, '51-home-320-200pct');
-await check(page, 'nav falls back to the 2x2 arrangement at 320 + 200%', async () => (await page.locator('nav:visible').getAttribute('data-layout')) === 'stacked');
+await check(page, 'navigation group fills up to a 16 px gap before the 56 px Log food circle and stacks the active label at 320 + 200%', async () =>
+  page.evaluate(() => {
+    const nav = document.querySelector('nav:not([hidden])');
+    const group = nav?.firstElementChild;
+    const action = nav?.querySelector('button[aria-label="Log food"]');
+    const active = nav?.querySelector('button[aria-current="page"]');
+    if (!nav || !group || !action || !active) return false;
+    const g = group.getBoundingClientRect();
+    const a = action.getBoundingClientRect();
+    const cells = Array.from(group.children).map((c) => c.getBoundingClientRect().width);
+    return nav.scrollWidth <= nav.clientWidth + 1 && Math.abs(a.left - g.right - 16) < 2 && Math.max(...cells) - Math.min(...cells) < 1.5 && Math.round(a.width) === 56 && Math.round(a.height) === 56 && getComputedStyle(active).flexDirection === 'column';
+  }),
+);
 await check(page, 'calorie ring stacks its figure under a medium ring at 320 + 200%', async () => (await page.locator('[data-screen="home"] [data-layout]').first().getAttribute('data-layout')) === 'stacked');
 await check(page, 'no horizontal overflow on Home at 320 + 200%', async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
 await scoped().getByRole('button', { name: 'Recipes', exact: true }).click();
@@ -391,9 +411,15 @@ await page.waitForTimeout(700);
 await shot(page, '52-recipes-320-200pct');
 await page.close();
 page = await newPage(390, 844, 'html { font-size: 200% !important; }');
-await scoped().getByRole('button', { name: 'Add first food' }).click();
+await scoped().getByRole('button', { name: 'Log first food' }).click();
 await page.waitForTimeout(350);
 await shot(page, '55-method-sheet-390-200pct');
+await check(page, 'method sheet falls back to one column of rows at 390 + 200%', async () =>
+  page.evaluate(() => {
+    const tile = document.querySelector('dialog[open] button:not([aria-label="Close"])');
+    return tile ? getComputedStyle(tile.parentElement).gridTemplateColumns.split(' ').length === 1 && getComputedStyle(tile).flexDirection === 'row' : false;
+  }),
+);
 await scoped().getByRole('button', { name: /Enter manually/ }).click();
 await page.waitForTimeout(200);
 await shot(page, '53-manual-390-200pct');

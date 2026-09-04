@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Portion is an iOS-oriented web prototype. Every measurement in code and stories is in CSS px; the iOS column is a platform mapping for a future native implementation and never relabels a CSS value as points. The 48 px target baseline is this product’s rule (stricter than WCAG 2.2 AA’s 24 px minimum); Add food is 56 px. Text scales from the browser preference through rem tokens; the navigation bar measures its labels and rearranges 2 × 2 when a word cannot fit.',
+          'Portion is an iOS-oriented web prototype. Every measurement in code and stories is in CSS px; the iOS column is a platform mapping for a future native implementation and never relabels a CSS value as points. The 48 px target baseline is this product’s rule (stricter than WCAG 2.2 AA’s 24 px minimum); Log food is 56 px. Text scales from the browser preference through rem tokens; the navigation bar measures its labels and rearranges 2 × 2 when a word cannot fit.',
       },
     },
   },
@@ -26,7 +26,7 @@ type Story = StoryObj<typeof meta>;
 const LEDGER: Array<[string, string, string, string]> = [
   ['Root text size', '16 CSS px (html 100 %)', 'Dynamic Type, Body 17 pt', 'Platform mapping — not equivalent values'],
   ['Minimum target', '48 × 48 CSS px', 'HIG 44 × 44 pt', 'Product baseline is stricter; keep 48'],
-  ['Add food target', '56 × 56 CSS px', 'Custom, 56 pt', 'Action in the bottom row, never a tab'],
+  ['Log food target', '56 × 56 CSS px', 'Custom, 56 pt', 'Action in the bottom row, never a tab'],
   ['Bottom bar', 'Custom: 3 destinations + 1 action', 'UITabBar has no trailing action', 'Native would need a custom bar'],
   ['Modal sheet', 'Native <dialog>, focus contained', 'UISheetPresentationController', 'Detents are not promised'],
   ['Safe areas', 'env(safe-area-inset-*) added to page spacing', 'safeAreaInsets', 'viewport-fit=cover in index.html'],
@@ -41,11 +41,11 @@ export const TargetSizes: Story = {
   render: () => (
     <Stack gap={16}>
       <Text as="p" variant="supporting" color="secondary">
-        Minimum target {resolveVar('--portion-size-target-minimum')} · Add food {resolveVar('--portion-size-target-add-food')} · glyph {resolveVar('--portion-size-icon-default')}
+        Minimum target {resolveVar('--portion-size-target-minimum')} · Log food {resolveVar('--portion-size-target-add-food')} · glyph {resolveVar('--portion-size-icon-default')}
       </Text>
       <Inline gap={16} align="end">
         <IconButton icon={X} label="Close" variant="outlined" />
-        <IconButton icon={Plus} label="Add food" variant="outlined" size="large" />
+        <IconButton icon={Plus} label="Log food" variant="outlined" size="large" />
       </Inline>
     </Stack>
   ),
@@ -53,7 +53,7 @@ export const TargetSizes: Story = {
     await expect(resolveVar('--portion-size-target-minimum')).toBe('48px');
     await expect(resolveVar('--portion-size-target-add-food')).toBe('56px');
     const close = within(canvasElement).getByRole('button', { name: 'Close' }).getBoundingClientRect();
-    const add = within(canvasElement).getByRole('button', { name: 'Add food' }).getBoundingClientRect();
+    const add = within(canvasElement).getByRole('button', { name: 'Log food' }).getBoundingClientRect();
     await expect(Math.min(close.width, close.height)).toBeGreaterThanOrEqual(48);
     await expect(Math.min(add.width, add.height)).toBeGreaterThanOrEqual(56);
   },

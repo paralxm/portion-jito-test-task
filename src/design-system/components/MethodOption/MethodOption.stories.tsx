@@ -13,11 +13,11 @@ const meta = {
     docs: {
       description: {
         component: `
-**Purpose.** One entry-method choice inside the Add food sheet (O01). The whole surface is the single control; selecting it starts that method's journey and never commits food data.
+**Purpose.** One entry-method choice inside the Log food sheet (O01). The whole surface is the single control; selecting it starts that method's journey and never commits food data.
 
 **Anatomy.** A \`button\` containing a 24 px Phosphor glyph in the action colour, a method title (method-title 16/24) and a one-line description (supporting 14/20). No chevron, no nested controls, no selected/radio state — the contract says choosing a method acts immediately.
 
-**Layout.** Tile by default (icon above text) on the light surface with the card radius. Inside the sheet's named \`method-grid\` container narrower than 20 rem, the same element turns into a row (icon beside text). The condition is container width, not viewport width, so the adaptation is deterministic: 320 px viewports at 100 % text and every supported width at 200 % text render rows.
+**Layout.** Tile by default (icon above text) on the light surface with the card radius. Inside the sheet's named \`method-grid\` container narrower than 17 rem, the same element turns into a row (icon beside text). The condition is container width, not viewport width, so the adaptation is deterministic: every supported viewport at 100 % text keeps tiles; 200 % text renders rows.
 
 **States.** rest, hover (pointer only: sunken fill + control boundary), pressed (same), focus-visible (3 px ring). There is no disabled state: every method is always available in this product, so none is drawn.
 
@@ -48,9 +48,9 @@ export const Tile: Story = {
 };
 
 export const RowInNarrowContainer: Story = {
-  name: 'Row — inside a method-grid container under 20 rem',
+  name: 'Row — inside a method-grid container under 17 rem',
   render: (args) => (
-    <div style={{ inlineSize: 288, containerType: 'inline-size', containerName: 'method-grid' }}>
+    <div style={{ inlineSize: 256, containerType: 'inline-size', containerName: 'method-grid' }}>
       <MethodOption {...args} />
     </div>
   ),

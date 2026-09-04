@@ -8,7 +8,7 @@ import { recipeCatalogue } from '../domain/fixtures';
 import { filterRecipes, removeCriterion, type RecipeCriteria } from '../domain/matching';
 import { RecipesScreen, type RecipesStatus } from './RecipesScreen';
 
-const navigation = <NavigationBar selected="recipes" onSelect={fn()} onAddFood={fn()} />;
+const navigation = <NavigationBar selected="recipes" onSelect={fn()} onLogFood={fn()} />;
 
 function Harness({ status, initialCriteria, onOpenRecipe, onOpenSearch, onRetry }: { status: RecipesStatus; initialCriteria: RecipeCriteria; onOpenRecipe: (id: string) => void; onOpenSearch: () => void; onRetry: () => void }) {
   const [criteria, setCriteria] = useState(initialCriteria);

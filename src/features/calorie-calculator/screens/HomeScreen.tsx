@@ -23,8 +23,8 @@ export interface HomeScreenProps {
   onGoalChange: (goalKcal: number | null) => void;
   /** A logged entry opens S07 in existing-entry mode. */
   onOpenEntry: (entryId: string) => void;
-  /** The body Add food action — the same O01 instance as the trailing plus. */
-  onAddFood: () => void;
+  /** The body Log food action — the same O01 instance as the bar's Log food. */
+  onLogFood: () => void;
   /** Opens or restores the Recipes browse destination (S03). */
   onFindRecipes: () => void;
   /** Labels of the criteria currently applied in Recipes browse; empty when none. */
@@ -35,12 +35,12 @@ export interface HomeScreenProps {
 
 /**
  * S01 — Home, the daily overview. One focal point (today's calorie state), then the
- * supporting macros, today's logged food with the primary Add food action, and the
+ * supporting macros, today's logged food with the primary Log food action, and the
  * recipe-discovery entry point. S01-1 (no committed entries today) and S01-2 (one or
  * more) share the same region order; only the food section changes. Logging and the
  * goal are optional: neither job needs them.
  */
-export function HomeScreen({ entries, goalKcal, onGoalChange, onOpenEntry, onAddFood, onFindRecipes, recipeCriteria = [], navigation }: HomeScreenProps) {
+export function HomeScreen({ entries, goalKcal, onGoalChange, onOpenEntry, onLogFood, onFindRecipes, recipeCriteria = [], navigation }: HomeScreenProps) {
   const [goalOpen, setGoalOpen] = useState(false);
   const summary = useMemo(() => summarizeDay(entries, goalKcal), [entries, goalKcal]);
   const populated = entries.length > 0;
@@ -92,8 +92,8 @@ export function HomeScreen({ entries, goalKcal, onGoalChange, onOpenEntry, onAdd
             Nothing logged today. Add a food or dish to review its portion and nutrition; adding it to today is optional.
           </Text>
         )}
-        <Button variant="primary" block onClick={onAddFood}>
-          {populated ? 'Add food' : 'Add first food'}
+        <Button variant="primary" size="large" block onClick={onLogFood}>
+          {populated ? 'Log food' : 'Log first food'}
         </Button>
       </section>
 

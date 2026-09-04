@@ -19,7 +19,7 @@ const meta = {
 
 **Treatments.** \`primary\` — the one filled action a screen leads with (Add to today, Continue to review, Apply filters). \`secondary\` — a tinted blue-50 fill with blue text for supporting actions: visibly a button, quieter than primary, never an outline that competes with fields. \`text\` — a bare label for tertiary actions (Done, Cancel, Reset all). \`destructive\` — the tinted red treatment for Discard and Remove.
 
-**Sizes.** \`medium\` (default): 48 px control, action-md 16/24 label, 16 px inline padding — screen-level actions. \`small\`: 40 px drawn control, action-sm 14/20 label, 12 px inline padding — in-context actions such as Filters, Reset all, Show all nutrition, Change food. The small control's hit area still reaches 48 px through a 4 px pseudo-element above and below.
+**Sizes.** \`large\`: 56 px control, action-lg (16/24, the same type as medium) label, 24 px inline padding, 24 px glyph — the one dominant action of a screen: a sticky footer's Add to today / Update entry / Continue to review, Home's Log food. \`medium\` (default): 48 px control, action-md 16/24 label, 16 px inline padding — screen-level actions. \`small\`: 40 px drawn control, action-sm 14/20 label, 12 px inline padding — in-context actions such as Filters, Reset all, Show all nutrition, Change food. The small control's hit area still reaches 48 px through a 4 px pseudo-element above and below.
 
 **States.** rest, hover (pointer only), pressed, focus-visible (3 px ring), disabled (disabled surface + disabled text; no activation from pointer or keyboard; native \`disabled\` so it leaves the tab order), loading (spinner in the icon slot, \`aria-busy\`, activation ignored — asynchronous requests only, never synchronous arithmetic). \`block\` fills the row for a screen's primary action.
 
@@ -34,7 +34,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'text', 'destructive'];
-const SIZES: ButtonSize[] = ['medium', 'small'];
+const SIZES: ButtonSize[] = ['large', 'medium', 'small'];
 
 export const Primary: Story = {
   play: async ({ canvasElement, args }) => {

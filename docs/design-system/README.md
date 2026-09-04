@@ -44,11 +44,11 @@ The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same
 
 | Control | Selection shape | Exposed as | Production use |
 | --- | --- | --- | --- |
-| `SegmentedControl` | Exactly 2–4 peer modes of one task; picking one immediately changes visible content | `radiogroup` / `radio`, roving tabindex, arrow keys | Search's Food \| Recipes scope switch |
+| `SegmentedControl` | Exactly 2–4 peer modes of one task; picking one immediately changes visible content | `radiogroup` / `radio` (default) or, with `pattern="tabs"`, `tablist` / `tab` + `aria-controls` over the consumer's `tabpanel`; roving tabindex, arrow keys, automatic activation | Search's Food \| Recipes scope switch |
 | `FilterChip` (`selectionRole="radio"`) | A longer or wrapping mutually-exclusive set | `radiogroup` / `radio` | Recipe filters' dietary preference (5 options, wraps) |
 | `FilterChip` (`selectionRole="toggle"`) | An independent on/off filter, others unaffected | `aria-pressed` | (capability exists; no current multi-toggle-filter screen) |
 | `Radio` / `Checkbox` | A single labelled option inside an ordinary form, not a compact control row | native `radio`/`checkbox` | `UnitSheet`'s unit list |
-| `NavigationBar` | The app's three fixed root destinations, never a caller-supplied set | `aria-current="page"` | Home / Search / Recipes |
+| `NavigationBar` | The app's three fixed root destinations in one width-filling group of equal cells, plus the separate circular Log food action | `aria-current="page"` on the active destination; inactive destinations are icon-only with `aria-label`; Log food is a plain labelled button | Home / Search / Recipes + Log food |
 | `UnitControl` → `UnitSheet` | A choice that opens a separate modal draft rather than switching content immediately | `aria-haspopup="dialog"` | Amount field's unit selector |
 
 `SegmentedControl` and the radio-mode `FilterChip` look similar (both are "pick one of several") but answer different questions: `SegmentedControl` is for a small, fixed, always-visible set of task-level modes where the surrounding content itself is what changes; `FilterChip` is for a longer or more open-ended set of values being narrowed, filtered or wrapped, where selection is one input among several rather than the entire visible context.
@@ -66,11 +66,13 @@ The app (`src/main.tsx`) and Storybook (`.storybook/preview.ts`) import the same
 | compact-title | 18 / 24 | 600 | Focused bar titles, card and empty-state titles |
 | action-md | 16 / 24 | 600 | Medium (default) button labels, unit selector |
 | body | 16 / 24 | 400 | Paragraphs, inputs, list items |
-| label | 14 / 20 | 500 | Field labels, chips, category labels, unselected segments |
+| label | 14 / 20 | 500 | Chips, category labels; control labels and unselected segments through the `control-label` / `segmented-label` aliases |
 | supporting | 14 / 20 | 400 | Helper, error, basis, secondary lines |
-| action-sm | 14 / 20 | 600 | Small button labels, selected segment |
-| caption | 12 / 16 | 500 | Unselected navigation labels, dietary tags (the 12 px floor) |
-| caption-strong | 12 / 16 | 600 | Selected navigation labels, count badge |
+| action-sm | 14 / 20 | 600 | Small button labels; the selected segment through the `segmented-label-selected` alias |
+| caption | 12 / 16 | 500 | Dietary tags, incidental metadata (the floor for content text) |
+| caption-strong | 12 / 16 | 600 | Count badge |
+| nav-label-active | 10 / 14 | 700 | The active bottom-navigation label only (§17) |
+| action-lg | → action-md | | Large (56 px) button label |
 | item-title, method-title, metric-inline | → action-md | | Row titles, tile titles and inline values |
 | metric-secondary | → section-title (20 / 28) | | Secondary macro values |
 | wordmark | 24 / 32, −0.03em | 600 | The lowercase wordmark only |
@@ -99,7 +101,7 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | 8 | Nutrition presentation (main result, macros, expanded list, unknown vs zero, precision) | Observed in current code | Unknown = "Not available"; known zero shown as 0; small mg values keep precision; fibre nested under carbohydrates | `ui-contract.md` §1, §4 | `NutritionValue`, `NutrientRow`, `NutritionSummary`, `nutrition.ts` | Components/NutritionValue, NutrientRow; Patterns/NutritionSummary | Unit tests (`nutrition.test.ts`, `calculation.test.ts`), story assertions, fixtures C/R in walkthrough | — |
 | 9 | Recipe presentation (card 4:3, details 16:9, no photo, long titles, match evidence) | Observed in current code | Title is the single control with a stretched hit area; no match claim without active criteria | `ui-contract.md` §5 | `RecipeCard`, `MatchCriteria`, `RecipeList` | Patterns/RecipeCard; Components/MatchCriteria | Story assertions incl. 320 px long title | Real photography and licences remain out of scope |
 | 10 | Feedback and status (inline messages, empty/no-match/failure, loading, spinner, reduced motion) | Observed in current code | Cause-specific copy and actions; failure uses `alert`, others `status`; no skeletons | `ui-contract.md` §5.6 | `InlineMessage`, `EmptyState`, `LoadingState`, `Spinner` | Components/InlineMessage, EmptyState, LoadingState; Primitives/Spinner | Role and reduced-motion assertions | — |
-| 11 | Navigation bar and headers (3 + 1 row, current-page semantics, enlargement fallback, keyboard hiding) | Observed in current code — Hi-Fi (§15) | 2 × 2 fallback measured from natural label widths; software keyboard detected from `visualViewport` shrink + text focus; Home/Search/Recipes + Add food, non-colour selected state (2 px indicator + bold icon + label weight + `aria-current`) | `low-fidelity.md`, `ui-contract.md` §2 | `NavigationBar`, `AppHeader`, `useSoftwareKeyboard` | Patterns/NavigationBar (Home/Search/Recipes selected, Recipe Details origin ×2, interaction, Add food, Selection, Hidden, keyboard focus-visible, selected+focus-visible, 320/390/393/430, 320 + 200 %, 430 + 150 %), AppHeader | Story assertions (incl. real-Chromium focus-visible/tab-order/target-size checks); walkthrough "nav falls back to 2 × 2 at 320 + 200 %" | Keyboard hiding and safe-area behaviour are **Platform mapping / Unverified** on a real device (see §5); no browser-automation tool was available this session for a manual visual pass (see §15) |
+| 11 | Navigation bar and headers (compact destination group + separate Log food action, current-page semantics, keyboard hiding) | Observed in current code — Hi-Fi (§15, §17) | The group fills the width beside the action as three equal cells (16 px gap); under 16 rem of group width the active label stacks under its glyph; active = bold glyph + 10/14 label + selected surface + `aria-current`, inactive = icon-only with `aria-label`; software keyboard detected from `visualViewport` shrink + text focus | `low-fidelity.md`, `ui-contract.md` §2 | `NavigationBar`, `AppHeader`, `useSoftwareKeyboard` | Patterns/NavigationBar (Home/Search/Recipes selected, Recipe Details origin ×2, interaction, Add food, Selection, Hidden, keyboard focus-visible, selected+focus-visible, 320/390/393/430, 320 + 200 %, 430 + 150 %), AppHeader | Story assertions (incl. real-Chromium focus-visible/tab-order/target-size checks); walkthrough "nav falls back to 2 × 2 at 320 + 200 %" | Keyboard hiding and safe-area behaviour are **Platform mapping / Unverified** on a real device (see §5); no browser-automation tool was available this session for a manual visual pass (see §15) |
 | 12 | Overlays (bottom sheet, confirm dialog, method sheet; focus containment, Escape, backdrop, restore) | Observed in current code | Native `<dialog>`; Escape handled directly because browsers skip `cancel` without user activation; scrolling text-only body is focusable | `ui-contract.md` §3, §5 | `ModalSheet`, `ConfirmDialog`, `MethodSheet` | Patterns/ModalSheet, ConfirmDialog, MethodSheet | Focus, Tab containment, Escape, restore-focus assertions; a11y at error | — |
 | 13 | Screen templates (root with bar, focused flow with sticky header/footer, safe areas) | Observed in current code | Footer stays in flow; measured header/footer heights become document scroll padding | `low-fidelity.md` | `RootScreenLayout`, `FocusedFlowLayout` | Templates/* (incl. short viewport) | Story assertions | Safe-area insets are **Platform mapping** (0 in desktop Chromium) |
 | 14 | Calculation journey screens (S01 empty/result/stale, S07 review per source, S06 manual entry with dirty check) | Observed in current code | Review confirms once and replaces; invalid draft = stale result; manual macros optional | `ui-contract.md` §4, `low-fidelity.md` | `HomeScreen`, `FoodReviewScreen`, `ManualEntryScreen`, `manual-entry.ts` | Product compositions/Home, Food review, Manual entry | Unit tests; story play functions; walkthrough checks 3–14 | — |
@@ -123,19 +125,19 @@ Status labels: **Documented** (rule exists in a contract only), **Observed in cu
 | Reduced motion | `prefers-reduced-motion` → 0 ms | `isReduceMotionEnabled` | Verified through the data attribute path |
 | Typeface | Inter Variable | SF Pro | Inter is the approved brand face |
 
-## 6. Verification status (last executed 2026-09-04 for the Hi-Fi migration, §16.9; the table below is the current state)
+## 6. Verification status (last executed 2026-09-04 after the navigation pass, §17.8; the table below is the current state)
 
 | Check | Command | Result |
 | --- | --- | --- |
 | Typecheck | `npx tsc --noEmit -p tsconfig.json` | exit 0 |
-| Token validity and drift | `node scripts/tokens/build.mjs --check` | 218 tokens validated; generated output current |
+| Token validity and drift | `node scripts/tokens/build.mjs --check` | 235 tokens validated; generated output current |
 | Unit tests (node) | `npx vitest run --project=unit` | 5 files, 50 tests passed |
-| Storybook tests (headless Chromium, axe at `error`) | `npx vitest run --project=storybook` | 63 files, 311 tests passed |
+| Storybook tests (headless Chromium, axe at `error`) | `npx vitest run --project=storybook` | 63 files, 310 tests passed |
 | App build | `npm run build` | success (Inter opsz woff2 + CSS + JS bundles) |
 | Storybook build | `npm run build-storybook` | success (`storybook-static/`, ignored) |
-| Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | 37/37 checks passed, 0 console/page errors, 55 screenshots in `.verification/runtime/` |
-| Storybook captures | `npm run build-storybook` then `node scripts/verify/storybook-captures.mjs` | 31 captures, 0 page errors, in `.verification/storybook/` |
-| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 54 pairs, 0 failing |
+| Runtime walkthrough | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` | 38/38 checks passed, 0 console/page errors, 55 screenshots in `.verification/runtime/` |
+| Storybook captures | `npm run build-storybook` then `node scripts/verify/storybook-captures.mjs` | 37 captures, 0 page errors, in `.verification/storybook/` |
+| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 59 pairs, 0 failing |
 | Impeccable detector | `node .claude/skills/impeccable/scripts/detect.mjs --json src` | no findings |
 
 Rendered inspection performed by reading the walkthrough screenshots (Calculate empty/result/stale/servings/expanded, method sheet, search results, review from search/barcode/photo/manual, manual errors, filters sheet, filtered browse, recipe details expanded, search failure, 320/393/430 widths, 320 px + 200 % and 390 px + 200 %); re-read after §10's refactor for Calculate result, Food review, Recipes filtered, Recipe details and Search results (no pixel changed); after §11, screenshotting Components/SegmentedControl, Foundations/Icons → Size catalogue and Search's Interactive story directly from `storybook-static`; and after §12, re-reading the manual-entry discard dialog and unit-sheet screenshots specifically to confirm Cancel/Confirm now render as a real equal-width side-by-side pair. The unit-change and 2 × 2 fallback defects found by the original inspection were fixed and re-verified; §10–§12 list what each pass found and fixed.
@@ -458,9 +460,9 @@ No 10 px role was added: `nav-label-compact` would be a verified fallback only, 
 
 | Component | Type roles | Colour / surface pairs | Radius | Spacing roles | States | Stories (title → names) | Verification |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Button | action-md, action-sm | on-action/primary; primary/secondary-surface; error fg/error surface; disabled text/surface | control | icon-to-label; 12/16 inline | rest, hover, pressed, focus-visible, disabled, loading, block | Primitives/Button → Primary, Treatments × sizes, Small hit area, Loading, Disabled, Keyboard focus-visible, Block long label 320 | story assertions; captures 01–03 |
-| SegmentedControl | label, action-sm | secondary/sunken; primary/canvas; control border/sunken | control + control-compact | 4 padding, 12/8 | selected, unselected, hover, focus-visible, disabled, selected+disabled | Components/SegmentedControl → Default, Recipes selected, Click, Keyboard, Selected + focus-visible, Disabled option, Selected + disabled, Long labels, 320, 200 %, Illustrative | story assertions; captures 04–08; Search walkthrough |
-| MethodOption / MethodSheet | method-title, supporting | primary text/surface; action glyph/surface | card (tiles), sheet | card-padding, card-gap, related | rest, hover, pressed, focus-visible; rows under 20 rem | Components/MethodOption (6), Patterns/MethodSheet → 2 × 2 at 390, 430, Dismiss, Keyboard, 320 rows, 200 % rows | story assertions; captures 09–11; walkthrough 02/54/55 |
+| Button | action-lg, action-md, action-sm | on-action/primary; primary/secondary-surface; error fg/error surface; disabled text/surface | control | icon-to-label; 12/16 inline | rest, hover, pressed, focus-visible, disabled, loading, block | Primitives/Button → Primary, Treatments × sizes, Small hit area, Loading, Disabled, Keyboard focus-visible, Block long label 320 | story assertions; captures 01–03 |
+| SegmentedControl | segmented-label, segmented-label-selected | on-action/primary (selected); primary/sunken (unselected); disabled text/disabled surface (selected + disabled) | control + control-compact | 4 padding, 12/8 | selected, unselected, hover, pressed, focus-visible, disabled, selected+disabled; radio or tabs pattern | Components/SegmentedControl → Food selected, Recipes selected, Tabs pattern, Click, Pressed, Keyboard, Selected + focus-visible, Disabled option, Selected + disabled, Long labels, 320, 200 %, Illustrative | story assertions; captures 04–08, 36; walkthrough 04 (tabs in the real Search screen) |
+| MethodOption / MethodSheet | method-title, supporting | primary text/surface; action glyph/surface | card (tiles), sheet | card-padding, card-gap, related | rest, hover, pressed, focus-visible; 2 × 2 at every width, rows under 17 rem (enlarged text) | Components/MethodOption (6), Patterns/MethodSheet → 2 × 2 at 390, 430, Dismiss, Keyboard, 320 keeps 2 × 2, 200 % rows | story assertions; captures 09–11; walkthrough 02/54/55 |
 | ProgressRing | — (consumer text) | indicator/track; indicator/surface | round (caps) | — | zero, partial, complete, over, unavailable, invalid input, reduced motion, 200 % | Primitives/ProgressRing (11) | story assertions incl. contrast; capture 12–13 |
 | CalorieProgressRing | main-result, label, supporting, metric-inline, caption | primary/surface; secondary/surface | — | 16/8 internal | below, reached, exceeded, no goal, incomplete, zero-kcal entry, six-character figure, 320, 320 + 200 % | Product compositions/Home (S01)/CalorieProgressRing (10) | story assertions; captures 14–18; walkthrough 14/51 |
 | RecipeCard | compact-title, metric-inline, supporting, caption | primary/canvas; decorative border | card, control (thumbnail) | 12 padding, title-to-secondary | rest, hover, pressed, focus-visible, no photo, unknown values, criteria, 320, 200 % | Patterns/RecipeCard (7) | story assertions; captures 19–21; walkthrough 31/34 |
@@ -489,7 +491,7 @@ No 10 px role was added: `nav-label-compact` would be a verified fallback only, 
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Token validity and drift | `npm run tokens:check` | 218 tokens validated; generated output current |
+| Token validity and drift | `npm run tokens:check` | 235 tokens validated; generated output current |
 | Typecheck | `npm run typecheck` | exit 0 |
 | Unit tests (node) | `npx vitest run --project unit` | 5 files, 50 tests passed (12 new in `daily-log.test.ts`) |
 | Storybook tests (headless Chromium, axe at `error`) | `npx vitest run --project storybook` | 63 files, 311 tests passed; one run under parallel build load produced a single timing failure in `PhotoScreen.stories.tsx` that passed alone and on the final rerun |
@@ -508,3 +510,96 @@ Rendered inspection: every capture listed in `verification/manifest.md` was read
 ### 16.10 CSS px versus iOS points, and sources
 
 All values in this repository are CSS px in a browser prototype. The iOS column of section 5 is a mapping: nothing here converts to points, and Apple's guidance is used as a design reference, not as evidence of native compliance. Sources consulted: [Apple UI design tips](https://developer.apple.com/design/tips/), [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/), [HIG Accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility), [HIG Layout](https://developer.apple.com/design/human-interface-guidelines/layout), [WCAG 2.2 Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html), [WCAG 2.2 Non-text Contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html), [WCAG 2.2 Reflow](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html), and the WAI-ARIA Authoring Practices radio-group pattern for SegmentedControl only.
+
+## 17. Navigation group, action-coloured segmented control, large button and 2 × 2 method grid (2026-09-04, `feat/navigation-hifi`)
+
+Second Hi-Fi pass, on top of §16. Same rules: in-place migration, no parallel components, Storybook is the executable specification, every claim below names its evidence.
+
+### 17.1 Scope conflicts and resolutions
+
+| Conflict | Sources | Resolution (owner updated) |
+| --- | --- | --- |
+| The plus was labelled **Add food** everywhere; the brief requires the persistent action to be **Log food** (`aria-label="Log food"`) | `low-fidelity.md` §3/§5, `ui-contract.md` §5, `PRODUCT.md`, `CLAUDE.md` | One name for the entry action: the bar's plus, the O01 sheet title and Home's body action (Log food / Log first food) are all **Log food**; **Add to today** remains the commit. Dated implementation notes in both UX contracts; `PRODUCT.md`, `AGENTS.md`, `CLAUDE.md` wording updated. |
+| `caption` 12 px was documented as the absolute floor and no 10 px role existed; the brief requires the active navigation label at **10/14, 700** | `visual-direction.md` §4, §16.5 | One base role `nav-label-active` (10/14, 700) restricted to the active bottom-navigation label, which is redundant with the bold glyph and the selected surface and never carries content; contrast 5.4:1. `caption` stays the floor for content text. Weight 700 added as `reference.font.weight.bold` (Inter Variable already covers 100–900; no new font file). |
+| The method sheet fell back to rows at 320 px (threshold 20 rem); the brief requires a normal **2 × 2 at 320–430 px**, rows only under enlarged text or a genuinely constrained width | `low-fidelity.md` §5 (O01), §16 | Threshold lowered to **17 rem**: 320 px keeps 2 × 2 with wrapping titles (288 px of sheet body); 200 % text on every width falls to rows. Contract sentence corrected; Storybook and the walkthrough assert 2 columns at 320 and 1 at 200 %. |
+| `SegmentedControl` was radio-only; the brief requires tab semantics for the Food \| Recipes **content switcher** when that matches the consumer | §11 decision ("the control never owns the panel") | Both are true of different consumers, so the control gained `pattern="radio" \| "tabs"`: Search's switch owns the results panel and now renders `tablist`/`tab`/`aria-controls` over a real `tabpanel`; the radio default remains for a mode that changes what a screen asks. Automatic activation per the APG. |
+| The group was first shipped hugging its content beside the action (large empty middle); the follow-up instruction requires the three destinations to **fill** the width evenly with a deliberate gap before the action | this pass | The group is a flex item (`flex: 1 1 0%`) of three equal cells; a 16 px gap (larger than the group's 4 px rhythm, equal to the page inset) separates the circular action. Under 16 rem of group width the active label stacks under its glyph instead of overflowing. |
+
+### 17.2 Skills and commands actually applied
+
+`impeccable doctor` (no drift), then shape → critique → audit → typeset → layout → distill → adapt → harden → polish applied inline from the installed references (the sub-agent-based critique/audit ran degraded, as in §16.2); the detector hook scanned every UI file written (no findings) and the final `detect.mjs --json src` scan reported no findings (`[]`). The frontend-design, portion-design-system and portion-visual-quality skills were used as the quality bar; no skill was installed or duplicated. The Chrome DevTools MCP remains unusable (no Chrome binary); all rendering evidence comes from Playwright's Chromium.
+
+### 17.3 Audit findings → decisions
+
+| Item | Finding (rendered baseline after §16) | Decision |
+| --- | --- | --- |
+| Button | No large size; the footer primary and Home's body action were the same 48 px control as every screen-level action | `size="large"`: 56 px, 24 px inline padding, 24 px glyph, `action-lg` label (alias of action-md: geometry, not type). Used for Add to today / Update entry / Continue to review and Home's Log food. |
+| SegmentedControl | Selected segment read as an outlined neutral button; action colour absent; disabled ≈ unselected; radio-only semantics | Selected = action fill + on-action text at 600 (`segmented-label-selected`); unselected = primary text at 500 (`segmented-label`); pressed and hover authored; disabled = disabled text, selected + disabled = disabled surface + disabled text (still contained); `pattern` prop with tabs for Search; `segmentedOptionId` export for the consumer's `tabpanel`. |
+| MethodSheet / MethodOption | Rows at 320 px; title "Add food"; description ended in "added" | 2 × 2 at every supported width (17 rem threshold); title "Log food"; description says "added to today". |
+| NavigationBar | Full-width equal 3 + 1 grid, labels on every destination at 12/16, 2 px indicator, measured 2 × 2 reflow under enlargement | One group of three equal cells filling the width beside a separate 56 px circular Log food action (16 px gap); active = bold glyph + 10/14/700 label + contained selected surface (`navigation-item` 12 inside `navigation-group` 16); inactive = regular glyph only with `aria-label`; stacking of the active label under 16 rem; no indicator, no reflow, no caption. |
+| Typography | No large-button, control-label, segmented or 10 px roles; 700 not tokenised or verified | `nav-label-active` (base), `action-lg`, `control-label`, `segmented-label`, `segmented-label-selected` (aliases); `reference.font.weight.bold`; font check extended to 400/500/600/700 in the app walkthrough and the Storybook Typography story. |
+| Tokens | No navigation roles; the round role did not name the action | `semantic.color.navigation.{surface, boundary, content, selected-surface, selected-content, action-surface, action-content}`; `semantic.radius.navigation-group` (16) and `navigation-item` (12); `round` description names the Log food action. 235 tokens. |
+| Evidence | Full-page runtime captures of open sheets showed un-scrimmed page content below the viewport (a screenshot artefact: a fixed backdrop cannot reach past the viewport); the walkthrough asserted the obsolete one-column rule | `shot()` captures the viewport while a dialog is open; column checks corrected (2 at 320, 1 at 200 %); the obsolete 2 × 2-bar check replaced by the group/gap/stacking check. |
+
+### 17.4 Reference register
+
+| Source | What was read | What was applied | What was not copied |
+| --- | --- | --- | --- |
+| Supplied reference image (three destinations in one surface, active shows icon + label, inactive icons only, separate red circular +) | Structure only | Group + separate circular action; active icon + label; inactive icons only | Glassmorphism, blur, transparency, gradient, shadow, red, icons, dimensions, spacing, typography, exact radii |
+| Apple HIG, Tab bars | Page body not readable by the fetcher (title only), as in §16.4 | Convention applied from memory, not from a quote: tab bars hold top-level destinations and not actions, so Log food stays outside the group | — |
+| WAI-ARIA APG, Tabs pattern (fetched; quotes: "Each element with role tab has the property aria-controls referring to its associated tabpanel element"; "It is recommended that tabs activate automatically when they receive focus as long as their associated tab panels are displayed without noticeable latency") | Roles, `aria-selected`/`aria-controls`, Tab/Arrow/Home/End behaviour, automatic activation | `pattern="tabs"`; Search's `tabpanel` labelled by the selected tab; automatic activation (fixture panels render without latency) | Manual activation |
+| WCAG 2.2 1.4.3 / 1.4.11 (fetched in §16.4) | Text and non-text thresholds | 59-pair matrix incl. the navigation and segment pairs | — |
+| Mature mobile products | Not inspected in this session (no device or app access); the supplied image stands for the pattern | — | — |
+
+### 17.5 Contract additions
+
+- **Type roles**: nav-label-active 10/14/700 (base); action-lg → action-md; control-label, segmented-label → label; segmented-label-selected → action-sm. `typography.css` classes and `Text` variants added; the Typography catalogue asserts each resolved value.
+- **Colour roles**: `navigation.*` as listed in 17.3; all aliases of existing semantic roles, so no new hue enters the system.
+- **Radius roles**: navigation-group 16 and navigation-item 12, chosen after rendering 12/8, 16/8, 12/12, 16/12 and a capsule with the real story (`scripts/verify/nav-radius-compare.mjs` → `.verification/compare/`): 12 read as a card, 16 as a container; 8 on the item fought the group's curve; the capsule is the rejected shape.
+- **Layout rule**: destination cells fill the group equally; a 16 px gap before the action; the active label stacks under 16 rem of group width; nothing shrinks below its role.
+
+### 17.6 Old API → revised implementation
+
+| Old | New | Consumers touched |
+| --- | --- | --- |
+| `NavigationBar` prop `onAddFood` | `onLogFood` | `App.tsx`, `HomeScreen` (its own `onAddFood` → `onLogFood`), every screen story that renders the bar |
+| Visible labels on every destination; `data-layout` reflow attribute | Active label only; no `data-layout`; inactive `aria-label` | Walkthrough check rewritten |
+| `SegmentedControl` (radio only) | `pattern?: 'radio' \| 'tabs'`, `controls?`, `id?`; `segmentedOptionId()`; `SegmentedControlPattern` type | `SearchScreen` (tabs + `tabpanel`), Search stories and the walkthrough query `tab` instead of `radio` |
+| `Button size: 'medium' \| 'small'` | `'large' \| 'medium' \| 'small'` | Review and manual-entry footers, Home's Log food |
+| `MethodSheet` title "Add food" | "Log food" | App and sheet stories query the new name |
+| Capture list | Renamed stories re-resolved; 6 captures added (navigation ×4, tabs pattern, method rows at 200 %) | `storybook-captures.mjs` |
+
+### 17.7 Component → roles → states → stories → verification (changed rows)
+
+| Component | Type roles | Colour / surface pairs | Radius | States | Stories | Verification |
+| --- | --- | --- | --- | --- | --- | --- |
+| NavigationBar | nav-label-active | navigation content/surface; selected-content/selected-surface; action-content/action-surface | navigation-group, navigation-item, round | selected, unselected, hover, pressed, focus-visible, hidden; stacked label under 16 rem | Patterns/NavigationBar → Home/Search/Recipes selected, Recipe Details origin, Interaction, Log food action, Selection, Hidden, Keyboard, 320 (stacked), 390, 393, 430, 320 at 200 % | 14 story assertions; captures 32–35; walkthrough 01/04/07/50/51 |
+| SegmentedControl | segmented-label, segmented-label-selected | on-action/primary; primary/sunken; disabled text/disabled surface | control, control-compact | selected, unselected, hover, pressed, focus-visible, disabled, selected + disabled; radio or tabs | Components/SegmentedControl → 13 stories incl. Tabs pattern, Pressed, Selected + disabled | 13 story assertions; captures 04–08, 36; walkthrough 04 |
+| Button | action-lg, action-md, action-sm | unchanged | control | unchanged + large | Primitives/Button → Treatments × sizes (3 sizes) | story assertions; capture 01; walkthrough 06/22 |
+| MethodSheet / MethodOption | method-title, supporting | unchanged | card, sheet | 2 × 2 at every width; rows under 17 rem | Patterns/MethodSheet → 320 keeps 2 × 2, 200 % rows | captures 09–11, 37; walkthrough 02/54/55 |
+
+### 17.8 Verification (executed 2026-09-04, final state of this pass)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Tokens | `npm run tokens:check` | 235 tokens validated; generated output current |
+| Typecheck | `npm run typecheck` | exit 0 |
+| Unit tests | `npx vitest run --project unit` | 50 passed |
+| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 59 pairs, 0 failing (navigation and segment pairs added; the obsolete indicator-on-canvas pair removed) |
+| Storybook tests | `npx vitest run --project storybook` | 63 files, 310 tests passed (axe at `error`) |
+| App build / Storybook build | `npm run build` / `npm run build-storybook` | both succeed |
+| Runtime walkthrough | `node scripts/verify/runtime-walkthrough.mjs` | 38 checks passed, 0 failed, no console errors; 55 captures (weights 400/500/600/700 confirmed loaded) |
+| Storybook captures | `node scripts/verify/storybook-captures.mjs` | 37 captures, 0 with problems (no play exceptions) |
+| Radius comparison | `node scripts/verify/nav-radius-compare.mjs` | 5 renders inspected (17.5) |
+| Detector | `node .claude/skills/impeccable/scripts/detect.mjs --json src` | `[]` — no findings |
+
+Rendered inspection (full resolution, by reading the files): navigation at 390 and 320 (Home, Search, Recipes selected; stacked label at 320 and at 320 / 200 %; keyboard ring on the active cell), the five radius variants, the segmented control in all four availability × selection states and as tabs with a panel, the three button sizes across all treatments, the 2 × 2 sheet at 320 and its rows at 390 / 200 %, and every runtime screen that carries the bar. Manual assistive-technology and real-device passes were not performed.
+
+### 17.9 Limitations
+
+- No screen-reader or real-device pass; tab semantics, `aria-current`, `aria-label` names and focus order are verified by story assertions and axe, not by a person using VoiceOver.
+- Apple HIG pages remain unreadable to the fetcher; the tab-bar convention is applied from memory and marked as such. No mature mobile product was inspected live.
+- The pressed appearance of a segment cannot be held by the test runner; the authored `:active` rule is asserted and the appearance was inspected by hand in the browser.
+- The 10 px active label is below Apple's 11 pt guidance for native text; it is a browser prototype in CSS px, the label is redundant with the glyph and surface, and the decision is recorded here and in the visual direction.
+- The branch is unmerged; the Figma capture of the final screens and deployment remain open items from §16.10.
+- An untracked `docs/ux/audits/` directory (the user's own pre-Hi-Fi audit and Figma exports) was present during this pass and was deliberately left out of every commit.

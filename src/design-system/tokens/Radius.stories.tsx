@@ -18,11 +18,13 @@ The radius catalogue is 0/4/8/12/16/20/24/28/32/36/40/44/48/52/56/60/64 plus \`f
 | --- | --- | --- |
 | \`structure\` | 0 | Full-bleed regions only — viewfinder, media breakouts, bars. Never the visible corner of an independent component surface. |
 | \`control-compact\` | 4 | Elements nested inside another control, or non-interactive tags: segmented-control segments (track 8 − 4 padding), badges, checkbox boxes. |
-| \`control\` | 8 | Buttons, inputs, search field, chips, the segmented-control track, inline messages, recipe-card thumbnails, the Add food glyph. |
+| \`control\` | 8 | Buttons, inputs, search field, chips, the segmented-control track, inline messages, recipe-card thumbnails. |
 | \`card\` | 12 | Independent content cards and tiles: recipe card, entry-method tile. |
 | \`grouped\` | 16 | A surface that holds a whole section: Home's daily overview group, prototype-control groups. |
 | \`sheet\` | 16 | Top corners of bottom sheets and every corner of a centred dialog. |
-| \`round\` | full | True circles only: radio marks, step-number discs, the progress ring's caps. |
+| \`navigation-group\` | 16 | The bottom navigation's compact destination group — chosen after rendering 12 and 16 (12 read as a card, 16 as a container). |
+| \`navigation-item\` | 12 | The active destination's contained surface inside that group (16 − 4 px padding, concentric). |
+| \`round\` | full | True circles only: the Log food action, radio marks, step-number discs, the progress ring's caps. |
 
 Nested corners stay concentric (outer − padding = inner), and pill-shaped chips, fields, cards and buttons are not part of this system.
         `,
@@ -41,6 +43,8 @@ const ROLES = [
   { role: 'control', expected: '8px' },
   { role: 'card', expected: '12px' },
   { role: 'grouped', expected: '16px' },
+  { role: 'navigation-group', expected: '16px' },
+  { role: 'navigation-item', expected: '12px' },
   { role: 'sheet', expected: '16px' },
   { role: 'round', expected: '9999px' },
 ] as const;

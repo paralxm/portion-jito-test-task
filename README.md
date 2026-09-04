@@ -20,6 +20,7 @@ npm run storybook         # Storybook on http://localhost:6006
 | Everything above plus builds | `npm run verify` |
 | Build app / Storybook | `npm run build` / `npm run build-storybook` |
 | Contrast matrix from the token source | `node scripts/verify/contrast-matrix.mjs --check` (regenerate `docs/design-system/contrast-matrix.md` without the flag) |
+| Navigation radius comparison renders (inspection aid, `.verification/compare/`) | `node scripts/verify/nav-radius-compare.mjs` after `npm run build-storybook` |
 | Runtime walkthrough with screenshots | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` |
 | Storybook captures from the static build | `npm run build-storybook` then `node scripts/verify/storybook-captures.mjs` |
 | Runtime walkthrough with screenshots | `npm run build && npx vite preview --port 4173` then `node scripts/verify/runtime-walkthrough.mjs` |

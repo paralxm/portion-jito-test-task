@@ -66,7 +66,7 @@ export function ManualEntryScreen({ initialDraft = EMPTY_MANUAL_DRAFT, onContinu
     <FocusedFlowLayout
       header={<AppHeader variant="focused" title="Enter manually" onBack={requestBack} />}
       footer={
-        <Button variant="primary" block onClick={submit}>
+        <Button variant="primary" size="large" block onClick={submit}>
           Continue to review
         </Button>
       }
