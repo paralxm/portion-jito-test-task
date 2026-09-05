@@ -37,6 +37,21 @@ const currentNav = () => page.locator('nav:visible [aria-current="page"]').inner
 // viewport, so the scrim and the bar in the image are what a user sees.
 const shot = async (page, name) => {
   const modal = await page.evaluate(() => Boolean(document.querySelector('dialog[open]')));
+  if (!modal) {
+    // Lazy thumbnails load only once scrolled into view: walk the page, wait for every image, return to the top.
+    await page.evaluate(async () => {
+      const y0 = window.scrollY;
+      for (let y = 0; y < document.documentElement.scrollHeight; y += window.innerHeight) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 40));
+      }
+      window.scrollTo(0, y0);
+      // Only the visible screen's images can load; hidden mounted screens keep lazy images pending, so a bound wait stops a lost image from hanging the run.
+      const visible = Array.from(document.querySelectorAll('[data-screen]:not([hidden]) img'));
+      const settled = (img) => (img.complete ? Promise.resolve() : new Promise((r) => { img.onload = r; img.onerror = r; }));
+      await Promise.race([Promise.all(visible.map(settled)), new Promise((r) => setTimeout(r, 5000))]);
+    });
+  }
   await page.screenshot({ path: `${out}${name}.png`, fullPage: !modal });
 };
 
@@ -327,7 +342,7 @@ await check(page, 'discard returns to Search with the query kept', async () => (
 await scoped().getByRole('button', { name: 'Clear search' }).click();
 
 // Photo → suggestions → review → Done (no logging)
-await scoped().getByRole('button', { name: 'Home' }).click();
+await scoped().getByRole('button', { name: 'Home', exact: true }).click();
 await page.waitForTimeout(150);
 await scoped().getByRole('button', { name: 'Log food' }).first().click();
 await scoped().getByRole('button', { name: /Take a photo/ }).click();
@@ -499,7 +514,7 @@ await page.waitForTimeout(150);
 await check(page, 'browse criteria untouched by search edits', async () => (await page.locator('main:visible').innerText()).includes('Under 460 kcal'));
 
 // Remove entry
-await scoped().getByRole('button', { name: 'Home' }).click();
+await scoped().getByRole('button', { name: 'Home', exact: true }).click();
 await page.waitForTimeout(150);
 await scoped().getByRole('button', { name: /Vegetable rice bowl/ }).click();
 await page.waitForTimeout(150);
@@ -596,6 +611,143 @@ await check(page, 'reduced motion: the scan line does not animate', async () =>
   }),
 );
 await page.close();
+
+// --- Journey 5: the populated Food tab, filters, view, persistence and the day boundary (ledger §11) ---
+page = await newPage(390, 844);
+await scoped().getByRole('button', { name: 'Search', exact: true }).click();
+await page.waitForTimeout(200);
+await shot(page, '57-search-first-use');
+await check(page, 'first use: the Food tab shows the 15-item catalogue at once in the list view, without Recently added', async () => {
+  const t = await visibleText();
+  const rows = await scoped().locator('ul[data-view="list"] > li').count();
+  const list = await scoped().getByRole('radio', { name: 'List' }).getAttribute('aria-checked');
+  return t.includes('15 items') && !t.includes('Recently added') && rows === 15 && list === 'true';
+});
+await check(page, 'every catalogue item shows a photograph, a name and calories with a basis', async () =>
+  page.evaluate(() => {
+    const rows = Array.from(document.querySelectorAll('[data-screen="search"]:not([hidden]) ul[data-view="list"] > li'));
+    return rows.length === 15 && rows.every((li) => li.querySelector('img') && /kcal/.test(li.textContent ?? '') && /per /.test(li.textContent ?? ''));
+  }),
+);
+await scoped().getByRole('button', { name: 'Food filters' }).click();
+await page.waitForTimeout(350);
+await shot(page, '58-food-filters-sheet');
+await scoped().getByRole('radio', { name: 'Drinks' }).click();
+await scoped().getByRole('button', { name: 'Apply filters' }).click();
+await page.waitForTimeout(350);
+await shot(page, '59-search-drinks-only');
+await check(page, 'Drinks only: the chip, the action count and exactly the three drinks', async () => {
+  const t = await visibleText();
+  const names = await scoped().locator('ul[data-view="list"] > li').allInnerTexts();
+  return t.includes('3 drinks') && t.includes('Drinks only') && (await scoped().getByRole('button', { name: 'Food filters, 1 active' }).count()) === 1 && names.length === 3 && names.every((n) => /Sparkling water|Orange juice|Oat drink/.test(n));
+});
+await scoped().getByRole('radio', { name: 'Grid' }).click();
+await page.waitForTimeout(250);
+await shot(page, '60-search-grid-drinks');
+await check(page, 'the grid keeps the filter and shows two columns of the same three drinks', async () =>
+  page.evaluate(() => {
+    const grid = document.querySelector('[data-screen="search"]:not([hidden]) ul[data-view="grid"]');
+    return !!grid && grid.children.length === 3 && getComputedStyle(grid).gridTemplateColumns.split(' ').length === 2;
+  }),
+);
+// Log a drink: it goes through the same review → Add-to-meal route and never touches water.
+await scoped().getByRole('button', { name: 'Orange juice' }).click();
+await page.waitForTimeout(200);
+await check(page, 'a drink opens review with its volume basis and units', async () => {
+  const t = await visibleText();
+  return t.includes('Orange juice') && t.includes('per 100 ml') && (await scoped().getByRole('button', { name: 'Change unit, currently ml' }).count()) === 1;
+});
+await scoped().getByLabel('Amount to calculate').fill('250');
+await scoped().getByRole('button', { name: 'Add to today' }).click();
+await page.waitForTimeout(300);
+await scoped().getByRole('button', { name: /^Add to (breakfast|lunch|dinner|snacks)$/ }).click();
+await page.waitForTimeout(400);
+await shot(page, '61-home-drink-logged');
+await check(page, 'the drink is logged under a meal at 113 kcal for 250 ml and water stays at 0 ml', async () => {
+  const t = await visibleText();
+  return t.includes('Orange juice') && t.includes('250 ml') && t.includes('113 kcal') && t.includes('0 ml') && !t.includes('250 ml added');
+});
+await scoped().getByRole('button', { name: 'Search', exact: true }).click();
+await page.waitForTimeout(200);
+await check(page, 'the Drinks filter and the grid view survive leaving Search; the logged drink now leads Recently added', async () => {
+  const t = await visibleText();
+  const grid = await scoped().getByRole('radio', { name: 'Grid' }).getAttribute('aria-checked');
+  const recents = await scoped().locator('ul[aria-labelledby^="search-recents"] > li').allInnerTexts();
+  return t.includes('Recently added') && grid === 'true' && recents.length === 1 && /Orange juice/.test(recents[0]);
+});
+await scoped().getByRole('button', { name: 'Remove filter: Drinks only' }).click();
+await page.waitForTimeout(250);
+await shot(page, '62-search-recents-grid');
+await check(page, 'without the filter: Recently added (1) above Explore foods (14), 15 items in total', async () => {
+  const t = await visibleText();
+  const explore = await scoped().locator('ul[aria-labelledby^="search-explore"] > li').count();
+  return t.includes('15 items') && explore === 14;
+});
+await scoped().getByRole('searchbox').fill('oat');
+await page.waitForTimeout(900);
+await check(page, 'a query yields one unified set: 2 items found for “oat”, no Recently added section', async () => {
+  const t = await visibleText();
+  return t.includes('2 items found') && !t.includes('Recently added');
+});
+await scoped().getByRole('button', { name: 'Clear search' }).click();
+await page.waitForTimeout(300);
+// Reload: entries, water and the view preference come back from the device.
+await page.reload();
+await page.waitForTimeout(400);
+await check(page, 'after a reload Home still shows the logged drink and 0 ml of water', async () => {
+  const t = await visibleText();
+  return t.includes('Orange juice') && t.includes('113 kcal') && t.includes('0 ml');
+});
+await scoped().getByRole('button', { name: 'Search', exact: true }).click();
+await page.waitForTimeout(250);
+await shot(page, '63-search-after-reload');
+await check(page, 'after a reload the grid view is kept and Recently added still lists the drink with its photograph', async () => {
+  const grid = await scoped().getByRole('radio', { name: 'Grid' }).getAttribute('aria-checked');
+  const recent = scoped().locator('ul[aria-labelledby^="search-recents"] > li');
+  return grid === 'true' && (await recent.count()) === 1 && (await recent.locator('img').count()) === 1;
+});
+// Day boundary: the stored record is moved to an earlier local day; after a reload it is history, not today.
+await page.evaluate(() => {
+  const record = JSON.parse(localStorage.getItem('portion.record'));
+  for (const entry of record.entries) entry.dayKey = '2000-01-01';
+  record.water = { '2000-01-01': 750 };
+  localStorage.setItem('portion.record', JSON.stringify(record));
+});
+await page.reload();
+await page.waitForTimeout(400);
+await shot(page, '64-home-after-day-boundary');
+await check(page, 'an earlier day never reads as today: Home shows nothing logged and 0 ml, while Recently added keeps the drink', async () => {
+  const home = await visibleText();
+  await scoped().getByRole('button', { name: 'Search', exact: true }).click();
+  await page.waitForTimeout(250);
+  const search = await visibleText();
+  return home.includes('Nothing logged') && home.includes('0 ml') && !home.includes('Orange juice') && search.includes('Recently added') && search.includes('Orange juice');
+});
+await page.close();
+
+// Midnight while the app stays open: the local day key rolls over without a reload.
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+  const clockPage = await ctx.newPage();
+  clockPage.on('pageerror', (e) => errors.push('[pageerror] ' + e.message));
+  const before = new Date();
+  before.setHours(23, 59, 30, 0);
+  await clockPage.clock.install({ time: before });
+  await clockPage.goto(base);
+  const local = () => clockPage.locator('[data-screen]:not([hidden]), dialog[open]');
+  await local().getByRole('button', { name: 'Add 250 millilitres of water' }).click();
+  await clockPage.waitForTimeout(500);
+  const shownBefore = await clockPage.locator('[data-screen]:not([hidden])').innerText();
+  await clockPage.clock.runFor(60 * 1000);
+  await clockPage.waitForTimeout(300);
+  const shownAfter = await clockPage.locator('[data-screen]:not([hidden])').innerText();
+  await check(clockPage, 'past local midnight the open app shows the new day: water returns to 0 ml and the date line advances', async () => {
+    const after = new Date(before.getTime() + 60 * 1000);
+    const fmt = (d) => d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+    return shownBefore.includes('250 ml') && shownBefore.includes(fmt(before)) && shownAfter.includes('0 ml') && shownAfter.includes(fmt(after)) && after.getDate() !== before.getDate();
+  });
+  await ctx.close();
+}
 
 await browser.close();
 log(`\n${passed} passed, ${failed} failed`);

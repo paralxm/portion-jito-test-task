@@ -109,7 +109,17 @@ const CAPTURES = [
   ['62-barcode-camera-denied', 'Product compositions/Barcode (S04)', 'Camera denied', 390, 100],
   ['63-photo-permission-pending', 'Product compositions/Photo (S05)', 'Waiting for the system camera prompt (P01, app side)', 390, 100],
   ['64-recipe-details-add', 'Product compositions/Recipe details (S08)', 'Add beside the title hands the recipe to the Add-to-meal sheet', 390, 100],
-  // ---- The 46 mapped states (docs/design/hifi-decisions.md §1 and §10.3), 393 × 852 -----
+  // ---- Stage B (ledger §11): the populated Food tab -----
+  ['65-viewtoggle', 'Components/ViewToggle', 'List selected (default)', 390, 100],
+  ['66-foodcard', 'Patterns/FoodCard', 'With a photograph — the whole card opens the item', 390, 100],
+  ['67-foodcard-no-photo', 'Patterns/FoodCard', 'No photo — the fallback is loaded content', 390, 100],
+  ['68-foodresultrow-thumbnail-320-200', 'Components/FoodResultRow', 'Thumbnail at 320 and 200 % — the figure wraps under the identity', 320, 200],
+  ['69-food-filters-sheet', 'Product compositions/Search (S02)/FoodFiltersSheet', 'Nothing applied — All is checked', 390, 100],
+  ['70-search-unified-results', 'Product compositions/Search (S02)', 'Unified results — “oat” across recents and catalogue, recent first', 390, 100],
+  ['71-search-no-match-filter', 'Product compositions/Search (S02)', 'No matches with a filter — change filters is offered', 390, 100],
+  ['72-icons-sizes-weights', 'Foundations/Icons', 'Sizes and weights', 390, 100],
+  ['73-foodresultrow-thumbnail-long-name-390', 'Components/FoodResultRow', 'Thumbnail with a long name at 390 — the name wraps between words, the basis gives way', 390, 100],
+  // ---- The 51 mapped states (docs/design/hifi-decisions.md §1 and §10.3), 393 × 852 -----
   ['states/S01-1-175-10', "Product states/Lane A — Core navigation", "S01-1 · 175:10 — Home / Today — No food logged", 393, 100, 852],
   ['states/S01-2-175-38', "Product states/Lane A — Core navigation", "S01-2 · 175:38 — Home / Today — Food logged", 393, 100, 852],
   ['states/S02-1-175-93', "Product states/Lane A — Core navigation", "S02-1 · 175:93 — Search / Food scope · results", 393, 100, 852],
@@ -125,6 +135,11 @@ const CAPTURES = [
   ['states/S07-2-176-201', "Product states/Lane B — Home through search and review", "S07-2 · 176:201 — Food review / Invalid portion", 393, 100, 852],
   ['states/S07-3-176-247', "Product states/Lane B — Home through search and review", "S07-3 · 176:247 — Food review / Edit logged entry (repurposed)", 393, 100, 852],
   ['states/O05-add-to-meal-food', "Product states/Lane B — Home through search and review", "O05 — Add to meal / From food review", 393, 100, 852],
+  ['states/S02-7-food-catalogue', "Product states/Lane B — Home through search and review", "S02-7 — Search / Food · first use: the catalogue at once", 393, 100, 852],
+  ['states/S02-8-recently-added', "Product states/Lane B — Home through search and review", "S02-8 — Search / Food · Recently added above Explore foods", 393, 100, 852],
+  ['states/S02-9-grid-view', "Product states/Lane B — Home through search and review", "S02-9 — Search / Food · grid view", 393, 100, 852],
+  ['states/O07-food-filters', "Product states/Lane B — Home through search and review", "O07 — Food filters (overlay)", 393, 100, 852],
+  ['states/S02-10-drinks-only', "Product states/Lane B — Home through search and review", "S02-10 — Search / Food · Drinks only applied", 393, 100, 852],
   ['states/S04-1-178-5', "Product states/Lane C1 — Barcode acquisition", "S04-1 · 178:5 — Barcode / Scanning", 393, 100, 852],
   ['states/S04-2-178-20', "Product states/Lane C1 — Barcode acquisition", "S04-2 · 178:20 — Barcode / Code read · lookup pending", 393, 100, 852],
   ['states/S04-3-178-31', "Product states/Lane C1 — Barcode acquisition", "S04-3 · 178:31 — Barcode / Code not readable", 393, 100, 852],
@@ -165,6 +180,8 @@ const CAPTURES = [
   ['states/V-O01-320', "Product states/Lane B — Home through search and review", "O01 at 320 keeps the 2 × 2 grid", 320, 100, 800],
   ['states/V-O05-200', "Product states/Lane B — Home through search and review", "O05 at 200 % text — invalid amount disables the commit", 393, 200, 852],
   ['states/V-S07-1-320', "Product states/Lane B — Home through search and review", "S07-1 at 320", 320, 100, 800],
+  ['states/V-S02-9-320', "Product states/Lane B — Home through search and review", "S02-9 at 320 — one column", 320, 100, 800],
+  ['states/V-S02-8-200', "Product states/Lane B — Home through search and review", "S02-8 at 200 % text", 393, 200, 852],
   ['states/V-S07-1-200', "Product states/Lane B — Home through search and review", "S07-1 at 200 % text — footer still reachable", 393, 200, 852],
   ['states/V-S07-1-safe-areas', "Product states/Lane B — Home through search and review", "S07-1 with the iPhone 16 safe-area fixture — footer owns the bottom inset", 393, 100, 852],
   ['states/V-S04-1-320', "Product states/Lane C1 — Barcode acquisition", "S04-1 at 320", 320, 100, 800],
@@ -214,6 +231,16 @@ for (const [file, title, name, width, fontPercent, height = 844] of CAPTURES) {
   if (fontPercent !== 100) {
     await page.addStyleTag({ content: `html { font-size: ${fontPercent}% !important; }` });
   }
+  // Lazy thumbnails below the fold load only once scrolled into view: walk the page, wait for every image, return to the top.
+  await page.evaluate(async () => {
+    const step = window.innerHeight;
+    for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 40));
+    }
+    window.scrollTo(0, 0);
+    await Promise.all(Array.from(document.images).map((img) => (img.complete ? Promise.resolve() : new Promise((r) => { img.onload = r; img.onerror = r; }))));
+  });
   // Settle transitions and container-query relayout.
   await page.waitForTimeout(400);
   // A capture that is not about focus should not carry the play function's last focus ring.

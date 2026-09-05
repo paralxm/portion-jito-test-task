@@ -69,6 +69,8 @@ const PAIRS = [
   ['Secondary button pressed label', 'action.pressed', 'action.secondary-surface', 4.5, ''],
   ['Text button hover', 'action.primary', 'action.secondary-surface', 4.5, 'text button hover fill'],
   ['Selected chip, applied chip, count badge', 'action.pressed', 'action.selected-surface', 4.5, ''],
+  ['View toggle selected option (label and glyph) on the selected surface', 'action.primary', 'action.selected-surface', 4.5, 'ViewToggle: List / Grid'],
+  ['View toggle unselected option on the sunken track', 'text.primary', 'background.sunken', 4.5, 'ViewToggle'],
   ['Selected chip boundary', 'action.primary', 'background.canvas', 3, 'non-text boundary'],
   ['Destructive button label', 'feedback.error.foreground', 'feedback.error.surface', 4.5, 'tinted destructive button'],
   ['Error message text', 'feedback.error.foreground', 'feedback.error.surface', 4.5, 'InlineMessage error'],
