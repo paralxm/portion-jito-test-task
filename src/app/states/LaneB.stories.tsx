@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 
-import { MethodSheet, NavigationBar, type Destination } from '../../design-system';
+import { MethodSheet, NavigationBar, type Destination, type ViewMode } from '../../design-system';
 import { withIPhone16PortraitSafeAreas, withRootFontSize, expectNoHorizontalOverflow } from '../../design-system/storybook/decorators';
 import { oatmealWithBerries } from '../../features/calorie-calculator/domain/home-fixtures';
 import { FoodReviewScreen } from '../../features/calorie-calculator/screens/FoodReviewScreen';
@@ -9,8 +9,11 @@ import { HomeScreen } from '../../features/calorie-calculator/screens/HomeScreen
 import { fixtureR } from '../../features/recipe-discovery/domain/fixtures';
 import { SearchScreen, type SearchResults } from '../screens/SearchScreen';
 import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
+import { foodCatalogue } from '../../features/calorie-calculator/domain/fixtures';
+import { NO_FOOD_FILTERS } from '../../features/calorie-calculator/domain/food-search';
+import { WithFoodSearch } from './harnesses';
 import { WithAddToMeal } from './harnesses';
-import { FIXED_DATE, fixtureCandidate, goal2200, reviewPortion } from './stateFixtures';
+import { FIXED_DATE, fixtureCandidate, goal2200, recentFoods, reviewPortion } from './stateFixtures';
 
 const nav = (selected: Destination) => <NavigationBar selected={selected} onSelect={fn()} onLogFood={fn()} />;
 const idle = { status: 'idle', results: [] } as const;
@@ -49,7 +52,7 @@ const emptyHome = () => (
   />
 );
 
-const foodSearch = (query: string, food: SearchResults<FoodCandidate>) => (
+const foodSearch = (query: string, food: SearchResults<FoodCandidate>, { recents = [] as readonly FoodCandidate[], filters = NO_FOOD_FILTERS, view = 'list' as ViewMode } = {}) => (
   <SearchScreen
     scope="food"
     onScopeChange={fn()}
@@ -58,6 +61,12 @@ const foodSearch = (query: string, food: SearchResults<FoodCandidate>) => (
     onSubmit={fn()}
     onClear={fn()}
     food={food}
+    catalogue={foodCatalogue}
+    recents={recents}
+    foodFilters={filters}
+    onApplyFoodFilters={fn()}
+    foodView={view}
+    onFoodViewChange={fn()}
     recipes={idle}
     criteria={{}}
     onApplyCriteria={fn()}
@@ -326,4 +335,129 @@ export const S07_1_SafeAreas: Story = {
     await expect(footer).not.toBeNull();
     if (footer) await expect(parseFloat(getComputedStyle(footer).paddingBlockEnd)).toBeGreaterThanOrEqual(34);
   },
+};
+
+// --- Stage B (2026-09-05): the populated Food tab, ledger §11 -------------------------------
+
+export const S02_7: Story = {
+  name: 'S02-7 — Search / Food · first use: the catalogue at once',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the Food tab is useful before anything is typed — the 15-item catalogue (12 foods or dishes, 3 drinks) shows at once with a photo, name, calories and basis each. Entry: Search root, Food scope, empty query, no confirmed entries yet. Fixture: the catalogue. Primary action: any item → S07-1; List / Grid toggle; Food filters → O07; Scan barcode → S04-1. Limitation: none.',
+      },
+    },
+  },
+  render: () => foodSearch('', idle),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('15 items');
+    await expect(canvas.getAllByRole('listitem')).toHaveLength(15);
+    await expect(canvas.queryByText('Recently added')).toBeNull();
+    await expect(canvas.getByRole('radio', { name: 'List' })).toHaveAttribute('aria-checked', 'true');
+  },
+};
+
+export const S02_8: Story = {
+  name: 'S02-8 — Search / Food · Recently added above Explore foods',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: what was confirmed into a meal comes back first. Entry: Search root, Food scope, empty query, confirmed entries exist. Fixture: three entries (banana yesterday, yoghurt this morning, oatmeal just now) → recents newest first, deduplicated by identity, never seeded and never from viewed items. Primary action: a recent item → S07-1. Limitation: none.',
+      },
+    },
+  },
+  render: () => foodSearch('', idle, { recents: recentFoods }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const recents = within(canvas.getByRole('list', { name: 'Recently added' }));
+    await expect(recents.getAllByRole('listitem')).toHaveLength(3);
+    await expect(recents.getAllByRole('button')[0]).toHaveTextContent('Oatmeal');
+    await expect(within(canvas.getByRole('list', { name: 'Explore foods' })).getAllByRole('listitem')).toHaveLength(12);
+  },
+};
+
+export const S02_9: Story = {
+  name: 'S02-9 — Search / Food · grid view',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the same collection as cards in two columns. Entry: the Grid option of the toolbar toggle (the choice persists on the device). Fixture: recents + catalogue. Behaviour: items, order, query, filters and opening are identical to the list; one column under 20 rem (320 px, or 200 % text). Limitation: none.',
+      },
+    },
+  },
+  render: () => foodSearch('', idle, { recents: recentFoods, view: 'grid' }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('radio', { name: 'Grid' })).toHaveAttribute('aria-checked', 'true');
+    await expect(getComputedStyle(canvas.getByRole('list', { name: 'Explore foods' })).gridTemplateColumns.split(' ')).toHaveLength(2);
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const O07: Story = {
+  name: 'O07 — Food filters (overlay)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: narrow the Food tab to foods or drinks from each item’s own record. Entry: the Food filters action at the end of the toolbar. Regions: Show — All / Foods / Drinks; Clear all; Apply filters. Outcomes: Apply → S02-10 with the chip; Close / backdrop / Escape → previous filters kept. Limitation: none.',
+      },
+    },
+  },
+  render: () => <WithFoodSearch />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Food filters' }));
+    const sheet = canvas.getByRole('dialog', { name: 'Filters' });
+    await expect(within(sheet).getByRole('radio', { name: 'All' })).toHaveAttribute('aria-checked', 'true');
+    await userEvent.click(within(sheet).getByRole('radio', { name: 'Drinks' }));
+  },
+};
+
+export const S02_10: Story = {
+  name: 'S02-10 — Search / Food · Drinks only applied',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the applied filter is visible as a chip and in the action’s name and count. Entry: Apply filters with Drinks in O07. Fixture: the three catalogue drinks. Outcomes: the chip’s remove action or Clear all → S02-7; a query combines with the filter. Limitation: none.',
+      },
+    },
+  },
+  render: () => foodSearch('', idle, { filters: { category: 'drink' } }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Food filters, 1 active' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Remove filter: Drinks only' })).toBeVisible();
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('3 drinks');
+    // The applied chip is its own one-item list; the results list holds exactly the three catalogue drinks.
+    await expect(within(canvas.getByRole('list', { name: 'Applied filters' })).getAllByRole('listitem')).toHaveLength(1);
+    const results = within(canvas.getByRole('list', { name: 'All foods' })).getAllByRole('listitem').map((li) => li.textContent ?? '');
+    await expect(results).toHaveLength(3);
+    await expect(results[0]).toContain('Sparkling water');
+    await expect(results[1]).toContain('Orange juice');
+    await expect(results[2]).toContain('Oat drink');
+  },
+};
+
+export const S02_9_Narrow320: Story = {
+  name: 'S02-9 at 320 — one column',
+  globals: { viewport: { value: 'mobile320', isRotated: false } },
+  render: () => foodSearch('', idle, { recents: recentFoods, view: 'grid' }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(getComputedStyle(canvas.getByRole('list', { name: 'Explore foods' })).gridTemplateColumns.split(' ')).toHaveLength(1);
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const S02_8_EnlargedText: Story = {
+  name: 'S02-8 at 200 % text',
+  decorators: [withRootFontSize(200)],
+  render: () => foodSearch('', idle, { recents: recentFoods }),
+  play: async () => expectNoHorizontalOverflow(),
 };

@@ -3,6 +3,8 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { NavigationBar, type Destination } from '../../design-system';
 import { withIPhone16PortraitSafeAreas, withRootFontSize, expectNoHorizontalOverflow } from '../../design-system/storybook/decorators';
+import { foodCatalogue } from '../../features/calorie-calculator/domain/fixtures';
+import { NO_FOOD_FILTERS } from '../../features/calorie-calculator/domain/food-search';
 import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import { filterRecipes, searchRecipes, type Recipe, type RecipeCriteria } from '../../features/recipe-discovery/domain/matching';
 import { RecipeDetailsScreen, type RecipeDetailsState } from '../../features/recipe-discovery/screens/RecipeDetailsScreen';
@@ -43,6 +45,12 @@ const recipeSearch = (query: string, criteria: RecipeCriteria) => (
     onSubmit={fn()}
     onClear={fn()}
     food={idle}
+    catalogue={foodCatalogue}
+    recents={[]}
+    foodFilters={NO_FOOD_FILTERS}
+    onApplyFoodFilters={fn()}
+    foodView="list"
+    onFoodViewChange={fn()}
     recipes={{ status: 'ready', results: filterRecipes(searchRecipes(recipeCatalogue, query), criteria) }}
     criteria={criteria}
     onApplyCriteria={fn()}

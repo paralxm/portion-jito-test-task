@@ -7,9 +7,9 @@
  *   remainingKcal = goalKcal − loggedKcal, when goal and total are valid
  *   visualRatio   = clamp(loggedKcal / goalKcal, 0, 1)
  *
- * Nothing here persists: the app keeps entries, the goal and water in memory for the
- * session. Unknown values stay unknown — a missing nutrient never becomes zero, and a
- * partial total says so instead of pretending to be complete.
+ * Persistence belongs to the app shell (src/app/persistence.ts); this module owns the
+ * arithmetic and the entry shape. Unknown values stay unknown — a missing nutrient never
+ * becomes zero, and a partial total says so instead of pretending to be complete.
  */
 import { parseAmount, scaleNutrition, type FoodCandidate, type NutritionValues, type Portion } from './calculation';
 import { MEAL_ORDER, type MealType } from './meal';
@@ -58,7 +58,7 @@ export function createEntry(candidate: FoodCandidate, portion: Portion, meal: Me
   const result = scaleNutrition(candidate, portion);
   if (!result || result.energyKcal === null) return null;
   const now = options.now ?? Date.now();
-  return { id: options.id ?? `entry-${++entrySequence}`, dayKey: localDayKey(new Date(now)), createdAt: now, meal, candidate, portion, result };
+  return { id: options.id ?? `entry-${now.toString(36)}-${++entrySequence}`, dayKey: localDayKey(new Date(now)), createdAt: now, meal, candidate, portion, result };
 }
 
 /** Applies a new portion (and optionally a new meal) to an existing entry, preserving its id and day. `null` when the portion cannot be calculated. */

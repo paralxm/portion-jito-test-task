@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { MethodSheet, NavigationBar, Toast, type Destination, type EntryMethod } from '../design-system';
+import { MethodSheet, NavigationBar, Toast, type Destination, type EntryMethod, type ViewMode } from '../design-system';
 import type { FoodCandidate, Portion } from '../features/calorie-calculator/domain/calculation';
-import { createEntry, entriesForDay, localDayKey, updateEntryPortion, type DailyGoal, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
-import { samplePhotoImage } from '../features/calorie-calculator/domain/fixtures';
+import { createEntry, entriesForDay, updateEntryPortion, type DailyGoal, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
+import { foodCatalogue, samplePhotoImage } from '../features/calorie-calculator/domain/fixtures';
+import { NO_FOOD_FILTERS, type FoodFilters } from '../features/calorie-calculator/domain/food-search';
+import { recentCandidates } from '../features/calorie-calculator/domain/recents';
 import { mealPhrase, suggestMeal, type MealType } from '../features/calorie-calculator/domain/meal';
 import { announceWaterAdded, formatWater, WATER_GOAL_ML } from '../features/calorie-calculator/domain/water';
 import { AddToMealSheet } from '../features/calorie-calculator/components/AddToMealSheet';
@@ -17,7 +19,10 @@ import { recipeToCandidate } from '../features/recipe-discovery/domain/recipe-en
 import { RecipeDetailsScreen, type RecipeDetailsState } from '../features/recipe-discovery/screens/RecipeDetailsScreen';
 import { RecipesScreen, type RecipesStatus } from '../features/recipe-discovery/screens/RecipesScreen';
 import { SearchScreen, type SearchResults, type SearchScope } from './screens/SearchScreen';
+import { catalogueImageFor } from './catalogue-images';
+import { browserStorage, loadRecord, saveRecord } from './persistence';
 import { analysePhotoService, browseRecipesService, loadRecipeService, lookupBarcodeService, readBarcodeService, searchFoodService, searchRecipeService } from './services';
+import { useLocalDayKey } from './useLocalDayKey';
 import { useScrollMemory } from './useScrollMemory';
 import { useSoftwareKeyboard } from './useSoftwareKeyboard';
 
@@ -64,9 +69,14 @@ function recommend(recipes: readonly Recipe[], criteria: RecipeCriteria): Recomm
   return { recipe: complete, evidence: [] };
 }
 
+/** The record as it was on the device when the app started (ledger §11.3). */
+const storage = browserStorage();
+const initialRecord = loadRecord(storage, catalogueImageFor);
+
 /**
- * The Portion runtime: in-memory navigation over fixture-backed screens. Today's entries,
- * the optional goal and today's water live for the session only; no persistence is promised.
+ * The Portion runtime: in-memory navigation over fixture-backed screens. The daily record
+ * (entries with their meals and days, the optional goal, water per day) and the Search
+ * view preference persist on the device and are restored on launch.
  */
 export default function App() {
   const [root, setRoot] = useState<Destination>('home');
@@ -79,15 +89,24 @@ export default function App() {
   const keyboardOpen = useSoftwareKeyboard();
 
   // Daily record --------------------------------------------------------------
-  const [entries, setEntries] = useState<FoodEntry[]>([]);
-  const [goal, setGoal] = useState<DailyGoal | null>(null);
-  const [water, setWater] = useState<Record<string, number>>({});
+  const [entries, setEntries] = useState<FoodEntry[]>(initialRecord.entries);
+  const [goal, setGoal] = useState<DailyGoal | null>(initialRecord.goal);
+  const [water, setWater] = useState<Record<string, number>>(initialRecord.water);
+  const [foodView, setFoodView] = useState<ViewMode>(initialRecord.searchView);
+  const [foodFilters, setFoodFilters] = useState<FoodFilters>(NO_FOOD_FILTERS);
   const [highlightEntryId, setHighlightEntryId] = useState<string | null>(null);
-  // Re-evaluated on every render, so a day change shows the new day's (empty) list while
-  // earlier entries stay associated with their own day.
-  const todayKey = localDayKey();
+  // The local calendar day, re-evaluated at midnight and on return to the tab, so a day
+  // change shows the new day's (empty) list while earlier entries stay under their own day.
+  const todayKey = useLocalDayKey();
   const todayEntries = useMemo(() => entriesForDay(entries, todayKey), [entries, todayKey]);
   const waterMl = water[todayKey] ?? 0;
+  // Recently added foods derive from confirmed entries only (ledger §11.1).
+  const recents = useMemo(() => recentCandidates(entries), [entries]);
+
+  // Every confirmed change is written to the device; nothing is written for drafts.
+  useEffect(() => {
+    saveRecord(storage, { version: 1, entries, goal, water, searchView: foodView });
+  }, [entries, goal, water, foodView]);
 
   // Feedback ----------------------------------------------------------------
   const [toast, setToast] = useState<{ message: string; undo?: () => void } | null>(null);
@@ -410,6 +429,12 @@ export default function App() {
             scroll.reset('root:search');
           }}
           food={foodRequest}
+          catalogue={foodCatalogue}
+          recents={recents}
+          foodFilters={foodFilters}
+          onApplyFoodFilters={setFoodFilters}
+          foodView={foodView}
+          onFoodViewChange={setFoodView}
           recipes={recipeRequest}
           criteria={searchCriteria}
           onApplyCriteria={setSearchCriteria}

@@ -3,7 +3,8 @@ import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 
 import { NavigationBar, type Destination } from '../../design-system';
 import { withIPhone16PortraitSafeAreas, withRootFontSize, expectNoHorizontalOverflow } from '../../design-system/storybook/decorators';
-import { searchFoods } from '../../features/calorie-calculator/domain/fixtures';
+import { foodCatalogue, searchFoods } from '../../features/calorie-calculator/domain/fixtures';
+import { NO_FOOD_FILTERS } from '../../features/calorie-calculator/domain/food-search';
 import type { DailyGoal, FoodEntry } from '../../features/calorie-calculator/domain/daily-log';
 import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import { RecipesScreen } from '../../features/recipe-discovery/screens/RecipesScreen';
@@ -112,6 +113,12 @@ export const S02_1: Story = {
       onSubmit={fn()}
       onClear={fn()}
       food={{ status: 'ready', results: searchFoods('rice') }}
+      catalogue={foodCatalogue}
+      recents={[]}
+      foodFilters={NO_FOOD_FILTERS}
+      onApplyFoodFilters={fn()}
+      foodView="list"
+      onFoodViewChange={fn()}
       recipes={idle}
       criteria={{}}
       onApplyCriteria={fn()}
@@ -127,7 +134,7 @@ export const S02_1: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('tab', { name: 'Food' })).toHaveAttribute('aria-selected', 'true');
-    await expect(canvas.getAllByText('1 food found').length).toBeGreaterThanOrEqual(1);
+    await expect(canvas.getAllByText('1 item found').length).toBeGreaterThanOrEqual(1);
     await expect(canvas.getByRole('button', { name: /Vegetable rice bowl/ })).toHaveTextContent('180 kcal');
     await expect(canvas.getByRole('button', { name: 'Scan barcode' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Search' })).toHaveAttribute('aria-current', 'page');

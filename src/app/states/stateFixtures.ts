@@ -4,7 +4,8 @@
  * never drift with the host clock; the runtime keeps the real clock.
  */
 import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
-import type { DailyGoal } from '../../features/calorie-calculator/domain/daily-log';
+import { createEntry, type DailyGoal, type FoodEntry } from '../../features/calorie-calculator/domain/daily-log';
+import { recentCandidates } from '../../features/calorie-calculator/domain/recents';
 import { fixtureC, foodCatalogue, photoSuggestions } from '../../features/calorie-calculator/domain/fixtures';
 import { budgetFixtureEntries, budgetFixtureGoal, homeEntries } from '../../features/calorie-calculator/domain/home-fixtures';
 import type { ManualDraft } from '../../features/calorie-calculator/domain/manual-entry';
@@ -74,3 +75,15 @@ export const invalidDraft: ManualDraft = { ...filledDraft, referenceQuantity: 'a
 export const longTitleNoPhotoPartial: Recipe = { ...recipeCatalogue[2], imageUrl: undefined, proteinG: null };
 
 export const BARCODE = { found: '5012345678900', unknown: '4009999999990', failing: '0000000000000' } as const;
+
+/**
+ * S02-8: confirmed entries that yield "Recently added" — the banana logged yesterday, the
+ * yoghurt this morning and the oatmeal just now (newest first: oatmeal, yoghurt, banana).
+ * Derived through the same function the app uses, so the fixture demonstrates the rule.
+ */
+export const recentEntries: FoodEntry[] = [
+  createEntry(foodCatalogue[9], { quantity: 120, unitId: 'g' }, 'snack', { now: FIXED_NOW - 26 * 60 * 60 * 1000, id: 'recent-banana' }),
+  createEntry(foodCatalogue[3], { quantity: 150, unitId: 'g' }, 'breakfast', { now: FIXED_NOW - 4 * 60 * 60 * 1000, id: 'recent-yoghurt' }),
+  createEntry(foodCatalogue[8], { quantity: 1, unitId: 'serving' }, 'breakfast', { now: FIXED_NOW - 60 * 1000, id: 'recent-oatmeal' }),
+].filter((entry): entry is FoodEntry => entry !== null);
+export const recentFoods: FoodCandidate[] = recentCandidates(recentEntries);

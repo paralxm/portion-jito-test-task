@@ -5,13 +5,16 @@
  */
 import { useState, type ReactNode } from 'react';
 
-import { Toast } from '../../design-system';
+import { NavigationBar, Toast, type ViewMode } from '../../design-system';
 import { AddToMealSheet } from '../../features/calorie-calculator/components/AddToMealSheet';
 import type { FoodCandidate, Portion } from '../../features/calorie-calculator/domain/calculation';
 import type { DailyGoal, FoodEntry } from '../../features/calorie-calculator/domain/daily-log';
 import type { MealType } from '../../features/calorie-calculator/domain/meal';
 import { announceWaterAdded } from '../../features/calorie-calculator/domain/water';
 import { HomeScreen, type HomeScreenProps } from '../../features/calorie-calculator/screens/HomeScreen';
+import { foodCatalogue, searchFoods } from '../../features/calorie-calculator/domain/fixtures';
+import { NO_FOOD_FILTERS, type FoodFilters } from '../../features/calorie-calculator/domain/food-search';
+import { SearchScreen, type SearchScope } from '../screens/SearchScreen';
 
 export interface HomeWithWaterProps extends Omit<HomeScreenProps, 'waterMl' | 'onAddWater' | 'onSetWaterTotal' | 'entries' | 'goal' | 'onGoalChange'> {
   entries: readonly FoodEntry[];
@@ -74,5 +77,56 @@ export function WithAddToMeal({ candidate, portion, meal, hint, onConfirm, child
         onCancel={() => setOpen(false)}
       />
     </>
+  );
+}
+
+export interface WithFoodSearchProps {
+  initialQuery?: string;
+  initialView?: ViewMode;
+  initialFilters?: FoodFilters;
+  recents?: readonly FoodCandidate[];
+  onOpenFood?: (candidate: FoodCandidate) => void;
+  onScanBarcode?: () => void;
+  onEnterManually?: () => void;
+}
+
+/**
+ * Search in the Food scope with the state the app owns (query, view, filters) held
+ * locally, over the real catalogue and the demo search engine, so the toolbar, the
+ * filter sheet and the unified results can be exercised in one story.
+ */
+export function WithFoodSearch({ initialQuery = '', initialView = 'list', initialFilters = NO_FOOD_FILTERS, recents = [], onOpenFood = () => {}, onScanBarcode = () => {}, onEnterManually = () => {} }: WithFoodSearchProps) {
+  const [scope, setScope] = useState<SearchScope>('food');
+  const [query, setQuery] = useState(initialQuery);
+  const [view, setView] = useState<ViewMode>(initialView);
+  const [filters, setFilters] = useState<FoodFilters>(initialFilters);
+  const trimmed = query.trim();
+  const food = trimmed ? ({ status: 'ready', results: searchFoods(trimmed) } as const) : ({ status: 'idle', results: [] } as const);
+  return (
+    <SearchScreen
+      scope={scope}
+      onScopeChange={setScope}
+      query={query}
+      onQueryChange={setQuery}
+      onSubmit={() => {}}
+      onClear={() => setQuery('')}
+      food={food}
+      catalogue={foodCatalogue}
+      recents={recents}
+      foodFilters={filters}
+      onApplyFoodFilters={setFilters}
+      foodView={view}
+      onFoodViewChange={setView}
+      recipes={{ status: 'idle', results: [] }}
+      criteria={{}}
+      onApplyCriteria={() => {}}
+      onRemoveCriterion={() => {}}
+      onOpenFood={onOpenFood}
+      onOpenRecipe={() => {}}
+      onScanBarcode={onScanBarcode}
+      onRetry={() => {}}
+      onEnterManually={onEnterManually}
+      navigation={<NavigationBar selected="search" onSelect={() => {}} onLogFood={() => {}} />}
+    />
   );
 }

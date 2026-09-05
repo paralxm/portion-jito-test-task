@@ -14,8 +14,37 @@ import pastaRoastedVegetablesPhoto from './recipes/pasta-roasted-vegetables.webp
 import tofuStirFryPhoto from './recipes/tofu-stir-fry.webp';
 import vegetableTraybakePhoto from './recipes/vegetable-traybake.webp';
 import sampleCapturePhoto from './foods/sample-capture.webp';
+import greekYoghurtPhoto from './foods/greek-yoghurt.webp';
+import almondButterPhoto from './foods/almond-butter.webp';
+import saladLeavesPhoto from './foods/salad-leaves.webp';
+import oatmealPhoto from './foods/oatmeal.webp';
+import bananaPhoto from './foods/banana.webp';
+import avocadoToastPhoto from './foods/avocado-toast.webp';
+import hummusPhoto from './foods/hummus.webp';
+import scrambledEggsPhoto from './foods/scrambled-eggs.webp';
+import sparklingWaterPhoto from './drinks/sparkling-water.webp';
+import orangeJuicePhoto from './drinks/orange-juice.webp';
+import oatDrinkPhoto from './drinks/oat-drink.webp';
 
 /** Intrinsic size of every registered photo, for aspect declarations and layout stability. */
 export const PHOTO_INTRINSIC = { width: 1200, height: 900 } as const;
 
-export { chickenSaladPhoto, lentilSoupPhoto, pastaRoastedVegetablesPhoto, sampleCapturePhoto, tofuStirFryPhoto, vegetableTraybakePhoto };
+export {
+  almondButterPhoto,
+  avocadoToastPhoto,
+  bananaPhoto,
+  chickenSaladPhoto,
+  greekYoghurtPhoto,
+  hummusPhoto,
+  lentilSoupPhoto,
+  oatDrinkPhoto,
+  oatmealPhoto,
+  orangeJuicePhoto,
+  pastaRoastedVegetablesPhoto,
+  saladLeavesPhoto,
+  sampleCapturePhoto,
+  scrambledEggsPhoto,
+  sparklingWaterPhoto,
+  tofuStirFryPhoto,
+  vegetableTraybakePhoto,
+};

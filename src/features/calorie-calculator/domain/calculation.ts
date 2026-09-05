@@ -42,8 +42,10 @@ export interface FoodCandidate {
   detail?: string;
   /** Where the candidate came from; drives the review screen's explanation. */
   source: 'search' | 'barcode' | 'photo' | 'manual' | 'recipe';
-  /** A photograph of the item where one is registered (recipes); evidence of appearance only. */
+  /** A photograph of the item where one is registered; evidence of appearance only. */
   imageUrl?: string;
+  /** Drinks carry volume units and never touch the water tracker; absent means food (ledger §11.1). */
+  category?: 'food' | 'drink';
   reference: ReferenceBasis;
   nutrition: NutritionValues;
   units: readonly SupportedUnit[];

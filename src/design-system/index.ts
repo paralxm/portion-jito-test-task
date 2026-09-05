@@ -75,6 +75,8 @@ export { SearchField } from './components/SearchField/SearchField';
 export type { SearchFieldProps } from './components/SearchField/SearchField';
 export { FilterChip, AppliedCriterionChip } from './components/Chip/Chip';
 export type { FilterChipProps, AppliedCriterionChipProps } from './components/Chip/Chip';
+export { ViewToggle } from './components/ViewToggle/ViewToggle';
+export type { ViewToggleProps, ViewMode } from './components/ViewToggle/ViewToggle';
 export { SegmentedControl, segmentedOptionId } from './components/SegmentedControl/SegmentedControl';
 export type { SegmentedControlProps, SegmentedControlOption, SegmentedControlPattern } from './components/SegmentedControl/SegmentedControl';
 export { NutritionValue } from './components/NutritionValue/NutritionValue';

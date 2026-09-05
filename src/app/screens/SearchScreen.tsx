@@ -1,8 +1,11 @@
 import { useId, useState, type ReactNode } from 'react';
 import { Barcode } from '@phosphor-icons/react';
 
-import { AppHeader, Button, EmptyState, FoodResultRow, IconButton, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl, segmentedOptionId } from '../../design-system';
-import { describeReferenceBasis, type FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
+import { AppHeader, AppliedCriterionChip, Button, EmptyState, IconButton, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl, segmentedOptionId, Text, ViewToggle, type ViewMode } from '../../design-system';
+import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
+import { activeFoodFilterCount, collectFoods, describeFoodFilter, foodCountText, NO_FOOD_FILTERS, type FoodFilters } from '../../features/calorie-calculator/domain/food-search';
+import { FoodCollection } from '../../features/calorie-calculator/components/FoodCollection';
+import { FoodFiltersSheet } from '../../features/calorie-calculator/components/FoodFiltersSheet';
 import { CriteriaToolbar } from '../../features/recipe-discovery/components/CriteriaToolbar';
 import { FilterAction } from '../../features/recipe-discovery/components/FilterAction';
 import { RecipeList } from '../../features/recipe-discovery/components/RecipeList';
@@ -25,7 +28,17 @@ export interface SearchScreenProps {
   onQueryChange: (query: string) => void;
   onSubmit: () => void;
   onClear: () => void;
+  /** Query results from the food service; `idle` with an empty query shows the catalogue instead. */
   food: SearchResults<FoodCandidate>;
+  /** The browsable catalogue shown without a query (ledger §11.1). */
+  catalogue: readonly FoodCandidate[];
+  /** Foods derived from confirmed meal entries, newest first; empty on first use. */
+  recents: readonly FoodCandidate[];
+  foodFilters: FoodFilters;
+  onApplyFoodFilters: (filters: FoodFilters) => void;
+  /** The presentation of the food collection; persisted by the app. */
+  foodView: ViewMode;
+  onFoodViewChange: (view: ViewMode) => void;
   recipes: SearchResults<Recipe>;
   /** Recipes-scope criteria: a snapshot copied from browsing, edited independently here. */
   criteria: RecipeCriteria;
@@ -42,11 +55,13 @@ export interface SearchScreenProps {
 }
 
 /**
- * S02 — shared Search. Two scopes over one query field: Food results are never
- * filtered by recipe criteria; Recipes results combine the query with the applied
- * criteria. The field carries the scope's trailing action — the barcode shortcut for
- * Food, the filter action with its applied count for Recipes — and applied chips sit
- * beneath it. Loading, no matches and service failure are distinct states.
+ * S02 — shared Search. Two scopes over one query field. Food: the barcode shortcut sits
+ * in the field; a compact toolbar under it carries the List / Grid toggle and, at its
+ * end, the food filter action (All / Foods / Drinks); with an empty query the tab shows
+ * "Recently added" (from confirmed entries) above the rest of the catalogue, and a query
+ * produces one unified result set across both. Recipes: the filter action sits in the
+ * field and applied chips beneath it; results combine the query with the criteria.
+ * Loading, no matches and service failure stay distinct states.
  */
 export function SearchScreen({
   scope,
@@ -56,6 +71,12 @@ export function SearchScreen({
   onSubmit,
   onClear,
   food,
+  catalogue,
+  recents,
+  foodFilters,
+  onApplyFoodFilters,
+  foodView,
+  onFoodViewChange,
   recipes,
   criteria,
   onApplyCriteria,
@@ -68,106 +89,158 @@ export function SearchScreen({
   navigation,
 }: SearchScreenProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [foodFiltersOpen, setFoodFiltersOpen] = useState(false);
   const id = useId();
   const resultsId = `search-results-${id}`;
+  const recentsId = `search-recents-${id}`;
+  const exploreId = `search-explore-${id}`;
   const scopeId = `search-scope-${id}`;
   const panelId = `search-panel-${id}`;
   const active = activeCriteriaCount(criteria);
-  const current = scope === 'food' ? food : recipes;
+  const activeFood = activeFoodFilterCount(foodFilters);
   const trimmed = query.trim();
 
+  // --- Food scope --------------------------------------------------------------------
+  const browsing = scope === 'food' && trimmed === '';
+  const collection = browsing
+    ? collectFoods({ query: '', recents, catalogue, filters: foodFilters })
+    : collectFoods({ query: trimmed, recents, catalogue: food.results, filters: foodFilters });
+  const foodStatus = browsing ? 'ready' : food.status;
+
+  // --- Heading and announcement ---------------------------------------------------------
+  let heading: string;
   let countText = '';
-  if (current.status === 'ready' && current.results.length > 0) {
-    const n = current.results.length;
-    countText =
-      scope === 'food'
-        ? `${n} ${n === 1 ? 'food' : 'foods'} found`
-        : active > 0
-          ? `${n} ${n === 1 ? 'recipe matches' : 'recipes match'} your filters`
-          : `${n} ${n === 1 ? 'recipe' : 'recipes'} found`;
+  if (scope === 'food') {
+    heading = browsing ? (collection.recents.length > 0 ? 'Foods' : 'All foods') : 'Results';
+    if (foodStatus === 'ready' && collection.count > 0) countText = foodCountText(collection.count, foodFilters, collection.mode);
+  } else {
+    heading = 'Results';
+    if (recipes.status === 'ready' && recipes.results.length > 0) {
+      const n = recipes.results.length;
+      countText = active > 0 ? `${n} ${n === 1 ? 'recipe matches' : 'recipes match'} your filters` : `${n} ${n === 1 ? 'recipe' : 'recipes'} found`;
+    }
   }
+  const current = scope === 'food' ? { status: foodStatus, length: collection.count } : { status: recipes.status, length: recipes.results.length };
   // Announced when results change; loading and failure announce themselves.
-  const summary = current.status !== 'ready' ? '' : current.results.length === 0 ? `No ${scope === 'food' ? 'foods' : 'recipes'} match “${trimmed}”` : countText;
+  const summary = current.status !== 'ready' ? '' : current.length === 0 ? (scope === 'food' ? (browsing ? 'No foods match your filters' : `No foods match “${trimmed}”`) : `No recipes match “${trimmed}”`) : countText;
 
   let content: ReactNode;
-  if (current.status === 'idle') {
-    content =
-      scope === 'food' ? (
-        <EmptyState title="Search for a food or dish">Type a name to see matching foods with their calories per reference amount, or scan a barcode from the field.</EmptyState>
-      ) : (
-        <EmptyState title="Search for a recipe">Type a recipe name or an ingredient. Filters narrow the results further.</EmptyState>
+  if (scope === 'food') {
+    if (foodStatus === 'loading') {
+      content = <LoadingState label="Searching foods" />;
+    } else if (foodStatus === 'failure') {
+      content = (
+        <EmptyState
+          kind="failure"
+          title="Search is not available right now"
+          actions={
+            <>
+              <Button variant="primary" onClick={onRetry}>
+                Try again
+              </Button>
+              <Button variant="text" onClick={onEnterManually}>
+                Enter manually
+              </Button>
+            </>
+          }
+        >
+          The search service did not respond. Your query is kept.
+        </EmptyState>
       );
-  } else if (current.status === 'loading') {
-    content = <LoadingState label={scope === 'food' ? 'Searching foods' : 'Searching recipes'} />;
-  } else if (current.status === 'failure') {
+    } else if (collection.count === 0) {
+      content = browsing ? (
+        <EmptyState
+          kind="no-match"
+          title="Nothing matches your filters"
+          actions={
+            <Button variant="secondary" onClick={() => onApplyFoodFilters(NO_FOOD_FILTERS)}>
+              Clear all filters
+            </Button>
+          }
+        >
+          There are no items of that kind yet. Clear the filter to see everything.
+        </EmptyState>
+      ) : (
+        <EmptyState
+          kind="no-match"
+          title={activeFood > 0 ? `No ${foodFilters.category === 'drink' ? 'drinks' : 'foods'} match “${trimmed}”` : `No foods match “${trimmed}”`}
+          actions={
+            <>
+              {activeFood > 0 ? (
+                <Button variant="secondary" onClick={() => setFoodFiltersOpen(true)}>
+                  Change filters
+                </Button>
+              ) : null}
+              <Button variant={activeFood > 0 ? 'text' : 'secondary'} onClick={onEnterManually}>
+                Enter manually
+              </Button>
+            </>
+          }
+        >
+          Check the spelling or try a shorter name. You can also enter the nutrition yourself.
+        </EmptyState>
+      );
+    } else if (collection.mode === 'browse' && collection.recents.length > 0) {
+      content = (
+        <div className={styles.sections}>
+          <section aria-labelledby={recentsId} className={styles.subsection}>
+            <Text as="h3" id={recentsId} variant="label" color="primary">
+              Recently added
+            </Text>
+            <FoodCollection items={collection.recents} view={foodView} onOpen={onOpenFood} aria-labelledby={recentsId} />
+          </section>
+          {collection.explore.length > 0 ? (
+            <section aria-labelledby={exploreId} className={styles.subsection}>
+              <Text as="h3" id={exploreId} variant="label" color="primary">
+                Explore foods
+              </Text>
+              <FoodCollection items={collection.explore} view={foodView} onOpen={onOpenFood} aria-labelledby={exploreId} />
+            </section>
+          ) : null}
+        </div>
+      );
+    } else {
+      content = <FoodCollection items={collection.mode === 'browse' ? collection.explore : collection.results} view={foodView} onOpen={onOpenFood} aria-labelledby={resultsId} />;
+    }
+  } else if (recipes.status === 'idle') {
+    content = <EmptyState title="Search for a recipe">Type a recipe name or an ingredient. Filters narrow the results further.</EmptyState>;
+  } else if (recipes.status === 'loading') {
+    content = <LoadingState label="Searching recipes" />;
+  } else if (recipes.status === 'failure') {
     content = (
       <EmptyState
         kind="failure"
         title="Search is not available right now"
         actions={
-          <>
-            <Button variant="primary" onClick={onRetry}>
-              Try again
-            </Button>
-            {scope === 'food' ? (
-              <Button variant="text" onClick={onEnterManually}>
-                Enter manually
-              </Button>
-            ) : null}
-          </>
+          <Button variant="primary" onClick={onRetry}>
+            Try again
+          </Button>
         }
       >
-        The search service did not respond. Your query{scope === 'recipes' ? ' and filters are' : ' is'} kept.
+        The search service did not respond. Your query and filters are kept.
       </EmptyState>
     );
-  } else if (current.results.length === 0) {
-    content =
-      scope === 'food' ? (
-        <EmptyState
-          kind="no-match"
-          title={`No foods match “${trimmed}”`}
-          actions={
-            <Button variant="secondary" onClick={onEnterManually}>
-              Enter manually
-            </Button>
-          }
-        >
-          Check the spelling or try a shorter name. You can also enter the nutrition yourself.
-        </EmptyState>
-      ) : (
-        <EmptyState
-          kind="no-match"
-          title={active > 0 ? `No recipes match “${trimmed}” and your filters` : `No recipes match “${trimmed}”`}
-          actions={
-            active > 0 ? (
-              <Button variant="secondary" onClick={() => setFiltersOpen(true)}>
-                Change filters
-              </Button>
-            ) : undefined
-          }
-        >
-          {active > 0 ? 'Every recipe is compared with the query and all of your filters. Try another word or loosen a filter.' : 'Try another recipe name or an ingredient.'}
-        </EmptyState>
-      );
-  } else if (scope === 'food') {
+  } else if (recipes.results.length === 0) {
     content = (
-      <ul className={styles.list} aria-labelledby={resultsId}>
-        {food.results.map((candidate) => (
-          <li key={candidate.id}>
-            <FoodResultRow
-              name={candidate.name}
-              detail={candidate.detail}
-              calories={candidate.nutrition.energyKcal}
-              basis={describeReferenceBasis(candidate).toLowerCase()}
-              onClick={() => onOpenFood(candidate)}
-            />
-          </li>
-        ))}
-      </ul>
+      <EmptyState
+        kind="no-match"
+        title={active > 0 ? `No recipes match “${trimmed}” and your filters` : `No recipes match “${trimmed}”`}
+        actions={
+          active > 0 ? (
+            <Button variant="secondary" onClick={() => setFiltersOpen(true)}>
+              Change filters
+            </Button>
+          ) : undefined
+        }
+      >
+        {active > 0 ? 'Every recipe is compared with the query and all of your filters. Try another word or loosen a filter.' : 'Try another recipe name or an ingredient.'}
+      </EmptyState>
     );
   } else {
     content = <RecipeList recipes={recipes.results} criteria={criteria} onOpen={onOpenRecipe} aria-labelledby={resultsId} />;
   }
+
+  const appliedFood = describeFoodFilter(foodFilters);
 
   return (
     <RootScreenLayout header={<AppHeader variant="section" title="Search" />} navigation={navigation}>
@@ -195,12 +268,37 @@ export function SearchScreen({
         ]}
       />
 
-      {scope === 'recipes' ? (
+      {scope === 'food' ? (
+        <>
+          <div className={styles.toolbar}>
+            <ViewToggle value={foodView} onChange={onFoodViewChange} label="Food view" />
+            <FilterAction count={activeFood} expanded={foodFiltersOpen} onClick={() => setFoodFiltersOpen(true)} label="Food filters" />
+          </div>
+          {appliedFood ? (
+            <ul className={styles.chips} aria-label="Applied filters">
+              <li>
+                <AppliedCriterionChip removeLabel={`Remove filter: ${appliedFood}`} onRemove={() => onApplyFoodFilters(NO_FOOD_FILTERS)}>
+                  {appliedFood}
+                </AppliedCriterionChip>
+              </li>
+            </ul>
+          ) : null}
+          <FoodFiltersSheet
+            open={foodFiltersOpen}
+            applied={foodFilters}
+            onApply={(next) => {
+              onApplyFoodFilters(next);
+              setFoodFiltersOpen(false);
+            }}
+            onCancel={() => setFoodFiltersOpen(false)}
+          />
+        </>
+      ) : (
         <CriteriaToolbar criteria={criteria} sheetOpen={filtersOpen} onCloseSheet={() => setFiltersOpen(false)} onApply={onApplyCriteria} onRemove={onRemoveCriterion} />
-      ) : null}
+      )}
 
       <section role="tabpanel" id={panelId} className={styles.results} aria-labelledby={segmentedOptionId(scopeId, scope)}>
-        <ResultsHeading id={resultsId} heading="Results" summary={summary} countText={countText} hidden={current.status === 'idle'} />
+        <ResultsHeading id={resultsId} heading={heading} summary={summary} countText={countText} hidden={scope === 'recipes' && recipes.status === 'idle'} />
         {content}
       </section>
     </RootScreenLayout>

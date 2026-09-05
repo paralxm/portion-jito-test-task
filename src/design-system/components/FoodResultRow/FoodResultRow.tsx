@@ -2,6 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { CaretRight } from '@phosphor-icons/react';
 
 import { Icon } from '../../icons/Icon';
+import { MediaFrame } from '../MediaFrame/MediaFrame';
 import { Text } from '../../primitives/Text/Text';
 import { formatQuantity, MISSING_GLYPH, NOT_AVAILABLE } from '../../nutrition/nutrition';
 import { VisuallyHidden } from '../../primitives/VisuallyHidden/VisuallyHidden';
@@ -12,6 +13,8 @@ export interface FoodResultRowProps extends Omit<ButtonHTMLAttributes<HTMLButton
   name: ReactNode;
   /** Brand, source or distinguishing detail (supporting 14/20). */
   detail?: ReactNode;
+  /** 4:3 thumbnail before the identity; absent or failed images show the shared No photo fallback. Omit for rows without imagery (Home entries). */
+  imageUrl?: string;
   /** Calories for the stated basis, or `null` when unknown. */
   calories: number | null;
   /**
@@ -26,10 +29,15 @@ export interface FoodResultRowProps extends Omit<ButtonHTMLAttributes<HTMLButton
  * Home, a logged entry (selecting it opens that entry for editing). Identity wraps; the
  * calorie value stays inline at 16/24 with the basis beneath it when one is given.
  */
-export function FoodResultRow({ name, detail, calories, basis, className, 'data-highlighted': highlighted, ...rest }: FoodResultRowProps & { 'data-highlighted'?: true }) {
+export function FoodResultRow({ name, detail, imageUrl, calories, basis, className, 'data-highlighted': highlighted, ...rest }: FoodResultRowProps & { 'data-highlighted'?: true }) {
   return (
     <div className={[styles.frame, className].filter(Boolean).join(' ')} data-highlighted={highlighted}>
-      <button type="button" className={styles.row} {...rest}>
+      <button type="button" className={styles.row} data-thumbnail={imageUrl !== undefined || undefined} {...rest}>
+      {imageUrl !== undefined ? (
+        <span className={styles.thumbnail}>
+          <MediaFrame aspect="4:3" imageUrl={imageUrl} imageAlt="" compact />
+        </span>
+      ) : null}
       <span className={styles.identity}>
         <Text variant="item-title" color="primary" wrap>
           {name}
