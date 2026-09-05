@@ -6,9 +6,11 @@ import { withIPhone16PortraitSafeAreas, withRootFontSize, expectNoHorizontalOver
 import { oatmealWithBerries } from '../../features/calorie-calculator/domain/home-fixtures';
 import { FoodReviewScreen } from '../../features/calorie-calculator/screens/FoodReviewScreen';
 import { HomeScreen } from '../../features/calorie-calculator/screens/HomeScreen';
+import { fixtureR } from '../../features/recipe-discovery/domain/fixtures';
 import { SearchScreen, type SearchResults } from '../screens/SearchScreen';
 import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
-import { fixtureCandidate, GOAL_KCAL, reviewPortion } from './stateFixtures';
+import { WithAddToMeal } from './harnesses';
+import { FIXED_DATE, fixtureCandidate, goal2200, reviewPortion } from './stateFixtures';
 
 const nav = (selected: Destination) => <NavigationBar selected={selected} onSelect={fn()} onLogFood={fn()} />;
 const idle = { status: 'idle', results: [] } as const;
@@ -20,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Low-fi lane B (176:2): the Log food chooser over Home, the Food-scope loading / no-match / failure states, and the shared review step from search, including the invalid-portion state and the existing-entry mode that replaces the superseded “Replaces current calculation” frame (docs/design/hifi-decisions.md D-1). Fixtures are deterministic; every state is also reachable in the runtime.',
+          'Low-fi lane B (176:2): the Log food chooser over Home, the Food-scope loading / no-match / failure states, the shared review step from search including the invalid-portion state and the existing-entry mode that replaces the superseded “Replaces current calculation” frame (docs/design/hifi-decisions.md D-1), and the Add-to-meal sheet added by the 2026-09-05 redesign (O05, D-23). Fixtures are deterministic; every state is also reachable in the runtime.',
       },
     },
   },
@@ -28,6 +30,24 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+const emptyHome = () => (
+  <HomeScreen
+    entries={[]}
+    goal={goal2200}
+    onGoalChange={fn()}
+    onOpenEntry={fn()}
+    onAddToMeal={fn()}
+    recommended={{ recipe: fixtureR, evidence: [] }}
+    onOpenRecipe={fn()}
+    onFindRecipes={fn()}
+    waterMl={0}
+    onAddWater={fn()}
+    onSetWaterTotal={fn()}
+    now={FIXED_DATE}
+    navigation={nav('home')}
+  />
+);
 
 const foodSearch = (query: string, food: SearchResults<FoodCandidate>) => (
   <SearchScreen
@@ -44,6 +64,7 @@ const foodSearch = (query: string, food: SearchResults<FoodCandidate>) => (
     onRemoveCriterion={fn()}
     onOpenFood={fn()}
     onOpenRecipe={fn()}
+    onScanBarcode={fn()}
     onRetry={fn()}
     onEnterManually={fn()}
     navigation={nav('search')}
@@ -56,13 +77,13 @@ export const O01: Story = {
     docs: {
       description: {
         story:
-          'Purpose: choose one of four identification methods. Entry: + Log food (or Home’s Log food) from Home, Search, Recipes or Recipe Details. Fixture: the sheet open over S01-1. Primary action: any tile starts that method; nothing is committed. Next: S02 / S04-1 / S05-1 / S06-1; close, backdrop or Escape → the exact origin. Limitation: the story composes HomeScreen + MethodSheet the way App does; the sheet is opened directly rather than through the plus.',
+          'Purpose: choose one of four identification methods. Entry: the bar’s Log food, or a Home meal’s add action (which records the meal for O05), from Home, Search, Recipes or Recipe Details. Fixture: the sheet open over S01-1. Primary action: any tile starts that method; nothing is committed. Next: S02 / S04-1 / S05-1 / S06-1; close, backdrop or Escape → the exact origin. Limitation: the story composes HomeScreen + MethodSheet the way App does; the sheet is opened directly rather than through the plus.',
       },
     },
   },
   render: () => (
     <>
-      <HomeScreen entries={[]} goalKcal={GOAL_KCAL} onGoalChange={fn()} onOpenEntry={fn()} onLogFood={fn()} onFindRecipes={fn()} recipeCriteria={[]} navigation={nav('home')} />
+      {emptyHome()}
       <MethodSheet open onRequestClose={fn()} onChoose={fn()} />
     </>
   ),
@@ -144,7 +165,7 @@ export const S07_1: Story = {
     docs: {
       description: {
         story:
-          'Purpose: identity, correction, desired portion and result in one focused step with no bottom bar. Entry: a result row in S02-1. Fixture: fixture C at 300 g → 540 kcal, 18 / 63 / 24 g. Primary action: Add to today → one entry, Home S01-2. Secondary: Done → the invoking surface without logging; Back → the results with the query intact. Limitation: none.',
+          'Purpose: identity, correction, desired portion and result in one focused step with no bottom bar. Entry: a result row in S02-1. Fixture: fixture C at 300 g → 540 kcal, 18 / 63 / 24 g. Primary action: Add to today → O05 (the sheet’s Add to {meal} commits). Secondary: Done → the invoking surface without logging; Back → the results with the query intact. Limitation: none.',
       },
     },
   },
@@ -188,14 +209,15 @@ export const S07_3: Story = {
     docs: {
       description: {
         story:
-          'Purpose: review and correct one committed entry (the frame’s former “replaces current calculation” meaning is superseded; ledger D-1). Entry: an entry row on S01-2. Fixture: Oatmeal with mixed berries, logged at 300 g, draft 150 g. Primary action: Update entry → the same entry ID, Home. Secondary: Remove entry → confirmation; Back with a changed draft → Keep editing / Discard. Limitation: none.',
+          'Purpose: review and correct one committed entry, including its meal (the frame’s former “replaces current calculation” meaning is superseded; ledger D-1). Entry: an entry row on S01-2. Fixture: Oatmeal with mixed berries, logged at 300 g at breakfast, draft 150 g. Primary action: Update entry → the same entry ID, Home. Secondary: Remove entry → confirmation; Back with a changed draft → Keep editing / Discard. Limitation: none.',
       },
     },
   },
-  render: () => <FoodReviewScreen candidate={oatmealWithBerries} mode="existing" initialPortion={{ quantity: 300, unitId: 'g' }} onBack={fn()} onUpdateEntry={fn()} onRemoveEntry={fn()} />,
+  render: () => <FoodReviewScreen candidate={oatmealWithBerries} mode="existing" initialPortion={{ quantity: 300, unitId: 'g' }} initialMeal="breakfast" onBack={fn()} onUpdateEntry={fn()} onRemoveEntry={fn()} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1, name: 'Edit entry' })).toBeInTheDocument();
+    await expect(canvas.getByRole('radio', { name: 'Breakfast' })).toBeChecked();
     const amount = canvas.getByLabelText('Amount to calculate');
     await userEvent.clear(amount);
     await userEvent.type(amount, '150');
@@ -206,6 +228,36 @@ export const S07_3: Story = {
   },
 };
 
+// ---- Row added by the 2026-09-05 redesign (ledger §10.3) ------------------------------
+
+export const O05: Story = {
+  name: 'O05 — Add to meal / From food review',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: choose the meal and confirm the amount before one entry is created. Entry: Add to today on S07-1 (or S07-4/5/6) with a valid portion. Fixture: fixture C at 300 g; lunch is preselected by the 12:00 baseline (time-of-day rule D-17) and the hint says so. Primary action: Add to lunch → one entry, Home S01-2. Secondary: Cancel / close / Escape → S07 unchanged. Limitation: the story composes the review screen and the sheet the way App does.',
+      },
+    },
+  },
+  render: () => (
+    <WithAddToMeal candidate={fixtureCandidate} portion={reviewPortion} meal="lunch" hint="Suggested for this time of day. Change it if you like." onConfirm={fn()}>
+      {review()}
+    </WithAddToMeal>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const dialog = canvas.getByRole('dialog', { name: 'Add to meal' });
+    await expect(within(dialog).getByRole('radio', { name: 'Lunch' })).toBeChecked();
+    await expect(within(dialog).getByLabelText('Amount')).toHaveValue('300');
+    await expect(within(dialog).getByText('540')).toBeVisible();
+    await expect(within(dialog).getByRole('button', { name: 'Add to lunch' })).toBeEnabled();
+    await userEvent.click(within(dialog).getByRole('radio', { name: 'Dinner' }));
+    await expect(within(dialog).getByRole('button', { name: 'Add to dinner' })).toBeEnabled();
+    await userEvent.click(within(dialog).getByRole('radio', { name: 'Lunch' }));
+  },
+};
+
 // ---- Representative and risk-bearing variants of this lane ----------------------------
 
 export const O01_Narrow320: Story = {
@@ -213,7 +265,7 @@ export const O01_Narrow320: Story = {
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   render: () => (
     <>
-      <HomeScreen entries={[]} goalKcal={GOAL_KCAL} onGoalChange={fn()} onOpenEntry={fn()} onLogFood={fn()} onFindRecipes={fn()} recipeCriteria={[]} navigation={nav('home')} />
+      {emptyHome()}
       <MethodSheet open onRequestClose={fn()} onChoose={fn()} />
     </>
   ),
@@ -221,6 +273,26 @@ export const O01_Narrow320: Story = {
     const dialog = within(canvasElement).getByRole('dialog', { name: 'Log food' });
     const tile = within(dialog).getByRole('button', { name: /Search food/ });
     await expect(getComputedStyle(tile.parentElement as Element).gridTemplateColumns.split(' ').length).toBe(2);
+    await expectNoHorizontalOverflow();
+  },
+};
+
+export const O05_InvalidAndEnlarged: Story = {
+  name: 'O05 at 200 % text — invalid amount disables the commit',
+  decorators: [withRootFontSize(200)],
+  render: () => (
+    <WithAddToMeal candidate={fixtureCandidate} portion={reviewPortion} meal="lunch" onConfirm={fn()}>
+      {review()}
+    </WithAddToMeal>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const dialog = canvas.getByRole('dialog', { name: 'Add to meal' });
+    const amount = within(dialog).getByLabelText('Amount');
+    await userEvent.clear(amount);
+    await userEvent.tab();
+    await expect(within(dialog).getByRole('button', { name: 'Add to lunch' })).toBeDisabled();
+    await expect(amount).toHaveAccessibleDescription('Enter the amount to add');
     await expectNoHorizontalOverflow();
   },
 };

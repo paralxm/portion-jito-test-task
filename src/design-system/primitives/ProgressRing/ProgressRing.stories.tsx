@@ -16,6 +16,8 @@ const meta = {
     docs: {
       description: {
         component: `
+**Deprecated (2026-09-05).** The calorie budget is now the horizontal \`ProgressBar\` (ledger D-19); no product screen renders this ring. It stays exported and documented until a consumer needs a circular presentation again.
+
 **Purpose.** A determinate quantity relative to a bound — a track and a bounded arc. It is the geometry under Home's calorie ring and knows nothing about calories, goals or entries: the consumer supplies \`value\`/\`min\`/\`max\`, an accessible \`label\` with units and state, and optional centre content.
 
 **Not for.** Loading or pending work (use \`Spinner\`), a score, a health verdict, or any metric that has no bound.

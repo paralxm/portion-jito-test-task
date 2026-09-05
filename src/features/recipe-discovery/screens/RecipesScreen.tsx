@@ -10,6 +10,7 @@ import { Text } from '../../../design-system/primitives/Text/Text';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
 import { RootScreenLayout } from '../../../design-system/templates/RootScreenLayout/RootScreenLayout';
 import { CriteriaToolbar } from '../components/CriteriaToolbar';
+import { FilterAction } from '../components/FilterAction';
 import { RecipeList } from '../components/RecipeList';
 import { activeCriteriaCount, type CriterionKey, type Recipe, type RecipeCriteria } from '../domain/matching';
 import styles from './RecipesScreen.module.css';
@@ -32,9 +33,10 @@ export interface RecipesScreenProps {
 }
 
 /**
- * S03 — query-free recipe browsing. Criteria are applied through the same filter sheet
- * as Search; no match, service failure and the plain list are separate states with
- * their own recovery.
+ * S03 — query-free recipe browsing. The search entry and the filter action share one
+ * row (the action at the end, as in Search); applied chips sit beneath. Criteria are
+ * applied through the same filter sheet as Search; no match, service failure and the
+ * plain list are separate states with their own recovery.
  */
 export function RecipesScreen({ results, criteria, status, onApplyCriteria, onRemoveCriterion, onClearCriteria, onRetry, onOpenRecipe, onOpenSearch, navigation }: RecipesScreenProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -94,22 +96,18 @@ export function RecipesScreen({ results, criteria, status, onApplyCriteria, onRe
   }
 
   return (
-    <RootScreenLayout header={<AppHeader title="Recipes" showWordmark />} navigation={navigation}>
-      <button type="button" className={styles.searchEntry} onClick={onOpenSearch}>
-        <Icon icon={MagnifyingGlass} size="small-action" />
-        <Text variant="body" color="secondary">
-          Search recipes
-        </Text>
-      </button>
+    <RootScreenLayout header={<AppHeader variant="section" title="Recipes" />} navigation={navigation}>
+      <div className={styles.searchRow}>
+        <button type="button" className={styles.searchEntry} onClick={onOpenSearch}>
+          <Icon icon={MagnifyingGlass} size="small-action" />
+          <Text variant="body" color="secondary">
+            Search recipes
+          </Text>
+        </button>
+        <FilterAction count={active} expanded={filtersOpen} onClick={() => setFiltersOpen(true)} className={styles.filter} />
+      </div>
 
-      <CriteriaToolbar
-        criteria={criteria}
-        sheetOpen={filtersOpen}
-        onOpenSheet={() => setFiltersOpen(true)}
-        onCloseSheet={() => setFiltersOpen(false)}
-        onApply={onApplyCriteria}
-        onRemove={onRemoveCriterion}
-      />
+      <CriteriaToolbar criteria={criteria} sheetOpen={filtersOpen} onCloseSheet={() => setFiltersOpen(false)} onApply={onApplyCriteria} onRemove={onRemoveCriterion} />
 
       <section className={styles.results} aria-labelledby={resultsId}>
         <ResultsHeading id={resultsId} heading={active > 0 ? 'Matching recipes' : 'All recipes'} summary={summary} countText={countText} />

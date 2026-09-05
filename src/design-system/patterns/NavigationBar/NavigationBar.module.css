@@ -1,13 +1,17 @@
 /* One row: the destination group fills the width beside the circular Log food action.
    The 16 px gap between them is deliberately larger than the group's own 4 px rhythm and
    equal to the page inset, so the action reads as a sibling of the group — separated by
-   function, not by distance — and the whole row reads as one navigation area. */
+   function, not by distance — and the whole row reads as one navigation area.
+
+   The bar is a plain block; the root layout's slot fixes it to the viewport. It sits on
+   the canvas with no top border: the restrained navigation shadow is its only separation
+   from content scrolling beneath it. */
 
 .bar {
   padding-block-start: var(--portion-ref-space-8);
   padding-block-end: max(var(--portion-ref-space-8), var(--portion-safe-area-bottom));
   background: var(--portion-color-background-canvas);
-  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  box-shadow: var(--portion-shadow-navigation);
 }
 
 .bar[hidden] {

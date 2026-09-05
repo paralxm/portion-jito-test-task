@@ -1,0 +1,42 @@
+/* The lockup owns its clear space: padding equal to the dot on every side, so the
+   wordmark's descender-free lowercase and the dot never touch neighbouring content. */
+.lockup {
+  --portion-logo-dot: 0.3em;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.12em;
+  padding: var(--portion-logo-dot);
+  margin: calc(var(--portion-logo-dot) * -1);
+  color: var(--portion-color-brand-wordmark);
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.wordmark {
+  display: inline-block;
+  color: inherit;
+}
+
+/* The dot sits on the baseline at the x-height's lower edge; its size is relative to the
+   wordmark so both sizes keep the same proportion. It is a true circle. */
+.dot {
+  display: inline-block;
+  inline-size: var(--portion-logo-dot);
+  block-size: var(--portion-logo-dot);
+  border-radius: var(--portion-radius-round);
+  background: var(--portion-color-brand-mark);
+  transform: translateY(calc(var(--portion-logo-dot) * -0.15));
+  flex-shrink: 0;
+}
+
+.lockup[data-tone='monochrome'] .dot {
+  background: var(--portion-color-brand-wordmark);
+}
+
+.lockup[data-tone='inverse'] {
+  color: var(--portion-color-brand-inverse);
+}
+
+.lockup[data-tone='inverse'] .dot {
+  background: var(--portion-color-brand-inverse);
+}

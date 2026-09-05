@@ -1,8 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { Camera } from '@phosphor-icons/react';
 
+import { CameraStage } from '../../../design-system/components/CameraStage/CameraStage';
 import { EmptyState } from '../../../design-system/components/EmptyState/EmptyState';
 import { InlineMessage } from '../../../design-system/components/InlineMessage/InlineMessage';
 import { LoadingState } from '../../../design-system/components/LoadingState/LoadingState';
+import { Icon } from '../../../design-system/icons/Icon';
 import { Button } from '../../../design-system/primitives/Button/Button';
 import { Radio } from '../../../design-system/primitives/Choice/Radio';
 import { Text } from '../../../design-system/primitives/Text/Text';
@@ -17,7 +20,8 @@ export type PhotoAnalysisResult = { kind: 'suggestions'; candidates: FoodCandida
 /**
  * The photo step's phases. `permission-pending` is the app-side state while the system
  * camera prompt (P01) is showing: capture is paused and the other methods stay reachable.
- * The prototype has no camera, so that phase is reached only through `initialPhase`.
+ * The prototype has no camera, so that phase, `denied` and `failed` are reached only
+ * through `initialPhase` (ledger D-24).
  */
 export type PhotoPhase =
   | { kind: 'permission-pending' }
@@ -30,7 +34,7 @@ export type PhotoPhase =
 
 export interface PhotoScreenProps {
   /** Analysis for a captured image. Responses after Cancel, Retake or Back are ignored. */
-  analyse: (imageId: string, options: { simulateFailure: boolean }) => Promise<PhotoAnalysisResult>;
+  analyse: (imageId: string) => Promise<PhotoAnalysisResult>;
   /** The image the simulated capture produces. */
   sampleImageUrl: string;
   /** The suggestion the user selected and asked to review goes to S07 as a photo-sourced candidate. */
@@ -46,6 +50,7 @@ export interface PhotoScreenProps {
  * S05 — Photo. Capture → preview with retake → analysis → suggestions with an explicit
  * selection, reviewed only when the user asks. A suggestion is never a measurement; the
  * amount is set on review. Failure keeps the image so the same analysis can be retried.
+ * The stage is the shared dark viewfinder; there are no simulator controls.
  */
 export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBack, onSearchInstead, onEnterManually, initialPhase }: PhotoScreenProps) {
   const [phase, setPhase] = useState<PhotoPhase>(initialPhase ?? { kind: 'capture' });
@@ -60,12 +65,12 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
     };
   }, []);
 
-  const run = (imageId: string, simulateFailure: boolean) => {
+  const run = (imageId: string) => {
     const id = ++request.current;
     setSelectedId(null);
     setNoneOpen(false);
     setPhase({ kind: 'analysing', imageId });
-    analyse(imageId, { simulateFailure }).then((result) => {
+    analyse(imageId).then((result) => {
       if (id !== request.current) return;
       if (result.kind === 'suggestions') setPhase({ kind: 'suggestions', imageId, candidates: result.candidates });
       else setPhase({ kind: 'failed', imageId });
@@ -91,12 +96,6 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
   );
 
   const showsImage = phase.kind === 'preview' || phase.kind === 'analysing' || phase.kind === 'suggestions' || phase.kind === 'failed';
-  const preview = showsImage ? (
-    <figure className={styles.preview}>
-      <img className={styles.previewImage} src={sampleImageUrl} alt="Sample image standing in for your photo" />
-    </figure>
-  ) : null;
-
   const selected = phase.kind === 'suggestions' ? phase.candidates.find((c) => c.id === selectedId) : undefined;
 
   return (
@@ -107,28 +106,26 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
           title="Camera access is needed to take a photo"
           actions={
             <>
-              <Button variant="primary" onClick={onSearchInstead}>
-                Search by name
+              <Button variant="primary" onClick={retake}>
+                Try again
               </Button>
-              <Button variant="secondary" onClick={onEnterManually}>
-                Enter manually
-              </Button>
+              {otherMethods}
             </>
           }
         >
-          Allow camera access in your browser or system settings, or add the food another way.
+          Allow camera access for this site in your browser settings (usually under Site settings or Permissions), then try again — or add the food another way.
         </EmptyState>
       ) : null}
 
       {phase.kind === 'permission-pending' ? (
         <>
-          <div className={styles.viewfinder} aria-live="polite">
-            <div className={styles.frame} data-paused />
-            <Text as="p" variant="body" color="primary">
+          <CameraStage status="Waiting for permission" tone="paused" guide="circle" aspect="1:1" caption="Allow access in the system prompt to continue." />
+          <div className={styles.guidance} aria-live="polite">
+            <Text as="p" variant="compact-title" color="primary">
               Waiting for camera permission
             </Text>
             <Text as="p" variant="supporting" color="secondary" wrap>
-              Allow access in the system prompt to continue, or add the food another way.
+              The browser or system is asking for camera access; that prompt is outside this app. Allow it to continue, or add the food another way.
             </Text>
           </div>
           <div className={styles.demoActions}>{otherMethods}</div>
@@ -137,39 +134,49 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
 
       {phase.kind === 'capture' ? (
         <>
-          <div className={styles.viewfinder}>
-            <div className={styles.frame} />
-            <Text as="p" variant="body" color="primary">
+          <CameraStage status="Frame the food" tone="scanning" guide="circle" aspect="1:1" />
+          <div className={styles.guidance}>
+            <Text as="p" variant="compact-title" color="primary">
               Frame the food, then take the photo
             </Text>
-            <Text as="p" variant="supporting" color="secondary">
-              You will see a suggestion to check before anything is calculated.
-            </Text>
-          </div>
-          <div className={styles.actions}>
-            <Button variant="primary" size="large" block onClick={() => setPhase({ kind: 'preview', imageId: 'sample-1' })}>
-              Take photo
-            </Button>
-          </div>
-          <fieldset className={styles.demo}>
-            <legend>
-              <Text variant="label" color="secondary">
-                Prototype controls
-              </Text>
-            </legend>
             <Text as="p" variant="supporting" color="secondary" wrap>
-              This prototype has no camera or recognition service. Take photo uses a sample image, and analysis returns fixed suggestions.
+              Keep the whole dish visible and well lit. You will see a suggestion to check before anything is calculated.
             </Text>
-            <div className={styles.demoActions}>
-              <Button variant="secondary" size="small" onClick={() => setPhase({ kind: 'denied' })}>
-                Simulate camera denied
-              </Button>
-            </div>
-          </fieldset>
+          </div>
+          <div className={styles.shutterRow}>
+            <button type="button" className={styles.shutter} onClick={() => setPhase({ kind: 'preview', imageId: 'sample-1' })}>
+              <Icon icon={Camera} size="emphasis" />
+              <Text as="span" variant="action-sm" color="inherit">
+                Take photo
+              </Text>
+            </button>
+          </div>
+          <Text as="p" variant="caption" color="secondary" align="center" wrap>
+            This prototype has no camera or recognition service: Take photo uses a labelled sample image, and analysis returns fixed suggestions.
+          </Text>
         </>
       ) : null}
 
-      {preview}
+      {showsImage ? (
+        <CameraStage
+          imageUrl={sampleImageUrl}
+          imageAlt="Sample image standing in for your photo"
+          guide="none"
+          aspect="4:3"
+          tone={phase.kind === 'analysing' ? 'detected' : 'paused'}
+          status={
+            phase.kind === 'preview'
+              ? 'Sample photo'
+              : phase.kind === 'analysing'
+                ? 'Analysing'
+                : phase.kind === 'failed'
+                  ? 'Analysis failed'
+                  : phase.kind === 'suggestions' && phase.candidates.length === 0
+                    ? 'No match'
+                    : 'Suggestions ready'
+          }
+        />
+      ) : null}
 
       {phase.kind === 'preview' ? (
         <>
@@ -177,25 +184,13 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
             Sample image used by this prototype. It is not a photo of your food and it does not measure the portion.
           </Text>
           <div className={styles.actions}>
-            <Button variant="primary" size="large" block onClick={() => run(phase.imageId, false)}>
+            <Button variant="primary" size="large" block onClick={() => run(phase.imageId)}>
               Analyse photo
             </Button>
             <Button variant="secondary" block onClick={retake}>
               Retake
             </Button>
           </div>
-          <fieldset className={styles.demo}>
-            <legend>
-              <Text variant="label" color="secondary">
-                Prototype controls
-              </Text>
-            </legend>
-            <div className={styles.demoActions}>
-              <Button variant="secondary" size="small" onClick={() => run(phase.imageId, true)}>
-                Analyse with a simulated failure
-              </Button>
-            </div>
-          </fieldset>
         </>
       ) : null}
 
@@ -288,7 +283,7 @@ export function PhotoScreen({ analyse, sampleImageUrl, onSuggestionChosen, onBac
           title="Analysis failed"
           actions={
             <>
-              <Button variant="primary" size="small" onClick={() => run(phase.imageId, false)}>
+              <Button variant="primary" size="small" onClick={() => run(phase.imageId)}>
                 Try again
               </Button>
               <Button variant="secondary" size="small" onClick={retake}>

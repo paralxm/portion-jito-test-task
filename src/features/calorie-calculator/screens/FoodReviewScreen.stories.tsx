@@ -36,7 +36,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'S07 — one review screen for every entry method; only the source explanation differs. The amount to calculate is separate from the nutrition basis and the result previews as you type — reading it completes the calorie task. **Add to today** is the one optional, explicit commit (enabled only for a calculable result, never fired twice for one submission); **Done** closes the task without logging. Opened from a Home row the screen is in existing-entry mode: the draft starts from the logged portion, **Update entry** commits to the same entry, **Remove entry** asks first, and Back with a changed amount offers Keep editing / Discard.',
+          'S07 — one review screen for every entry method; only the source explanation differs. The amount to calculate is separate from the nutrition basis and the result previews as you type — reading it completes the calorie task. **Add to today** (enabled only for a calculable result) opens the Add-to-meal sheet, whose *Add to {meal}* is the one explicit commit; **Done** closes the task without logging. Opened from a Home row the screen is in existing-entry mode: the draft starts from the logged portion and meal, a `MealPicker` lets the meal change, **Update entry** commits portion and meal to the same entry, **Remove entry** asks first, and Back with a changed amount offers Keep editing / Discard.',
       },
     },
   },
@@ -55,10 +55,9 @@ export const FromSearch: Story = {
     await userEvent.type(amount, '300');
     await expect(canvas.getByText('540')).toBeInTheDocument();
     const add = canvas.getByRole('button', { name: 'Add to today' });
+    await expect(add).toHaveAttribute('aria-haspopup', 'dialog');
     await userEvent.click(add);
-    await userEvent.click(add);
-    // One submission creates one entry, even when tapped twice.
-    await expect(args.onAddToToday).toHaveBeenCalledTimes(1);
+    // Add to today hands the portion to the Add-to-meal sheet, which owns the commit (ledger D-23).
     await expect(args.onAddToToday).toHaveBeenCalledWith({ quantity: 300, unitId: 'g' });
   },
 };
@@ -147,10 +146,12 @@ export const PartialData: Story = {
 
 export const ExistingEntry: Story = {
   name: 'Existing entry — Update entry keeps the same entry',
-  args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' } },
+  args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' }, initialMeal: 'breakfast' },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1, name: 'Edit entry' })).toBeInTheDocument();
+    await expect(canvas.getByRole('radio', { name: 'Breakfast' })).toBeChecked();
+    await userEvent.click(canvas.getByRole('radio', { name: 'Lunch' }));
     await expect(canvas.queryByRole('button', { name: 'Change food' })).toBeNull();
     await expect(canvas.getByLabelText('Amount to calculate')).toHaveValue('300');
     const amount = canvas.getByLabelText('Amount to calculate');
@@ -158,13 +159,13 @@ export const ExistingEntry: Story = {
     await userEvent.type(amount, '150');
     await expect(canvas.getByText('275')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Update entry' }));
-    await expect(args.onUpdateEntry).toHaveBeenCalledWith({ quantity: 150, unitId: 'g' });
+    await expect(args.onUpdateEntry).toHaveBeenCalledWith({ quantity: 150, unitId: 'g' }, 'lunch');
   },
 };
 
 export const RemoveEntry: Story = {
   name: 'Existing entry — Remove asks first',
-  args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' } },
+  args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' }, initialMeal: 'breakfast' },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Remove entry' }));
@@ -179,7 +180,7 @@ export const RemoveEntry: Story = {
 
 export const ExistingEntryDirtyBack: Story = {
   name: 'Existing entry — Back with a changed amount asks to keep or discard',
-  args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' } },
+  args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' }, initialMeal: 'breakfast' },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     // Unchanged: Back leaves directly.
@@ -196,6 +197,19 @@ export const ExistingEntryDirtyBack: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Back' }));
     await userEvent.click(within(await canvas.findByRole('alertdialog')).getByRole('button', { name: 'Discard' }));
     await expect(args.onBack).toHaveBeenCalledTimes(2);
+  },
+};
+
+export const UnassignedEntry: Story = {
+  name: 'Existing entry without a meal — Update entry waits for a choice',
+  args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' }, initialMeal: null },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText(/This entry has no meal yet/)).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Update entry' })).toBeDisabled();
+    await userEvent.click(canvas.getByRole('radio', { name: 'Snacks' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Update entry' }));
+    await expect(args.onUpdateEntry).toHaveBeenCalledWith({ quantity: 300, unitId: 'g' }, 'snack');
   },
 };
 

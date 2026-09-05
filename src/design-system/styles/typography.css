@@ -34,7 +34,8 @@
 .portion-type-control-label,
 .portion-type-segmented-label,
 .portion-type-segmented-label-selected,
-.portion-type-wordmark {
+.portion-type-wordmark,
+.portion-type-wordmark-compact {
   font-family: var(--portion-type-family);
   font-size: var(--portion-type-size);
   font-weight: var(--portion-type-weight);
@@ -250,4 +251,13 @@
 
 .portion-text-center {
   text-align: center;
+}
+
+.portion-type-wordmark-compact {
+  --portion-type-family: var(--portion-typography-wordmark-compact-font-family);
+  --portion-type-size: var(--portion-typography-wordmark-compact-font-size);
+  --portion-type-weight: var(--portion-typography-wordmark-compact-font-weight);
+  --portion-type-line-height: var(--portion-typography-wordmark-compact-line-height);
+  --portion-type-letter-spacing: var(--portion-typography-wordmark-compact-letter-spacing);
+  text-transform: lowercase;
 }

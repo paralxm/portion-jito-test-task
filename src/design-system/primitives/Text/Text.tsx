@@ -30,7 +30,9 @@ export type TextVariant =
   | 'method-title'
   | 'metric-inline'
   | 'metric-secondary'
-  | 'wordmark';
+  | 'wordmark'
+  /** The compact brand lockup, 18/24 with the wordmark's tracking. */
+  | 'wordmark-compact';
 
 export type TextColor = 'primary' | 'secondary' | 'on-action' | 'error' | 'inherit';
 

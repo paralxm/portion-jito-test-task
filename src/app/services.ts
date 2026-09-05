@@ -2,7 +2,10 @@
  * Simulated services for the evaluator-facing prototype. Every function resolves from
  * deterministic fixtures after a short delay so loading, failure and late-response
  * handling can be exercised. None of this is a real search, barcode, recognition or
- * recipe backend, and the app labels it as such where a user could mistake it.
+ * recipe backend, and the app labels it as such where a user could mistake it. There
+ * are no simulator or debug controls in the product (ledger D-24): the scanner reads
+ * one sample barcode on its own, and the other scanner outcomes are deterministic
+ * story states.
  */
 import type { FoodCandidate } from '../features/calorie-calculator/domain/calculation';
 import { barcodeCatalogue, photoSuggestions, searchFoods } from '../features/calorie-calculator/domain/fixtures';
@@ -40,11 +43,24 @@ export async function loadRecipeService(id: string): Promise<Recipe | null> {
   return findRecipe(id) ?? null;
 }
 
+/** The fixture codes: the sample the prototype camera reads, and two the deterministic stories inject. */
 export const BARCODE_DEMO_CODES = {
   found: '5012345678900',
   unknown: '4009999999990',
   failing: '0000000000000',
 } as const;
+
+/** How long the prototype "camera" scans before it reads the sample barcode. */
+export const BARCODE_READ_DELAY_MS = 1800;
+
+/**
+ * The prototype camera: there is no real camera or decoder, so scanning "reads" the
+ * sample barcode after a fixed delay. The screen ignores a read that lands after Back.
+ */
+export async function readBarcodeService(): Promise<string> {
+  await delay(BARCODE_READ_DELAY_MS);
+  return BARCODE_DEMO_CODES.found;
+}
 
 export async function lookupBarcodeService(code: string): Promise<BarcodeLookupResult> {
   await delay(700);
@@ -53,8 +69,7 @@ export async function lookupBarcodeService(code: string): Promise<BarcodeLookupR
   return candidate ? { kind: 'found', candidate } : { kind: 'not-found' };
 }
 
-export async function analysePhotoService(_imageId: string, options: { simulateFailure: boolean }): Promise<PhotoAnalysisResult> {
+export async function analysePhotoService(_imageId: string): Promise<PhotoAnalysisResult> {
   await delay(900);
-  if (options.simulateFailure) return { kind: 'failed' };
   return { kind: 'suggestions', candidates: [...photoSuggestions] };
 }

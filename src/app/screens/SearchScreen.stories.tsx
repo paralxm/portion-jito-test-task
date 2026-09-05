@@ -19,12 +19,14 @@ function Harness({
   initialCriteria = {},
   onOpenFood,
   onOpenRecipe,
+  onScanBarcode = fn(),
 }: {
   initialScope?: SearchScope;
   initialQuery?: string;
   initialCriteria?: RecipeCriteria;
   onOpenFood: (candidate: FoodCandidate) => void;
   onOpenRecipe: (id: string) => void;
+  onScanBarcode?: () => void;
 }) {
   const [scope, setScope] = useState<SearchScope>(initialScope);
   const [query, setQuery] = useState(initialQuery);
@@ -47,6 +49,7 @@ function Harness({
       onRemoveCriterion={(key) => setCriteria((c) => removeCriterion(c, key))}
       onOpenFood={onOpenFood}
       onOpenRecipe={onOpenRecipe}
+      onScanBarcode={onScanBarcode}
       onRetry={fn()}
       onEnterManually={fn()}
       navigation={navigation}
@@ -71,6 +74,7 @@ const meta = {
     onRemoveCriterion: fn(),
     onOpenFood: fn(),
     onOpenRecipe: fn(),
+    onScanBarcode: fn(),
     onRetry: fn(),
     onEnterManually: fn(),
     navigation,
@@ -96,6 +100,16 @@ export const Idle: Story = {
     await expect(canvas.getByRole('tab', { name: 'Food' })).toHaveAttribute('aria-selected', 'true');
     await expect(canvas.getByText('Search for a food or dish')).toBeInTheDocument();
     await expect(canvas.queryByRole('button', { name: /^Filters/ })).toBeNull();
+    // Food scope carries the barcode shortcut at the end of the field.
+    await expect(canvas.getByRole('button', { name: 'Scan barcode' })).toBeVisible();
+  },
+};
+
+export const BarcodeShortcut: Story = {
+  name: 'Food scope — the barcode action opens the scanner in one tap',
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Scan barcode' }));
+    await expect(args.onScanBarcode).toHaveBeenCalledTimes(1);
   },
 };
 
@@ -108,7 +122,8 @@ export const Interactive: Story = {
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('1 food found');
     await userEvent.click(canvas.getByRole('tab', { name: 'Recipes' }));
     await expect(canvas.getByRole('searchbox')).toHaveValue('lentil');
-    await expect(canvas.getByRole('button', { name: /^Filters/ })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
+    await expect(canvas.queryByRole('button', { name: 'Scan barcode' })).toBeNull();
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('1 recipe found');
     await userEvent.click(canvas.getByRole('button', { name: 'Lentil soup' }));
     await expect(args.onOpenRecipe).toHaveBeenCalledWith('recipe-lentil-soup');

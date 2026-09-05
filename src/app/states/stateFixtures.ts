@@ -1,22 +1,35 @@
 /**
- * Deterministic fixtures for the 41 mapped product-state stories (docs/design/hifi-decisions.md §1).
- * Every date-dependent value derives from one fixed baseline so captures never drift with
- * the host clock; the runtime keeps the real clock.
+ * Deterministic fixtures for the mapped product-state stories (docs/design/hifi-decisions.md
+ * §1 and §10.3). Every date-dependent value derives from one fixed baseline so captures
+ * never drift with the host clock; the runtime keeps the real clock.
  */
 import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
+import type { DailyGoal } from '../../features/calorie-calculator/domain/daily-log';
 import { fixtureC, foodCatalogue, photoSuggestions } from '../../features/calorie-calculator/domain/fixtures';
-import { homeEntries } from '../../features/calorie-calculator/domain/home-fixtures';
+import { budgetFixtureEntries, budgetFixtureGoal, homeEntries } from '../../features/calorie-calculator/domain/home-fixtures';
 import type { ManualDraft } from '../../features/calorie-calculator/domain/manual-entry';
-import { recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
+import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import type { Recipe, RecipeCriteria } from '../../features/recipe-discovery/domain/matching';
+import { recipeToCandidate } from '../../features/recipe-discovery/domain/recipe-entry';
 
 /** The one baseline instant for stories, visual fixtures and date-dependent test data. */
 export const FIXED_NOW_ISO = '2026-09-04T12:00:00Z';
 export const FIXED_NOW = Date.parse(FIXED_NOW_ISO);
+/** The header's date line and the meal suggestion read this instant instead of the clock. */
+export const FIXED_DATE = new Date(FIXED_NOW);
 
 /** S01-2: the ui-contract §1 populated Home (1,350 of 2,200 kcal), logged at the baseline. */
 export const populatedEntries = homeEntries(FIXED_NOW);
 export const GOAL_KCAL = 2200;
+export const goal2200: DailyGoal = { kcal: GOAL_KCAL };
+
+/** The brief's partial-progress fixture: 1,600 remaining, 400 consumed · 20 %, goal 2,000, 24 / 120 · 48 / 220 · 14 / 65 g. */
+export const budgetEntries = budgetFixtureEntries(FIXED_NOW);
+export const budgetGoal: DailyGoal = budgetFixtureGoal;
+
+/** Water fixtures (ledger D-22): the partial total the brief shows, and the reference. */
+export const WATER_PARTIAL_ML = 1250;
+export const WATER_GOAL_ML = 2000;
 
 /** S03-2 / S02-5: three applied criteria that leave one match in the catalogue. */
 export const filteredCriteria: RecipeCriteria = { dietary: 'vegan', caloriesMax: 500, proteinMin: 10 };
@@ -28,6 +41,10 @@ export const detailsCriteria: RecipeCriteria = { caloriesMax: 500, proteinMin: 2
 /** Fixture C at the contract's 300 g example (540 kcal, 18 / 63 / 24 g). */
 export const reviewPortion = { quantity: 300, unitId: 'g' } as const;
 export const fixtureCandidate = fixtureC;
+
+/** O05-2: fixture R as a meal candidate (1 serving = 300 g). */
+export const recipeCandidate = recipeToCandidate(fixtureR);
+export const servingPortion = { quantity: 1, unitId: 'serving' } as const;
 
 /** S07-5: a photo suggestion with partial nutrition, so unknown macros are visible. */
 export const photoPartialSuggestion: FoodCandidate = {
@@ -53,7 +70,7 @@ export const manualCandidate: FoodCandidate = {
 export const filledDraft: ManualDraft = { name: 'Lentil soup', referenceQuantity: '300', referenceUnit: 'g', calories: '450', protein: '24', carbohydrates: '', fat: '18' };
 export const invalidDraft: ManualDraft = { ...filledDraft, referenceQuantity: 'abc', calories: '' };
 
-/** S08-4: the long-title recipe without a photo and with an unknown protein value. */
-export const longTitleNoPhotoPartial: Recipe = { ...recipeCatalogue[2], proteinG: null };
+/** S08-4: the long-title recipe without a photo and with an unknown protein value (story fixture; the catalogue recipe has a photo, ledger D-28). */
+export const longTitleNoPhotoPartial: Recipe = { ...recipeCatalogue[2], imageUrl: undefined, proteinG: null };
 
 export const BARCODE = { found: '5012345678900', unknown: '4009999999990', failing: '0000000000000' } as const;

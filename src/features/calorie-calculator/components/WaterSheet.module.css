@@ -1,0 +1,25 @@
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+}
+
+.figure {
+  display: flex;
+  align-items: baseline;
+  gap: var(--portion-ref-space-8);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.legend {
+  padding: 0;
+}

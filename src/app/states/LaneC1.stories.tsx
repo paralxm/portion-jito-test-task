@@ -9,6 +9,8 @@ import { BARCODE } from './stateFixtures';
 
 /** A lookup that never resolves: the pending state stays on screen for inspection. */
 const pendingLookup = () => new Promise<never>(() => {});
+/** A camera that never reads, so the scanning state stays on screen. */
+const neverReads = () => new Promise<string>(() => {});
 
 const meta = {
   title: 'Product states/Lane C1 — Barcode acquisition',
@@ -17,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Low-fi lane C1 (178:2): reading, lookup and four distinct failures, the app-side state behind the system permission prompt (P01), and review of a matched product. Each phase is set through the screen’s `initialPhase` test-harness prop; in the runtime the same phases follow a real (simulated) read.',
+          'Low-fi lane C1 (178:2) on the shared dark camera stage: reading, lookup and four distinct failures, the app-side state behind the system permission prompt (P01), and review of a matched product. Each phase is set through the screen’s `initialPhase` test-harness prop. In the runtime the prototype camera reads the sample code on its own (S04-1 → S04-2 → S07-4); the not-found, failed, unreadable and denied phases have no simulator controls in the product and are verified here as deterministic stories (ledger D-24).',
       },
     },
   },
@@ -27,7 +29,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const barcode = (initialPhase: BarcodePhase, lookup: BarcodeScreenLookup = pendingLookup) => (
-  <BarcodeScreen lookup={lookup} demoCodes={BARCODE} onFound={fn()} onBack={fn()} onSearchInstead={fn()} onEnterManually={fn()} initialPhase={initialPhase} />
+  <BarcodeScreen read={neverReads} lookup={lookup} onFound={fn()} onBack={fn()} onSearchInstead={fn()} onEnterManually={fn()} initialPhase={initialPhase} />
 );
 type BarcodeScreenLookup = Parameters<typeof BarcodeScreen>[0]['lookup'];
 
@@ -37,7 +39,7 @@ export const S04_1: Story = {
     docs: {
       description: {
         story:
-          'Purpose: the live scan region with guidance; the other methods stay reachable. Entry: Scan barcode from O01 with camera access. Fixture: scanning phase. Primary action: a read → S04-2. Next: S04-2 / S04-3. Limitation: the prototype has no camera, so reads come from the labelled prototype controls.',
+          'Purpose: the live scan region with guidance; the other methods stay reachable. Entry: Scan barcode from O01 with camera access. Fixture: scanning phase. Primary action: a read → S04-2. Next: S04-2 / S04-3. Limitation: the prototype has no camera; the runtime reads a sample barcode after a moment and the stage says so. The scan line runs only in this phase.',
       },
     },
   },
@@ -45,7 +47,10 @@ export const S04_1: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1, name: 'Scan barcode' })).toBeInTheDocument();
-    await expect(canvas.getByText('Point the camera at the product barcode')).toBeVisible();
+    await expect(canvas.getByText('Point the camera at the barcode')).toBeVisible();
+    await expect(canvas.getByText('Scanning')).toBeVisible();
+    await expect(canvasElement.querySelector('[class*="scanLine"]')).not.toBeNull();
+    await expect(canvas.queryByText(/Simulate/)).toBeNull();
     await expect(canvas.queryByRole('navigation')).toBeNull();
   },
 };
@@ -65,6 +70,9 @@ export const S04_2: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('status')).toHaveTextContent('Looking up product');
     await expect(canvas.getByText(/Scanning is paused/)).toBeVisible();
+    await expect(canvas.getByText('Code read')).toBeVisible();
+    // Detection stops the scan line; the chip and corners carry the detected treatment with wording.
+    await expect(canvasElement.querySelector('[class*="scanLine"]')).toBeNull();
   },
 };
 
@@ -100,8 +108,10 @@ export const S04_4: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('alert')).toHaveTextContent('Product not found');
+    await expect(canvas.getByRole('alert')).toHaveTextContent('read correctly');
     await expect(canvas.getByRole('alert')).toHaveTextContent(BARCODE.unknown);
-    await expect(canvas.getByRole('button', { name: 'Search by name' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Enter manually' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Scan again' })).toBeVisible();
   },
 };
 
@@ -156,6 +166,9 @@ export const S04_6: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('alert')).toHaveTextContent('Camera access is needed to scan');
+    await expect(canvas.getByRole('alert')).toHaveTextContent('browser settings');
+    await expect(canvas.getByRole('button', { name: 'Try again' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: /Open settings/ })).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Search by name' })).toBeVisible();
   },
 };
@@ -166,7 +179,7 @@ export const S07_4: Story = {
     docs: {
       description: {
         story:
-          'Purpose: the same review step with the scanned source shown and correction emphasised before anything is added. Entry: lookup found a product. Fixture: Oat drink, unsweetened, 43 kcal per 100 ml. Primary action: Add to today. Secondary: Change food → search; Done; Back → the paused scanner. Limitation: none.',
+          'Purpose: the same review step with the scanned source shown and correction emphasised before anything is added. Entry: lookup found a product. Fixture: Oat drink, unsweetened, 43 kcal per 100 ml. Primary action: Add to today → O05 (the sheet commits). Secondary: Change food → search; Done; Back → the paused scanner. Limitation: none.',
       },
     },
   },
@@ -176,6 +189,7 @@ export const S07_4: Story = {
     await expect(canvas.getByText(/Matched from the barcode/)).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Change food' })).toBeVisible();
     await expect(canvas.getByText('43')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Add to today' })).toHaveAttribute('aria-haspopup', 'dialog');
   },
 };
 

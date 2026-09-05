@@ -5,11 +5,12 @@
   background: var(--portion-color-background-canvas);
 }
 
-/* The content region grows and scrolls the document normally. Bottom padding keeps the
-   last control clear of the navigation when the column is taller than the viewport. */
+/* The content region grows and scrolls the document normally. Its bottom padding is the
+   measured height of the fixed navigation plus one section step, so the last control is
+   never underneath the bar. */
 .content {
   flex: 1 0 auto;
-  padding-block-end: var(--portion-ref-space-24);
+  padding-block-end: calc(var(--portion-layout-navigation-height, 0px) + var(--portion-ref-space-24));
   min-inline-size: 0;
 }
 
@@ -25,5 +26,15 @@
 
 .footer {
   padding-block: var(--portion-ref-space-8);
+  padding-block-end: calc(var(--portion-layout-navigation-height, 0px) + var(--portion-ref-space-8));
   background: var(--portion-color-background-canvas);
+}
+
+/* The bar's slot is the fixed element: full viewport width so the bar's own Container
+   centres it within the 430 px shell; the bar owns the bottom safe area. */
+.navigationSlot {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--portion-layer-navigation);
 }

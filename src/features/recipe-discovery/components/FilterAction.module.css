@@ -1,0 +1,20 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.button {
+  color: var(--portion-color-action-primary);
+}
+
+/* The count badge overlaps the glyph's top-end corner; decorative here because the
+   name already speaks the count. A canvas-coloured halo separates it from the strokes
+   beneath so the overlap reads as a badge, not a collision. */
+.count {
+  position: absolute;
+  inset-block-start: var(--portion-ref-space-2);
+  inset-inline-end: var(--portion-ref-space-2);
+  box-shadow: 0 0 0 2px var(--portion-color-surface-canvas);
+  pointer-events: none;
+}

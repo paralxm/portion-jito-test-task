@@ -30,6 +30,11 @@ export interface NutritionValueProps {
   category?: NutrientCategory;
   /** The basis this value belongs to, e.g. "For 250 g" or "Per serving (300 g)". */
   basis?: ReactNode;
+  /**
+   * A user-entered target the value is measured against, rendered as "24 / 120 g" with
+   * the target in the secondary colour. Only known values show it; it is never derived.
+   */
+  target?: number | null;
   status?: NutritionValueStatus;
   className?: string;
 }
@@ -42,10 +47,11 @@ const UNIT_VARIANT = { main: 'body', secondary: 'supporting', compact: 'supporti
  * accessible text. Tabular figures stabilise updates; the box is allowed to grow when
  * a digit is added. Unknown values are named, never rendered as zero.
  */
-export function NutritionValue({ value, unit, size = 'inline', label, category, basis, status = 'known', className }: NutritionValueProps) {
+export function NutritionValue({ value, unit, size = 'inline', label, category, basis, target, status = 'known', className }: NutritionValueProps) {
   const isKnown = status === 'known' && value !== null;
   const valueVariant = VALUE_VARIANT[size];
   const unitVariant = UNIT_VARIANT[size];
+  const hasTarget = isKnown && typeof target === 'number' && Number.isFinite(target) && target > 0;
 
   return (
     <div className={[styles.value, className].filter(Boolean).join(' ')} data-size={size} data-status={status}>
@@ -63,6 +69,13 @@ export function NutritionValue({ value, unit, size = 'inline', label, category, 
             <Text variant={valueVariant} numeric color="primary" className={styles.number}>
               {formatQuantity(value, unit)}
             </Text>
+            {hasTarget ? (
+              <Text variant={unitVariant} numeric color="secondary" className={styles.target}>
+                <VisuallyHidden>of </VisuallyHidden>
+                <span aria-hidden="true">/ </span>
+                {formatQuantity(target as number, unit)}
+              </Text>
+            ) : null}
             <Text variant={unitVariant} color={size === 'inline' ? 'primary' : 'secondary'} className={styles.unit}>
               {unit}
             </Text>

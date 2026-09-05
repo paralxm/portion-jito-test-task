@@ -5,9 +5,9 @@ import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-sy
 import { photoSuggestions, samplePhotoImage } from '../domain/fixtures';
 import { PhotoScreen, type PhotoAnalysisResult } from './PhotoScreen';
 
-const analyse = async (_imageId: string, options: { simulateFailure: boolean }): Promise<PhotoAnalysisResult> => {
+const analyse = async (): Promise<PhotoAnalysisResult> => {
   await new Promise((resolve) => setTimeout(resolve, 60));
-  return options.simulateFailure ? { kind: 'failed' } : { kind: 'suggestions', candidates: [...photoSuggestions] };
+  return { kind: 'suggestions', candidates: [...photoSuggestions] };
 };
 
 const meta = {
@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'S05 — capture, preview with retake, analysis, then suggestions with an explicit selection: a radio row is marked, **Review selected match** opens review, and **None of these** reveals Retake / Search by name / Enter manually. A suggestion is never a measurement; the amount is set on review. Analysis failure keeps the image for a retry. There is no camera or recognition service in this prototype; the sample photograph and fixed suggestions are labelled as such.',
+          'S05 — the dark capture stage with a circular framing guide and a 72 px shutter; preview with retake; analysis; then suggestions with an explicit selection: a radio row is marked, **Review selected match** opens review, and **None of these** reveals Retake / Search by name / Enter manually. A suggestion is never a measurement; the amount is set on review. Analysis failure and camera denial are reached through `initialPhase` — there are no simulator controls in the product (ledger D-24). There is no camera or recognition service in this prototype; the sample photograph and fixed suggestions are labelled as such.',
       },
     },
   },
@@ -30,7 +30,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Capture: Story = {
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: 'Take photo' })).toBeInTheDocument();
+    const canvas = within(canvasElement);
+    const shutter = canvas.getByRole('button', { name: 'Take photo' });
+    await expect(shutter).toBeInTheDocument();
+    await expect(shutter.getBoundingClientRect().width).toBeGreaterThanOrEqual(72);
+    await expect(canvas.getByText('Frame the food')).toBeVisible();
+    await expect(canvas.queryByText(/Simulate/)).toBeNull();
   },
 };
 
@@ -86,12 +91,11 @@ export const CancelAnalysis: Story = {
 
 export const AnalysisFailed: Story = {
   name: 'Analysis failed → retry with the same image',
+  args: { initialPhase: { kind: 'failed', imageId: 'sample-1' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Take photo' }));
-    await userEvent.click(canvas.getByRole('button', { name: 'Analyse with a simulated failure' }));
-    await new Promise((resolve) => setTimeout(resolve, 150));
     await expect(canvas.getByRole('alert')).toHaveTextContent('Analysis failed');
+    await expect(canvas.getByRole('img', { name: /Sample image/ })).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Try again' }));
     await new Promise((resolve) => setTimeout(resolve, 150));
     await expect(canvas.getByRole('group', { name: 'Suggested foods' })).toBeInTheDocument();
@@ -121,9 +125,9 @@ export const PermissionPending: Story = {
 
 export const CameraDenied: Story = {
   name: 'Camera denied',
+  args: { initialPhase: { kind: 'denied' } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Simulate camera denied' }));
     await expect(canvas.getByRole('alert')).toHaveTextContent('Camera access is needed to take a photo');
     await userEvent.click(canvas.getByRole('button', { name: 'Search by name' }));
     await expect(args.onSearchInstead).toHaveBeenCalledTimes(1);

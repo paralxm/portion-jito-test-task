@@ -12,7 +12,7 @@ const meta = {
   title: 'Templates/RootScreenLayout',
   component: RootScreenLayout,
   args: {
-    header: <AppHeader title="Home" showWordmark />,
+    header: <AppHeader variant="root" title="Home" context="Today · Sep 4" />,
     navigation: <NavigationBar selected="home" onSelect={fn()} onLogFood={fn()} />,
     children: (
       <EmptyState title="Nothing logged today">Add a food or dish to review its portion and nutrition. Adding it to today is optional.</EmptyState>
@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Root destination layout: header, scrolling content, optional in-flow footer and the bottom navigation. The column fills the viewport height so the bar sits at the bottom on tall screens and follows the content on short ones. Nothing is fixed over content.',
+          'Root destination layout: header, scrolling content, optional in-flow footer and the bottom navigation, whose slot is fixed to the viewport (ledger D-26). The layout measures the bar and reserves matching bottom padding, scroll padding and the `--portion-navigation-inset` custom property, so content, focused fields and anchored feedback never sit under the bar. Header and navigation own their safe areas once.',
       },
     },
   },
@@ -42,7 +42,7 @@ export const Empty: Story = {
 };
 
 export const LongContent: Story = {
-  name: 'Long content — bar follows the content',
+  name: 'Long content — the bar stays fixed and the content reserves its height',
   args: {
     children: Array.from({ length: 30 }, (_, i) => (
       <Text key={i} as="p" variant="body">
@@ -51,6 +51,17 @@ export const LongContent: Story = {
     )),
   },
   globals: { viewport: { value: 'shortHeight', isRotated: false } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const nav = canvas.getByRole('navigation', { name: 'Main' });
+    const slot = nav.parentElement as HTMLElement;
+    await expect(getComputedStyle(slot).position).toBe('fixed');
+    await expect(Math.round(slot.getBoundingClientRect().bottom)).toBe(window.innerHeight);
+    // The content reserves at least the bar's height, and the bar has no top border.
+    await expect(parseFloat(getComputedStyle(canvas.getByRole('main')).paddingBlockEnd)).toBeGreaterThanOrEqual(nav.getBoundingClientRect().height);
+    await expect(getComputedStyle(nav).borderTopWidth).toBe('0px');
+    await expect(getComputedStyle(document.documentElement).getPropertyValue('--portion-navigation-inset').trim()).not.toBe('0px');
+  },
 };
 
 export const IPhone16PortraitSafeAreas: Story = {
@@ -60,7 +71,7 @@ export const IPhone16PortraitSafeAreas: Story = {
   play: async ({ canvasElement }) => {
     const header = canvasElement.querySelector('header') as HTMLElement;
     const navigation = within(canvasElement).getByRole('navigation', { name: 'Main' });
-    await expect(parseFloat(getComputedStyle(header).paddingBlockStart)).toBe(16 + iPhone16PortraitSafeAreas.top);
+    await expect(parseFloat(getComputedStyle(header).paddingBlockStart)).toBe(12 + iPhone16PortraitSafeAreas.top);
     await expect(parseFloat(getComputedStyle(navigation).paddingBlockEnd)).toBe(iPhone16PortraitSafeAreas.bottom);
     const main = within(canvasElement).getByRole('main');
     await expect(parseFloat(getComputedStyle(main).paddingBlockStart)).toBe(0);

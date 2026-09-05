@@ -41,7 +41,9 @@ export interface FoodCandidate {
   name: string;
   detail?: string;
   /** Where the candidate came from; drives the review screen's explanation. */
-  source: 'search' | 'barcode' | 'photo' | 'manual';
+  source: 'search' | 'barcode' | 'photo' | 'manual' | 'recipe';
+  /** A photograph of the item where one is registered (recipes); evidence of appearance only. */
+  imageUrl?: string;
   reference: ReferenceBasis;
   nutrition: NutritionValues;
   units: readonly SupportedUnit[];
@@ -151,9 +153,18 @@ export function describePortion(candidate: FoodCandidate, portion: Portion): str
   if (!unit) return '';
   const ref = findUnit(candidate, candidate.reference.unitId);
   const q = trimNumber(portion.quantity);
-  if (unit.id === candidate.reference.unitId || !ref) return `${q} ${unit.label}`;
+  const isSymbol = (label: string) => label === 'g' || label === 'ml';
+  const plural = portion.quantity === 1 || isSymbol(unit.label) ? unit.label : `${unit.label}s`;
+  if (unit.id === candidate.reference.unitId || !ref) {
+    // A word-based reference unit (serving, piece) states its mass or volume when the
+    // food's data defines one, e.g. "2 servings (600 g)" for a recipe.
+    const measure = candidate.units.find((u) => u.id !== unit.id && isSymbol(u.label) && u.toReference > 0);
+    if (unit.id === candidate.reference.unitId && !isSymbol(unit.label) && measure) {
+      return `${q} ${plural} (${trimNumber(portion.quantity / measure.toReference)} ${measure.label})`;
+    }
+    return `${q} ${plural}`;
+  }
   const inRef = trimNumber(portion.quantity * unit.toReference);
-  const plural = portion.quantity === 1 ? unit.label : `${unit.label}s`;
   return `${q} ${plural} (${inRef} ${ref.label})`;
 }
 

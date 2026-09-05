@@ -1,18 +1,42 @@
-/* Looks like the search field it leads to, but it is a button: pressing it opens Search
-   in the Recipes scope. It never holds a query itself. */
-.searchEntry {
+/* The search entry and the filter action share one field-shaped row, mirroring Search's
+   field with its trailing action. */
+.searchRow {
   display: flex;
   align-items: center;
-  gap: var(--portion-ref-space-8);
-  inline-size: 100%;
+  min-inline-size: 0;
   min-block-size: var(--portion-size-target-minimum);
-  padding-inline: var(--portion-ref-space-12);
+  padding-inline-start: var(--portion-ref-space-12);
   background: var(--portion-color-background-canvas);
   border: var(--portion-border-width-default) solid var(--portion-color-border-control);
   border-radius: var(--portion-radius-control);
+}
+
+/* Looks like the search field it leads to, but it is a button: pressing it opens Search
+   in the Recipes scope. It never holds a query itself. Its focus ring is drawn inward
+   because the row's boundary is the visual field. */
+.searchEntry {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+  min-block-size: var(--portion-size-target-minimum);
+  margin-inline-start: calc(var(--portion-ref-space-12) * -1);
+  padding-inline: var(--portion-ref-space-12);
+  border: 0;
+  border-radius: var(--portion-radius-control);
+  background: transparent;
   color: var(--portion-color-text-secondary);
   text-align: start;
   cursor: pointer;
+}
+
+.searchEntry:focus-visible {
+  outline-offset: calc(var(--portion-focus-ring-offset) * -1);
+}
+
+.filter :focus-visible {
+  outline-offset: calc(var(--portion-focus-ring-offset) * -1);
 }
 
 .results {

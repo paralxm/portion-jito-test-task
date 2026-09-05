@@ -26,9 +26,9 @@ export interface FoodResultRowProps extends Omit<ButtonHTMLAttributes<HTMLButton
  * Home, a logged entry (selecting it opens that entry for editing). Identity wraps; the
  * calorie value stays inline at 16/24 with the basis beneath it when one is given.
  */
-export function FoodResultRow({ name, detail, calories, basis, className, ...rest }: FoodResultRowProps) {
+export function FoodResultRow({ name, detail, calories, basis, className, 'data-highlighted': highlighted, ...rest }: FoodResultRowProps & { 'data-highlighted'?: true }) {
   return (
-    <div className={[styles.frame, className].filter(Boolean).join(' ')}>
+    <div className={[styles.frame, className].filter(Boolean).join(' ')} data-highlighted={highlighted}>
       <button type="button" className={styles.row} {...rest}>
       <span className={styles.identity}>
         <Text variant="item-title" color="primary" wrap>

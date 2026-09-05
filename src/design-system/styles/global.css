@@ -137,6 +137,11 @@ a {
     --portion-motion-transition-async-result: 0ms;
     --portion-motion-transition-sheet: 0ms;
     --portion-motion-transition-navigation: 0ms;
+    --portion-motion-duration-value-change: 0ms;
+    --portion-motion-duration-scan-sweep: 0ms;
+    --portion-motion-transition-value-change: 0ms;
+    --portion-motion-transition-scan-sweep: 0ms;
+    --portion-motion-transition-toast: 0ms;
   }
 }
 
@@ -151,6 +156,17 @@ a {
   --portion-motion-transition-async-result: 0ms;
   --portion-motion-transition-sheet: 0ms;
   --portion-motion-transition-navigation: 0ms;
+  --portion-motion-duration-value-change: 0ms;
+  --portion-motion-duration-scan-sweep: 0ms;
+  --portion-motion-transition-value-change: 0ms;
+  --portion-motion-transition-scan-sweep: 0ms;
+  --portion-motion-transition-toast: 0ms;
+}
+
+/* The fixed bottom navigation publishes its measured height here (RootScreenLayout sets
+   it on the root element) so a toast or any anchored feedback can sit above the bar. */
+:root {
+  --portion-navigation-inset: 0px;
 }
 
 /* Safe areas are read through custom properties so both the app shell and Storybook

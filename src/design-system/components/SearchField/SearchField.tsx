@@ -1,4 +1,4 @@
-import { useId, type ChangeEvent, type KeyboardEvent, type Ref } from 'react';
+import { useId, type ChangeEvent, type KeyboardEvent, type ReactNode, type Ref } from 'react';
 import { MagnifyingGlass, X } from '@phosphor-icons/react';
 
 import { Icon } from '../../icons/Icon';
@@ -18,6 +18,12 @@ export interface SearchFieldProps {
   onClear?: () => void;
   /** A hint only — never the sole label. */
   placeholder?: string;
+  /**
+   * One trailing action after the clear control, e.g. the barcode shortcut in Food
+   * search or the filter action in Recipe search. An `IconButton` (or a control with the
+   * same 48 px target and an accessible name); its state must not rely on colour alone.
+   */
+  action?: ReactNode;
   autoFocus?: boolean;
   disabled?: boolean;
   className?: string;
@@ -25,12 +31,14 @@ export interface SearchFieldProps {
 }
 
 /**
- * Search input with the leading glyph and a 48 × 48 clear action that appears once a
- * query exists. Query text is retained by the feature; this field never resets it.
+ * Search input with the leading glyph, a 48 × 48 clear action that appears once a
+ * query exists, and one optional trailing action slot. Query text is retained by the
+ * feature; this field never resets it.
  */
-export function SearchField({ label, value, onChange, onSubmit, onClear, placeholder, autoFocus, disabled, className, inputRef }: SearchFieldProps) {
+export function SearchField({ label, value, onChange, onSubmit, onClear, placeholder, action, autoFocus, disabled, className, inputRef }: SearchFieldProps) {
   const id = useId();
   const inputId = `search-${id}`;
+  const clear = value.length > 0 && onClear ? <IconButton icon={X} label="Clear search" onClick={onClear} disabled={disabled} className={styles.clear} /> : null;
   return (
     <div className={[styles.wrapper, className].filter(Boolean).join(' ')} role="search">
       <VisuallyHidden as="label" htmlFor={inputId}>
@@ -55,8 +63,11 @@ export function SearchField({ label, value, onChange, onSubmit, onClear, placeho
         }}
         leading={<Icon icon={MagnifyingGlass} size="small-action" />}
         trailing={
-          value.length > 0 && onClear ? (
-            <IconButton icon={X} label="Clear search" onClick={onClear} disabled={disabled} className={styles.clear} />
+          clear || action ? (
+            <span className={styles.actions}>
+              {clear}
+              {action ? <span className={styles.action}>{action}</span> : null}
+            </span>
           ) : undefined
         }
       />

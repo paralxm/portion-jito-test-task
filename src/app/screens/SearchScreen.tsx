@@ -1,8 +1,10 @@
 import { useId, useState, type ReactNode } from 'react';
+import { Barcode } from '@phosphor-icons/react';
 
-import { AppHeader, Button, EmptyState, FoodResultRow, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl, segmentedOptionId } from '../../design-system';
+import { AppHeader, Button, EmptyState, FoodResultRow, IconButton, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl, segmentedOptionId } from '../../design-system';
 import { describeReferenceBasis, type FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { CriteriaToolbar } from '../../features/recipe-discovery/components/CriteriaToolbar';
+import { FilterAction } from '../../features/recipe-discovery/components/FilterAction';
 import { RecipeList } from '../../features/recipe-discovery/components/RecipeList';
 import { activeCriteriaCount, type CriterionKey, type Recipe, type RecipeCriteria } from '../../features/recipe-discovery/domain/matching';
 import styles from './SearchScreen.module.css';
@@ -32,6 +34,8 @@ export interface SearchScreenProps {
   /** A food result opens review; it does not replace the current calculation. */
   onOpenFood: (candidate: FoodCandidate) => void;
   onOpenRecipe: (id: string) => void;
+  /** The field's barcode shortcut in Food scope: opens the scanner in one tap (ledger D-27). */
+  onScanBarcode: () => void;
   onRetry: () => void;
   onEnterManually: () => void;
   navigation: ReactNode;
@@ -40,7 +44,9 @@ export interface SearchScreenProps {
 /**
  * S02 — shared Search. Two scopes over one query field: Food results are never
  * filtered by recipe criteria; Recipes results combine the query with the applied
- * criteria. Loading, no matches and service failure are distinct states.
+ * criteria. The field carries the scope's trailing action — the barcode shortcut for
+ * Food, the filter action with its applied count for Recipes — and applied chips sit
+ * beneath it. Loading, no matches and service failure are distinct states.
  */
 export function SearchScreen({
   scope,
@@ -56,6 +62,7 @@ export function SearchScreen({
   onRemoveCriterion,
   onOpenFood,
   onOpenRecipe,
+  onScanBarcode,
   onRetry,
   onEnterManually,
   navigation,
@@ -86,7 +93,7 @@ export function SearchScreen({
   if (current.status === 'idle') {
     content =
       scope === 'food' ? (
-        <EmptyState title="Search for a food or dish">Type a name to see matching foods with their calories per reference amount.</EmptyState>
+        <EmptyState title="Search for a food or dish">Type a name to see matching foods with their calories per reference amount, or scan a barcode from the field.</EmptyState>
       ) : (
         <EmptyState title="Search for a recipe">Type a recipe name or an ingredient. Filters narrow the results further.</EmptyState>
       );
@@ -163,7 +170,7 @@ export function SearchScreen({
   }
 
   return (
-    <RootScreenLayout header={<AppHeader title="Search" showWordmark />} navigation={navigation}>
+    <RootScreenLayout header={<AppHeader variant="section" title="Search" />} navigation={navigation}>
       <SearchField
         label={scope === 'food' ? 'Search foods' : 'Search recipes'}
         value={query}
@@ -171,6 +178,7 @@ export function SearchScreen({
         onSubmit={() => onSubmit()}
         onClear={onClear}
         placeholder={scope === 'food' ? 'Food or dish name' : 'Recipe name or ingredient'}
+        action={scope === 'food' ? <IconButton icon={Barcode} label="Scan barcode" onClick={onScanBarcode} /> : <FilterAction count={active} expanded={filtersOpen} onClick={() => setFiltersOpen(true)} />}
       />
 
       {/* The scope switch owns the results panel below, so it is exposed as tabs. */}
@@ -188,14 +196,7 @@ export function SearchScreen({
       />
 
       {scope === 'recipes' ? (
-        <CriteriaToolbar
-          criteria={criteria}
-          sheetOpen={filtersOpen}
-          onOpenSheet={() => setFiltersOpen(true)}
-          onCloseSheet={() => setFiltersOpen(false)}
-          onApply={onApplyCriteria}
-          onRemove={onRemoveCriterion}
-        />
+        <CriteriaToolbar criteria={criteria} sheetOpen={filtersOpen} onCloseSheet={() => setFiltersOpen(false)} onApply={onApplyCriteria} onRemove={onRemoveCriterion} />
       ) : null}
 
       <section role="tabpanel" id={panelId} className={styles.results} aria-labelledby={segmentedOptionId(scopeId, scope)}>

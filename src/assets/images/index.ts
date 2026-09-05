@@ -10,10 +10,12 @@
  */
 import chickenSaladPhoto from './recipes/chicken-salad.webp';
 import lentilSoupPhoto from './recipes/lentil-soup.webp';
+import pastaRoastedVegetablesPhoto from './recipes/pasta-roasted-vegetables.webp';
 import tofuStirFryPhoto from './recipes/tofu-stir-fry.webp';
+import vegetableTraybakePhoto from './recipes/vegetable-traybake.webp';
 import sampleCapturePhoto from './foods/sample-capture.webp';
 
 /** Intrinsic size of every registered photo, for aspect declarations and layout stability. */
 export const PHOTO_INTRINSIC = { width: 1200, height: 900 } as const;
 
-export { chickenSaladPhoto, lentilSoupPhoto, sampleCapturePhoto, tofuStirFryPhoto };
+export { chickenSaladPhoto, lentilSoupPhoto, pastaRoastedVegetablesPhoto, sampleCapturePhoto, tofuStirFryPhoto, vegetableTraybakePhoto };

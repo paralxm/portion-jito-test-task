@@ -1,19 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { MethodSheet, NavigationBar, type Destination, type EntryMethod } from '../design-system';
+import { MethodSheet, NavigationBar, Toast, type Destination, type EntryMethod } from '../design-system';
 import type { FoodCandidate, Portion } from '../features/calorie-calculator/domain/calculation';
-import { createEntry, entriesForDay, localDayKey, updateEntryPortion, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
+import { createEntry, entriesForDay, localDayKey, updateEntryPortion, type DailyGoal, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
 import { samplePhotoImage } from '../features/calorie-calculator/domain/fixtures';
+import { mealPhrase, suggestMeal, type MealType } from '../features/calorie-calculator/domain/meal';
+import { announceWaterAdded, formatWater, WATER_GOAL_ML } from '../features/calorie-calculator/domain/water';
+import { AddToMealSheet } from '../features/calorie-calculator/components/AddToMealSheet';
 import { BarcodeScreen } from '../features/calorie-calculator/screens/BarcodeScreen';
 import { FoodReviewScreen } from '../features/calorie-calculator/screens/FoodReviewScreen';
-import { HomeScreen } from '../features/calorie-calculator/screens/HomeScreen';
+import { HomeScreen, type RecommendedRecipe } from '../features/calorie-calculator/screens/HomeScreen';
 import { ManualEntryScreen } from '../features/calorie-calculator/screens/ManualEntryScreen';
 import { PhotoScreen } from '../features/calorie-calculator/screens/PhotoScreen';
-import { activeCriteria, describeCriterion, filterRecipes, removeCriterion, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
+import { activeCriteriaCount, filterRecipes, matchEvidence, removeCriterion, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
+import { recipeToCandidate } from '../features/recipe-discovery/domain/recipe-entry';
 import { RecipeDetailsScreen, type RecipeDetailsState } from '../features/recipe-discovery/screens/RecipeDetailsScreen';
 import { RecipesScreen, type RecipesStatus } from '../features/recipe-discovery/screens/RecipesScreen';
 import { SearchScreen, type SearchResults, type SearchScope } from './screens/SearchScreen';
-import { analysePhotoService, BARCODE_DEMO_CODES, browseRecipesService, loadRecipeService, lookupBarcodeService, searchFoodService, searchRecipeService } from './services';
+import { analysePhotoService, browseRecipesService, loadRecipeService, lookupBarcodeService, readBarcodeService, searchFoodService, searchRecipeService } from './services';
 import { useScrollMemory } from './useScrollMemory';
 import { useSoftwareKeyboard } from './useSoftwareKeyboard';
 
@@ -27,7 +31,7 @@ type FlowStepInput =
   | { kind: 'manual' }
   | { kind: 'review'; candidate: FoodCandidate; from: EntryMethod }
   | { kind: 'entry'; entryId: string }
-  | { kind: 'recipe'; recipeId: string; criteriaSource: 'search' | 'browse' };
+  | { kind: 'recipe'; recipeId: string; criteriaSource: 'search' | 'browse' | 'home' };
 type FlowStep = FlowStepInput & { id: number };
 
 let stepSequence = 0;
@@ -41,26 +45,53 @@ interface RequestState<T> extends SearchResults<T> {
 }
 const IDLE: RequestState<never> = { status: 'idle', results: [], query: '', criteriaKey: '' };
 
+/** What the Add-to-meal sheet is confirming: a reviewed food or a recipe. */
+interface PendingAdd {
+  candidate: FoodCandidate;
+  portion: Portion;
+  meal: MealType;
+  hint: string;
+}
+
+/** Selects the recommended recipe (ledger D-21): the first browse match with evidence, else the first complete recipe with a photo. */
+function recommend(recipes: readonly Recipe[], criteria: RecipeCriteria): RecommendedRecipe | null {
+  if (recipes.length === 0) return null;
+  if (activeCriteriaCount(criteria) > 0) {
+    const match = filterRecipes(recipes, criteria)[0];
+    if (match) return { recipe: match, evidence: matchEvidence(match, criteria) };
+  }
+  const complete = recipes.find((r) => r.imageUrl && r.energyKcal !== null && r.proteinG !== null) ?? recipes.find((r) => r.imageUrl) ?? recipes[0];
+  return { recipe: complete, evidence: [] };
+}
+
 /**
- * The Portion runtime: in-memory navigation over fixture-backed screens. Today's entries
- * and the optional goal live for the session only; no persistence is promised.
+ * The Portion runtime: in-memory navigation over fixture-backed screens. Today's entries,
+ * the optional goal and today's water live for the session only; no persistence is promised.
  */
 export default function App() {
   const [root, setRoot] = useState<Destination>('home');
   const [flow, setFlow] = useState<FlowStep[]>([]);
   const [methodOpen, setMethodOpen] = useState(false);
-  // Where the food task was started from (root + focused stack when Log food was opened),
-  // so Done can return there even after Search food switched the root to Search.
-  const [taskOrigin, setTaskOrigin] = useState<{ root: Destination; flow: FlowStep[] } | null>(null);
+  // Where the food task was started from (root + focused stack when Log food was opened,
+  // plus the meal when a Home meal row started it), so Done can return there and the
+  // Add-to-meal sheet can preselect the meal.
+  const [taskOrigin, setTaskOrigin] = useState<{ root: Destination; flow: FlowStep[]; meal: MealType | null } | null>(null);
   const keyboardOpen = useSoftwareKeyboard();
 
   // Daily record --------------------------------------------------------------
   const [entries, setEntries] = useState<FoodEntry[]>([]);
-  const [goalKcal, setGoalKcal] = useState<number | null>(null);
+  const [goal, setGoal] = useState<DailyGoal | null>(null);
+  const [water, setWater] = useState<Record<string, number>>({});
+  const [highlightEntryId, setHighlightEntryId] = useState<string | null>(null);
   // Re-evaluated on every render, so a day change shows the new day's (empty) list while
   // earlier entries stay associated with their own day.
   const todayKey = localDayKey();
   const todayEntries = useMemo(() => entriesForDay(entries, todayKey), [entries, todayKey]);
+  const waterMl = water[todayKey] ?? 0;
+
+  // Feedback ----------------------------------------------------------------
+  const [toast, setToast] = useState<{ message: string; undo?: () => void } | null>(null);
+  const [pendingAdd, setPendingAdd] = useState<PendingAdd | null>(null);
 
   // Search ------------------------------------------------------------------
   const [scope, setScope] = useState<SearchScope>('food');
@@ -139,7 +170,7 @@ export default function App() {
   }, [browseToken]);
 
   const browseResults = useMemo(() => filterRecipes(browseRecipes, browseCriteria), [browseRecipes, browseCriteria]);
-  const browseCriteriaLabels = useMemo(() => activeCriteria(browseCriteria).map((key) => describeCriterion(browseCriteria, key)), [browseCriteria]);
+  const recommended = useMemo(() => recommend(browseRecipes, browseCriteria), [browseRecipes, browseCriteria]);
 
   // Recipe details ----------------------------------------------------------
   const [details, setDetails] = useState<RecipeDetailsState>({ status: 'loading' });
@@ -183,9 +214,9 @@ export default function App() {
     setFlow([]);
     setRoot(destination);
   };
-  /** Opens the shared Log food chooser and remembers the invoking surface. */
-  const openLogFood = () => {
-    setTaskOrigin({ root, flow });
+  /** Opens the shared Log food chooser and remembers the invoking surface (and meal, from a Home row). */
+  const openLogFood = (meal: MealType | null = null) => {
+    setTaskOrigin({ root, flow, meal });
     setMethodOpen(true);
   };
   /**
@@ -221,15 +252,30 @@ export default function App() {
 
   const openReview = (candidate: FoodCandidate, from: EntryMethod) => push({ kind: 'review', candidate, from });
 
-  const addToToday = (candidate: FoodCandidate, portion: Portion) => {
-    const entry = createEntry(candidate, portion);
+  /** The Add-to-meal sheet: preselect the Home row's meal, else the time-of-day suggestion (D-17). */
+  const openAddToMeal = (candidate: FoodCandidate, portion: Portion) => {
+    const fromRow = taskOrigin?.meal ?? null;
+    setPendingAdd({
+      candidate,
+      portion,
+      meal: fromRow ?? suggestMeal(),
+      hint: fromRow ? 'Preselected from the meal you started from. Change it if you like.' : 'Suggested for this time of day. Change it if you like.',
+    });
+  };
+
+  const confirmAdd = (meal: MealType, portion: Portion) => {
+    if (!pendingAdd) return;
+    const entry = createEntry(pendingAdd.candidate, portion, meal);
+    setPendingAdd(null);
     if (!entry) return;
     setEntries((list) => [...list, entry]);
+    setHighlightEntryId(entry.id);
+    setToast({ message: `Added to ${mealPhrase(meal)}.` });
     switchRoot('home');
   };
 
-  const updateEntry = (entryId: string, portion: Portion) => {
-    setEntries((list) => list.map((entry) => (entry.id === entryId ? (updateEntryPortion(entry, portion) ?? entry) : entry)));
+  const updateEntry = (entryId: string, portion: Portion, meal: MealType) => {
+    setEntries((list) => list.map((entry) => (entry.id === entryId ? (updateEntryPortion(entry, portion, meal) ?? entry) : entry)));
     switchRoot('home');
   };
 
@@ -238,12 +284,27 @@ export default function App() {
     switchRoot('home');
   };
 
-  const openRecipe = (recipeId: string, criteriaSource: 'search' | 'browse') => {
+  const addWater = (ml: number, source: 'quick' | 'sheet') => {
+    const before = waterMl;
+    setWater((w) => ({ ...w, [todayKey]: (w[todayKey] ?? 0) + ml }));
+    // Functional update above keeps rapid taps exact; the announcement reads the value they produce.
+    setToast({
+      message: announceWaterAdded(ml, before + ml),
+      undo: source === 'quick' ? () => setWater((w) => ({ ...w, [todayKey]: Math.max(0, (w[todayKey] ?? 0) - ml) })) : undefined,
+    });
+  };
+
+  const setWaterTotal = (ml: number) => {
+    setWater((w) => ({ ...w, [todayKey]: ml }));
+    setToast({ message: `Today's water set to ${formatWater(ml)}.` });
+  };
+
+  const openRecipe = (recipeId: string, criteriaSource: 'search' | 'browse' | 'home') => {
     push({ kind: 'recipe', recipeId, criteriaSource });
     loadDetails(recipeId);
   };
 
-  const navigation = (selected: Destination) => <NavigationBar selected={selected} onSelect={switchRoot} onLogFood={openLogFood} hidden={keyboardOpen} />;
+  const navigation = (selected: Destination) => <NavigationBar selected={selected} onSelect={switchRoot} onLogFood={() => openLogFood()} hidden={keyboardOpen} />;
 
   const rootVisible = (destination: Destination) => flow.length === 0 && root === destination;
 
@@ -252,8 +313,8 @@ export default function App() {
       case 'barcode':
         return (
           <BarcodeScreen
+            read={readBarcodeService}
             lookup={lookupBarcodeService}
-            demoCodes={BARCODE_DEMO_CODES}
             onFound={(candidate) => openReview(candidate, 'barcode')}
             onBack={pop}
             onSearchInstead={goToFoodSearch}
@@ -278,7 +339,7 @@ export default function App() {
           <FoodReviewScreen
             candidate={step.candidate}
             mode="new"
-            onAddToToday={(portion) => addToToday(step.candidate, portion)}
+            onAddToToday={(portion) => openAddToMeal(step.candidate, portion)}
             onDone={closeTask}
             onBack={pop}
             onChangeMatch={step.from === 'barcode' || step.from === 'photo' ? goToFoodSearch : pop}
@@ -292,7 +353,8 @@ export default function App() {
             candidate={entry.candidate}
             mode="existing"
             initialPortion={entry.portion}
-            onUpdateEntry={(portion) => updateEntry(entry.id, portion)}
+            initialMeal={entry.meal}
+            onUpdateEntry={(portion, meal) => updateEntry(entry.id, portion, meal)}
             onRemoveEntry={() => removeEntry(entry.id)}
             onBack={pop}
           />
@@ -305,6 +367,7 @@ export default function App() {
             criteria={step.criteriaSource === 'search' ? searchCriteria : browseCriteria}
             onBack={pop}
             onRetry={() => loadDetails(step.recipeId)}
+            onAdd={(recipe) => openAddToMeal(recipeToCandidate(recipe), { quantity: 1, unitId: 'serving' })}
             navigation={navigation(root)}
           />
         );
@@ -316,12 +379,18 @@ export default function App() {
       <div data-screen="home" hidden={!rootVisible('home')}>
         <HomeScreen
           entries={todayEntries}
-          goalKcal={goalKcal}
-          onGoalChange={setGoalKcal}
+          goal={goal}
+          onGoalChange={setGoal}
           onOpenEntry={(entryId) => push({ kind: 'entry', entryId })}
-          onLogFood={openLogFood}
+          onAddToMeal={(meal) => openLogFood(meal)}
+          recommended={recommended}
+          onOpenRecipe={(id) => openRecipe(id, 'home')}
           onFindRecipes={() => switchRoot('recipes')}
-          recipeCriteria={browseCriteriaLabels}
+          waterMl={waterMl}
+          waterGoalMl={WATER_GOAL_ML}
+          onAddWater={addWater}
+          onSetWaterTotal={setWaterTotal}
+          highlightEntryId={highlightEntryId}
           navigation={navigation('home')}
         />
       </div>
@@ -347,6 +416,10 @@ export default function App() {
           onRemoveCriterion={(key: CriterionKey) => setSearchCriteria((c) => removeCriterion(c, key))}
           onOpenFood={(candidate) => openReview(candidate, 'search')}
           onOpenRecipe={(id) => openRecipe(id, 'search')}
+          onScanBarcode={() => {
+            setTaskOrigin({ root: 'search', flow: [], meal: null });
+            push({ kind: 'barcode' });
+          }}
           onRetry={() => setRetryToken((n) => n + 1)}
           onEnterManually={() => push({ kind: 'manual' })}
           navigation={navigation('search')}
@@ -380,6 +453,28 @@ export default function App() {
       ))}
 
       <MethodSheet open={methodOpen} onRequestClose={() => setMethodOpen(false)} onChoose={chooseMethod} />
+
+      <AddToMealSheet
+        open={pendingAdd !== null}
+        candidate={pendingAdd?.candidate ?? null}
+        initialPortion={pendingAdd?.portion ?? null}
+        initialMeal={pendingAdd?.meal ?? null}
+        mealHint={pendingAdd?.hint}
+        onConfirm={confirmAdd}
+        onCancel={() => setPendingAdd(null)}
+      />
+
+      <Toast
+        open={toast !== null}
+        message={toast?.message ?? ''}
+        actionLabel={toast?.undo ? 'Undo' : undefined}
+        onAction={toast?.undo}
+        onDismiss={() => {
+          setToast(null);
+          setHighlightEntryId(null);
+        }}
+      />
     </>
   );
 }
+

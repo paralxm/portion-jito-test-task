@@ -1,0 +1,32 @@
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+/* A 4 rem (64 px) 4:3 thumbnail with the control radius, nested inside the sheet. */
+.thumbnail {
+  flex: 0 0 4rem;
+  inline-size: 4rem;
+  border-radius: var(--portion-radius-control);
+  overflow: hidden;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}
+
+/* The recalculated preview on the light surface, one group below the amount. */
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-12);
+  padding: var(--portion-spacing-card-padding);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-surface);
+  min-inline-size: 0;
+}

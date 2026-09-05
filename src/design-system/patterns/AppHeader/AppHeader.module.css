@@ -1,26 +1,54 @@
+/* Every variant owns the top safe area once through its own top padding. */
+
+/* Root: the lockup and the contextual line on one row, the trailing action at the end. */
 .root {
+  padding-block-start: calc(var(--portion-ref-space-12) + var(--portion-safe-area-top));
+  padding-block-end: var(--portion-ref-space-8);
+  /* The header is the container its brand row queries (an element cannot query itself). */
+  container-type: inline-size;
+}
+
+.rootRow,
+.sectionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-12);
+  min-block-size: var(--portion-size-target-minimum);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+  flex: 1 1 auto;
+}
+
+/* A hairline between the lockup and the date, the height of the body line. */
+.divider {
+  inline-size: var(--portion-border-width-default);
+  block-size: var(--portion-ref-space-24);
+  background: var(--portion-color-border-control);
+  flex-shrink: 0;
+}
+
+.context {
+  min-inline-size: 0;
+  white-space: nowrap;
+}
+
+/* Section: the 28/36 screen title with an optional trailing action beside it. */
+.section {
   padding-block-start: calc(var(--portion-ref-space-16) + var(--portion-safe-area-top));
   padding-block-end: var(--portion-ref-space-8);
 }
 
-.rootContent {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portion-ref-space-4);
-}
-
-.wordmark {
-  color: var(--portion-color-text-primary);
-}
-
-.rootRow {
-  display: flex;
+.sectionRow {
   align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--portion-ref-space-12);
 }
 
-.rootTitle {
+.sectionTitle {
   min-inline-size: 0;
   flex: 1 1 auto;
 }
@@ -48,6 +76,7 @@
   align-items: center;
   justify-content: center;
   min-inline-size: var(--portion-size-target-minimum);
+  flex-shrink: 0;
 }
 
 .trailing {
@@ -58,4 +87,22 @@
   min-inline-size: 0;
   padding-block: var(--portion-ref-space-8);
   text-align: start;
+}
+
+/* Under 20 rem of header width (320 px, or any width at enlarged text) the root row
+   drops the context line under the lockup instead of shrinking either. */
+@container (max-width: 20rem) {
+  .brand {
+    flex-wrap: wrap;
+    row-gap: var(--portion-ref-space-4);
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .context {
+    flex-basis: 100%;
+    white-space: normal;
+  }
 }

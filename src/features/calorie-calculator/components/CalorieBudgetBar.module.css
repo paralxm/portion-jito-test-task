@@ -1,0 +1,53 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+/* The figure leads; the optional Set goal sits at its end on the same row. */
+.headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-12);
+  flex-wrap: wrap;
+}
+
+.figure {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.number {
+  min-inline-size: 0;
+}
+
+.caption {
+  white-space: nowrap;
+}
+
+/* "400 consumed · 20 %" at the start, "Goal 2,000" at the end, on one line when it fits. */
+.stats {
+  min-inline-size: 0;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: var(--portion-ref-space-12);
+  row-gap: var(--portion-ref-space-4);
+}
+
+.goal {
+  white-space: nowrap;
+}
+
+.note {
+  min-inline-size: 0;
+}
