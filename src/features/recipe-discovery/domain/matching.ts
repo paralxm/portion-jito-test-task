@@ -2,6 +2,11 @@
  * Recipe-discovery domain: criteria drafts, validation, AND matching with inclusive
  * bounds, and the evidence shown to the user. Unknown data never establishes a match,
  * filters are never silently relaxed, and no score or health verdict is ever computed.
+ *
+ * Dietary constraints are a set (ledger §12 B3): every selected one must hold (AND). A
+ * recipe declared vegan also satisfies "vegetarian" — the canonical implication, so a
+ * source that omits the redundant tag is not excluded — while an unspecified dietary
+ * record (`null`) satisfies none of them.
  */
 import type { MatchCriterion } from '../../../design-system/components/MatchCriteria/MatchCriteria';
 
@@ -14,12 +19,20 @@ export const DIETARY_OPTIONS: ReadonlyArray<{ id: DietaryPreference; label: stri
   { id: 'dairy-free', label: 'Dairy-free' },
 ];
 
+const DIETARY_ORDER: readonly DietaryPreference[] = DIETARY_OPTIONS.map((o) => o.id);
+
+export function dietaryLabel(id: DietaryPreference): string {
+  return DIETARY_OPTIONS.find((o) => o.id === id)?.label ?? id;
+}
+
 export interface Recipe {
   id: string;
   title: string;
   imageUrl?: string;
   /** Serving basis every value belongs to. */
   servingGrams: number;
+  /** How many servings the ingredient list makes; the nutrition is per one of them. */
+  servings?: number;
   energyKcal: number | null;
   proteinG: number | null;
   carbohydratesG: number | null;
@@ -30,17 +43,19 @@ export interface Recipe {
   preparationMinutes: number | null;
   /** Dietary types the source declares. `null` = not specified; it cannot satisfy a dietary criterion. */
   dietary: readonly DietaryPreference[] | null;
+  /** An editorial pick for the discovery page's Featured group; a curation flag, not a popularity metric. */
+  featured?: boolean;
   ingredients: readonly string[];
   instructions: readonly string[];
 }
 
-/** Applied or draft criteria. `null`/`undefined` bounds mean "no constraint", never zero. */
+/** Applied or draft criteria. `null`/`undefined` bounds mean "no constraint", never zero; an empty dietary set means none. */
 export interface RecipeCriteria {
   caloriesMin?: number | null;
   caloriesMax?: number | null;
   proteinMin?: number | null;
   preparationMax?: number | null;
-  dietary?: DietaryPreference | null;
+  dietary?: readonly DietaryPreference[] | null;
 }
 
 export const EMPTY_CRITERIA: RecipeCriteria = {};
@@ -51,7 +66,7 @@ export interface CriteriaDraft {
   caloriesMax: string;
   proteinMin: string;
   preparationMax: string;
-  dietary: DietaryPreference | null;
+  dietary: readonly DietaryPreference[];
 }
 
 export function draftFromCriteria(criteria: RecipeCriteria): CriteriaDraft {
@@ -61,7 +76,7 @@ export function draftFromCriteria(criteria: RecipeCriteria): CriteriaDraft {
     caloriesMax: s(criteria.caloriesMax),
     proteinMin: s(criteria.proteinMin),
     preparationMax: s(criteria.preparationMax),
-    dietary: criteria.dietary ?? null,
+    dietary: dietaryOf(criteria),
   };
 }
 
@@ -99,22 +114,57 @@ export function validateDraft(draft: CriteriaDraft): { ok: true; criteria: Recip
       caloriesMax: caloriesMax as number | null,
       proteinMin: proteinMin as number | null,
       preparationMax: preparationMax as number | null,
-      dietary: draft.dietary,
+      dietary: canonicalDietary(draft.dietary),
     },
   };
 }
 
-export type CriterionKey = 'calories' | 'protein' | 'preparation' | 'dietary';
+// ---------------------------------------------------------------------------
+// Dietary sets
+// ---------------------------------------------------------------------------
+
+/** The applied dietary set in option order, without duplicates. */
+export function dietaryOf(criteria: RecipeCriteria): DietaryPreference[] {
+  return canonicalDietary(criteria.dietary ?? []);
+}
+
+export function canonicalDietary(list: readonly DietaryPreference[]): DietaryPreference[] {
+  return DIETARY_ORDER.filter((id) => list.includes(id));
+}
+
+/** Adds or removes one dietary constraint; the result is committed by the caller (chips apply at once). */
+export function toggleDietary(criteria: RecipeCriteria, id: DietaryPreference): RecipeCriteria {
+  const current = dietaryOf(criteria);
+  const next = current.includes(id) ? current.filter((d) => d !== id) : [...current, id];
+  const { dietary: _d, ...rest } = criteria;
+  return next.length === 0 ? rest : { ...rest, dietary: canonicalDietary(next) };
+}
+
+/** Whether the recipe's declared record satisfies one constraint; vegan implies vegetarian; unknown never qualifies. */
+export function satisfiesDietary(recipe: Recipe, id: DietaryPreference): boolean {
+  if (recipe.dietary === null) return false;
+  if (recipe.dietary.includes(id)) return true;
+  return id === 'vegetarian' && recipe.dietary.includes('vegan');
+}
+
+// ---------------------------------------------------------------------------
+// Active criteria
+// ---------------------------------------------------------------------------
+
+export type CriterionKey = 'calories' | 'protein' | 'preparation' | `dietary:${DietaryPreference}`;
+
+const DIETARY_KEY = /^dietary:(.+)$/;
 
 export function activeCriteria(criteria: RecipeCriteria): CriterionKey[] {
   const keys: CriterionKey[] = [];
   if (criteria.caloriesMin != null || criteria.caloriesMax != null) keys.push('calories');
   if (criteria.proteinMin != null) keys.push('protein');
   if (criteria.preparationMax != null) keys.push('preparation');
-  if (criteria.dietary) keys.push('dietary');
+  for (const id of dietaryOf(criteria)) keys.push(`dietary:${id}`);
   return keys;
 }
 
+/** Each numeric constraint counts once (a calorie range is one), and each dietary constraint once. */
 export function activeCriteriaCount(criteria: RecipeCriteria): number {
   return activeCriteria(criteria).length;
 }
@@ -128,7 +178,12 @@ export function removeCriterion(criteria: RecipeCriteria, key: CriterionKey): Re
   }
   if (key === 'protein') delete next.proteinMin;
   if (key === 'preparation') delete next.preparationMax;
-  if (key === 'dietary') delete next.dietary;
+  const dietary = DIETARY_KEY.exec(key);
+  if (dietary) {
+    const remaining = dietaryOf(criteria).filter((id) => id !== dietary[1]);
+    if (remaining.length === 0) delete next.dietary;
+    else next.dietary = remaining;
+  }
   return next;
 }
 
@@ -153,12 +208,13 @@ function evaluate(recipe: Recipe, criteria: RecipeCriteria, key: CriterionKey): 
       if (v === null) return { id: key, text: `Preparation time not available — needs at most ${criteria.preparationMax} min`, met: false };
       return { id: key, text: `${v} min preparation — at most ${criteria.preparationMax} min`, met: v <= (criteria.preparationMax as number) };
     }
-    case 'dietary': {
-      const wanted = criteria.dietary as DietaryPreference;
-      const label = DIETARY_OPTIONS.find((o) => o.id === wanted)?.label ?? wanted;
+    default: {
+      const wanted = (DIETARY_KEY.exec(key)?.[1] ?? key) as DietaryPreference;
+      const label = dietaryLabel(wanted);
       if (recipe.dietary === null) return { id: key, text: `Dietary type not specified — ${label} cannot be confirmed`, met: false };
-      const met = recipe.dietary.includes(wanted);
-      return { id: key, text: met ? `Marked ${label.toLowerCase()} by the source` : `Not marked ${label.toLowerCase()}`, met };
+      const met = satisfiesDietary(recipe, wanted);
+      const implied = met && !recipe.dietary.includes(wanted);
+      return { id: key, text: met ? (implied ? `Marked vegan by the source, so ${label.toLowerCase()}` : `Marked ${label.toLowerCase()} by the source`) : `Not marked ${label.toLowerCase()}`, met };
     }
   }
 }
@@ -198,7 +254,13 @@ export function describeCriterion(criteria: RecipeCriteria, key: CriterionKey): 
       return `${criteria.proteinMin} g protein or more`;
     case 'preparation':
       return `Under ${criteria.preparationMax} min`;
-    case 'dietary':
-      return DIETARY_OPTIONS.find((o) => o.id === criteria.dietary)?.label ?? String(criteria.dietary);
+    default:
+      return dietaryLabel((DIETARY_KEY.exec(key)?.[1] ?? key) as DietaryPreference);
   }
+}
+
+/** Unique recipes by id, first occurrence kept — the count the UI states is never of duplicates. */
+export function uniqueRecipes(recipes: readonly Recipe[]): Recipe[] {
+  const seen = new Set<string>();
+  return recipes.filter((r) => (seen.has(r.id) ? false : (seen.add(r.id), true)));
 }

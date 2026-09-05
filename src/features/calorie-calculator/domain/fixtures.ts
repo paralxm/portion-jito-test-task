@@ -45,7 +45,7 @@ const perServing = (grams: number): SupportedUnit[] => [
 export const fixtureC: FoodCandidate = {
   id: 'food-c',
   name: 'Vegetable rice bowl',
-  detail: 'Fixture C',
+  detail: 'Prepared dish',
   source: 'search',
   category: 'food',
   imageUrl: sampleCapturePhoto,

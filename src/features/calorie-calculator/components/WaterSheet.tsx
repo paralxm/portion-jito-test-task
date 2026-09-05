@@ -21,6 +21,8 @@ export interface WaterSheetProps {
   /** Replaces today's total and closes. */
   onSaveTotal: (ml: number) => void;
   onCancel: () => void;
+  /** The day the sheet edits, for its wording: "Today" (default), "Yesterday" or "Thu, Sep 3". */
+  dayLabel?: string;
   /** Deterministic starting mode for stories; the runtime always opens in `add`. */
   initialMode?: WaterSheetMode;
 }
@@ -44,7 +46,9 @@ const TOTAL_ERRORS = {
  * field with `Save total`. Both are drafts: Cancel, close, backdrop and Escape change
  * nothing; the sheet contains focus and returns it to the opener.
  */
-export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSaveTotal, onCancel, initialMode = 'add' }: WaterSheetProps) {
+export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSaveTotal, onCancel, dayLabel = 'Today', initialMode = 'add' }: WaterSheetProps) {
+  const isToday = dayLabel === 'Today';
+  const dayPossessive = isToday ? "today's" : `${dayLabel}'s`;
   const [mode, setMode] = useState<WaterSheetMode>(initialMode);
   const [preset, setPreset] = useState<number | null>(null);
   const [custom, setCustom] = useState('');
@@ -106,7 +110,7 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
   const summary = (
     <div className={styles.summary}>
       <Text as="p" variant="supporting" color="secondary">
-        Today
+        {dayLabel}
       </Text>
       <p className={styles.figure}>
         <Text variant="metric-secondary" numeric color="primary">
@@ -124,8 +128,8 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
       <ModalSheet
         open={open}
         onRequestClose={onCancel}
-        title="Edit today's total"
-        description="Replace the amount recorded for today. Nothing else changes."
+        title={`Edit ${dayPossessive} total`}
+        description={`Replace the amount recorded for ${isToday ? 'today' : dayLabel}. Nothing else changes.`}
         footer={
           <Inline gap={8} distribute="fill" align="stretch">
             <Button variant="secondary" onClick={() => { setMode('add'); setError(undefined); }}>
@@ -140,7 +144,7 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
         <Stack gap={16}>
           {summary}
           <AmountField
-            label="Today's total"
+            label={`${isToday ? "Today's" : `${dayLabel}'s`} total`}
             value={totalDraft}
             onChange={(value) => {
               setTotalDraft(value);
@@ -161,7 +165,7 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
       open={open}
       onRequestClose={onCancel}
       title="Add water"
-      description="Choose an amount or enter your own. The daily reference is a default, not advice."
+      description={`Choose an amount or enter your own${isToday ? '' : ` for ${dayLabel}`}. The daily reference is a default, not advice.`}
       footer={
         <Inline gap={8} distribute="fill" align="stretch">
           <Button variant="secondary" onClick={onCancel}>
@@ -211,7 +215,7 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
         />
         <div>
           <Button variant="text" size="small" onClick={() => { setMode('edit-total'); setError(undefined); }}>
-            Edit today&rsquo;s total
+            Edit {dayPossessive} total
           </Button>
         </div>
       </Stack>

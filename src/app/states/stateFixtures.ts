@@ -8,7 +8,9 @@ import { createEntry, type DailyGoal, type FoodEntry } from '../../features/calo
 import { recentCandidates } from '../../features/calorie-calculator/domain/recents';
 import { fixtureC, foodCatalogue, photoSuggestions } from '../../features/calorie-calculator/domain/fixtures';
 import { budgetFixtureEntries, budgetFixtureGoal, homeEntries } from '../../features/calorie-calculator/domain/home-fixtures';
+import { localDayKey } from '../../features/calorie-calculator/domain/day-keys';
 import type { ManualDraft } from '../../features/calorie-calculator/domain/manual-entry';
+import type { Streak } from '../../features/calorie-calculator/domain/streak';
 import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import type { Recipe, RecipeCriteria } from '../../features/recipe-discovery/domain/matching';
 import { recipeToCandidate } from '../../features/recipe-discovery/domain/recipe-entry';
@@ -18,6 +20,10 @@ export const FIXED_NOW_ISO = '2026-09-04T12:00:00Z';
 export const FIXED_NOW = Date.parse(FIXED_NOW_ISO);
 /** The header's date line and the meal suggestion read this instant instead of the clock. */
 export const FIXED_DATE = new Date(FIXED_NOW);
+/** The baseline's local day key: what Home calls "today" in every product-state story. */
+export const TODAY_KEY = localDayKey(FIXED_DATE);
+/** No streak: the launch state. */
+export const NO_STREAK: Streak = { days: 0, todayLogged: false };
 
 /** S01-2: the ui-contract §1 populated Home (1,350 of 2,200 kcal), logged at the baseline. */
 export const populatedEntries = homeEntries(FIXED_NOW);
@@ -33,7 +39,7 @@ export const WATER_PARTIAL_ML = 1250;
 export const WATER_GOAL_ML = 2000;
 
 /** S03-2 / S02-5: three applied criteria that leave one match in the catalogue. */
-export const filteredCriteria: RecipeCriteria = { dietary: 'vegan', caloriesMax: 500, proteinMin: 10 };
+export const filteredCriteria: RecipeCriteria = { dietary: ['vegan'], caloriesMax: 500, proteinMin: 10 };
 /** S02-6: a query that matches but criteria that nothing satisfies. */
 export const impossibleCriteria: RecipeCriteria = { caloriesMax: 200 };
 /** S08-1: criteria fixture R satisfies (two met). */

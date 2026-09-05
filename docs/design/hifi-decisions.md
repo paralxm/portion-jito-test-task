@@ -625,3 +625,55 @@ Rendered inspection: the five new state captures, both new variants, the nine ne
 Harness finding: Storybook's Lane B stories count list items, so an applied-filter chip (itself a list) was being counted with the results; the assertions are scoped to the named results list and check the drink identities, not just a count.
 
 Not verified here: a real screen reader or device pass, native iOS safe-area behaviour, a live software keyboard, a real camera, and an unmocked midnight; these remain manual checks (11.6).
+
+## 12. Revision R1–R6 (2026-09-05) — dates and streak, discovery, hero containment, two-step manual, source-specific review, method sheet
+
+Branch `feat/redesign-r1-r6` from `main` at `30d54d9` (the integrated Stage A + B baseline; `feat/hifi-screens` `6732e5b` is merged and no longer ahead). Baseline recovered from git, the audited deployment notes in the brief and the current source; Stage A/B work is the starting point, not regenerated. Impeccable context loader run once for this session with `--target src/app/App.tsx` (PRODUCT.md and DESIGN.md loaded; no CONTEXT_STALE directive acted on).
+
+### 12.1 Reference mapping (attachment order defines R1–R6; confirmed by visible content)
+
+| Ref | Content seen | Adopt / adapt / reject |
+| --- | --- | --- |
+| R1 | Home: week strip (Mon 31 … Sun 6, Sat 5 selected with a dot), "1,600 kcal remaining", "Daily Target 2,000 kcal", "400 consumed (20%)", "Goal: 2,000", horizontal bar, three macro tiles with "24g / 120g" and a compact bar each | Adopt the strip, the remaining figure, the consumed line and the per-macro bars. Adapt: one goal figure (the duplicated "Daily Target" / "Goal" is rejected), Portion tokens and type, real data. |
+| R2 | Recipes: "Recipes · 10 available", search field, quick chips All / Vegetarian / Vegan / Gluten-free, "Popular recipes · FEATURED · Swipe for more" photo cards, "All recipes · 10 recipes" list | Adopt the photographic discovery hierarchy, quick chips (as multi-select) and groups. Adapt: truthful group labels from real data ("Featured", "Ready in under 30 minutes", "30 g protein or more"), the full catalogue moves to Search / Recipes, counts derive from real unique items. Reject "Popular" without analytics, status bar, decorative badges. |
+| R3 | Daily Log · Step 1 of 2: name with clear, photo attached (Change / Remove), Reference amount 100 grams, Nutrition for that amount (Energy required, core macronutrients optional), calculated macro energy split, Continue to review | Adopt the grouping and step label. Adapt: Portion fields, "blank means unknown" beside optional fields only, optional local photo. Reject the macro energy split bar (an inferred percentage), status bar. |
+| R4 | Manual food record: photo + name + "Entered manually" + basis, Edit; Amount to calculate with − 100 g + and presets 50 g / 100 g / 150 g / 1 bowl (250 g); Energy value 130 kcal "For 100 g portion" with macro tiles and % kcal; info note; Show all nutrition; Add to today | Adopt identity summary with Edit, prominent editable amount with stepper and presets, live result, one final action. Adapt: presets from the item's own units only (no universal bowl), MealPicker and target day added, "Add to {meal}". Reject "% kcal" on macros (unsupported inference), the kebab menu. |
+| R5 | Verified item (barcode): product image, name, brand, basis, Change product; "Matched 7394376616037 · Verified packaging specs"; amount with unit control and presets; 43 kcal "For 100 ml" with macros; Show all nutrition; Add to today; Done | Adopt identity → portion → nutrition → final action. Adapt: "Barcode match" not "Verified", real record fields only, Change product + Edit label values, and the same hierarchy for the photo result with its own wording and actions. Reject VERIFIED, Live sync, Done as an ambiguous exit. |
+| R6 | Log food sheet: title, review-before-saving line, Close; full-width Search food row (PRIMARY badge); "INSTANT RECOGNITION" caption with Scan barcode / Take a photo cards; separator; Enter manually row | Adopt the order, grouping and hierarchy 1:1. Adapt: no PRIMARY badge, quieter caption wording, Portion tokens and icons, stack the pair under 20 rem. Reject the drawn home indicator and outer frame. |
+
+### 12.2 Requirement map
+
+| ID | Requirement | Screen / component | Data / domain | Story | Test / check | Doc |
+| --- | --- | --- | --- | --- | --- | --- |
+| A1 | Home order, streak in header, sole goal action on the calorie surface | `HomeScreen`, `AppHeader` root, `StreakIndicator`, `CalorieBudgetBar` | `streak.ts` | Lane A S01-1/S01-2/S01-5/S01-6 | walkthrough, unit | PRODUCT §Home, DESIGN §Home |
+| A2 | Per-macro compact bars beside the values; no-target / below / at / over / unknown | `NutritionMacros` (existing), `CalorieBudgetBar` | `summarizeDay` | CalorieBudgetBar stories | storybook | DESIGN §Calorie budget |
+| A3 | Date strip: today vs selected, prev/next week, Today action, future unavailable | `DayStrip` | `day-keys.ts` (`addDays`, `weekOf`, `formatDayLabel`) | Lane A S01-5 | unit, walkthrough | PRODUCT §Home |
+| A4 | Selected day drives entries, totals, water; target day bound at task start; commit returns to that day | `App` (`selectedDay`, `taskOrigin.dayKey`) | `createEntry({dayKey})`, `water[dayKey]` | Lane A | walkthrough (midnight with mocked clock), unit | ui-contract §3 |
+| A5 | Streak rule (confirmed food/recipe entries, consecutive local days ending today or yesterday) | `StreakIndicator` | `computeStreak` | Lane A S01-6 | unit (gaps, backfill, removal) | PRODUCT §Home |
+| A6 | Record v2: goal history with effective dates, migration keeps entries/water/legacy goal (from the migration day) | `persistence.ts` | `goal-history.ts` (`goalForDay`, `setGoalFrom`) | — | unit (v1 → v2, invalid storage) | PRODUCT §Data truth |
+| A7 | Water per selected day, Undo scoped to day | `HomeScreen`, `WaterSheet` | `water[dayKey]` | Lane A | walkthrough | — |
+| B1 | Recipes root = curated discovery (groups, multi-select chips, featured label) | `RecipesScreen`, `RecipeTile`, `DietaryChips` | `discovery.ts` (groups from real data), `RecipeCriteria.dietary[]` | Lane E S03-1/S03-2 | unit, storybook | PRODUCT §Recipe discovery |
+| B2 | Full catalogue + count + criteria in Search / Recipes; empty query shows the catalogue | `SearchScreen` | `filterRecipes` over the catalogue | Lane E S02-5/S02-11 | walkthrough | ui-contract |
+| B3 | Multi-select dietary AND, vegan ⇒ vegetarian, unknown never matches, sheet draft/apply/reset/dismiss | `RecipeFiltersSheet`, `CriteriaToolbar` | `matching.ts` | O02 | unit | PRODUCT |
+| B4 | 10 recipe records with licensed local photos | recipe fixtures, `src/assets/images/recipes/` | — | — | captures | §5 register |
+| B5 | Barcode as a sibling action beside the Food field, below it at narrow widths | `SearchScreen` | — | Lane B S02-7 + 320 variant | storybook | DESIGN §Search field actions |
+| C1 | Hero begins below the header; full bleed within the shell only | `RecipeDetailsScreen.module.css`, `RootScreenLayout` | — | Lane E S08-1 + variants | walkthrough geometry check | DESIGN §Recipe details |
+| D1 | Manual Step 1 of 2 (R3) with optional local photo | `ManualEntryScreen`, `PhotoField` | `manual-entry.ts`, `photo-store.ts` | Lane D S06-1…S06-3 | storybook, unit | PRODUCT §Manual |
+| D2 | Manual Step 2 of 2 (R4): identity + Edit, editable amount with stepper/presets, live result, MealPicker, Add to {meal} | `ManualPortionScreen`, shared `PortionForm` | `portion-presets.ts` | Lane D S06-5 | storybook, walkthrough | PRODUCT §Manual |
+| D3 | Flow-level draft preserved across Back/Edit; shared exit + dirty policy (Discard changes? dialog) | `App` (`manualTask`), `DiscardChangesDialog` | `isManualTaskDirty` | Lane D O08 | storybook, walkthrough | ui-contract §exit policy |
+| D4 | Browser Back / gesture uses the same guard; refresh limitation documented | `App` (`useHistoryGuard`) | — | — | walkthrough | PRODUCT §Data truth |
+| E1 | Barcode review per R5 (image, name, brand when supplied, code, basis, Change product, Edit label values) | `FoodReviewScreen` | `FoodCandidate.barcode`, override provenance | Lane C1 S07-4 + correction | storybook | PRODUCT §Food calculation |
+| E2 | Photo review (sample image labelled, Change match, Retake, Edit nutrition values) | `FoodReviewScreen` | — | Lane C2 S07-5 | storybook | PRODUCT |
+| E3 | Review commits with one Add to {meal}; no second sheet; Cancel + dirty policy | `FoodReviewScreen`, `PortionForm` | `createEntry` | Lane B S07-1 | walkthrough | ui-contract |
+| F1 | MethodSheet per R6 with responsive stacking | `MethodSheet`, `MethodOption` (row / card) | — | O01 + 320 / 200 % variants | storybook, walkthrough | DESIGN §Log food sheet |
+| G1 | "Fixture C" never shown as product metadata | fixtures detail | — | — | storybook | — |
+
+### 12.3 Impeccable use (recorded before each invocation)
+
+- Session context: `node .claude/skills/impeccable/scripts/context.mjs --target src/app/App.tsx` → loaded PRODUCT.md / DESIGN.md; Operate mode confirmed; nothing stale acted on.
+- Planned gates (recorded when invoked, with result): detector (`detect.mjs --json src`) after each stage's edits as the technical-integrity gate; `critique` reference once the redesigned families (Home, Recipes, Manual 1/2, Review, MethodSheet) render, to check composition against R1–R6; `adapt` reference only if the 320 / 200 % review finds reflow defects.
+
+### 12.4 Checkpoint
+
+- Branch `feat/redesign-r1-r6`, HEAD `30d54d9` (nothing committed yet for this revision). Working tree: this ledger section only.
+- Next action: implement A6/A3/A5 domain modules with unit tests (`day-keys.ts`, `streak.ts`, `goal-history.ts`, persistence v2), then Home (A1–A4, A7).

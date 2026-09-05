@@ -1,3 +1,41 @@
+/* The field and its sibling scanner: one row while the frame is at least 22 rem wide
+   (every supported viewport at 100 % text), the scanner below the field at full width
+   under that (320 px is 20 rem; every viewport at 200 %). */
+.fieldFrame {
+  container-type: inline-size;
+  min-inline-size: 0;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.field {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.scan {
+  flex-shrink: 0;
+}
+
+@container (max-width: 22rem) {
+  .fieldRow[data-scope='food'] {
+    flex-wrap: wrap;
+  }
+
+  .fieldRow[data-scope='food'] .field {
+    flex-basis: 100%;
+  }
+
+  .fieldRow[data-scope='food'] .scan {
+    flex: 1 1 100%;
+  }
+}
+
 .results {
   display: flex;
   flex-direction: column;

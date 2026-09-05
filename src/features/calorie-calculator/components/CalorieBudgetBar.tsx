@@ -11,8 +11,10 @@ export interface CalorieBudgetBarProps {
   summary: DailySummary;
   /** The committed goal, for the optional macro targets. `null` when none is set. */
   goal: DailyGoal | null;
-  /** Offered in the no-goal state, next to the logged amount. */
+  /** The one goal action on Home: Set goal without a goal, Edit goal with one. Applies from today. */
   onSetGoal?: () => void;
+  /** True when the shown day is before today: a missing goal is explained as "none was set for this day". */
+  pastDay?: boolean;
   className?: string;
 }
 
@@ -52,6 +54,9 @@ function status(summary: DailySummary): string | null {
   }
 }
 
+/** The no-goal note for a day before today: nothing is invented for it, and a new goal starts today. */
+const PAST_NO_GOAL = 'No goal was set for this day, so only the logged amount is shown. A new goal applies from today onward.';
+
 /** Accessible description of the bar, with units and state. */
 function describeBar(summary: DailySummary): string {
   const percent = Math.round((summary.ratio ?? 0) * 100);
@@ -65,9 +70,9 @@ function describeBar(summary: DailySummary): string {
  * arithmetic and persistence belong to the feature. Without a goal no bar is drawn (a
  * meaningless empty track is not a state), and `Set goal` sits beside the logged amount.
  */
-export function CalorieBudgetBar({ summary, goal, onSetGoal, className }: CalorieBudgetBarProps) {
+export function CalorieBudgetBar({ summary, goal, onSetGoal, pastDay = false, className }: CalorieBudgetBarProps) {
   const f = figure(summary);
-  const note = status(summary);
+  const note = summary.state === 'no-goal' && pastDay ? PAST_NO_GOAL : status(summary);
   const hasGoal = summary.goalKcal !== null;
   const percent = summary.ratio === null ? null : Math.round((summary.energy.kcal / (summary.goalKcal as number)) * 100);
   const macros = {
@@ -87,9 +92,9 @@ export function CalorieBudgetBar({ summary, goal, onSetGoal, className }: Calori
             {f.caption}
           </Text>
         </p>
-        {!hasGoal && onSetGoal ? (
-          <Button variant="secondary" size="small" onClick={onSetGoal} aria-haspopup="dialog">
-            Set goal
+        {onSetGoal ? (
+          <Button variant={hasGoal ? 'text' : 'secondary'} size="small" onClick={onSetGoal} aria-haspopup="dialog">
+            {hasGoal ? 'Edit goal' : 'Set goal'}
           </Button>
         ) : null}
       </div>

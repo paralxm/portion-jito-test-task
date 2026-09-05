@@ -105,10 +105,23 @@
   color: var(--portion-color-text-secondary);
 }
 
+/* Tile presentation: the photo spans the card above the text, whatever the width; the
+   card fills its rail cell so tiles in one rail share a height. */
+.card[data-presentation='tile'] {
+  display: flex;
+  flex-direction: column;
+}
+
+.card[data-presentation='tile'] .layout {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: var(--portion-ref-space-12);
+  flex: 1 1 auto;
+}
+
 /* Narrow adaptation: under 19 rem (the 320 px viewport at 100 % text, 288 px of card)
    the thumbnail drops to 6 rem so the text column keeps a comfortable measure. */
 @container recipe-card (max-width: 19rem) {
-  .layout {
+  .card:not([data-presentation='tile']) .layout {
     grid-template-columns: 6rem minmax(0, 1fr);
   }
 }
@@ -117,7 +130,7 @@
    thumbnail, so the image moves above the text at full width. 272 px at 100 % text —
    below every supported viewport — and 544 px at 200 %, i.e. all of them. */
 @container recipe-card (max-width: 17rem) {
-  .layout {
+  .card:not([data-presentation='tile']) .layout {
     grid-template-columns: minmax(0, 1fr);
     row-gap: var(--portion-ref-space-12);
   }

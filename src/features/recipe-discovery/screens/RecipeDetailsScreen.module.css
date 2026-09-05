@@ -1,8 +1,11 @@
-/* Breaks the MediaFrame hero out to the viewport edge; MediaFrame owns the aspect
-   ratio, background and image/no-photo fill. The header sits directly above it. */
+/* The hero bleeds to the edges of the mobile shell only: the Container owns the page inset
+   (and the runtime side safe areas), so the negative inline margin cancels exactly that inset
+   and never reaches the desktop viewport. It starts directly under the focused header —
+   RootScreenLayout gives the content no top padding, so no negative top margin is needed
+   (the earlier −16 px pulled the hero underneath the header; ledger §12 C1). MediaFrame owns
+   the 16:9 aspect, cover cropping, background and the no-photo fill. */
 .hero {
   margin-inline: calc(var(--portion-spacing-page-inset) * -1);
-  margin-block-start: calc(var(--portion-ref-space-16) * -1);
 }
 
 .identity {

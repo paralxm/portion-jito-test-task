@@ -376,16 +376,28 @@ await check(page, 'Done closes the task to Home without logging', async () => {
 await scoped().getByRole('button', { name: 'Recipes', exact: true }).click();
 await page.waitForTimeout(700);
 await shot(page, '32-recipes-browse');
-await check(page, 'every catalogue recipe shows a photograph; the filter action sits at the end of the search entry', async () => {
+await check(page, 'discovery shows the real count, the three groups and the quick chips; every card has a photograph; the filter action sits at the end of the search entry', async () => {
   const noPhoto = await page.locator('[data-screen="recipes"]:visible main').getByText('No photo').count();
   const filters = await scoped().getByRole('button', { name: 'Filters' }).count();
-  return noPhoto === 0 && filters === 1;
+  const t = await page.locator('main:visible').innerText();
+  return noPhoto === 0 && filters === 1 && t.includes('10 recipes') && t.includes('Featured') && t.includes('Ready in under 30 minutes') && t.includes('30 g protein or more') && (await scoped().getByRole('button', { name: 'Vegan' }).getAttribute('aria-pressed')) === 'false';
 });
+await scoped().getByRole('button', { name: 'Vegan' }).click();
+await page.waitForTimeout(150);
+await scoped().getByRole('button', { name: 'Gluten-free' }).click();
+await page.waitForTimeout(150);
+await check(page, 'quick chips combine with AND and apply at once (Vegan + Gluten-free → 2 recipes)', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return t.includes('2 recipes match your filters') && (await scoped().getByRole('button', { name: 'Filters, 2 active' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'All', exact: true }).click();
+await page.waitForTimeout(150);
+await check(page, 'All clears the dietary constraints', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
 await check(page, 'navigation stays fixed on Recipes', () => fixedNavigationHolds(page));
 await scoped().getByRole('button', { name: /^Filters/ }).click();
 await page.waitForTimeout(350);
 await shot(page, '33-filters-sheet');
-await scoped().getByRole('radio', { name: 'Vegan' }).click();
+await page.locator('dialog[open]').getByRole('button', { name: 'Vegan' }).click();
 await scoped().getByLabel('Maximum').fill('100');
 await scoped().getByLabel('Minimum').fill('300');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
@@ -397,11 +409,11 @@ await scoped().getByLabel('Protein per serving, at least').fill('10');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(300);
 await shot(page, '35-recipes-filtered');
-await check(page, 'filtered browse shows evidence per card and the count on the filter action', async () => {
+await check(page, 'filtered discovery shows evidence per card, the pressed Vegan chip and the count on the filter action', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('Matches') && (await scoped().getByRole('button', { name: 'Filters, 3 active' }).count()) === 1;
+  return t.includes('Matches') && (await scoped().getByRole('button', { name: 'Filters, 3 active' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Vegan' }).getAttribute('aria-pressed')) === 'true';
 });
-await scoped().getByRole('button', { name: /Remove filter: Vegan/ }).click();
+await scoped().getByRole('button', { name: 'Vegan' }).click();
 await page.waitForTimeout(150);
 await shot(page, '36-recipes-chip-removed');
 await scoped().getByRole('button', { name: /^Filters/ }).click();
@@ -413,7 +425,7 @@ await scoped().getByRole('button', { name: 'Change filters' }).click();
 await scoped().getByRole('button', { name: 'Reset all' }).click();
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(300);
-await check(page, 'reset + apply clears filters', async () => (await page.locator('main:visible').innerText()).includes('All recipes'));
+await check(page, 'reset + apply clears filters', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
 await scoped().getByRole('button', { name: /^Filters/ }).click();
 await scoped().getByLabel('Maximum').fill('460');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
@@ -482,16 +494,16 @@ await page.waitForTimeout(200);
 await check(page, 'All recipes opens the Recipes root with its criteria and scroll kept', async () => {
   const afterY = await page.evaluate(() => window.scrollY);
   log('   scroll before/after:', beforeY, afterY);
-  return (await page.locator('main:visible').innerText()).includes('Matching recipes') && Math.abs(beforeY - afterY) < 5;
+  return (await page.locator('main:visible').innerText()).includes('match your filters') && Math.abs(beforeY - afterY) < 5;
 });
 
 // Browse → Search snapshot, scopes, failure
 await scoped().getByRole('button', { name: 'Search recipes' }).click();
 await page.waitForTimeout(150);
 await shot(page, '44-search-recipes-scope-snapshot');
-await check(page, 'search opens in Recipes scope with snapshot criteria and the filter action in the field', async () => {
+await check(page, 'search opens in Recipes scope with snapshot criteria, the filter action in the field and the catalogue narrowed by them (no query)', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('Under 460 kcal') && (await scoped().getByRole('tab', { name: 'Recipes' }).getAttribute('aria-selected')) === 'true' && (await scoped().getByRole('button', { name: 'Filters, 1 active' }).count()) === 1;
+  return t.includes('Under 460 kcal') && t.includes('Matching recipes') && t.includes('match your filters') && (await scoped().getByRole('tab', { name: 'Recipes' }).getAttribute('aria-selected')) === 'true' && (await scoped().getByRole('button', { name: 'Filters, 1 active' }).count()) === 1;
 });
 await scoped().getByRole('searchbox').fill('lentil');
 await page.waitForTimeout(1000);

@@ -10,7 +10,7 @@ import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domai
 import { RecipesScreen } from '../../features/recipe-discovery/screens/RecipesScreen';
 import { SearchScreen } from '../screens/SearchScreen';
 import { HomeWithWater } from './harnesses';
-import { budgetEntries, budgetGoal, FIXED_DATE, goal2200, populatedEntries, WATER_PARTIAL_ML } from './stateFixtures';
+import { budgetEntries, budgetGoal, goal2200, populatedEntries, TODAY_KEY, WATER_PARTIAL_ML } from './stateFixtures';
 
 const nav = (selected: Destination) => <NavigationBar selected={selected} onSelect={fn()} onLogFood={fn()} />;
 const idle = { status: 'idle', results: [] } as const;
@@ -42,7 +42,7 @@ const home = (entries: readonly FoodEntry[], goal: DailyGoal | null, waterMl = 0
     recommended={recommended}
     onOpenRecipe={fn()}
     onFindRecipes={fn()}
-    now={FIXED_DATE}
+    todayKey={TODAY_KEY}
     navigation={nav('home')}
     {...extra}
   />
@@ -113,6 +113,8 @@ export const S02_1: Story = {
       onSubmit={fn()}
       onClear={fn()}
       food={{ status: 'ready', results: searchFoods('rice') }}
+      recipeCatalogue={recipeCatalogue}
+      recipeCatalogueStatus="ready"
       catalogue={foodCatalogue}
       recents={[]}
       foodFilters={NO_FOOD_FILTERS}
@@ -147,17 +149,18 @@ export const S03_1: Story = {
     docs: {
       description: {
         story:
-          'Purpose: query-free browsing without criteria; every catalogue recipe shows its licensed photo (ledger D-28) and the filter action sits at the end of the search entry. Entry: Recipes root, browse loaded. Fixture: the five-recipe catalogue, including a long-title card and a card whose protein is not available. Primary action: a card → S08-2; Filters → O02. Next: S03-2 after Apply. Limitation: none.',
+          'Purpose: curated discovery without criteria (ledger §12 B1, after R2): the real count, the search entry with the filter action at its end, quick dietary chips, and the Featured / under-30-minutes / 30 g-protein rails, every card with its licensed photo (D-28); the complete catalogue lives in Search / Recipes. Entry: Recipes root, catalogue loaded. Fixture: the ten-recipe catalogue. Primary action: a card → S08-2; a chip or Filters → S03-2; View all / Browse all → S02-11. Limitation: none.',
       },
     },
   },
   render: () => (
-    <RecipesScreen results={recipeCatalogue} criteria={{}} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
+    <RecipesScreen recipes={recipeCatalogue} criteria={{}} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onToggleDietary={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { name: 'All recipes' })).toBeInTheDocument();
-    await expect(canvas.getAllByText('5 recipes').length).toBeGreaterThanOrEqual(1);
+    await expect(canvas.getByRole('heading', { name: 'Featured' })).toBeInTheDocument();
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('10 recipes');
+    await expect(canvas.getByRole('group', { name: 'Dietary' })).toBeInTheDocument();
     await expect(canvas.queryByText('No photo')).toBeNull();
     await expect(canvas.queryByText(/Matches all/)).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Filters' })).toBeVisible();

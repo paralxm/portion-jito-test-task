@@ -1,33 +1,39 @@
 /**
- * The daily record on the device (ledger §11.3): today's and earlier entries, the
- * optional goal, water totals per local day, and the Search view preference, kept in
- * `localStorage` under one versioned key so a reload never loses what was confirmed.
+ * The daily record on the device (ledger §11.3, §12 A6): today's and earlier entries,
+ * the effective-dated goal history, water totals per local day, and the Search view
+ * preference, kept in `localStorage` under one versioned key so a reload never loses
+ * what was confirmed.
  *
  * Rules: an unreadable or foreign record is ignored, never wiped by a crash; an entry
  * written before the meal field existed loads with `meal: null` (the unassigned guard,
  * ledger D-16) rather than being classified silently; every entry keeps its own local
  * day key, so yesterday's food never reads as today's after a reload; a candidate's
  * photograph is re-resolved from the current catalogue by its stable id, because a built
- * asset URL is not durable across deployments.
+ * asset URL is not durable across deployments; a version-1 record's single goal becomes
+ * one goal period starting on the migration day, so earlier days never receive a goal
+ * that was not in force (§12 A6).
  */
 import type { FoodCandidate } from '../features/calorie-calculator/domain/calculation';
 import type { DailyGoal, FoodEntry } from '../features/calorie-calculator/domain/daily-log';
+import { isDayKey, localDayKey } from '../features/calorie-calculator/domain/day-keys';
+import { migrateLegacyGoal, normaliseGoalHistory, type GoalHistory, type GoalPeriod } from '../features/calorie-calculator/domain/goal-history';
 import { MEAL_ORDER, type MealType } from '../features/calorie-calculator/domain/meal';
 
 export const RECORD_KEY = 'portion.record';
-export const RECORD_VERSION = 1;
+export const RECORD_VERSION = 2;
 
 export type SearchView = 'list' | 'grid';
 
 export interface PersistedRecord {
   version: typeof RECORD_VERSION;
   entries: FoodEntry[];
-  goal: DailyGoal | null;
+  /** Effective-dated goal periods, sorted by day; empty when no goal was ever set. */
+  goals: GoalHistory;
   water: Record<string, number>;
   searchView: SearchView;
 }
 
-export const EMPTY_RECORD: PersistedRecord = { version: RECORD_VERSION, entries: [], goal: null, water: {}, searchView: 'list' };
+export const EMPTY_RECORD: PersistedRecord = { version: RECORD_VERSION, entries: [], goals: [], water: {}, searchView: 'list' };
 
 /** The subset of `Storage` the record needs; `localStorage` in the browser, a Map-backed fake in tests. */
 export interface RecordStorage {
@@ -37,7 +43,6 @@ export interface RecordStorage {
 
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
-const isDayKey = (value: unknown): value is string => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 
 function readMeal(value: unknown): MealType | null {
   return typeof value === 'string' && (MEAL_ORDER as readonly string[]).includes(value) ? (value as MealType) : null;
@@ -71,6 +76,17 @@ function readGoal(raw: unknown): DailyGoal | null {
   return { kcal: raw.kcal, proteinG: target(raw.proteinG), carbohydratesG: target(raw.carbohydratesG), fatG: target(raw.fatG) };
 }
 
+/** Version 2 periods: each needs a day key; a period whose goal cannot be read is a clear (`null`), never a guess. */
+function readGoals(raw: unknown): GoalPeriod[] {
+  if (!Array.isArray(raw)) return [];
+  const periods: GoalPeriod[] = [];
+  for (const item of raw) {
+    if (!isObject(item) || !isDayKey(item.from)) continue;
+    periods.push({ from: item.from, goal: item.goal === null ? null : readGoal(item.goal) });
+  }
+  return normaliseGoalHistory(periods);
+}
+
 function readWater(raw: unknown): Record<string, number> {
   if (!isObject(raw)) return {};
   const water: Record<string, number> = {};
@@ -80,11 +96,19 @@ function readWater(raw: unknown): Record<string, number> {
   return water;
 }
 
+export interface ParseOptions {
+  /** Re-resolves a candidate's photograph from the current catalogue by id. */
+  resolveImage?: (candidateId: string) => string | undefined;
+  /** The local day a version-1 goal starts on (the day the record is migrated); defaults to the device's current day. */
+  migrationDayKey?: string;
+}
+
 /**
  * Parses a stored record. Older or partial shapes are migrated field by field: what can
  * be read is kept, what cannot is left out. Returns the empty record for nothing stored.
  */
-export function parseRecord(text: string | null, resolveImage: (candidateId: string) => string | undefined = () => undefined): PersistedRecord {
+export function parseRecord(text: string | null, options: ParseOptions | ((candidateId: string) => string | undefined) = {}): PersistedRecord {
+  const { resolveImage = () => undefined, migrationDayKey = localDayKey() } = typeof options === 'function' ? { resolveImage: options } : options;
   if (!text) return EMPTY_RECORD;
   let raw: unknown;
   try {
@@ -94,16 +118,18 @@ export function parseRecord(text: string | null, resolveImage: (candidateId: str
   }
   if (!isObject(raw)) return EMPTY_RECORD;
   const entries = Array.isArray(raw.entries) ? raw.entries.map((e) => readEntry(e, resolveImage)).filter((e): e is FoodEntry => e !== null) : [];
+  // Version 2 keeps a goal history; anything older carried one goal, which starts on the migration day.
+  const goals = Array.isArray(raw.goals) ? readGoals(raw.goals) : migrateLegacyGoal(readGoal(raw.goal), migrationDayKey);
   return {
     version: RECORD_VERSION,
     entries,
-    goal: readGoal(raw.goal),
+    goals,
     water: readWater(raw.water),
     searchView: raw.searchView === 'grid' ? 'grid' : 'list',
   };
 }
 
-/** Strips the photograph before writing: it is re-resolved from the catalogue on load. */
+/** Strips the photograph before writing: it is re-resolved from the catalogue (or the photo store) on load. */
 export function serialiseRecord(record: PersistedRecord): string {
   const entries = record.entries.map((entry) => {
     const { imageUrl: _image, ...candidate } = entry.candidate;
@@ -112,10 +138,10 @@ export function serialiseRecord(record: PersistedRecord): string {
   return JSON.stringify({ ...record, version: RECORD_VERSION, entries });
 }
 
-export function loadRecord(storage: RecordStorage | null, resolveImage?: (candidateId: string) => string | undefined): PersistedRecord {
+export function loadRecord(storage: RecordStorage | null, options?: ParseOptions | ((candidateId: string) => string | undefined)): PersistedRecord {
   if (!storage) return EMPTY_RECORD;
   try {
-    return parseRecord(storage.getItem(RECORD_KEY), resolveImage);
+    return parseRecord(storage.getItem(RECORD_KEY), options);
   } catch {
     return EMPTY_RECORD;
   }

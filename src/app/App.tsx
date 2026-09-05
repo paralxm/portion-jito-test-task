@@ -3,6 +3,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { MethodSheet, NavigationBar, Toast, type Destination, type EntryMethod, type ViewMode } from '../design-system';
 import type { FoodCandidate, Portion } from '../features/calorie-calculator/domain/calculation';
 import { createEntry, entriesForDay, updateEntryPortion, type DailyGoal, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
+import { compareDayKeys, dayPhrase } from '../features/calorie-calculator/domain/day-keys';
+import { goalForDay, setGoalFrom, type GoalHistory } from '../features/calorie-calculator/domain/goal-history';
+import { computeStreak } from '../features/calorie-calculator/domain/streak';
 import { foodCatalogue, samplePhotoImage } from '../features/calorie-calculator/domain/fixtures';
 import { NO_FOOD_FILTERS, type FoodFilters } from '../features/calorie-calculator/domain/food-search';
 import { recentCandidates } from '../features/calorie-calculator/domain/recents';
@@ -14,7 +17,7 @@ import { FoodReviewScreen } from '../features/calorie-calculator/screens/FoodRev
 import { HomeScreen, type RecommendedRecipe } from '../features/calorie-calculator/screens/HomeScreen';
 import { ManualEntryScreen } from '../features/calorie-calculator/screens/ManualEntryScreen';
 import { PhotoScreen } from '../features/calorie-calculator/screens/PhotoScreen';
-import { activeCriteriaCount, filterRecipes, matchEvidence, removeCriterion, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
+import { activeCriteriaCount, filterRecipes, matchEvidence, removeCriterion, toggleDietary, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
 import { recipeToCandidate } from '../features/recipe-discovery/domain/recipe-entry';
 import { RecipeDetailsScreen, type RecipeDetailsState } from '../features/recipe-discovery/screens/RecipeDetailsScreen';
 import { RecipesScreen, type RecipesStatus } from '../features/recipe-discovery/screens/RecipesScreen';
@@ -83,14 +86,15 @@ export default function App() {
   const [flow, setFlow] = useState<FlowStep[]>([]);
   const [methodOpen, setMethodOpen] = useState(false);
   // Where the food task was started from (root + focused stack when Log food was opened,
-  // plus the meal when a Home meal row started it), so Done can return there and the
-  // Add-to-meal sheet can preselect the meal.
-  const [taskOrigin, setTaskOrigin] = useState<{ root: Destination; flow: FlowStep[]; meal: MealType | null } | null>(null);
+  // plus the meal when a Home meal row started it, and the day Home showed), so Cancel
+  // can return there, the commit can preselect the meal and land on the bound day — a
+  // midnight rollover during the task never moves the entry to another day (§12 A4).
+  const [taskOrigin, setTaskOrigin] = useState<{ root: Destination; flow: FlowStep[]; meal: MealType | null; dayKey: string } | null>(null);
   const keyboardOpen = useSoftwareKeyboard();
 
   // Daily record --------------------------------------------------------------
   const [entries, setEntries] = useState<FoodEntry[]>(initialRecord.entries);
-  const [goal, setGoal] = useState<DailyGoal | null>(initialRecord.goal);
+  const [goals, setGoals] = useState<GoalHistory>(initialRecord.goals);
   const [water, setWater] = useState<Record<string, number>>(initialRecord.water);
   const [foodView, setFoodView] = useState<ViewMode>(initialRecord.searchView);
   const [foodFilters, setFoodFilters] = useState<FoodFilters>(NO_FOOD_FILTERS);
@@ -98,15 +102,24 @@ export default function App() {
   // The local calendar day, re-evaluated at midnight and on return to the tab, so a day
   // change shows the new day's (empty) list while earlier entries stay under their own day.
   const todayKey = useLocalDayKey();
-  const todayEntries = useMemo(() => entriesForDay(entries, todayKey), [entries, todayKey]);
-  const waterMl = water[todayKey] ?? 0;
+  // The day Home shows: `null` follows today across midnight; an explicitly selected
+  // earlier day stays selected until the user moves (§12 A3/A4).
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const selectedDayKey = selectedDay !== null && compareDayKeys(selectedDay, todayKey) < 0 ? selectedDay : todayKey;
+  const selectDay = (dayKey: string) => setSelectedDay(dayKey === todayKey ? null : dayKey);
+  const dayEntries = useMemo(() => entriesForDay(entries, selectedDayKey), [entries, selectedDayKey]);
+  const waterMl = water[selectedDayKey] ?? 0;
+  // The goal in force on the selected day; edits record a new period from today (§12 A6).
+  const goal = useMemo(() => goalForDay(goals, selectedDayKey), [goals, selectedDayKey]);
+  const changeGoal = (next: DailyGoal | null) => setGoals((history) => setGoalFrom(history, todayKey, next));
+  const streak = useMemo(() => computeStreak(entries, todayKey), [entries, todayKey]);
   // Recently added foods derive from confirmed entries only (ledger §11.1).
   const recents = useMemo(() => recentCandidates(entries), [entries]);
 
   // Every confirmed change is written to the device; nothing is written for drafts.
   useEffect(() => {
-    saveRecord(storage, { version: 1, entries, goal, water, searchView: foodView });
-  }, [entries, goal, water, foodView]);
+    saveRecord(storage, { version: 2, entries, goals, water, searchView: foodView });
+  }, [entries, goals, water, foodView]);
 
   // Feedback ----------------------------------------------------------------
   const [toast, setToast] = useState<{ message: string; undo?: () => void } | null>(null);
@@ -188,8 +201,13 @@ export default function App() {
     };
   }, [browseToken]);
 
-  const browseResults = useMemo(() => filterRecipes(browseRecipes, browseCriteria), [browseRecipes, browseCriteria]);
   const recommended = useMemo(() => recommend(browseRecipes, browseCriteria), [browseRecipes, browseCriteria]);
+  /** Discovery → Search: a deliberate criteria snapshot; later Search edits never touch the discovery criteria. */
+  const openRecipeSearch = (snapshot: RecipeCriteria) => {
+    setSearchCriteria({ ...snapshot });
+    setScope('recipes');
+    setRoot('search');
+  };
 
   // Recipe details ----------------------------------------------------------
   const [details, setDetails] = useState<RecipeDetailsState>({ status: 'loading' });
@@ -235,9 +253,13 @@ export default function App() {
   };
   /** Opens the shared Log food chooser and remembers the invoking surface (and meal, from a Home row). */
   const openLogFood = (meal: MealType | null = null) => {
-    setTaskOrigin({ root, flow, meal });
+    setTaskOrigin({ root, flow, meal, dayKey: selectedDayKey });
     setMethodOpen(true);
   };
+  /** The day a commit lands on: the day bound when the task started, else the day Home shows. */
+  const targetDayKey = () => taskOrigin?.dayKey ?? selectedDayKey;
+  /** Home shows the day an entry landed on; today follows the clock again. */
+  const showDay = (dayKey: string) => setSelectedDay(dayKey === todayKey ? null : dayKey);
   /**
    * Close the food task to the surface it was started from, without logging: the root
    * and focused stack recorded when Log food was opened (Recipe Details included), or the
@@ -282,40 +304,57 @@ export default function App() {
     });
   };
 
-  const confirmAdd = (meal: MealType, portion: Portion) => {
-    if (!pendingAdd) return;
-    const entry = createEntry(pendingAdd.candidate, portion, meal);
-    setPendingAdd(null);
-    if (!entry) return;
+  /** The one commit for a reviewed food or recipe: exactly one entry on the bound day, then Home showing that day. */
+  const commitEntry = (candidate: FoodCandidate, portion: Portion, meal: MealType) => {
+    const dayKey = targetDayKey();
+    const entry = createEntry(candidate, portion, meal, { dayKey });
+    if (!entry) return false;
     setEntries((list) => [...list, entry]);
     setHighlightEntryId(entry.id);
-    setToast({ message: `Added to ${mealPhrase(meal)}.` });
+    setToast({ message: dayKey === todayKey ? `Added to ${mealPhrase(meal)}.` : `Added to ${mealPhrase(meal)} ${dayPhrase(dayKey, todayKey)}.` });
+    showDay(dayKey);
     switchRoot('home');
+    return true;
+  };
+
+  const confirmAdd = (meal: MealType, portion: Portion) => {
+    if (!pendingAdd) return;
+    const { candidate } = pendingAdd;
+    setPendingAdd(null);
+    commitEntry(candidate, portion, meal);
   };
 
   const updateEntry = (entryId: string, portion: Portion, meal: MealType) => {
+    const current = entries.find((entry) => entry.id === entryId);
     setEntries((list) => list.map((entry) => (entry.id === entryId ? (updateEntryPortion(entry, portion, meal) ?? entry) : entry)));
+    if (current) showDay(current.dayKey);
     switchRoot('home');
   };
 
   const removeEntry = (entryId: string) => {
+    const current = entries.find((entry) => entry.id === entryId);
     setEntries((list) => list.filter((entry) => entry.id !== entryId));
+    if (current) showDay(current.dayKey);
     switchRoot('home');
   };
 
+  // Water is recorded against the day Home shows; Undo is bound to that same day and amount (§12 A7).
   const addWater = (ml: number, source: 'quick' | 'sheet') => {
+    const dayKey = selectedDayKey;
     const before = waterMl;
-    setWater((w) => ({ ...w, [todayKey]: (w[todayKey] ?? 0) + ml }));
+    setWater((w) => ({ ...w, [dayKey]: (w[dayKey] ?? 0) + ml }));
     // Functional update above keeps rapid taps exact; the announcement reads the value they produce.
+    const suffix = dayKey === todayKey ? '' : ` ${dayPhrase(dayKey, todayKey).replace(/^on /, 'on ')}`;
     setToast({
-      message: announceWaterAdded(ml, before + ml),
-      undo: source === 'quick' ? () => setWater((w) => ({ ...w, [todayKey]: Math.max(0, (w[todayKey] ?? 0) - ml) })) : undefined,
+      message: dayKey === todayKey ? announceWaterAdded(ml, before + ml) : `${formatWater(ml)} added${suffix}. ${formatWater(before + ml)} that day.`,
+      undo: source === 'quick' ? () => setWater((w) => ({ ...w, [dayKey]: Math.max(0, (w[dayKey] ?? 0) - ml) })) : undefined,
     });
   };
 
   const setWaterTotal = (ml: number) => {
-    setWater((w) => ({ ...w, [todayKey]: ml }));
-    setToast({ message: `Today's water set to ${formatWater(ml)}.` });
+    const dayKey = selectedDayKey;
+    setWater((w) => ({ ...w, [dayKey]: ml }));
+    setToast({ message: dayKey === todayKey ? `Today's water set to ${formatWater(ml)}.` : `Water ${dayPhrase(dayKey, todayKey)} set to ${formatWater(ml)}.` });
   };
 
   const openRecipe = (recipeId: string, criteriaSource: 'search' | 'browse' | 'home') => {
@@ -397,9 +436,13 @@ export default function App() {
     <>
       <div data-screen="home" hidden={!rootVisible('home')}>
         <HomeScreen
-          entries={todayEntries}
+          entries={dayEntries}
           goal={goal}
-          onGoalChange={setGoal}
+          onGoalChange={changeGoal}
+          selectedDayKey={selectedDayKey}
+          todayKey={todayKey}
+          onSelectDay={selectDay}
+          streak={streak}
           onOpenEntry={(entryId) => push({ kind: 'entry', entryId })}
           onAddToMeal={(meal) => openLogFood(meal)}
           recommended={recommended}
@@ -436,16 +479,21 @@ export default function App() {
           foodView={foodView}
           onFoodViewChange={setFoodView}
           recipes={recipeRequest}
+          recipeCatalogue={browseRecipes}
+          recipeCatalogueStatus={browseStatus}
           criteria={searchCriteria}
           onApplyCriteria={setSearchCriteria}
           onRemoveCriterion={(key: CriterionKey) => setSearchCriteria((c) => removeCriterion(c, key))}
           onOpenFood={(candidate) => openReview(candidate, 'search')}
           onOpenRecipe={(id) => openRecipe(id, 'search')}
           onScanBarcode={() => {
-            setTaskOrigin({ root: 'search', flow: [], meal: null });
+            setTaskOrigin({ root: 'search', flow: [], meal: null, dayKey: selectedDayKey });
             push({ kind: 'barcode' });
           }}
-          onRetry={() => setRetryToken((n) => n + 1)}
+          onRetry={() => {
+            setRetryToken((n) => n + 1);
+            if (browseStatus === 'failure') setBrowseToken((n) => n + 1);
+          }}
           onEnterManually={() => push({ kind: 'manual' })}
           navigation={navigation('search')}
         />
@@ -453,20 +501,16 @@ export default function App() {
 
       <div data-screen="recipes" hidden={!rootVisible('recipes')}>
         <RecipesScreen
-          results={browseResults}
+          recipes={browseRecipes}
           criteria={browseCriteria}
           status={browseStatus}
           onApplyCriteria={setBrowseCriteria}
           onRemoveCriterion={(key) => setBrowseCriteria((c) => removeCriterion(c, key))}
           onClearCriteria={() => setBrowseCriteria({})}
+          onToggleDietary={(id) => setBrowseCriteria((c) => toggleDietary(c, id))}
           onRetry={() => setBrowseToken((n) => n + 1)}
           onOpenRecipe={(id) => openRecipe(id, 'browse')}
-          onOpenSearch={() => {
-            // Browse-to-Search copies a snapshot; later Search edits never touch browse criteria.
-            setSearchCriteria({ ...browseCriteria });
-            setScope('recipes');
-            setRoot('search');
-          }}
+          onOpenSearch={openRecipeSearch}
           navigation={navigation('recipes')}
         />
       </div>

@@ -1,0 +1,118 @@
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+/* Week controls: previous, the range (and Today when away from it), next. */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+.range {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.today {
+  flex-shrink: 0;
+}
+
+/* Seven equal tiles. When seven 48 px targets do not fit (320 px, enlarged text) the row
+   scrolls instead of shrinking the targets; the scrollbar stays visible for the keyboard. */
+.days {
+  display: grid;
+  grid-auto-flow: column;
+  /* At least the 48 px target, and at least 3 rem so enlarged text never squeezes a tile. */
+  grid-auto-columns: minmax(max(var(--portion-size-target-minimum), 3rem), 1fr);
+  gap: var(--portion-ref-space-4);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-block: var(--portion-ref-space-4);
+  /* Room for the focus ring at the row's edges without clipping it. */
+  padding-inline: var(--portion-ref-space-4);
+  margin-inline: calc(var(--portion-ref-space-4) * -1);
+  scrollbar-width: thin;
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--portion-ref-space-0);
+  min-inline-size: max(var(--portion-size-target-minimum), 3rem);
+  min-block-size: 56px;
+  padding-block: var(--portion-ref-space-8);
+  padding-inline: var(--portion-ref-space-4);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-control);
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-primary);
+  scroll-snap-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.weekday {
+  color: var(--portion-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.number {
+  line-height: 1.25;
+}
+
+/* Today's dot pairs with the word "today" in the accessible name; it is never the only cue. */
+.dot {
+  inline-size: 6px;
+  block-size: 6px;
+  margin-block-start: var(--portion-ref-space-4);
+  border-radius: var(--portion-radius-round);
+  background: transparent;
+}
+
+.day[data-today] .dot {
+  background: var(--portion-color-action-primary);
+}
+
+@media (hover: hover) {
+  .day:not(:disabled, [data-selected]):hover {
+    background: var(--portion-color-background-surface);
+    border-color: var(--portion-color-border-control);
+  }
+}
+
+.day[data-selected] {
+  background: var(--portion-color-action-primary);
+  border-color: var(--portion-color-action-primary);
+  color: var(--portion-color-text-on-action);
+}
+
+.day[data-selected] .weekday {
+  color: inherit;
+}
+
+.day[data-selected][data-today] .dot {
+  background: var(--portion-color-text-on-action);
+}
+
+.day:disabled {
+  color: var(--portion-color-state-disabled-text);
+  border-color: var(--portion-color-state-disabled-surface);
+  background: var(--portion-color-state-disabled-surface);
+  cursor: not-allowed;
+}
+
+.day:disabled .weekday {
+  color: inherit;
+}

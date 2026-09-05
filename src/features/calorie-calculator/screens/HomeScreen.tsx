@@ -10,12 +10,16 @@ import { RootScreenLayout } from '../../../design-system/templates/RootScreenLay
 import type { Recipe } from '../../recipe-discovery/domain/matching';
 import { dietaryLabels } from '../../recipe-discovery/components/RecipeList';
 import { CalorieBudgetBar } from '../components/CalorieBudgetBar';
+import { DayStrip } from '../components/DayStrip';
 import { GoalSheet } from '../components/GoalSheet';
 import { MealGroup } from '../components/MealGroup';
+import { StreakIndicator } from '../components/StreakIndicator';
 import { WaterSheet, type WaterSheetMode } from '../components/WaterSheet';
 import { WaterTracker } from '../components/WaterTracker';
 import { summarizeDay, type DailyGoal, type FoodEntry } from '../domain/daily-log';
+import { addDays, describeDay, describeSelectedDay } from '../domain/day-keys';
 import type { MealType } from '../domain/meal';
+import type { Streak } from '../domain/streak';
 import { WATER_GOAL_ML } from '../domain/water';
 import styles from './HomeScreen.module.css';
 
@@ -26,32 +30,36 @@ export interface RecommendedRecipe {
 }
 
 export interface HomeScreenProps {
-  /** Today's committed entries only; the app selects the local day. */
+  /** The selected day's committed entries only; the app selects the day. */
   entries: readonly FoodEntry[];
-  /** The committed optional goal (calories plus optional targets). */
+  /** The goal in force on the selected day, from the goal history (`null` when none was). */
   goal: DailyGoal | null;
-  /** Apply (a goal) or clear (null) from the contextual goal editor. */
+  /** Apply (a goal) or clear (null); the app records it from today onward. */
   onGoalChange: (goal: DailyGoal | null) => void;
+  /** The day Home shows and the device's current local day. */
+  selectedDayKey: string;
+  todayKey: string;
+  onSelectDay: (dayKey: string) => void;
+  /** The logging streak relative to today (never to the selected day). */
+  streak: Streak;
   /** A logged entry opens S07 in existing-entry mode. */
   onOpenEntry: (entryId: string) => void;
-  /** A meal's add action starts the food task (O01) with that meal preselected. */
+  /** A meal's add action starts the food task (O01) with that meal preselected, for the selected day. */
   onAddToMeal: (meal: MealType) => void;
   /** The one recommended recipe (ledger D-21), or null when the catalogue is not loaded. */
   recommended: RecommendedRecipe | null;
   /** Opens Recipe Details for the recommended recipe with the Home origin. */
   onOpenRecipe: (recipeId: string) => void;
-  /** Opens or restores the Recipes browse destination (S03). */
+  /** Opens or restores the Recipes discovery destination (S03). */
   onFindRecipes: () => void;
-  /** Today's water in millilitres. */
+  /** The selected day's water in millilitres. */
   waterMl: number;
   waterGoalMl?: number;
-  /** Quick add and sheet additions; the app announces and offers Undo for the quick add. */
+  /** Quick add and sheet additions for the selected day; the app announces and offers Undo for the quick add. */
   onAddWater: (ml: number, source: 'quick' | 'sheet') => void;
   onSetWaterTotal: (ml: number) => void;
   /** A just-added entry to highlight briefly. */
   highlightEntryId?: string | null;
-  /** The local date for the header context line; the app passes the real clock, stories a fixed one. */
-  now?: Date;
   /** Deterministic starting mode for the water sheet in stories. */
   waterSheetOpen?: boolean;
   waterSheetMode?: WaterSheetMode;
@@ -59,19 +67,22 @@ export interface HomeScreenProps {
   navigation: ReactNode;
 }
 
-const dateFormat = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' });
-
 /**
- * S01 — Home, the daily overview (ledger D-31): header with the lockup, the date and
- * Set/Edit goal → the calorie budget with macros → one recommended recipe → today's
- * meals (all four, always) → water → the fixed bar. S01-1 (no committed entries today)
- * and S01-2 (one or more) share the same region order; only the meal rows change.
- * Logging, the goal and water are optional: neither job needs them.
+ * S01 — Home, the daily overview (ledger D-31, §12 A1): root header with the lockup, the
+ * selected day's context line and the streak → the week strip → the calorie budget with
+ * macros (the only Set goal / Edit goal action) → the meals (all four, always) → water →
+ * one supporting recipe recommendation → the fixed bar. S01-1 (no committed entries on
+ * the day) and S01-2 (one or more) share the same region order; only the meal rows
+ * change. Any day up to today can be selected; the record shown is that day's.
  */
 export function HomeScreen({
   entries,
   goal,
   onGoalChange,
+  selectedDayKey,
+  todayKey,
+  onSelectDay,
+  streak,
   onOpenEntry,
   onAddToMeal,
   recommended,
@@ -82,7 +93,6 @@ export function HomeScreen({
   onAddWater,
   onSetWaterTotal,
   highlightEntryId,
-  now,
   waterSheetOpen = false,
   waterSheetMode = 'add',
   navigation,
@@ -90,30 +100,26 @@ export function HomeScreen({
   const [goalOpen, setGoalOpen] = useState(false);
   const [waterOpen, setWaterOpen] = useState(waterSheetOpen);
   const summary = useMemo(() => summarizeDay(entries, goal?.kcal ?? null), [entries, goal]);
-  const today = now ?? new Date();
+  const isToday = selectedDayKey === todayKey;
+  const isYesterday = selectedDayKey === addDays(todayKey, -1);
+  const day = describeDay(selectedDayKey);
+  const dayLabel = isToday ? 'Today' : isYesterday ? 'Yesterday' : `${day.weekday}, ${day.monthDay}`;
+  const mealsHeading = isToday ? 'Today’s meals' : isYesterday ? 'Yesterday’s meals' : `Meals on ${day.weekday}, ${day.monthDay}`;
 
   return (
-    <RootScreenLayout
-      header={
-        <AppHeader
-          variant="root"
-          title="Home"
-          context={`Today · ${dateFormat.format(today)}`}
-          trailing={
-            <Button variant="text" size="small" onClick={() => setGoalOpen(true)} aria-haspopup="dialog">
-              {goal === null ? 'Set goal' : 'Edit goal'}
-            </Button>
-          }
-        />
-      }
-      navigation={navigation}
-    >
+    <RootScreenLayout header={<AppHeader variant="root" title="Home" context={describeSelectedDay(selectedDayKey, todayKey)} trailing={<StreakIndicator streak={streak} />} />} navigation={navigation}>
+      <DayStrip selectedDayKey={selectedDayKey} todayKey={todayKey} onSelectDay={onSelectDay} />
+
       <Surface as="section" tone="surface" border="none" radius="grouped" padding={16} aria-labelledby="home-today-heading" className={styles.today}>
         <h2 id="home-today-heading" className="portion-visually-hidden">
-          Today&rsquo;s calories
+          {isToday ? 'Today’s calories' : `Calories on ${day.long}`}
         </h2>
-        <CalorieBudgetBar summary={summary} goal={goal} onSetGoal={() => setGoalOpen(true)} />
+        <CalorieBudgetBar summary={summary} goal={goal} onSetGoal={() => setGoalOpen(true)} pastDay={!isToday} />
       </Surface>
+
+      <MealGroup entries={entries} onOpenEntry={onOpenEntry} onAdd={onAddToMeal} highlightEntryId={highlightEntryId} heading={mealsHeading} />
+
+      <WaterTracker totalMl={waterMl} goalMl={waterGoalMl} onQuickAdd={(ml) => onAddWater(ml, 'quick')} onOpen={() => setWaterOpen(true)} />
 
       {recommended ? (
         <section aria-labelledby="home-recipe-heading" className={styles.section}>
@@ -139,10 +145,6 @@ export function HomeScreen({
         </section>
       ) : null}
 
-      <MealGroup entries={entries} onOpenEntry={onOpenEntry} onAdd={onAddToMeal} highlightEntryId={highlightEntryId} />
-
-      <WaterTracker totalMl={waterMl} goalMl={waterGoalMl} onQuickAdd={(ml) => onAddWater(ml, 'quick')} onOpen={() => setWaterOpen(true)} />
-
       <GoalSheet
         open={goalOpen}
         goal={goal}
@@ -161,6 +163,7 @@ export function HomeScreen({
         open={waterOpen}
         totalMl={waterMl}
         goalMl={waterGoalMl}
+        dayLabel={dayLabel}
         initialMode={waterSheetMode}
         onAdd={(ml) => {
           setWaterOpen(false);

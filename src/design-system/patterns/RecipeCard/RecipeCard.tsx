@@ -25,6 +25,8 @@ export interface RecipeCardProps {
   /** Active criteria only. With none, the card shows plain metadata and no match claim. */
   criteria?: readonly MatchCriterion[];
   onOpen: () => void;
+  /** `row` (default): thumbnail beside the text. `tile`: the photo above the text, for a rail of equal cards. */
+  presentation?: 'row' | 'tile';
   className?: string;
   children?: ReactNode;
 }
@@ -38,11 +40,11 @@ export interface RecipeCardProps {
  * elements. Under 17 rem of card width (200 % text on every supported viewport) the
  * thumbnail moves above the text.
  */
-export function RecipeCard({ title, imageUrl, imageAlt = '', calories, protein, servingBasis, preparationMinutes, dietary, criteria, onOpen, className, children }: RecipeCardProps) {
+export function RecipeCard({ title, imageUrl, imageAlt = '', calories, protein, servingBasis, preparationMinutes, dietary, criteria, onOpen, presentation = 'row', className, children }: RecipeCardProps) {
   const hasTime = preparationMinutes !== undefined && preparationMinutes !== null;
   const hasDietary = Boolean(dietary && dietary.length > 0);
   return (
-    <article className={[styles.card, className].filter(Boolean).join(' ')}>
+    <article className={[styles.card, className].filter(Boolean).join(' ')} data-presentation={presentation}>
       <div className={styles.layout}>
         <div className={styles.media}>
           <MediaFrame aspect="4:3" imageUrl={imageUrl} imageAlt={imageAlt} compact />

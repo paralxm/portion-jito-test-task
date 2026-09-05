@@ -165,6 +165,7 @@ const CAPTURES = [
   ['states/O02-181-72', "Product states/Lane E — Recipe browse, criteria, details and return", "O02 · 181:72 — Recipe filters / Applied values", 393, 100, 852],
   ['states/O02-2-181-117', "Product states/Lane E — Recipe browse, criteria, details and return", "O02-2 · 181:117 — Recipe filters / Invalid range", 393, 100, 852],
   ['states/S02-5-181-133', "Product states/Lane E — Recipe browse, criteria, details and return", "S02-5 · 181:133 — Search / Recipes scope · results", 393, 100, 852],
+  ['states/S02-11-recipes-catalogue', "Product states/Lane E — Recipe browse, criteria, details and return", "S02-11 — Search / Recipes scope · the catalogue without a query", 393, 100, 852],
   ['states/S08-2-181-289', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-2 · 181:289 — Recipe details / Loading", 393, 100, 852],
   ['states/S08-1-181-237', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-1 · 181:237 — Recipe details / Loaded", 393, 100, 852],
   ['states/S08-3-181-317', "Product states/Lane E — Recipe browse, criteria, details and return", "S08-3 · 181:317 — Recipe details / Unavailable", 393, 100, 852],

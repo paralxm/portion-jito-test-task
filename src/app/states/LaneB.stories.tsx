@@ -6,14 +6,14 @@ import { withIPhone16PortraitSafeAreas, withRootFontSize, expectNoHorizontalOver
 import { oatmealWithBerries } from '../../features/calorie-calculator/domain/home-fixtures';
 import { FoodReviewScreen } from '../../features/calorie-calculator/screens/FoodReviewScreen';
 import { HomeScreen } from '../../features/calorie-calculator/screens/HomeScreen';
-import { fixtureR } from '../../features/recipe-discovery/domain/fixtures';
+import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import { SearchScreen, type SearchResults } from '../screens/SearchScreen';
 import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { foodCatalogue } from '../../features/calorie-calculator/domain/fixtures';
 import { NO_FOOD_FILTERS } from '../../features/calorie-calculator/domain/food-search';
 import { WithFoodSearch } from './harnesses';
 import { WithAddToMeal } from './harnesses';
-import { FIXED_DATE, fixtureCandidate, goal2200, recentFoods, reviewPortion } from './stateFixtures';
+import { fixtureCandidate, goal2200, NO_STREAK, recentFoods, reviewPortion, TODAY_KEY } from './stateFixtures';
 
 const nav = (selected: Destination) => <NavigationBar selected={selected} onSelect={fn()} onLogFood={fn()} />;
 const idle = { status: 'idle', results: [] } as const;
@@ -47,7 +47,10 @@ const emptyHome = () => (
     waterMl={0}
     onAddWater={fn()}
     onSetWaterTotal={fn()}
-    now={FIXED_DATE}
+    selectedDayKey={TODAY_KEY}
+    todayKey={TODAY_KEY}
+    onSelectDay={fn()}
+    streak={NO_STREAK}
     navigation={nav('home')}
   />
 );
@@ -68,6 +71,8 @@ const foodSearch = (query: string, food: SearchResults<FoodCandidate>, { recents
     foodView={view}
     onFoodViewChange={fn()}
     recipes={idle}
+    recipeCatalogue={recipeCatalogue}
+    recipeCatalogueStatus="ready"
     criteria={{}}
     onApplyCriteria={fn()}
     onRemoveCriterion={fn()}

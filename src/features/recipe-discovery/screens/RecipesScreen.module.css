@@ -39,9 +39,88 @@
   outline-offset: calc(var(--portion-focus-ring-offset) * -1);
 }
 
-.results {
+/* Quick dietary chips: one row that scrolls sideways when five chips do not fit (320 px,
+   enlarged text) rather than shrinking them; the chips' 48 px hit areas need the block
+   padding to stay unclipped. */
+.quick {
+  display: flex;
+  gap: var(--portion-ref-space-8);
+  overflow-x: auto;
+  padding-block: var(--portion-ref-space-4);
+  padding-inline: var(--portion-ref-space-4);
+  margin-inline: calc(var(--portion-ref-space-4) * -1);
+  scrollbar-width: thin;
+  min-inline-size: 0;
+}
+
+.quick > * {
+  flex-shrink: 0;
+}
+
+/* The count sits under the chips as the page's status line; tight to the chips. */
+.count {
+  margin-block-start: calc(var(--portion-ref-space-12) * -1);
+  min-inline-size: 0;
+}
+
+.group {
   display: flex;
   flex-direction: column;
   gap: var(--portion-spacing-section-title-to-content);
+  min-inline-size: 0;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+/* The action never wraps inside its label; the title column gives way instead. */
+.groupHeader > :last-child {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.groupTitle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+/* A rail of tiles: fixed-width photo cards that scroll sideways within the page inset,
+   the next tile peeking so the rail reads as scrollable without a hint. Every tile is a
+   button in a list, so keyboard and assistive technology reach each without swiping. */
+.rail {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(16rem, 78%);
+  gap: var(--portion-spacing-card-gap);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-block: var(--portion-ref-space-4);
+  padding-inline: var(--portion-spacing-page-inset);
+  margin-inline: calc(var(--portion-spacing-page-inset) * -1);
+  scrollbar-width: thin;
+  min-inline-size: 0;
+}
+
+.tile {
+  display: flex;
+  min-inline-size: 0;
+  scroll-snap-align: start;
+}
+
+.tile > * {
+  flex: 1 1 auto;
+}
+
+.all {
   min-inline-size: 0;
 }

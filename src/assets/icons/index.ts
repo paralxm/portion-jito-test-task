@@ -5,8 +5,10 @@ import spriteMarkup from './sprite.svg?raw';
 export const ICON_SYMBOL_IDS = new Set<string>([
   'arrow-left-regular',
   'barcode-regular',
+  'calendar-check-regular',
   'camera-regular',
   'caret-down-regular',
+  'caret-left-regular',
   'caret-right-regular',
   'caret-up-regular',
   'check-bold',

@@ -7,7 +7,7 @@ import { Stack } from '../../../design-system/primitives/layout/Stack';
 import { Inline } from '../../../design-system/primitives/layout/Inline';
 import { Text } from '../../../design-system/primitives/Text/Text';
 import { ModalSheet } from '../../../design-system/patterns/ModalSheet/ModalSheet';
-import { DIETARY_OPTIONS, draftFromCriteria, EMPTY_DRAFT, validateDraft, type CriteriaDraft, type DraftErrors, type RecipeCriteria } from '../domain/matching';
+import { canonicalDietary, DIETARY_OPTIONS, draftFromCriteria, EMPTY_DRAFT, validateDraft, type CriteriaDraft, type DietaryPreference, type DraftErrors, type RecipeCriteria } from '../domain/matching';
 import styles from './RecipeFiltersSheet.module.css';
 
 export interface RecipeFiltersSheetProps {
@@ -21,9 +21,11 @@ export interface RecipeFiltersSheetProps {
 }
 
 /**
- * O02 — recipe filters as a modal draft. Reset all clears the draft only (it takes
- * effect on Apply); Apply validates, refuses an invalid range and commits; Cancel keeps
- * the previously applied criteria untouched.
+ * O02 — recipe filters as a modal draft over the same criteria the quick chips edit
+ * (ledger §12 B3): dietary constraints as a set of toggles combined with AND, a calorie
+ * range (one criterion), a protein minimum and a preparation maximum. Reset all clears
+ * the draft only (it takes effect on Apply); Apply validates, refuses an invalid range
+ * and commits; Cancel keeps the previously applied criteria untouched.
  */
 export function RecipeFiltersSheet({ open, applied, onApply, onCancel }: RecipeFiltersSheetProps) {
   const [draft, setDraft] = useState<CriteriaDraft>(() => draftFromCriteria(applied));
@@ -41,6 +43,11 @@ export function RecipeFiltersSheet({ open, applied, onApply, onCancel }: RecipeF
   const update = <K extends keyof CriteriaDraft>(key: K, value: CriteriaDraft[K]) => {
     setDraft((d) => ({ ...d, [key]: value }));
     setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
+  };
+
+  const toggle = (option: DietaryPreference) => {
+    const current = draft.dietary;
+    update('dietary', canonicalDietary(current.includes(option) ? current.filter((d) => d !== option) : [...current, option]));
   };
 
   const apply = () => {
@@ -74,19 +81,19 @@ export function RecipeFiltersSheet({ open, applied, onApply, onCancel }: RecipeF
           concept both forms use, not spacing.section (24 px), which is for major
           screen-level regions. */}
       <Stack gap={16}>
-        <fieldset className={styles.group} role="radiogroup" aria-labelledby={dietaryLabelId}>
+        <fieldset className={styles.group} role="group" aria-labelledby={dietaryLabelId}>
           <Text as="legend" id={dietaryLabelId} variant="label" color="primary" className={styles.legend}>
-            Dietary preference
+            Dietary
           </Text>
           <Text as="p" variant="supporting" color="secondary" className={styles.hint}>
-            Based on what each recipe declares. Not an allergen check.
+            Choose any that apply; a recipe must satisfy all of them. Based on what each recipe declares — a vegan recipe also counts as vegetarian. Not an allergen check.
           </Text>
           <Inline gap={8} wrap block>
-            <FilterChip selectionRole="radio" selected={draft.dietary === null} onClick={() => update('dietary', null)}>
-              No preference
+            <FilterChip selected={draft.dietary.length === 0} onClick={() => update('dietary', [])}>
+              All
             </FilterChip>
             {DIETARY_OPTIONS.map((option) => (
-              <FilterChip key={option.id} selectionRole="radio" selected={draft.dietary === option.id} onClick={() => update('dietary', option.id)}>
+              <FilterChip key={option.id} selected={draft.dietary.includes(option.id)} onClick={() => toggle(option.id)}>
                 {option.label}
               </FilterChip>
             ))}

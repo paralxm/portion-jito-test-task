@@ -97,6 +97,8 @@ export interface MealGroupProps {
   onOpenEntry: (entryId: string) => void;
   onAdd: (meal: MealType) => void;
   highlightEntryId?: string | null;
+  /** The heading: "Today's meals" by default, "Meals on Thu, Sep 3" for another day. */
+  heading?: string;
   className?: string;
 }
 
@@ -106,14 +108,14 @@ export interface MealGroupProps {
  * ledger D-16) is listed in its own section with a Choose meal resolution — never
  * classified silently.
  */
-export function MealGroup({ entries, onOpenEntry, onAdd, highlightEntryId, className }: MealGroupProps) {
+export function MealGroup({ entries, onOpenEntry, onAdd, highlightEntryId, heading = 'Today’s meals', className }: MealGroupProps) {
   const { meals, unassigned } = groupByMeal(entries);
   const total = energyOf(entries);
   return (
     <section aria-labelledby="home-meals-heading" className={[styles.section, className].filter(Boolean).join(' ')}>
       <div className={styles.sectionHeader}>
         <Text as="h2" id="home-meals-heading" variant="section-title" color="primary">
-          Today&rsquo;s meals
+          {heading}
         </Text>
         <Text as="p" variant="supporting" color="secondary" numeric>
           {entries.length === 0 ? 'Nothing logged' : `${formatKcal(total.kcal)}${total.complete ? '' : '+'} kcal logged`}

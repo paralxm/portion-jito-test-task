@@ -1,0 +1,34 @@
+/* A quiet header control: glyph, count and unit on the canvas, 48 px target. */
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-4);
+  min-block-size: var(--portion-size-target-minimum);
+  min-inline-size: var(--portion-size-target-minimum);
+  padding-inline: var(--portion-ref-space-8);
+  border: 0;
+  border-radius: var(--portion-radius-control);
+  background: transparent;
+  color: var(--portion-color-text-primary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+@media (hover: hover) {
+  .indicator:hover {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.indicator:active {
+  background: var(--portion-color-background-sunken);
+}
+
+.unit {
+  white-space: nowrap;
+}
+
+.close {
+  margin-block-start: var(--portion-ref-space-16);
+}
