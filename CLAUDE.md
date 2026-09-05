@@ -12,4 +12,5 @@
 - Keep UI copy in English. Keep code, identifiers, and documentation in the repository's existing language.
 - Continue autonomously through implementation and verification. Stop only for a real blocker: inaccessible required source, unsafe repository state, contradictory product authority, missing permission, or a failing prerequisite that cannot be repaired within scope.
 - Do not push, merge, rebase, reset, delete branches, or overwrite unrelated work. Local commits are allowed only when the active task says so.
+For code-to-Figma transfer tasks, read and follow docs/design/figma-transfer-contract.md before planning or making changes.
 
