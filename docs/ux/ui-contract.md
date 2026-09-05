@@ -462,3 +462,5 @@ Ring text and nutrition labels communicate quantities without requiring color pe
 Respect reduced motion. Verify keyboard use, focus order, modal return and screen-reader interpretation in runtime.
 
 Existing reports of 24 verified color pairs apply to those listed pairs only. They do not establish contrast in every new ring/card placement or overall accessibility conformance. Check actual token combinations when implementing.
+
+Implemented 2026-09-05 (Hi-Fi redesign, docs/design/hifi-decisions.md §10): every committed entry belongs to one meal (breakfast, lunch, dinner, snack); Add to today on S07 opens the shared Add-to-meal sheet whose Add to {meal} is the single commit (D-23); Recipe Details offers Add, which creates a recipe entry on a per-serving basis (superseding the 6.4 sentence that no Add to today exists on details); the Home ring is replaced by the horizontal calorie budget bar with a goal marker (D-19, D-20) and the goal editor takes optional user-entered macro targets (D-18); Home records today's water (D-22); the bottom navigation is fixed within the shell (D-26); the barcode and photo steps show no simulator controls (D-24).

@@ -1,6 +1,6 @@
 # Portion Hi-Fi decisions ledger
 
-Updated: 2026-09-05 (redesign checkpoint, §10). Baseline pass: 2026-09-04. Branch: `feat/hifi-screens` (from `main` at `a7c76c4`). Owner of this file: the Hi-Fi product pass. It is the compact, resumable record of the state inventory (41 rows in the baseline pass, 46 after the §10 redesign), the transition model, the reference synthesis, the content model, the asset register and every material interpretation. Product truth stays in `PRODUCT.md`; behaviour stays in `docs/ux/`; visual composition stays in `DESIGN.md`. This ledger records how those were applied, not a second specification.
+Updated: 2026-09-05 (Stage A close-out, §10.9; Stage B queued, §11). Baseline pass: 2026-09-04. Branch: `feat/hifi-screens` (from `main` at `a7c76c4`). Owner of this file: the Hi-Fi product pass. It is the compact, resumable record of the state inventory (41 rows in the baseline pass, 46 after the §10 redesign), the transition model, the reference synthesis, the content model, the asset register and every material interpretation. Product truth stays in `PRODUCT.md`; behaviour stays in `docs/ux/`; visual composition stays in `DESIGN.md`. This ledger records how those were applied, not a second specification.
 
 ## 0. Sources read for this pass (in the required order)
 
@@ -242,8 +242,9 @@ Register (filled in §8 after acquisition; every row must have a verifiable item
 | chicken-salad | `src/assets/images/recipes/chicken-salad.webp` | `recipe-chicken-salad` | Unsplash | Zayed Ahmed Zadu (`/@zayed_ahmed_zadu`) | https://unsplash.com/photos/grilled-chicken-salad-with-vegetables-and-nuts-top-view-bly5KOy6zNM | https://unsplash.com/license | 2026-09-04 | 1200 × 900 centre crop; 16:9 hero by cover | empty alt |
 | tofu-stir-fry | `src/assets/images/recipes/tofu-stir-fry.webp` | `recipe-tofu` | Unsplash | tommao wang (`/@tommaomaoer`) | https://unsplash.com/photos/pan-fried-golden-tofu-with-green-vegetables-in-a-white-bowl-HUc9rHGfgM4 | https://unsplash.com/license | 2026-09-04 | 1200 × 900 centre crop; 16:9 hero by cover | empty alt |
 | sample-capture | `src/assets/images/foods/sample-capture.webp` | the photo flow’s captured frame (S05-2…S05-6), a rice bowl | Unsplash | Shashi Chaturvedula (`/@thephotographermom`) | https://unsplash.com/photos/cooked-rice-with-green-peas-and-carrots-on-stainless-steel-bowl-oYvZ-stypr4 | https://unsplash.com/license | 2026-09-04 | 1200 × 900 centre crop (4:3 preview) | “Sample image standing in for your photo” — it carries the meaning that this is a sample, not the user’s food |
-| — (fallback) | — | `recipe-traybake` | — | — | — | — | — | intentional **No photo** | the only licensed candidates found were either Unsplash+ (paid) or depicted a different dish (a skillet with bread), so the slot stays honest |
-| — (fallback) | — | `recipe-pasta-long` | — | — | — | — | — | intentional **No photo** (the S03-1 / S08-4 no-photo case) | — |
+| vegetable-traybake | `src/assets/images/recipes/vegetable-traybake.webp` | `recipe-traybake` (“Roasted vegetable and chickpea traybake”; the photo shows roasted peppers, aubergine and cauliflower on a tray — chickpeas are not visible, so the image is appearance only) | Pexels | Anthony Rahayel (`/@anthony-rahayel-125801377`) | https://www.pexels.com/photo/36367576/ | https://www.pexels.com/license/ | 2026-09-05 | Pexels CDN centre crop 1200 × 900 (`auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop`), encoded to WebP q0.72 by Chromium (`.verification/to-webp.mjs`, no dependency added); 16:9 hero by `object-fit: cover` | empty alt beside the visible title |
+| pasta-roasted-vegetables | `src/assets/images/recipes/pasta-roasted-vegetables.webp` | `recipe-pasta-long` (“Wholegrain pasta with roasted vegetables and tahini dressing”; penne with courgette and peppers on a plate) | Pexels | Ravi Sharma (`/@ravinepz`) | https://www.pexels.com/photo/penne-pasta-dish-in-a-plate-7458755/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| — (baseline pass) | — | `recipe-traybake`, `recipe-pasta-long` | — | — | — | — | 2026-09-04 | were intentional **No photo** in the baseline pass (Unsplash candidates were paid or the wrong dish); superseded 2026-09-05 by the two Pexels rows above (D-28) | — |
 
 Rejected candidates and why (so the search is not repeated): Jezebel Rose KGw62KtHzxA (butternut squash, not lentil); Monika Grabkowska VVPC-DEBi2I (pumpkin/sweet-potato soup); Max Griss xVgE_mCA8fk (sweet-potato soup); Zayed Ahmed Zadu VNYi27uNrxE (egg-drop soup); Kateryna Hliznitsova ZWKLCjeAdZ8 and Maryam Sicard KxUIupj29iU / ekoJ6j-0BEA (Unsplash+); Chefitt BKKZqbMShzo (roasted vegetables with bread in a skillet — no chickpeas, bread could read as part of the recipe); Christopher Stites aCfju9BMtP8 (breakfast platter). Files were fetched through the item’s Unsplash download endpoint and resized server-side to 1200 × 900 WebP (`fm=webp&w=1200&h=900&fit=crop&q=72`); no image-conversion dependency was added. Sizes: 65–210 KB (the chicken salad is the largest at 210 KB; it is the only slot rendered at the 16:9 hero size on a 2× display).
 
@@ -444,9 +445,9 @@ New rows:
 | D-30 | Toast | New `Toast` pattern: bottom-anchored above the fixed bar (`--portion-navigation-inset`), `role="status"`, optional action (`Undo`), auto-dismiss after 6 s, sheet motion tokens, instant under reduced motion; used for water quick add and Add-to-meal success | — |
 | D-31 | Home order | Header → budget bar + macros → recommended recipe → Today's meals → Water → fixed bar. The large in-body `Log food` button is removed; the bar's plus and the per-meal add actions are the entry points | — |
 
-### 10.6 Photography plan (register rows are appended to §5 when acquired)
+### 10.6 Photography (acquired 2026-09-05; register rows in §5)
 
-Inventory before this pass: `lentil-soup`, `chicken-salad`, `tofu-stir-fry`, `sample-capture` (all Unsplash, 1200 × 900 WebP). Required: `recipe-traybake` (roasted vegetables and chickpeas on a tray) and `recipe-pasta-long` (pasta with roasted vegetables). Priority: existing local assets → verified Unsplash/Pexels item pages with a current licence page → fallback. Same fetch method as §5 (item download endpoint, `fm=webp&w=1200&h=900&fit=crop&q=72`), same empty-alt rule. The reference photographs are never used.
+Inventory before this pass: `lentil-soup`, `chicken-salad`, `tofu-stir-fry`, `sample-capture` (all Unsplash, 1200 × 900 WebP). Added: `vegetable-traybake` and `pasta-roasted-vegetables` from Pexels (free Pexels licence; the Unsplash candidates for both dishes were Unsplash+ paid items or the wrong dish, as in the baseline pass). Because no image converter is installed, the Pexels CDN delivered the 1200 × 900 centre crop as JPEG and Chromium (via Playwright) encoded it to WebP; the helper is `.verification/to-webp.mjs` (ignored, no dependency added). Every catalogue recipe now has a photo; the reference photographs were never used.
 
 ### 10.7 Implementation sequence (frozen)
 
@@ -456,14 +457,110 @@ Inventory before this pass: `lentil-soup`, `chicken-salad`, `tofu-stir-fry`, `sa
 4. Recipe Detail + Add, `RecipeCard`, photography + register — commit.
 5. Lane stories, index, captures/walkthrough/contrast scripts, manifest, docs, final verification — commit, push.
 
-### 10.8 Status of reopened and new rows
+### 10.8 Status of reopened and new rows (2026-09-05)
 
-Filled in as work lands.
+Every row has production UI, a mapped deterministic story with a play function (axe at `error`), a 393 × 852 capture and a recorded verification mode. Rows verified as **story** are the prototype's unreachable phases: with the simulator controls gone (D-24) the not-found, lookup-failed, unreadable, denied and analysis-failed phases have no runtime trigger, so they join P01, S05-5, S06-2 and S08-3 as deterministic stories.
 
-### 10.9 Verification record (redesign)
+| # | ID | Row | Story (Product states / …) | Capture (393 × 852, `verification/storybook/`) | Verification |
+| --- | --- | --- | --- | --- | --- |
+| 1 | S01-1 | reopened | Lane A → S01-1 | `states/S01-1-175-10.png` | runtime + story · walkthrough 01-home-empty / 03-home-goal-empty |
+| 2 | S01-2 | reopened | Lane A → S01-2 | `states/S01-2-175-38.png` | runtime + story · walkthrough 10-home-populated / 51-home-320/393/430 |
+| 3 | S02-1 | reopened | Lane A → S02-1 | `states/S02-1-175-93.png` | runtime + story · walkthrough 06-search-food-results |
+| 4 | S03-1 | reopened | Lane A → S03-1 | `states/S03-1-175-158.png` | runtime + story · walkthrough 32-recipes-browse (five photographs) |
+| 5 | O01 | reopened (over the new Home) | Lane B → O01 | `states/O01-176-20.png` | runtime + story · walkthrough 04-method-sheet / 52 / 55 |
+| 6 | S02-2 | reopened | Lane B → S02-2 | `states/S02-2-176-43.png` | runtime + story · walkthrough 05-search-loading |
+| 7 | S02-3 | reopened | Lane B → S02-3 | `states/S02-3-176-77.png` | runtime + story · walkthrough 48-search-no-match |
+| 8 | S02-4 | reopened | Lane B → S02-4 | `states/S02-4-176-118.png` | runtime + story · walkthrough 47-search-failure |
+| 9 | S07-1 | reopened | Lane B → S07-1 | `states/S07-1-176-157.png` | runtime + story · walkthrough 08-review-300 / 18-review-from-home-origin |
+| 10 | S07-2 | reopened | Lane B → S07-2 | `states/S07-2-176-201.png` | runtime + story · walkthrough 12-entry-invalid-stale |
+| 11 | S07-3 | reopened (meal picker) | Lane B → S07-3 | `states/S07-3-176-247.png` | runtime + story · walkthrough 11-entry-edit (meal moved to Dinner) |
+| 12 | S04-1 | reopened | Lane C1 → S04-1 | `states/S04-1-178-5.png` | runtime + story · walkthrough 19-barcode-scanning |
+| 13 | S04-2 | reopened | Lane C1 → S04-2 | `states/S04-2-178-20.png` | runtime + story · walkthrough 20-barcode-looking-up |
+| 14 | S04-3 | reopened | Lane C1 → S04-3 | `states/S04-3-178-31.png` | story (deterministic, D-24) |
+| 15 | S04-4 | reopened | Lane C1 → S04-4 | `states/S04-4-178-47.png` | story (deterministic, D-24) |
+| 16 | S04-5 | reopened | Lane C1 → S04-5 | `states/S04-5-178-65.png` | story (deterministic, D-24) |
+| 17 | P01 | reopened | Lane C1 → P01 | `states/P01-178-81.png` | story (deterministic, D-6 / D-25) |
+| 18 | S04-6 | reopened | Lane C1 → S04-6 | `states/S04-6-178-94.png` | story (deterministic, D-24) |
+| 19 | S07-4 | reopened | Lane C1 → S07-4 | `states/S07-4-178-109.png` | runtime + story · walkthrough 21-review-barcode |
+| 20 | S05-1 | reopened | Lane C2 → S05-1 | `states/S05-1-179-5.png` | runtime + story · walkthrough 27-photo-capture |
+| 21 | S05-2 | reopened | Lane C2 → S05-2 | `states/S05-2-179-12.png` | runtime + story · walkthrough 28-photo-preview |
+| 22 | S05-3 | reopened | Lane C2 → S05-3 | `states/S05-3-179-21.png` | runtime + story · walkthrough 29-photo-analysing |
+| 23 | S05-4 | reopened | Lane C2 → S05-4 | `states/S05-4-179-31.png` | runtime + story · walkthrough 30-photo-suggestions |
+| 24 | S05-5 | reopened | Lane C2 → S05-5 | `states/S05-5-179-57.png` | story (deterministic, D-9) |
+| 25 | S05-6 | reopened | Lane C2 → S05-6 | `states/S05-6-179-70.png` | story (deterministic, D-24) |
+| 26 | S07-5 | reopened | Lane C2 → S07-5 | `states/S07-5-179-81.png` | runtime + story · walkthrough 31-review-photo |
+| 27 | S06-1 | preserved | Lane D → S06-1 | `states/S06-1-180-5.png` | runtime + story · walkthrough 23-manual-empty |
+| 28 | S06-2 | preserved | Lane D → S06-2 | `states/S06-2-180-43.png` | story (deterministic, D-7) |
+| 29 | S06-3 | preserved | Lane D → S06-3 | `states/S06-3-180-71.png` | runtime + story · walkthrough 24-manual-errors |
+| 30 | O03 | preserved | Lane D → O03 | `states/O03-180-111.png` | runtime + story · walkthrough 26-manual-discard-dialog |
+| 31 | O04 | preserved | Lane D → O04 | `states/O04-180-134.png` | runtime + story · walkthrough 13-unit-sheet |
+| 32 | S07-6 | reopened | Lane D → S07-6 | `states/S07-6-180-162.png` | runtime + story · walkthrough 25-review-manual |
+| 33 | S03-2 | reopened | Lane E → S03-2 | `states/S03-2-181-5.png` | runtime + story · walkthrough 35-recipes-filtered |
+| 34 | O02 | reopened (opened from the filter action) | Lane E → O02 | `states/O02-181-72.png` | runtime + story · walkthrough 33-filters-sheet |
+| 35 | O02-2 | reopened | Lane E → O02-2 | `states/O02-2-181-117.png` | runtime + story · walkthrough 34-filters-invalid-range |
+| 36 | S02-5 | reopened | Lane E → S02-5 | `states/S02-5-181-133.png` | runtime + story · walkthrough 45-search-recipes-results |
+| 37 | S08-2 | reopened | Lane E → S08-2 | `states/S08-2-181-289.png` | runtime + story · walkthrough 38-recipe-loading |
+| 38 | S08-1 | reopened | Lane E → S08-1 | `states/S08-1-181-237.png` | runtime + story · walkthrough 39-recipe-loaded / 40-recipe-expanded |
+| 39 | S08-3 | reopened | Lane E → S08-3 | `states/S08-3-181-317.png` | story (deterministic, D-5) |
+| 40 | S08-4 | reopened | Lane E → S08-4 | `states/S08-4-181-350.png` | story (the catalogue recipe now has a photo, D-28) |
+| 41 | S02-6 | reopened | Lane E → S02-6 | `states/S02-6-181-193.png` | runtime + story · walkthrough 37-recipes-no-match (browse) and 48 (search) |
+| 42 | O05 | new | Lane B → O05 | `states/O05-add-to-meal-food.png` | runtime + story · walkthrough 09-add-to-meal-sheet |
+| 43 | O05-2 | new | Lane E → O05-2 | `states/O05-2-add-to-meal-recipe.png` | runtime + story · walkthrough 41-recipe-add-sheet / 42-home-with-recipe |
+| 44 | S01-4 | new | Lane A → S01-4 | `states/S01-4-water-quick-add.png` | runtime + story · walkthrough 15-home-water-quick-add (two taps, Undo) |
+| 45 | O06 | new | Lane A → O06 | `states/O06-water-sheet.png` | runtime + story · walkthrough 16-water-sheet |
+| 46 | O06-2 | new | Lane A → O06-2 | `states/O06-2-water-edit-total.png` | runtime + story · walkthrough 17-water-edit-total |
 
-Filled in after the final run.
+Component-level evidence (not rows): `PortionLogo`, `ProgressBar`, `AppHeader` variants, `CalorieBudgetBar` (no goal / partial / reached / over / partial total), `MealGroup` (empty / populated / long names / unassigned guard / picker), `WaterTracker` (zero / partial / reached / over / quick add + Undo / reduced motion / 320 / 430 / 200 % / safe area), `WaterSheet` (default / preset / custom valid / custom invalid / edit total / invalid total / cancel / keyboard / 320 / 430 / 200 % / safe area), `AddToMealSheet` (food / recipe / meal change / no meal / invalid / partial / cancel / keyboard / 320 / 200 % / safe area / reduced motion), `CameraStage` (scanning / detected / paused / circle / image / reduced motion), `Toast`, `FilterAction`, the Search barcode shortcut and Recipe Details' Add — all under Product compositions / Primitives / Components / Patterns.
+
+### 10.9 Verification record (redesign, Stage A close-out 2026-09-05)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Tokens | `npm run tokens:check` | 268 tokens validated; generated output current |
+| Typecheck | `npm run typecheck` | exit 0 |
+| Unit tests | `npm run test:unit` | 8 files, 59 passed |
+| Storybook tests (play + axe at `error`) | `npm run test:storybook` | 77 files, 458 tests passed |
+| App build | `npm run build` | success |
+| Storybook build | `npm run build-storybook` | success |
+| Runtime walkthrough | `node scripts/verify/runtime-walkthrough.mjs` | 62 checks passed, 0 failed, no console/page errors (goal with targets, meal row → O01 → search → review → Add-to-meal → Home under the chosen meal, entry edit and move, water quick add ×2 + Undo + sheet + edit total, task origin, barcode from the field and late-read guard, manual + discard, photo, recipes/filters/details/Add → 2 servings, recommendation with filters, search scopes and failure, remove; 320 / 393 / 430 with the fixed bar held, 320 + 200 %, 390 + 200 %, reduced motion) |
+| Storybook captures | `node scripts/verify/storybook-captures.mjs` | 130 captures, 0 with problems: 64 component/foundation captures, the 46 mapped states at 393 × 852, 20 variants (320 / 430, 200 % text, safe-area fixture, reduced motion) |
+| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 71 pairs, 0 failing (water accent moved to cyan.700; the marker-on-indicator pair is informational and carries a 1 px canvas halo) |
+| Impeccable detector | `node .claude/skills/impeccable/scripts/detect.mjs --json src` | no findings |
+
+Rendered inspection: every one of the 46 state captures, the 20 variants, the curated component captures and the runtime subset were read at full resolution and recorded in `verification/manifest.md`. Defects found by that reading and fixed before the checkpoint: the recipe-details nutrition card crowded “Carbohydrates” against the Fat marker at 393 px (the secondary macro row now shows the short name between 20 rem and 22 rem, with the full name kept in the accessible label); the photo no-match state carried a “Suggestions ready” chip (now “No match”); the unreadable-barcode state offered Enter manually twice (the row below the message keeps only Search by name); the filter count badge sat on the glyph without separation (2 px inset and a canvas halo); the water sheet refused an out-of-range custom amount without saying why (the range message now shows while typing); the RecipeCard story used an artificial SVG placeholder although the repository ships licensed photographs (now the lentil soup photo).
+
+Harness finding: in the production Storybook build, passive effects flush after a play function has started, so a sheet's reset-on-open effect could overwrite what the play had already typed (the two O05 stories). The three sheets (`AddToMealSheet`, `WaterSheet`, `GoalSheet`) now reset only on a closed → open transition; the state initialisers already reflect the props at mount.
+
+Not verified here: a real screen reader or device pass, native iOS safe-area behaviour, a live software keyboard, and a real camera; these remain manual checks.
 
 ### 10.10 Next action (resumable)
 
-Phase 2 of §10.7: shared components. Nothing of §10.7 steps 2–5 has been implemented at this checkpoint.
+Stage A (§10.7 steps 1–5) is implemented, verified (§10.9), committed and pushed. Next: Stage B per §11 — implement 11.1–11.3, extend the state inventory with the new Search rows, add stories, captures and walkthrough coverage, run the full verification set again, commit and push.
+
+## 11. Stage B (queued 2026-09-05) — populated Search, recents, food filters, list/grid, local assets, day rollover
+
+Recorded before implementation so the checkpoint is resumable. Stage A (§10) ships first; Stage B reopens S02-1/S02-2/S02-3/S02-4 and adds its own rows once frozen here.
+
+### 11.1 Scope
+
+- **Initial catalogue**: the Food tab with an empty query shows a browsable collection at once — 12 foods/dishes and 3 drinks, each with a local licensed photo, a name, calories with an explicit basis (per serving / per 100 g / per 100 ml), concise metadata and the existing review → Add-to-meal route. Existing entries are reused and enriched (fixture C, lentil soup, pasta, yoghurt, almond butter, salad leaves, sparkling water, the oat drink); no duplicates; nothing valid deleted. Drinks carry volume/serving units. Logging a drink never touches the water tracker.
+- **Recently added**: derived from confirmed meal entries only (never viewed items, never seeded records), newest first, deduplicated by the candidate's stable id; adding again moves it to the top; cancelled drafts never appear. Shown above `Explore foods` (the remaining catalogue) when history exists; without history the catalogue shows immediately. History survives reload (see 11.3). Populated history is demonstrated with explicit Storybook fixtures.
+- **Food filters**: All / Foods / Drinks (reliable item data only; no dietary inference from photographs) in the shared filter-sheet pattern with Apply, Clear all, applied chips; dismissing without Apply keeps the previous filters. The barcode shortcut stays inside the field; the Food filter action sits at the right of a compact toolbar under the field; Recipe filtering stays as agreed.
+- **List / Grid**: an accessible toggle (List default) in that toolbar; both views share items, order, query, filters, basis and opening behaviour; the choice persists; grid = two columns, one column at narrow widths / 200 % text without shrinking type or targets.
+- **Count**: an accurate unique-item count with singular/plural wording; a query or filter produces one unified collection across recents and catalogue; clearing restores the recent/catalogue presentation; switching views never resets search state; first-use, no-results, loading and failure states stay distinct.
+
+### 11.2 Assets
+
+- Photographs in `src/assets/images/foods/`, `src/assets/images/drinks/`, `src/assets/images/recipes/`; existing approved assets first (the rice-bowl sample, the lentil-soup, pasta and chicken-salad recipe photos double as food photos), then individually verified Unsplash/Pexels items; WebP through the Chromium encoder; registry rows in §5 (provider, creator, item URL, licence URL, local path, mapping).
+- Icons: the SVGs the UI actually uses, exported faithfully from the installed Phosphor family (regular, plus bold where the UI uses bold) into `src/assets/icons/` as a generated sprite the shared `Icon` component renders through `<use>`; Phosphor's MIT licence retained; API, weights, sizes, colour and accessibility unchanged; no second family, no whole-library copy.
+- App icon / favicon derived from the portion dot mark, documented in DESIGN.md without creating a second identity.
+
+### 11.3 Data consistency
+
+- Local-day basis: the device's local calendar day (`localDayKey`), re-evaluated at midnight while the app stays open; entries and water keep their own day keys; yesterday never reads as today, including after reload.
+- Session persistence in `localStorage` with a versioned schema; a stored entry without a valid meal loads as unassigned (the D-16 guard), never reclassified; no history feature is added.
+- Recalculation verified after add, edit, move (meal change) and delete; water additions must be positive, editing today's total allows zero; rapid taps and Undo neither lose increments nor overwrite later changes.
+
+### 11.4 Next action
+
+After the Stage A checkpoint commit and push: implement 11.1–11.3, extend the state inventory (new rows for the initial catalogue, recents, food filters and the grid view), fixtures, stories, scripts, registry and manifest, then run the full verification set again.

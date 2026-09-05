@@ -596,3 +596,5 @@ Earlier supplied documents label these revisions 2026-09-07 and 2026-09-08, date
 This update changes documentation only. Figma, FigJam, runtime, Storybook, tokens, git history and deployment were not modified. Keep stable design IDs when performing the pending edits.
 
 Downstream documentation: align the existing visual-direction rules for a functional labeled ring, the product-scope description for optional daily records, and any stale navigation instructions. Preserve research findings and established visual tokens; do not duplicate them into new competing documents.
+
+Implemented 2026-09-05 (Hi-Fi redesign, docs/design/hifi-decisions.md §10): the water and meal-grouping exclusions in §2 are superseded for same-day records only (no history, streaks or analytics); Home's region order is header (lockup, date, Set/Edit goal) → calorie budget bar and macros → recommended recipe → Today's meals (all four, always) → Water → fixed navigation (D-31); the inventory is 46 rows (41 preserved frames + O05, O05-2, S01-4, O06, O06-2).
