@@ -646,6 +646,18 @@ Recorded in `docs/design/hifi-decisions.md` §12 (reference mapping, requirement
 | Screens | Home (strip, streak, selected day, order), Recipes (discovery), Search (recipe catalogue, sibling scanner), Manual entry step 1 and the new step 2, Food review (R5 hierarchy), Method sheet (R6), Recipe details hero containment | Product compositions/* |
 | Verification | new state stories S01-5, S01-6, S02-11, S06-4, S06-5, O08 and variants; component captures 74–81; walkthrough steps for the strip, the streak, the discovery chips, the catalogue in Search, the two-step manual task with Back/Edit retention, browser Back through the guard, barcode corrections, photo retake, the R6 sheet at 200 % | `verification/manifest.md` |
 
+## 2026-09-06 — Revision T1: the target flow (focused steps, review and editor)
+
+Recorded in `docs/design/hifi-decisions.md` §14. What changed in the system:
+
+| Area | Change | Where |
+| --- | --- | --- |
+| Domain | `goal-history.ts` gains `setGoalFrom(…, { keepLater })`, `currentPeriod`, `pendingPeriod`, `cancelPending`; `DailyGoal.adjusted`; `persistence.saveRecord` reports whether the write succeeded | `src/features/calorie-calculator/domain/`, `src/app/persistence.ts` |
+| Patterns | `FocusedBar` (Back · centred step count · Help), `HelpDialog` (short body + *Calculation details* disclosure) | Patterns/FocusedBar, Patterns/HelpDialog |
+| Components | `SelectionCard` (card and tile presentations, reserved indicator slot); `MacroTargetsEditor` rows with nutrient markers and no grouped surface; `CalorieBudgetBar` `scheduledNote` | Components/SelectionCard, feature components |
+| Feature | `src/features/calorie-calculator/targets/`: `targets-draft.ts` (one task draft, `buildGoal`, `resolveStart`, the effective-date copy), `TargetsEntrySheet`, `EstimateStepScreen` + `UnitField`, `TargetEditorScreen` (review / manual / edit) + `EffectiveDateControl`, `help.tsx`; `TargetsSheet` retired; App owns the task (`targets-*` flow steps, save-before-state, pending change, removal) | Product compositions/Targets/* |
+| Verification | stories for the entry sheet, the three steps (errors, imperial, help, unsupported goal, discard, 320 / 200 %), the editor (review, adjust, manual, edit, scheduled, remove, save failure, help, discard, 320 / 200 %), SelectionCard, HelpDialog, FocusedBar; capture rows 39–39s; walkthrough journeys for the focused flow, Help focus return, unit conversion, Adjust and Edit details, Recalculate, browser Back through the guard, a future start, a refused write with retry, the cancelled schedule, removal with a scheduled change, the earlier-day save and the mocked midnight | `*.stories.tsx`, `scripts/verify/` |
+
 ## 2026-09-05 — Revision H2: Home composition, Recipes discovery, Search alignment, targets
 
 Recorded in `docs/design/hifi-decisions.md` §13. What changed in the system:
