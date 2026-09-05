@@ -35,7 +35,8 @@ Do not promote a one-off until at least two real consumers need the same contrac
 - Define relevant rest, hover, active, focus-visible, disabled, loading, invalid, selected, empty, error, and reduced-motion behavior.
 - Use native semantics first. Preserve accessible name, role, state, keyboard behavior, and focus lifecycle.
 - Public changes require updating every consumer, export, type, story, and test in the same change.
-- Keep icons in `@phosphor-icons/react`; visible size never substitutes for target size.
+- Keep icons in `@phosphor-icons/react`; product glyphs are exported verbatim from the installed package into `src/assets/icons/` by `npm run icons:build` (the sprite `Icon` draws through `<use>`; `npm run icons:check` guards staleness) — never hand-edit or paste SVG paths; visible size never substitutes for target size.
+- Collections of items get one presentation switch (`ViewToggle`, a radio group) and share data, order and open behaviour between `FoodResultRow` (list) and `FoodCard` (grid); filters live in the shared sheet pattern (`RecipeFiltersSheet`, `FoodFiltersSheet`) with a draft, Apply, Clear/Reset and dismissal that keeps the applied state.
 - Do not add a dependency when the locked stack can implement the contract clearly.
 
 ## Layout contract

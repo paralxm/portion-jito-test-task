@@ -67,6 +67,11 @@ task context or primary result
 - Recipe card images use 4:3; recipe detail uses 16:9. Every normal catalogue recipe has a licensed, locally stored photograph; `No photo` is the resilient fallback for an absent or failed image, never the principal state of a catalogue recipe.
 - Photographs are optimised local WebP (1200 × 900, centre crop), registered with provider, creator, item URL, licence URL, access date, crop, and alt decision in `docs/design/hifi-decisions.md`. Decorative empty alt when the adjacent text already names the recipe. Reference UI screenshots are never production media.
 - Photography is evidence of appearance only; it never proves nutrition, ingredients, or suitability.
+- Product glyphs are served from `src/assets/icons/`, an export of the official Phosphor paths generated from the installed package (`npm run icons:build`); `Icon` keeps its API, weights and sizes.
+
+### App icon
+
+The app icon and favicon are the portion dot alone — the brand mark (action blue) centred on the canvas white — generated from `src/assets/favicon/make.mjs` into `public/`. No wordmark, gradient, second symbol or alternative colourway: the lockup stays the only brand rendering inside the product, and the dot is its only mark outside it.
 
 ## Composition contracts
 
@@ -139,6 +144,7 @@ Limit grouped surfaces. On Home the grouped surfaces are the calorie budget, the
 ### Search field actions
 
 - `SearchField` has one trailing action slot after the clear control: Food scope → `Scan barcode` icon button; Recipes scope and browse → `Filters` icon button whose applied count is shown as a badge and spoken in the name (`Filters, 2 active`). Applied chips render beneath the field. There is no separate left-aligned Filters button.
+- Food scope adds one compact toolbar under the field: `ViewToggle` (List / Grid, a radio group of 48 px targets with glyph and label) at the start and the `Food filters` action at the end; the applied chip sits beneath. The list uses `FoodResultRow` with a 4 rem thumbnail; the grid uses `FoodCard` (photo above identity, calories with basis) in two columns, one under 20 rem. Both present the same items in the same order. In a row the name has priority: its column never drops under 7.5 rem (the width of the catalogue’s longest words), the calorie value stays on one line and the basis wraps only between `per serving` and its amount; under 18 rem (22 rem with a thumbnail) the figure moves beneath the identity instead.
 
 ### Log food sheet
 

@@ -619,3 +619,17 @@ The sections above are the dated record of earlier passes and are not rewritten.
 | Calculator feature | meal model (`meal.ts`: four meals, `suggestMeal`), `daily-log.ts` entries carry `meal` (null = unassigned guard), `DailyGoal` with optional targets, `water.ts`; `CalorieBudgetBar`, `MealGroup`/`MealPicker`, `WaterTracker`/`WaterSheet`, `AddToMealSheet`; Home recomposed; review's Add to today opens the sheet; barcode/photo without simulator controls | Product compositions/* |
 | Recipe feature | `FilterAction` in the field, `CriteriaToolbar` = chips + sheet, Recipe Details with title-side `Add`, `recipeToCandidate` for meal entries, every catalogue recipe photographed | Product compositions/* |
 | Verification | 46 mapped state stories + variants, `scripts/verify/*` updated (walkthrough covers meals, water, Add-to-meal, fixed bar, reduced motion; captures 130 files; contrast 71 pairs) | `verification/manifest.md` |
+
+## 2026-09-05 — Stage B: the populated Food tab, device record, local icons and app icon
+
+Recorded in `docs/design/hifi-decisions.md` §11 (scope, assets, data consistency, the 51-row inventory, decisions D-32–D-40). What changed in the system:
+
+| Area | Change | Where |
+| --- | --- | --- |
+| Domain | `FoodCandidate.category` (`food` / `drink`); the 15-item catalogue with registered photographs (`fixtures.ts`, positions 0–6 frozen); `food-search.ts` (filters, unified collection, count wording); `recents.ts` (from confirmed entries only); `local-day.ts` (midnight arithmetic); reload-safe entry ids | `src/features/calorie-calculator/domain/` |
+| App shell | `persistence.ts` (versioned `portion.record`: entries, goal, water per day, Search view; validated on load, photos re-resolved by id); `useLocalDayKey` (midnight + visibility); `catalogue-images.ts`; Search wiring for catalogue, recents, filters and view | `src/app/` |
+| Components | `ViewToggle` (radio group List / Grid); `FoodResultRow` gained a thumbnail and became a flex row whose identity keeps a 7.5 rem basis while the basis text gives way (D-41); `FoodCard` pattern for the grid; `FilterAction` gained a `label` | Components/ViewToggle, Components/FoodResultRow, Patterns/FoodCard |
+| Feature | `FoodFiltersSheet` (All / Foods / Drinks in the shared sheet pattern); `FoodCollection` (list or two-column grid, one column under 20 rem); Search's Food scope recomposed (toolbar under the field, Recently added / Explore foods, unified results) | Product compositions/Search (S02) |
+| Icons | `scripts/icons/export.mjs` → `src/assets/icons/` (sprite + per-glyph SVGs + LICENSE, only the glyphs and weights the product renders); `Icon` draws them through `<use>` with the React package as fallback; `npm run icons:check` in `verify` | Foundations/Icons |
+| App icon | `src/assets/favicon/make.mjs` → `public/favicon.svg`, PNG sizes, `manifest.webmanifest`; linked from `index.html` | DESIGN.md → App icon |
+| Verification | 5 new state stories (S02-7 … S02-10, O07) + variants; walkthrough journey 5 (catalogue, filters, grid, drink logging without water, recents, unified query, reload, day boundary, midnight with the mocked clock); capture rows 65–73 | `verification/manifest.md` |

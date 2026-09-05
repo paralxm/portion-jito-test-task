@@ -53,6 +53,8 @@ Home is a bounded daily overview for one day, organised by meal, not a diary das
 - Missing nutrition is `Not available`, not zero.
 - Adding to today is optional and requires an explicit commit through `Add to meal`.
 - Food search offers a one-tap barcode action in the field; recipe search and browse offer the filter action in the field, with applied filters shown as chips beneath it.
+- The Food tab is populated before anything is typed: a catalogue of 12 foods or dishes and 3 drinks, each with a local licensed photo, a name, calories with an explicit basis and one detail line, in a list (default) or a two-column grid chosen from a compact toolbar under the field; the choice persists on the device. `Recently added` — derived only from confirmed meal entries, newest first, one row per item — sits above `Explore foods` when history exists. Food filters (All / Foods / Drinks, from each item's own record) live in the shared filter sheet behind the toolbar's `Food filters` action; a query yields one unified, counted set across recents and catalogue.
+- Drinks carry volume units and are logged like any food; logging a drink never changes the water record.
 
 ### Recipe discovery
 
@@ -68,7 +70,7 @@ Home is a bounded daily overview for one day, organised by meal, not a diary das
 
 ## Data truth
 
-Barcode, photo recognition, nutrition, and recipe content are deterministic fixtures. Different fixtures remain independent. Copy must identify estimates, unavailable values, and retryable system states without implying live recognition. The scanner and camera steps are fixture-backed: the prototype reads a sample barcode and captures a labelled sample photograph, and the screens say so; no simulator or debug controls appear in the product.
+Today's and earlier entries, the goal, water per day and the Search view are kept on the device (`localStorage`) under one versioned record and restored on launch; each entry keeps its own local calendar day, and the current day is re-evaluated at local midnight. Barcode, photo recognition, nutrition, and recipe content are deterministic fixtures. Different fixtures remain independent. Copy must identify estimates, unavailable values, and retryable system states without implying live recognition. The scanner and camera steps are fixture-backed: the prototype reads a sample barcode and captures a labelled sample photograph, and the screens say so; no simulator or debug controls appear in the product.
 
 ## Brand commitments
 
