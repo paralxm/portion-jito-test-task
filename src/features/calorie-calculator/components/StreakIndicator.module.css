@@ -28,7 +28,3 @@
 .unit {
   white-space: nowrap;
 }
-
-.close {
-  margin-block-start: var(--portion-ref-space-16);
-}

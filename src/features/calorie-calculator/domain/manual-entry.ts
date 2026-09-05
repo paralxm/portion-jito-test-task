@@ -4,7 +4,7 @@
  * the review screen, never here. Validation happens on Continue, and a blank optional
  * value stays unknown rather than becoming zero.
  */
-import { parseAmount, parseNonNegative, type FoodCandidate, type SupportedUnit } from './calculation';
+import { formatQuantityDraft, parseAmount, parseNonNegative, type FoodCandidate, type SupportedUnit } from './calculation';
 
 export type ManualUnit = 'g' | 'ml' | 'serving';
 
@@ -52,6 +52,32 @@ export type ManualValidation = { ok: true; candidate: FoodCandidate } | { ok: fa
 
 let manualSequence = 0;
 
+/** A candidate id unique across reloads (the photo store and recents key on it). */
+export function newManualId(now = Date.now()): string {
+  return `manual-${now.toString(36)}-${++manualSequence}`;
+}
+
+/** The unit ids manual entry accepts; a record in another unit falls back to grams for correction. */
+const isManualUnit = (id: string): id is ManualUnit => id === 'g' || id === 'ml' || id === 'serving';
+
+/**
+ * Starts a correction draft from a matched or suggested record (ledger §12 E1): the
+ * record's name and reference values prefilled so the user edits known label values
+ * rather than retyping them. Unknown values stay blank.
+ */
+export function draftFromCandidate(candidate: FoodCandidate): ManualDraft {
+  const n = (value: number | null | undefined) => (value === null || value === undefined ? '' : formatQuantityDraft(value));
+  return {
+    name: candidate.name,
+    referenceQuantity: formatQuantityDraft(candidate.reference.quantity),
+    referenceUnit: isManualUnit(candidate.reference.unitId) ? candidate.reference.unitId : 'g',
+    calories: n(candidate.nutrition.energyKcal),
+    protein: n(candidate.nutrition.proteinG),
+    carbohydrates: n(candidate.nutrition.carbohydratesG),
+    fat: n(candidate.nutrition.fatG),
+  };
+}
+
 /** Validates the draft and, when valid, builds the candidate for review. */
 export function validateManualDraft(draft: ManualDraft, id?: string): ManualValidation {
   const errors: ManualErrors = {};
@@ -80,7 +106,7 @@ export function validateManualDraft(draft: ManualDraft, id?: string): ManualVali
   return {
     ok: true,
     candidate: {
-      id: id ?? `manual-${++manualSequence}`,
+      id: id ?? newManualId(),
       name,
       detail: 'Entered manually',
       source: 'manual',

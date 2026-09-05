@@ -1,0 +1,61 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-16);
+  min-inline-size: 0;
+}
+
+/* − field + on one row; the field keeps the room, the steppers keep their 48 px targets.
+   The steppers align with the input, not the label above it, so the row reads as one
+   control: the field's label stays above and the helper/error stays below the field. */
+.amountRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.amount {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.stepper {
+  flex-shrink: 0;
+  /* The label line above the input (1.25 rem, so it follows the text size) plus the label-to-control step. */
+  margin-block-start: calc(1.25rem + var(--portion-spacing-label-to-control));
+}
+
+/* Under 17 rem of form width (200 % text on every supported viewport) the label wraps and
+   the steppers move beneath the field as a pair, keeping their 48 px targets. */
+.form {
+  container-type: inline-size;
+}
+
+@container (max-width: 17rem) {
+  .amountRow {
+    flex-wrap: wrap;
+  }
+
+  .amount {
+    flex-basis: 100%;
+    order: -1;
+  }
+
+  .stepper {
+    margin-block-start: 0;
+  }
+}
+
+/* Presets wrap; each keeps its 48 px hit area (the chip's own ::before). */
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+  padding-block: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+.result {
+  min-inline-size: 0;
+}

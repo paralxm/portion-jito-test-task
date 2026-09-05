@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { CalendarCheck } from '@phosphor-icons/react';
 
 import { Icon } from '../../../design-system/icons/Icon';
-import { Button } from '../../../design-system/primitives/Button/Button';
 import { Text } from '../../../design-system/primitives/Text/Text';
 import { ModalSheet } from '../../../design-system/patterns/ModalSheet/ModalSheet';
 import { describeStreak, type Streak } from '../domain/streak';
@@ -37,11 +36,6 @@ export function StreakIndicator({ streak, className }: StreakIndicatorProps) {
         <Text as="p" variant="body" color="secondary" wrap>
           A day counts when it holds at least one food or recipe added to a meal. Water, opening the app, reaching a goal or looking at a day do not count. The streak always describes the run up to today, whichever day is selected.
         </Text>
-        <div className={styles.close}>
-          <Button variant="secondary" block onClick={() => setOpen(false)}>
-            Close
-          </Button>
-        </div>
       </ModalSheet>
     </>
   );

@@ -1,0 +1,48 @@
+/* Identity first (after R5): image beside the name, source, record fields and basis; the
+   correction actions the source supports beneath, as small secondary buttons. */
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+.summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+/* A 6 rem 4:3 image at the control radius; the sample label sits on it for the photo source. */
+.media {
+  position: relative;
+  flex: 0 0 6rem;
+  inline-size: 6rem;
+  border-radius: var(--portion-radius-control);
+  overflow: hidden;
+}
+
+.mediaLabel {
+  position: absolute;
+  inset-block-end: var(--portion-ref-space-4);
+  inset-inline-start: var(--portion-ref-space-4);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+.source {
+  align-self: flex-start;
+}
+
+.corrections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}

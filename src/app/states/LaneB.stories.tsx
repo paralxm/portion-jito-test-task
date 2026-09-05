@@ -12,7 +12,6 @@ import type { FoodCandidate } from '../../features/calorie-calculator/domain/cal
 import { foodCatalogue } from '../../features/calorie-calculator/domain/fixtures';
 import { NO_FOOD_FILTERS } from '../../features/calorie-calculator/domain/food-search';
 import { WithFoodSearch } from './harnesses';
-import { WithAddToMeal } from './harnesses';
 import { fixtureCandidate, goal2200, NO_STREAK, recentFoods, reviewPortion, TODAY_KEY } from './stateFixtures';
 
 const nav = (selected: Destination) => <NavigationBar selected={selected} onSelect={fn()} onLogFood={fn()} />;
@@ -25,7 +24,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Low-fi lane B (176:2): the Log food chooser over Home, the Food-scope loading / no-match / failure states, the shared review step from search including the invalid-portion state and the existing-entry mode that replaces the superseded “Replaces current calculation” frame (docs/design/hifi-decisions.md D-1), and the Add-to-meal sheet added by the 2026-09-05 redesign (O05, D-23). Fixtures are deterministic; every state is also reachable in the runtime.',
+          'Low-fi lane B (176:2): the Log food chooser over Home (after R6), the Food-scope loading / no-match / failure states, the shared review step from search — which now commits with one Add to {meal} on the screen (ledger §12 E3; the food Add-to-meal sheet is retired) — including the invalid-portion state and the existing-entry mode that replaces the superseded “Replaces current calculation” frame (D-1). Fixtures are deterministic; every state is also reachable in the runtime.',
       },
     },
   },
@@ -91,7 +90,7 @@ export const O01: Story = {
     docs: {
       description: {
         story:
-          'Purpose: choose one of four identification methods. Entry: the bar’s Log food, or a Home meal’s add action (which records the meal for O05), from Home, Search, Recipes or Recipe Details. Fixture: the sheet open over S01-1. Primary action: any tile starts that method; nothing is committed. Next: S02 / S04-1 / S05-1 / S06-1; close, backdrop or Escape → the exact origin. Limitation: the story composes HomeScreen + MethodSheet the way App does; the sheet is opened directly rather than through the plus.',
+          'Purpose: choose one of four identification methods in the R6 hierarchy — the prominent Search food row, the Scan barcode / Take a photo card pair under a restrained caption, a separator, the quieter Enter manually row. Entry: the bar’s Log food, or a Home meal’s add action (which records the meal and the day for the commit), from Home, Search, Recipes or Recipe Details. Fixture: the sheet open over S01-1. Primary action: any method starts that journey; nothing is committed. Next: S02 / S04-1 / S05-1 / S06-1; close, backdrop or Escape → the exact origin. Limitation: the story composes HomeScreen + MethodSheet the way App does; the sheet is opened directly rather than through the plus.',
       },
     },
   },
@@ -105,9 +104,11 @@ export const O01: Story = {
     const canvas = within(canvasElement);
     const dialog = canvas.getByRole('dialog', { name: 'Log food' });
     await expect(dialog).toBeVisible();
-    for (const label of ['Search food', 'Scan barcode', 'Take a photo', 'Enter manually']) {
-      await expect(within(dialog).getByRole('button', { name: new RegExp(label) })).toBeVisible();
-    }
+    const options = within(dialog).getAllByRole('button').filter((b) => b.getAttribute('aria-label') !== 'Close');
+    await expect(options.map((o) => o.textContent)).toEqual([expect.stringContaining('Search food'), expect.stringContaining('Scan barcode'), expect.stringContaining('Take a photo'), expect.stringContaining('Enter manually')]);
+    await expect(options[0].getAttribute('data-presentation')).toBe('row');
+    await expect(options[1].getAttribute('data-presentation')).toBe('card');
+    await expect(options[3].getAttribute('data-tone')).toBe('quiet');
     await expect(within(dialog).getByRole('button', { name: 'Close' })).toBeVisible();
   },
 };
@@ -170,7 +171,7 @@ export const S02_4: Story = {
 };
 
 const review = (extra: Partial<Parameters<typeof FoodReviewScreen>[0]> = {}) => (
-  <FoodReviewScreen candidate={fixtureCandidate} mode="new" initialPortion={reviewPortion} onBack={fn()} onChangeMatch={fn()} onAddToToday={fn()} onDone={fn()} {...extra} />
+  <FoodReviewScreen candidate={fixtureCandidate} mode="new" initialPortion={reviewPortion} initialMeal="lunch" mealHint="Suggested for this time of day. Change it if you like." onBack={fn()} onCancel={fn()} onChangeMatch={fn()} onAdd={fn()} {...extra} />
 );
 
 export const S07_1: Story = {
@@ -179,7 +180,7 @@ export const S07_1: Story = {
     docs: {
       description: {
         story:
-          'Purpose: identity, correction, desired portion and result in one focused step with no bottom bar. Entry: a result row in S02-1. Fixture: fixture C at 300 g → 540 kcal, 18 / 63 / 24 g. Primary action: Add to today → O05 (the sheet’s Add to {meal} commits). Secondary: Done → the invoking surface without logging; Back → the results with the query intact. Limitation: none.',
+          'Purpose: identity, correction, the portion with steps and presets, the live result, the meal and one final action in one focused step with no bottom bar (after R5, ledger §12 E3). Entry: a result row in S02-1. Fixture: fixture C at 300 g → 540 kcal, 18 / 63 / 24 g; lunch preselected by the 12:00 baseline (D-17). Primary action: Add to lunch → one entry, Home S01-2 on the bound day. Secondary: Change food → search; Cancel → the invoking surface (asks when something changed); Back → the results with the query intact. Limitation: none.',
       },
     },
   },
@@ -188,8 +189,13 @@ export const S07_1: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1, name: 'Review food' })).toBeInTheDocument();
     await expect(canvas.getByText('540')).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Add to today' })).toBeEnabled();
-    await expect(canvas.getByRole('button', { name: 'Done' })).toBeVisible();
+    await expect(canvas.getByRole('radio', { name: 'Lunch' })).toBeChecked();
+    await expect(canvas.getByRole('button', { name: 'Add to lunch' })).toBeEnabled();
+    await expect(canvas.getByRole('button', { name: 'Cancel' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'Done' })).toBeNull();
+    // 300 g is typed in grams; the serving preset is offered because the record defines it.
+    await expect(canvas.getByRole('button', { name: '1 serving (300 g)' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(canvas.getByRole('button', { name: 'Increase by 25 g' })).toBeVisible();
     await expect(canvas.queryByRole('navigation')).toBeNull();
   },
 };
@@ -200,7 +206,7 @@ export const S07_2: Story = {
     docs: {
       description: {
         story:
-          'Purpose: a non-positive amount keeps guidance beside the field, marks the previous result unavailable and disables Add to today. Entry: the amount was edited to “0”. Fixture: fixture C. Primary action: correct the amount → S07-1. Limitation: the play function types the invalid value; the capture shows the resulting state.',
+          'Purpose: a non-positive amount keeps guidance beside the field, marks the previous result unavailable and disables the commit. Entry: the amount was edited to “0”. Fixture: fixture C. Primary action: correct the amount → S07-1. Limitation: the play function types the invalid value; the capture shows the resulting state.',
       },
     },
   },
@@ -212,7 +218,7 @@ export const S07_2: Story = {
     await userEvent.type(amount, '0');
     await userEvent.tab();
     await expect(amount).toHaveAccessibleDescription('Enter an amount greater than zero');
-    await expect(canvas.getByRole('button', { name: 'Add to today' })).toBeDisabled();
+    await expect(canvas.getByRole('button', { name: 'Add to lunch' })).toBeDisabled();
     await expect(canvas.queryByText('540')).toBeNull();
   },
 };
@@ -242,40 +248,36 @@ export const S07_3: Story = {
   },
 };
 
-// ---- Row added by the 2026-09-05 redesign (ledger §10.3) ------------------------------
+// ---- Row added by the R1–R6 revision (ledger §12 D3) ----------------------------------
 
-export const O05: Story = {
-  name: 'O05 — Add to meal / From food review',
+export const O08: Story = {
+  name: 'O08 — Discard changes? (shared exit confirmation)',
   parameters: {
     docs: {
       description: {
         story:
-          'Purpose: choose the meal and confirm the amount before one entry is created. Entry: Add to today on S07-1 (or S07-4/5/6) with a valid portion. Fixture: fixture C at 300 g; lunch is preselected by the 12:00 baseline (time-of-day rule D-17) and the hint says so. Primary action: Add to lunch → one entry, Home S01-2. Secondary: Cancel / close / Escape → S07 unchanged. Limitation: the story composes the review screen and the sheet the way App does.',
+          'Purpose: one exit confirmation for every food task — manual entry (both steps), barcode review and photo review — asked only when meaningful unsaved data would be lost. Entry: Cancel, Back out of the task, or browser Back on a changed draft. Fixture: fixture C review with the amount changed to 250 g. Primary (safe) action: Keep editing, focused first; Escape and backdrop do the same. Destructive action: Discard changes, in the error tokens with its consequence in words → the recorded origin. Limitation: none.',
       },
     },
   },
-  render: () => (
-    <WithAddToMeal candidate={fixtureCandidate} portion={reviewPortion} meal="lunch" hint="Suggested for this time of day. Change it if you like." onConfirm={fn()}>
-      {review()}
-    </WithAddToMeal>
-  ),
+  render: () => review(),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const dialog = canvas.getByRole('dialog', { name: 'Add to meal' });
-    await expect(within(dialog).getByRole('radio', { name: 'Lunch' })).toBeChecked();
-    await expect(within(dialog).getByLabelText('Amount')).toHaveValue('300');
-    await expect(within(dialog).getByText('540')).toBeVisible();
-    await expect(within(dialog).getByRole('button', { name: 'Add to lunch' })).toBeEnabled();
-    await userEvent.click(within(dialog).getByRole('radio', { name: 'Dinner' }));
-    await expect(within(dialog).getByRole('button', { name: 'Add to dinner' })).toBeEnabled();
-    await userEvent.click(within(dialog).getByRole('radio', { name: 'Lunch' }));
+    const amount = canvas.getByLabelText('Amount to calculate');
+    await userEvent.clear(amount);
+    await userEvent.type(amount, '250');
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    const dialog = await canvas.findByRole('alertdialog', { name: 'Discard changes?' });
+    await expect(within(dialog).getByRole('button', { name: 'Keep editing' })).toHaveFocus();
+    await expect(within(dialog).getByRole('button', { name: 'Discard changes' })).toBeVisible();
+    await expect(within(dialog).getByText(/Nothing already logged will be changed/)).toBeVisible();
   },
 };
 
 // ---- Representative and risk-bearing variants of this lane ----------------------------
 
 export const O01_Narrow320: Story = {
-  name: 'O01 at 320 keeps the 2 × 2 grid',
+  name: 'O01 at 320 keeps the card pair',
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   render: () => (
     <>
@@ -285,28 +287,25 @@ export const O01_Narrow320: Story = {
   ),
   play: async ({ canvasElement }) => {
     const dialog = within(canvasElement).getByRole('dialog', { name: 'Log food' });
-    const tile = within(dialog).getByRole('button', { name: /Search food/ });
-    await expect(getComputedStyle(tile.parentElement as Element).gridTemplateColumns.split(' ').length).toBe(2);
+    const card = within(dialog).getByRole('button', { name: /Scan barcode/ });
+    await expect(getComputedStyle(card.parentElement as Element).gridTemplateColumns.split(' ').length).toBe(2);
     await expectNoHorizontalOverflow();
   },
 };
 
-export const O05_InvalidAndEnlarged: Story = {
-  name: 'O05 at 200 % text — invalid amount disables the commit',
+export const O01_EnlargedText: Story = {
+  name: 'O01 at 200 % text — the card pair stacks, order kept',
   decorators: [withRootFontSize(200)],
   render: () => (
-    <WithAddToMeal candidate={fixtureCandidate} portion={reviewPortion} meal="lunch" onConfirm={fn()}>
-      {review()}
-    </WithAddToMeal>
+    <>
+      {emptyHome()}
+      <MethodSheet open onRequestClose={fn()} onChoose={fn()} />
+    </>
   ),
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const dialog = canvas.getByRole('dialog', { name: 'Add to meal' });
-    const amount = within(dialog).getByLabelText('Amount');
-    await userEvent.clear(amount);
-    await userEvent.tab();
-    await expect(within(dialog).getByRole('button', { name: 'Add to lunch' })).toBeDisabled();
-    await expect(amount).toHaveAccessibleDescription('Enter the amount to add');
+    const dialog = within(canvasElement).getByRole('dialog', { name: 'Log food' });
+    const card = within(dialog).getByRole('button', { name: /Scan barcode/ });
+    await expect(getComputedStyle(card.parentElement as Element).gridTemplateColumns.split(' ').length).toBe(1);
     await expectNoHorizontalOverflow();
   },
 };
@@ -325,7 +324,7 @@ export const S07_1_EnlargedText: Story = {
   decorators: [withRootFontSize(200)],
   render: () => review(),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: 'Add to today' })).toBeVisible();
+    await expect(within(canvasElement).getByRole('button', { name: 'Add to lunch' })).toBeVisible();
     await expectNoHorizontalOverflow();
   },
 };
@@ -336,7 +335,7 @@ export const S07_1_SafeAreas: Story = {
   decorators: [withIPhone16PortraitSafeAreas],
   render: () => review(),
   play: async ({ canvasElement }) => {
-    const footer = within(canvasElement).getByRole('button', { name: 'Add to today' }).closest('[class*="footer"]') as HTMLElement | null;
+    const footer = within(canvasElement).getByRole('button', { name: 'Add to lunch' }).closest('[class*="footer"]') as HTMLElement | null;
     await expect(footer).not.toBeNull();
     if (footer) await expect(parseFloat(getComputedStyle(footer).paddingBlockEnd)).toBeGreaterThanOrEqual(34);
   },

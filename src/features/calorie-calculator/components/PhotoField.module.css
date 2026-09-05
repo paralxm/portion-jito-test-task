@@ -1,0 +1,72 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
+  min-inline-size: 0;
+}
+
+/* The native file input stays in the document for assistive technology and the keyboard
+   (it is what Add a photo / Change photo activate); it is visually replaced by them. */
+.input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.input:focus-visible + * {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+  border-radius: var(--portion-radius-control);
+}
+
+.add {
+  align-self: flex-start;
+}
+
+/* Preview: a 6 rem 4:3 thumbnail beside the file name and its two text actions. */
+.preview {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+.thumbnail {
+  flex: 0 0 6rem;
+  inline-size: 6rem;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--portion-radius-control);
+  overflow: hidden;
+  background: var(--portion-color-background-surface);
+}
+
+.image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.previewText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+.name {
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-4);
+  margin-inline-start: calc(var(--portion-ref-space-8) * -1);
+}

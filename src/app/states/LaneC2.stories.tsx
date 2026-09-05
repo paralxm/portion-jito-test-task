@@ -151,14 +151,20 @@ export const S07_5: Story = {
     docs: {
       description: {
         story:
-          'Purpose: a suggestion still needs review and a user-entered portion; unknown macros stay unknown, never zero. Entry: Review selected match. Fixture: a suggested food with partial nutrition (carbohydrates and fat not available). Primary action: Add to today. Secondary: Change food → search; Done; Back → S05-4 with the selection kept. Limitation: none.',
+          'Purpose: the photo result in the R5 hierarchy (ledger §12 E2): the captured frame — in this prototype a labelled sample photograph, never a catalogue product photo — the selected identity, the source stated as a suggestion the user must check, then the portion, meal and one final action; unknown macros stay unknown, never zero. Entry: Review selected match. Fixture: a suggested food with partial nutrition. Primary action: Add to {meal}. Secondary: Change match → S05-4 with the selection kept; Retake photo → S05-1; Edit nutrition values → S06-4; Cancel. Limitation: none.',
       },
     },
   },
-  render: () => <FoodReviewScreen candidate={photoPartialSuggestion} mode="new" onBack={fn()} onChangeMatch={fn()} onAddToToday={fn()} onDone={fn()} />,
+  render: () => <FoodReviewScreen candidate={photoPartialSuggestion} mode="new" initialMeal="lunch" capturedImageUrl={samplePhotoImage} onBack={fn()} onCancel={fn()} onChangeMatch={fn()} onRetake={fn()} onEditValues={fn()} onAdd={fn()} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(/the photo does not measure it/)).toBeVisible();
+    await expect(canvas.getByText('Photo suggestion')).toBeVisible();
+    await expect(canvas.getByRole('img', { name: /Sample photograph/ })).toBeVisible();
+    await expect(canvas.getByText(/the photo does not measure the amount/)).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Change match' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Retake photo' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Edit nutrition values' })).toBeVisible();
+    await expect(canvas.queryByText(/Barcode/)).toBeNull();
     const visible = canvas.getAllByText('Not available').filter((el) => !el.classList.contains('portion-visually-hidden'));
     await expect(visible.length).toBeGreaterThanOrEqual(2);
     await expect(canvas.queryByText(/\b0 g\b/)).toBeNull();

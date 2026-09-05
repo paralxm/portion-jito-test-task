@@ -4,6 +4,7 @@ import spriteMarkup from './sprite.svg?raw';
 /** Every symbol in the sprite, as `<glyph-kebab>-<weight>`. */
 export const ICON_SYMBOL_IDS = new Set<string>([
   'arrow-left-regular',
+  'arrows-clockwise-regular',
   'barcode-regular',
   'calendar-check-regular',
   'camera-regular',

@@ -24,6 +24,8 @@ export interface AddToMealSheetProps {
   initialMeal: MealType | null;
   /** Why the meal is preselected, shown under the picker, e.g. "Suggested for this time of day." */
   mealHint?: string;
+  /** "yesterday" or "on Thu, Sep 3" when the commit lands on another day (ledger §12 A4). */
+  dayPhrase?: string;
   /** The single commit: one entry in the chosen meal. */
   onConfirm: (meal: MealType, portion: Portion) => void;
   /** Cancel, close, backdrop and Escape: nothing changes. */
@@ -31,13 +33,14 @@ export interface AddToMealSheetProps {
 }
 
 /**
- * O05 — one Add-to-meal sheet for foods and recipes (ledger D-23): thumbnail when the
+ * O05-2 — the Add-to-meal sheet for a recipe from Recipe Details (ledger D-23, §12 E3:
+ * foods commit on their review screen and no longer pass through a sheet): thumbnail when the
  * item has one, name and basis, the meal choice, the amount or servings in the review's
  * unit, the recalculated calories and macros, and the single final action `Add to
  * {meal}`. The action is unavailable while the amount is invalid or no meal is chosen,
  * and a second activation before the sheet closes is ignored. No exact time is asked.
  */
-export function AddToMealSheet({ open, candidate, initialPortion, initialMeal, mealHint, onConfirm, onCancel }: AddToMealSheetProps) {
+export function AddToMealSheet({ open, candidate, initialPortion, initialMeal, mealHint, dayPhrase, onConfirm, onCancel }: AddToMealSheetProps) {
   const [meal, setMeal] = useState<MealType | null>(initialMeal);
   const [quantity, setQuantity] = useState(initialPortion ? formatQuantityDraft(initialPortion.quantity) : '');
   const [touched, setTouched] = useState(false);
@@ -140,6 +143,11 @@ export function AddToMealSheet({ open, candidate, initialPortion, initialMeal, m
               Choose {Object.values(MEAL_LABELS).slice(0, 3).join(', ').toLowerCase()} or snacks to continue.
             </Text>
           )}
+          {dayPhrase ? (
+            <Text as="p" variant="supporting" color="secondary" wrap>
+              This adds to your record {dayPhrase}, the day you were viewing when you started.
+            </Text>
+          ) : null}
         </Stack>
       ) : null}
     </ModalSheet>

@@ -8,7 +8,7 @@ import { createEntry, type DailyGoal, type FoodEntry } from '../../features/calo
 import { recentCandidates } from '../../features/calorie-calculator/domain/recents';
 import { fixtureC, foodCatalogue, photoSuggestions } from '../../features/calorie-calculator/domain/fixtures';
 import { budgetFixtureEntries, budgetFixtureGoal, homeEntries } from '../../features/calorie-calculator/domain/home-fixtures';
-import { localDayKey } from '../../features/calorie-calculator/domain/day-keys';
+import { addDays, localDayKey } from '../../features/calorie-calculator/domain/day-keys';
 import type { ManualDraft } from '../../features/calorie-calculator/domain/manual-entry';
 import type { Streak } from '../../features/calorie-calculator/domain/streak';
 import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
@@ -33,6 +33,16 @@ export const goal2200: DailyGoal = { kcal: GOAL_KCAL };
 /** The brief's partial-progress fixture: 1,600 remaining, 400 consumed · 20 %, goal 2,000, 24 / 120 · 48 / 220 · 14 / 65 g. */
 export const budgetEntries = budgetFixtureEntries(FIXED_NOW);
 export const budgetGoal: DailyGoal = budgetFixtureGoal;
+
+/**
+ * S01-5 / S01-6: entries on three consecutive days ending at the baseline (a 3-day streak),
+ * with yesterday holding the budget fixture so a past day shows its own totals and water.
+ */
+export const threeDayEntries: FoodEntry[] = [
+  ...populatedEntries.map((entry) => ({ ...entry, id: `${entry.id}-2d`, dayKey: addDays(TODAY_KEY, -2) })),
+  ...budgetEntries.map((entry) => ({ ...entry, id: `${entry.id}-1d`, dayKey: addDays(TODAY_KEY, -1) })),
+  ...populatedEntries,
+];
 
 /** Water fixtures (ledger D-22): the partial total the brief shows, and the reference. */
 export const WATER_PARTIAL_ML = 1250;
@@ -62,7 +72,7 @@ export const photoPartialSuggestion: FoodCandidate = {
 };
 export const photoCandidates = photoSuggestions;
 
-/** S07-6: a manual candidate on a serving basis with an unknown carbohydrate value. */
+/** S06-5: the manual candidate built by step 1 — a serving basis with an unknown carbohydrate value. */
 export const manualCandidate: FoodCandidate = {
   id: 'manual-lentil-soup',
   name: 'Lentil soup',
