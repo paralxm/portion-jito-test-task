@@ -633,3 +633,15 @@ Recorded in `docs/design/hifi-decisions.md` §11 (scope, assets, data consistenc
 | Icons | `scripts/icons/export.mjs` → `src/assets/icons/` (sprite + per-glyph SVGs + LICENSE, only the glyphs and weights the product renders); `Icon` draws them through `<use>` with the React package as fallback; `npm run icons:check` in `verify` | Foundations/Icons |
 | App icon | `src/assets/favicon/make.mjs` → `public/favicon.svg`, PNG sizes, `manifest.webmanifest`; linked from `index.html` | DESIGN.md → App icon |
 | Verification | 5 new state stories (S02-7 … S02-10, O07) + variants; walkthrough journey 5 (catalogue, filters, grid, drink logging without water, recents, unified query, reload, day boundary, midnight with the mocked clock); capture rows 65–73 | `verification/manifest.md` |
+
+## 2026-09-05 — Revision R1–R6: selected days and streak, discovery, two-step manual entry, source-specific review, method sheet
+
+Recorded in `docs/design/hifi-decisions.md` §12 (reference mapping, requirement map, decisions, verification). What changed in the system:
+
+| Area | Change | Where |
+| --- | --- | --- |
+| Domain | `day-keys.ts` (local-day arithmetic, DST-safe), `streak.ts`, `goal-history.ts` (effective-dated periods), `portion-draft.ts` (documented steps, item-only presets, carried portions); `RecipeCriteria.dietary` is a set (`toggleDietary`, `satisfiesDietary`: vegan ⇒ vegetarian); `discovery.ts` (groups from each record); `FoodCandidate` gained `brand`, `barcode`, `provenance`; `draftFromCandidate` for corrections | `src/features/*/domain/` |
+| App shell | record version 2 (goal history; v1 migrates from the migration day), `photo-store.ts` (bounded user-photo previews, separate key), `exit-guard.tsx` + `useHistoryStack.ts` (browser Back and swipe-back through the same guard), the flow-level manual task, direct commits on review | `src/app/` |
+| Components | `DayStrip`, `StreakIndicator`, `PortionForm` + `usePortionDraft`, `PhotoField`, `DiscardChangesDialog`; `RecipeCard` `presentation="tile"`; `MethodOption` `presentation` (row / card) and `tone="quiet"`; `CriteriaToolbar` `hideDietary`; `CalorieBudgetBar` owns the goal action; `NutritionMacros` compact row stacks under 17 rem | Components/*, Patterns/* |
+| Screens | Home (strip, streak, selected day, order), Recipes (discovery), Search (recipe catalogue, sibling scanner), Manual entry step 1 and the new step 2, Food review (R5 hierarchy), Method sheet (R6), Recipe details hero containment | Product compositions/* |
+| Verification | new state stories S01-5, S01-6, S02-11, S06-4, S06-5, O08 and variants; component captures 74–81; walkthrough steps for the strip, the streak, the discovery chips, the catalogue in Search, the two-step manual task with Back/Edit retention, browser Back through the guard, barcode corrections, photo retake, the R6 sheet at 200 % | `verification/manifest.md` |
