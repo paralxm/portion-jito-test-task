@@ -1,6 +1,6 @@
 # Portion Hi-Fi decisions ledger
 
-Updated: 2026-09-04. Branch: `feat/hifi-screens` (from `main` at `a7c76c4`). Owner of this file: the Hi-Fi product pass. It is the compact, resumable record of the 41-state inventory, the transition model, the reference synthesis, the content model, the asset register and every material interpretation. Product truth stays in `PRODUCT.md`; behaviour stays in `docs/ux/`; visual composition stays in `DESIGN.md`. This ledger records how those were applied, not a second specification.
+Updated: 2026-09-05 (redesign checkpoint, §10). Baseline pass: 2026-09-04. Branch: `feat/hifi-screens` (from `main` at `a7c76c4`). Owner of this file: the Hi-Fi product pass. It is the compact, resumable record of the state inventory (41 rows in the baseline pass, 46 after the §10 redesign), the transition model, the reference synthesis, the content model, the asset register and every material interpretation. Product truth stays in `PRODUCT.md`; behaviour stays in `docs/ux/`; visual composition stays in `DESIGN.md`. This ledger records how those were applied, not a second specification.
 
 ## 0. Sources read for this pass (in the required order)
 
@@ -15,7 +15,7 @@ Figma, read-only through the connected MCP:
 
 Evidence limits: the low-fi interiors are text-free placeholder geometry (board header 175:5/175:6: “Placeholder bars mean omitted content; loading is drawn separately”), so wording, wrapping and semantics come from the contracts and this ledger, never from bar widths. Prototype reactions were not executed in Figma; the arrows are the connector evidence.
 
-## 1. Inventory — exactly 41 rows
+## 1. Inventory — the 41 baseline rows (count superseded: §10.3 holds the 46-row inventory)
 
 Count: Lane A 4 + Lane B 7 + Lane C1 8 + Lane C2 7 + Lane D 6 + Lane E 9 = **41**. Excluded on purpose: 176:5 “Origin beneath — the invoking screen (board reference)” (a board aid behind O01, not a state) and every Label/Caption/Lane-title frame. **S01-3 (185:2)** sits outside section 175:2; the audit (F-03) records it as a superseded current-calculation composition, so it is not an inventory row. Its intent — a 320 px witness of S01-2 — is covered by the 320 px captures of S01-2.
 
@@ -277,7 +277,7 @@ No product-changing conflict remains open. No hard blocker was found.
 - Captures: every mapped story at 393 × 852; representative states at 320 and 430; 200 % text and the 59/34 safe-area fixture for the root, focused and sheet families; runtime walkthrough captures for every runtime-mode row.
 - Commands: `npm run tokens:check`, `npm exec --no -- tsc --noEmit`, `npm run build`, `npm run build-storybook`, `npm exec --no -- vitest run`, `node scripts/verify/runtime-walkthrough.mjs`, `node scripts/verify/storybook-captures.mjs`, `node scripts/verify/contrast-matrix.mjs --check`, detector.
 
-## 8. Status (final, 2026-09-04)
+## 8. Status (baseline pass, final 2026-09-04 — superseded by §10.8 for reopened rows)
 
 All 41 rows have production UI, a mapped deterministic story, a 393 × 852 capture and a recorded verification mode. Commands and results are in §9; the tracked evidence set and its inspection notes are `verification/manifest.md`.
 
@@ -327,7 +327,7 @@ All 41 rows have production UI, a mapped deterministic story, a 393 × 852 captu
 
 Story-only rows and why they are not user-navigable routes: **P01** is the OS prompt (only the app’s waiting state is app UI; the prototype has no camera, D-6); **S05-5** needs an analyser that returns nothing, which the fixed-suggestion prototype cannot do honestly (D-9); **S06-2** needs a software keyboard, which cannot be scripted (D-7); **S08-3** needs a catalogue recipe that fails to load, and a deliberately failing recipe would be an invented evaluator path (D-5). Every other row occurs in the real runtime flow and is exercised by the walkthrough.
 
-## 9. Verification record (final, 2026-09-04)
+## 9. Verification record (baseline pass, final 2026-09-04 — see §10.9 for the redesign)
 
 | Check | Command | Result |
 | --- | --- | --- |
@@ -345,3 +345,125 @@ Story-only rows and why they are not user-navigable routes: **P01** is the OS pr
 Impeccable sequence applied (bounded, inline from the installed references): context once (`--target src/app/App.tsx`) → critique of the Home, Search/Review, Recipes and Details renders (findings D-11–D-15) → layout/typeset not needed (no shared cause found; tokens, Inter and roles untouched) → clarify done manually against §4 → adapt through the 320 / 430 / 200 % variants and the state stories’ overflow assertions → harden through the invalid, unknown, failure, keyboard-inset and safe-area states → animate not needed (no new transition) → audit through axe on every story plus manual keyboard checks in the play functions → one polish pass (D-12, D-13). Rendered inspection at 393 (all 41), 320 and 430 (representative rows) and 200 % is recorded in the manifest.
 
 Not verified here: a real screen reader or device pass, native iOS safe-area behaviour, and a live software keyboard; these remain manual checks.
+
+## 10. Redesign checkpoint — 2026-09-05
+
+A controlled product/UI redesign of the completed 2026-09-04 pass, driven by the new brief (four attached UI references: a selected Home, a barcode scanner, a photo capture and a recipe-detail composition). This section is the resumable record for that pass; §§1–9 stay as the baseline history and are not rewritten. Where a §10 decision changes a §6 decision, §10 wins.
+
+### 10.1 Baseline reconstructed from the repository (no chat history was available)
+
+- Git: `feat/hifi-screens` at `e229cbe` = `origin/feat/hifi-screens`, clean worktree, upstream set; `origin/main` has since merged this branch as PR #8 (`fd11590`), which does not affect continuing here. Nothing after `e229cbe` exists locally or remotely on the branch. Remote: `paralxm/portion-jito-test-task`.
+- Commits that produced the state: `97905ad` (41 states as production UI, Lane A–E state stories, photography, fixtures) and `e229cbe` (tracked captures: 41 states + 18 variants + runtime set, `verification/manifest.md`).
+- Complete: all 41 rows of §1 (§8), verification record §9 (tokens 235, tsc 0, unit 50, storybook 378, walkthrough 40 checks, 101 captures, 58 contrast pairs, detector clean). Story-only by design: P01, S05-5, S06-2, S08-3 (D-5, D-6, D-7, D-9). Nothing uncommitted.
+- What this brief reopens: Home (S01-1, S01-2, O01 as an overlay over the new Home), Search (S02-1…S02-6: field trailing actions and filter placement), Recipes (S03-1, S03-2: photos, filter placement), the barcode lane (P01, S04-1…S04-6, S07-4: dark stage, simulator removal, meal commit), the photo lane (S05-1…S05-6, S07-5), every review row (S07-1, S07-2, S07-3, S07-6: Add-to-meal commit, meal picker on an existing entry), recipe details (S08-1…S08-4: hero, Add, nutrition hierarchy) and O02/O02-2 (opened from the new trailing filter action). Not reopened: S06-1, S06-2, S06-3, O03, O04 (focused header unchanged, no navigation, no commit).
+- Impeccable: `context.mjs --target src/app/App.tsx` was run once for this session. Its `AUTONOMY_DIRECTIVE_CHECK` asks for a structured interview; the repository contract (`CLAUDE.md`: Impeccable is a refinement/QA toolkit inside PRODUCT/DESIGN/UX authority, Operate mode) and the brief's "continue autonomously" rule take precedence, so no interview was held and the brief is the design authority. The router also reports no local image converter; photography is therefore fetched pre-sized from the provider again (§5 method).
+
+### 10.2 The four attached references — adopt / adapt / reject
+
+| Reference | Element | Decision | Reason |
+| --- | --- | --- | --- |
+| Home (selected) | Compact header: lowercase wordmark + blue dot, `Today · Sep 4`, trailing `Edit goal` | **Adopt** | Matches the brief's AppHeader root variant; the wordmark and dot become `PortionLogo`; the date is the real local day; the action is `Set goal` / `Edit goal` |
+| Home | Horizontal calorie budget: large remaining figure, `consumed · %`, `Goal`, track with goal marker | **Adopt** | Replaces the ring (D-19); the marker gives the bar a visible bound so 0 % and unknown differ |
+| Home | Blue fill on the budget track | **Adapt** | Blue is allowed as *information* by DESIGN.md; the fill never changes colour for reached/over; words carry the state (D-20) |
+| Home | Macro rows `24 / 120 g` with coloured bars | **Adapt** | Targets appear only when the user entered them in the goal editor (D-18); tracks use the existing nutrient accents; unknown stays `Not available` |
+| Home | Recipe card `FITS YOUR GOALS`, `High protein option` | **Reject** wording, **adapt** placement | Portion has no goal-fit criteria; the card reads `Recommended recipe`, or `Matches all N filters` only with active browse criteria (D-21). Uppercase label and green badges rejected (no health claims, no badge clouds) |
+| Home | `Today's meals` grouped list with a filled/empty dot and `+ Add dinner` | **Adopt** | One grouped surface with row separation (D-16); the dot is paired with text (kcal or the add action), never colour alone |
+| Home | Water row with drop icon, `1.25 / 2 L`, `+250 ml` | **Adopt** | `WaterTracker` with sibling controls (D-22); cyan family distinct from action blue |
+| Home | Bottom bar with a fourth `Add` cell | **Reject** | Portion keeps three destinations plus the separate 56 px circular `Log food`; only the missing top border and the fixed position are adopted (D-26) |
+| Home | Status bar / device frame | **Reject** | No OS chrome (DESIGN.md) |
+| Barcode | Dark camera stage, focus corners, `Searching` chip, moving scan line, instruction hierarchy | **Adopt** | `CameraStage` component; the chip is text, the corners are drawn boxes, the line animates only while scanning and not under reduced motion |
+| Barcode | Flash action | **Reject** | No runtime capability |
+| Barcode | `PROTOTYPE · Simulate scanner responses` panel | **Reject** | Simulator controls leave production; deterministic phases are story-only (D-24) |
+| Photo | Dark stage, grid, circular guide, `Center meal in frame` chip, `Frame the food` heading | **Adapt** | Same `CameraStage`; the circular guide and one chip are kept, the grid is dropped (decorative); copy stays Portion's (`Frame the food, then take the photo`) |
+| Photo | `Review before saving` note | **Adapt** | Kept as Portion's existing sentence (`You will see a suggestion to check before anything is calculated`) in an info surface under the stage |
+| Photo | Large circular shutter | **Adopt** | 72 px circular shutter (`Take photo`), above the 56 px action minimum |
+| Photo | `AUTO · 1×`, `Food Scanner` chip, prototype footer | **Reject** | Fake camera chrome; the runtime is fixture-backed and says so under the stage |
+| Recipe detail | Full-width 16:9 hero, time chip + dietary badge above the title, title + `Add` beside it | **Adopt** | `Add` opens `AddToMealSheet` (D-23); no sticky footer; the root bar stays |
+| Recipe detail | Bookmark, share, ingredient checkboxes | **Reject** | Not in scope (PRODUCT.md non-goals) |
+| Recipe detail | Nutrition surface: `CALORIES 610 kcal`, `Per serving (400 g)` badge, three macro tiles, `Show all nutrition` | **Adapt** | The existing `NutritionSummary` sits on one grouped surface with the basis kept as text beside the value (no badge, no card-in-card tiles) |
+| Recipe detail | Ingredients list with `6 items`, numbered method step cards with `3 steps` | **Adapt** | Counts as plain supporting text; ingredients as a bordered list; steps numbered on a light surface each (one group per step) |
+| All four | Sample food photography inside the references | **Reject** | Never copied; production photos come from the §5 register (Unsplash) |
+
+### 10.3 Inventory — recomputed: exactly 46 rows
+
+Count: the 41 baseline rows (IDs and Figma nodes preserved) + 5 new user-visible product states = **46**. The count changed because the brief adds two product capabilities with their own decisions and outcomes: Add-to-meal (a commit step with a meal decision) and water tracking (a quick-add outcome with Undo, and a sheet with two modes). Component microstates (invalid amounts in the sheet, preset selection, animation frames, the unassigned-meal guard) stay in component stories.
+
+Reopened baseline rows (36): S01-1, S01-2, O01, S02-1, S02-2, S02-3, S02-4, S02-5, S02-6, S03-1, S03-2, S04-1, S04-2, S04-3, S04-4, S04-5, S04-6, P01, S07-1, S07-2, S07-3, S07-4, S07-5, S07-6, S05-1, S05-2, S05-3, S05-4, S05-5, S05-6, S08-1, S08-2, S08-3, S08-4, O02, O02-2. Preserved unchanged (5): S06-1, S06-2, S06-3, O03, O04.
+
+New rows:
+
+| # | Portion ID | Surface | State / purpose | Entry | Regions | Controls → outcome | Data | Fixture | Mode |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 42 | **O05** | `AddToMealSheet` over S07 (new mode) | Choose the meal and confirm the amount before one entry is created | `Add to today` on S07-1/4/5/6 with a valid portion | Item name + basis; Breakfast / Lunch / Dinner / Snacks (radio chips; preselected from the Home row that started the task, else the time-of-day suggestion); Amount with the review's unit; recalculated calories + macros; footer `Add to lunch` (+ Cancel) | Add to {meal} → one `FoodEntry` with `meal`, Home S01-2, status "Added to lunch"; Cancel / close / Escape → S07 unchanged | one entry appended | Fixture C 300 g, lunch suggested at the 12:00 baseline | both |
+| 43 | **O05-2** | `AddToMealSheet` over S08-1 | The same sheet for a recipe: servings instead of grams, thumbnail when the recipe has a photo | `Add` beside the recipe title | Thumbnail, title, `Per serving (300 g)`; meal chips; Servings (1); preview per the servings; `Add to dinner` | Add → recipe entry (candidate built from the recipe, 1 serving = 300 g), Home; Cancel → S08-1 unchanged | one entry | Fixture R, dinner preselected (story fixture) | both |
+| 44 | **S01-4** | Home / Water quick-add confirmation | The outcome of `+250 ml`: total and fill updated, confirmation with Undo | `Add 250 millilitres of water` on S01-1/S01-2 | Water tracker at the new total; status toast "250 ml added. 1.5 litres today." with `Undo` | Undo → previous total, toast closes; timeout/close → toast closes; repeated taps accumulate | water total for the day | 1,250 → 1,500 ml (story); runtime 0 → 250 | both |
+| 45 | **O06** | `WaterSheet` · add | Add a chosen amount to today's water | `Edit water, … of 2 litres` on Home | Total / goal; presets 150 / 250 / 350 / 500 ml (radio chips); `Custom amount` (ml); `Add water` (disabled until a preset or valid custom); `Edit today's total` | Add water → total updated, sheet closes, status; Cancel → unchanged | water total | 1,250 ml, preset 250 selected in the story | both |
+| 46 | **O06-2** | `WaterSheet` · edit total | Replace today's total directly | `Edit today's total` inside O06 | `Today's total` (ml) prefilled; `Save total` (disabled while invalid); `Back to adding` | Save total → total replaced; Back → O06 | water total | 1,250 ml, draft 1,000 | both |
+
+### 10.4 Transition additions and changes
+
+| From | Event | Guard | Next / outcome | Data | Notes |
+| --- | --- | --- | --- | --- | --- |
+| S01 meal row | `Add breakfast` / `Add to lunch` (per meal) | — | O01 with a **meal context** | task origin records `{ root, flow, meal }` | the meal preselects O05 later; the bar's Log food has no meal context |
+| S07 new | `Add to today` | valid portion, energy known | **O05** | none until confirmed | replaces direct entry creation (D-23) |
+| O05 | `Add to {meal}` | valid amount, meal chosen, not yet submitted | entry appended with `meal`, Home S01-2, toast "Added to lunch"; the new row is highlighted briefly | one entry | duplicate activation blocked |
+| O05 | Cancel / close / Escape | — | S07 unchanged | none | focus returns to `Add to today` |
+| S08-1 | `Add` | — | **O05-2** with servings = 1 | none | the recipe becomes a `FoodCandidate` (`source: 'recipe'`, units serving + g) only inside the sheet |
+| O05-2 | `Add to {meal}` | as O05 | recipe entry appended, Home | one entry | the Home row reopens it in S07-3 with servings |
+| S01 | recommended recipe card | — | S08-2 with origin Home (Home stays selected; Back → Home) | none | D-21 |
+| S07-3 | Meal picker | — | draft meal; `Update entry` commits meal + portion together | entry `meal` replaced, id and day kept | new for existing entries |
+| S01 | `+250 ml` | — | **S01-4** | water total += 250 | functional update, so rapid taps never drop an increment |
+| S01-4 | Undo | toast open | previous total restored | water total | announced once |
+| S01 | Water content (`Edit water…`) | — | **O06** | none | sibling control, not a nested button |
+| O06 | Add water | preset or valid custom (1–5,000 ml) | total += amount, close, status | water total | — |
+| O06 | Edit today's total | — | **O06-2** | none | mode inside the same dialog |
+| O06-2 | Save total | 0–10,000 ml integer | total replaced, close, status | water total | — |
+| S01 | `Set goal` / `Edit goal` (header) | — | goal editor (title `Set goal` / `Edit goal`) | goal kcal + optional macro targets | D-18 |
+| S02 Food | barcode trailing action | — | S04-1 (task origin = Search) | none | one tap (D-27) |
+| S02 Recipes / S03 | filter trailing action | — | O02 | draft | replaces the left `Filters` button (D-27) |
+| S04-1 | (prototype camera) fixture read after 1.8 s | not already looking up | S04-2 → S07-4 | none | D-24: the runtime path; other outcomes are story phases |
+
+### 10.5 Product and data-model decisions (new IDs continue §6)
+
+| ID | Question | Decision | Reversibility |
+| --- | --- | --- | --- |
+| D-16 | Meal model | Every committed entry carries `meal: 'breakfast' \| 'lunch' \| 'dinner' \| 'snack'`. `createEntry` requires it. The stored type also admits `null` as an *unassigned* guard for a record that predates the field: no persisted store exists (session memory only, ui-contract 2.4), so no such record can occur at runtime; `MealGroup` renders an `Unassigned` section with a `Choose meal` action when one exists (component story only, never a ledger row). Home always shows all four meals, empty ones included | documented; schema is additive |
+| D-17 | Meal suggestion | `suggestMeal(date)`: 05:00–10:59 breakfast, 11:00–15:59 lunch, 16:00–21:59 dinner, otherwise snack (local time). Used only to preselect O05 when the task has no meal context; the choice is always visible and editable; no eating time is asked or stored | — |
+| D-18 | Goal wording and macro targets | `Set a daily goal` → `Set goal`; with a goal → `Edit goal` (header action and editor title). The editor also takes optional protein / carbohydrate / fat targets in grams; they are user-entered, never derived (PRODUCT.md non-goal: automatic goal calculation). Without a target a macro shows its logged grams alone | — |
+| D-19 | Ring replaced | `CalorieBudgetBar` (feature) on the new `ProgressBar` primitive replaces `CalorieProgressRing` everywhere. `CalorieProgressRing` is removed (no consumer). `ProgressRing` stays exported as a deprecated primitive with no product consumer; its stories are kept but it leaves the curated capture set | reversible via git |
+| D-20 | Budget colours | Fill = `progress.indicator` → action blue (information about progress toward a user-set bound, not calorie quality). Reached and over-goal keep the same fill; the excess is stated in words (`150 kcal over goal`) and the marker stays visible; no red/green | — |
+| D-21 | Recommendation truth | Home shows one recipe: with active browse criteria and ≥ 1 match, the first match with `Matches all N filters`; otherwise the first catalogue recipe with a photo and complete calories/protein, labelled `Recommended recipe`. `Fits your goals` never appears (no goal-fit fixture criteria) | — |
+| D-22 | Water | Per local day, in ml, session-only like entries. Default daily target 2,000 ml is a product default shown as the bound (`of 2 L`), not advice. Quick add 250; presets 150 / 250 / 350 / 500; custom 1–5,000 ml; edit total 0–10,000 ml; integers only. Over the target the excess is stated. Display in litres to two decimals (`1.25 / 2 L`), ml under 1 L (`250 ml / 2 L`) | — |
+| D-23 | Commit through Add-to-meal | S07 new mode: `Add to today` opens O05; `Add to {meal}` is the single commit. Recipe Detail: `Add` opens O05-2. Existing mode keeps `Update entry` direct and gains a meal picker. `Done` is unchanged (task origin, D-4) | supersedes §2 row "S07 new · Add to today" |
+| D-24 | Simulator controls removed | Production shows no prototype/debug controls. Barcode: `readBarcodeService` (services.ts) resolves the fixture code `5012345678900` 1,800 ms after scanning starts; the stage caption says a sample barcode is read by this prototype. Photo: `Take photo` yields the labelled sample; analysis returns fixed suggestions. Not-found, lookup-failed, unreadable, denied and analysis-failed phases are reached only through `initialPhase` in stories/tests → verification mode **story** for S04-3, S04-4, S04-5, S04-6, S05-6; runtime keeps S04-1, S04-2, S07-4, S05-1…S05-4, S07-5 | supersedes §8 modes for those rows |
+| D-25 | P01 | Unchanged as a conceptual system layer; the mapped story renders the app-owned waiting state on the dark stage with the explanation that the real prompt is outside the app | — |
+| D-26 | Fixed navigation | `NavigationBar` is `position: fixed` at the viewport bottom, owns the bottom safe area once, no top border, canvas surface with the restrained `shadow.navigation` token; `RootScreenLayout` measures the bar and reserves bottom padding + scroll padding; hidden as a unit for the keyboard. Recipe Detail keeps the root bar and has no second sticky footer | — |
+| D-27 | Search trailing actions | `SearchField` gains an `action` slot: Food scope → `Scan barcode` icon button (opens S04-1 in one tap); Recipes scope and browse → `Filters` icon button with a count badge and the name `Filters, N active`; the left `Filters` button is removed; applied chips sit under the field | — |
+| D-28 | Photography | Every catalogue recipe has a licensed local photo (traybake and pasta added, §10.6). `No photo` remains the resilient fallback for a failed or absent image; S08-4 keeps its no-photo fixture as a story state (`imageUrl` removed in the fixture), so the principal S03-1 state shows five photographs | — |
+| D-29 | Recipe Detail composition | Hero 16:9 full width; time chip + dietary badges; title with `Add` (primary, one word) beside it; nutrition on one grouped surface; ingredients as a bordered list with a count; numbered steps each on a light surface; no bookmark/share/checkboxes/ratings | — |
+| D-30 | Toast | New `Toast` pattern: bottom-anchored above the fixed bar (`--portion-navigation-inset`), `role="status"`, optional action (`Undo`), auto-dismiss after 6 s, sheet motion tokens, instant under reduced motion; used for water quick add and Add-to-meal success | — |
+| D-31 | Home order | Header → budget bar + macros → recommended recipe → Today's meals → Water → fixed bar. The large in-body `Log food` button is removed; the bar's plus and the per-meal add actions are the entry points | — |
+
+### 10.6 Photography plan (register rows are appended to §5 when acquired)
+
+Inventory before this pass: `lentil-soup`, `chicken-salad`, `tofu-stir-fry`, `sample-capture` (all Unsplash, 1200 × 900 WebP). Required: `recipe-traybake` (roasted vegetables and chickpeas on a tray) and `recipe-pasta-long` (pasta with roasted vegetables). Priority: existing local assets → verified Unsplash/Pexels item pages with a current licence page → fallback. Same fetch method as §5 (item download endpoint, `fm=webp&w=1200&h=900&fit=crop&q=72`), same empty-alt rule. The reference photographs are never used.
+
+### 10.7 Implementation sequence (frozen)
+
+1. Ledger, PRODUCT.md, DESIGN.md, skills (this checkpoint) — commit.
+2. Shared tokens/components: `PortionLogo`, `AppHeader` variants, `ProgressBar` + `CalorieBudgetBar`, goal editor (`Set goal`, macro targets), meal domain + `MealGroup`/`MealSection`/`MealEntryRow`/`MealPicker`, water domain + `WaterTracker`/`WaterSheet`, `Toast`, `AddToMealSheet`, fixed `NavigationBar` + `RootScreenLayout`, Home, App wiring — commit.
+3. `SearchField` action slot, Search/Recipes screens, `CameraStage`, Barcode/Photo without simulator, services — commit.
+4. Recipe Detail + Add, `RecipeCard`, photography + register — commit.
+5. Lane stories, index, captures/walkthrough/contrast scripts, manifest, docs, final verification — commit, push.
+
+### 10.8 Status of reopened and new rows
+
+Filled in as work lands.
+
+### 10.9 Verification record (redesign)
+
+Filled in after the final run.
+
+### 10.10 Next action (resumable)
+
+Phase 2 of §10.7: shared components. Nothing of §10.7 steps 2–5 has been implemented at this checkpoint.

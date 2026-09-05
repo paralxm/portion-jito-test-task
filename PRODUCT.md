@@ -27,12 +27,23 @@ Portion provides clarity before eating. It is precise, correctable, neutral, and
 
 ### Home
 
-Home is a bounded daily overview, not a diary dashboard.
+Home is a bounded daily overview for one day, organised by meal, not a diary dashboard or a timeline.
 
 - `S01-1`: no committed food entries today.
 - `S01-2`: one or more committed food entries today.
-- It may show an optional daily goal, logged/remaining calories, neutral progress, compact nutrition, today's committed entries, `Log food`, and recipe discovery.
-- Calculation and recipe discovery remain complete without a goal or log.
+- Header: the Portion logo, the local date (`Today · Sep 4`), and `Set goal` (no goal) or `Edit goal` (goal set).
+- Calorie budget: a horizontal bar with the goal marked; remaining while below the goal, `0 kcal remaining` at it, the excess stated above it; without a goal the logged amount alone and no bar. Macro targets are optional, user-entered in the same goal editor, never derived.
+- One recommended recipe with a real photo: `Matches all N filters` only when Recipes browse has active criteria a recipe satisfies; otherwise the neutral `Recommended recipe`. No goal-fit, health, or preference claim.
+- `Today's meals`: Breakfast, Lunch, Dinner, Snacks are always shown, empty ones included, with today's committed entries under their meal and a per-meal add action.
+- Water: today's total against a default 2 L reference (`1.25 / 2 L`), a `+250 ml` quick add with Undo, and a sheet for other amounts or editing the total. The reference amount is a product default, not advice.
+- Calculation and recipe discovery remain complete without a goal, log, or water record.
+
+### Meals and Add-to-meal
+
+- Every committed food or recipe entry belongs to exactly one meal: `breakfast`, `lunch`, `dinner`, or `snack`. A record without a meal is presented as unassigned with a `Choose meal` resolution, never silently classified.
+- Committing goes through one shared `Add to meal` sheet from every acquisition path (search, barcode, photo, manual) and from Recipe Details: it shows the item, its basis, the meal choice, the amount or servings, the recalculated nutrition, and one final action such as `Add to lunch`. Cancel changes nothing.
+- Opening the sheet from a Home meal row preselects that meal; otherwise a documented time-of-day rule suggests one. The choice is always visible and editable. No eating time is asked or stored.
+- A logged entry reopens for editing with its meal, portion, and unit; `Update entry` keeps its identity and day.
 
 ### Food calculation
 
@@ -40,7 +51,8 @@ Home is a bounded daily overview, not a diary dashboard.
 - Results always retain identity, amount, unit, and nutrition basis.
 - Scale only compatible known units. Never invent g↔ml/piece/serving conversions.
 - Missing nutrition is `Not available`, not zero.
-- Adding to today is optional and requires an explicit commit.
+- Adding to today is optional and requires an explicit commit through `Add to meal`.
+- Food search offers a one-tap barcode action in the field; recipe search and browse offer the filter action in the field, with applied filters shown as chips beneath it.
 
 ### Recipe discovery
 
@@ -49,9 +61,14 @@ Home is a bounded daily overview, not a diary dashboard.
 - Match claims require active criteria and known supporting values.
 - Never infer medical, allergen, or dietary safety from an image or missing data.
 
+### Recipe details
+
+- Focused header (`Back`, `Recipe`) with the root navigation retained; full-width photo; preparation time and declared dietary tags; title with a one-word `Add` that opens `Add to meal` with servings; nutrition per serving; ingredients; numbered method.
+- No bookmark, sharing, ingredient checklists, ratings, or cooking mode.
+
 ## Data truth
 
-Barcode, photo recognition, nutrition, and recipe content are deterministic fixtures. Different fixtures remain independent. Copy must identify estimates, unavailable values, and retryable system states without implying live recognition.
+Barcode, photo recognition, nutrition, and recipe content are deterministic fixtures. Different fixtures remain independent. Copy must identify estimates, unavailable values, and retryable system states without implying live recognition. The scanner and camera steps are fixture-backed: the prototype reads a sample barcode and captures a labelled sample photograph, and the screens say so; no simulator or debug controls appear in the product.
 
 ## Brand commitments
 
@@ -63,7 +80,7 @@ Barcode, photo recognition, nutrition, and recipe content are deterministic fixt
 
 ## Non-goals
 
-Accounts/onboarding; a separate Diary/Profile destination; automatic goal calculation; exercise, weight, water, streak, or weekly tracking; health scores; medical claims; saved recipes; meal planning; recipe authoring; multi-ingredient building; social, payment, coaching, notification, or gamification features; dark mode; production recognition/nutrition services.
+Accounts/onboarding; a separate Diary/Profile destination; automatic goal or macro-target calculation; exercise, weight, streak, weekly, or long-term tracking (water and meals are same-day records only); health scores; medical claims; saved recipes; meal planning; recipe authoring; multi-ingredient building; exact eating times or a timeline; social, payment, coaching, notification, or gamification features; dark mode; production recognition/nutrition services.
 
 ## Evidence limits
 

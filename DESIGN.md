@@ -38,10 +38,19 @@ task context or primary result
 ### Color
 
 - Canvas is white; use cool-neutral surfaces and neutral primary/secondary text.
-- Blue means action, selection, focus, or information—not calorie quality.
+- Blue means action, selection, focus, or information—not calorie quality. The calorie budget fill is blue as *information about progress toward a user-set bound*; it never changes hue for reached or over-goal.
 - Calories and nutrition values are neutral by default. Nutrient colors are supporting identifiers, never the only meaning.
+- Water uses its own semantic family (`water.accent`, `water.surface`, `water.track`, `water.text`): an accessible cyan distinct from action blue and from the carbohydrate teal. Amount and reference are always stated in text.
+- The camera stage (`camera.stage`, `camera.stage-text`, `camera.chip-surface`, `camera.frame`, `camera.detected`) is the only dark surface; it exists to show a viewfinder, never as a theme.
 - Error, warning, success, and information describe system state, never food or user behavior.
 - Use the canonical tokens and verify the actual rendered foreground/background pair.
+
+### Brand lockup
+
+- `PortionLogo` is the only brand rendering: the lowercase `portion` wordmark (Inter Semi Bold, −3 % tracking) followed by the blue portion dot, optically aligned to the x-height.
+- Sizes: default (24/32) for root headers, compact (18/24) for tight rows. Tones: default (neutral wordmark, blue dot), monochrome (both neutral), inverse (both white on a dark or blue surface).
+- Minimum height 18 px; clear space equal to the dot diameter on every side; never stretched, recoloured outside the three tones, or paired with a second mark.
+- The lockup has one accessible name, `Portion`; the dot is decorative and produces no screen-reader output.
 
 ### Shape and depth
 
@@ -55,7 +64,8 @@ task context or primary result
 
 - Use Phosphor regular; bold only for selected persistent navigation.
 - Visible icon size and hit target are separate. Icon-only controls require accessible names.
-- Recipe card images use 4:3; recipe detail uses 16:9. Use a deliberate `No photo` fallback when no approved local asset exists.
+- Recipe card images use 4:3; recipe detail uses 16:9. Every normal catalogue recipe has a licensed, locally stored photograph; `No photo` is the resilient fallback for an absent or failed image, never the principal state of a catalogue recipe.
+- Photographs are optimised local WebP (1200 × 900, centre crop), registered with provider, creator, item URL, licence URL, access date, crop, and alt decision in `docs/design/hifi-decisions.md`. Decorative empty alt when the adjacent text already names the recipe. Reference UI screenshots are never production media.
 - Photography is evidence of appearance only; it never proves nutrition, ingredients, or suitability.
 
 ## Composition contracts
@@ -77,7 +87,13 @@ Use a restrained hierarchy:
 canvas -> content surface -> interactive surface -> overlay
 ```
 
-Limit grouped surfaces. On Home, one grouped daily-overview surface is appropriate; other content should remain plain sections unless a card represents a distinct object.
+Limit grouped surfaces. On Home the grouped surfaces are the calorie budget, the recommended recipe (one tappable object), the meal group, and the water tracker; each is one meaningful group. Nothing else on Home is a card.
+
+### App header
+
+- `AppHeader` has three variants and a screen shows exactly one: **root** (`PortionLogo`, a contextual line such as `Today · Sep 4`, optional trailing action; the screen name is a visually hidden h1), **section** (28/36 screen title with optional trailing action), **focused** (Back, 18/24 title, optional trailing action or status).
+- Home uses root; Search and Recipes use section; barcode, photo, manual entry, and review use focused with the navigation hidden; Recipe Details uses focused (`Back`, `Recipe`) with the root navigation kept.
+- The header owns the top safe area exactly once.
 
 ### Bottom navigation
 
@@ -86,15 +102,43 @@ Limit grouped surfaces. On Home, one grouped daily-overview surface is appropria
 - Active destination: bold icon, visible label, selected surface, `aria-current="page"`. Inactive destinations: regular icon with accessible name.
 - `Log food` is the strongest filled action and never selected.
 - At narrow or enlarged-text widths, stack the active label under its icon; do not hide or shrink it.
+- The bar is fixed to the viewport bottom on Home, Search, Recipes, and Recipe Details, centred within the mobile shell, on the canvas surface with no top border and only the restrained `shadow.navigation` elevation. It owns the bottom safe area once; the root layout reserves matching bottom padding and scroll padding so content, dialogs, sheets, and the keyboard never collide with it.
 - Hide the whole navigation unit when the software keyboard or focused flow requires it.
 
-### Home progress
+### Calorie budget
 
-- `ProgressRing` owns generic SVG geometry, clamping, unavailable state, accessible name, and reduced-motion behavior.
-- `CalorieProgressRing` owns Home wording and data.
-- With a complete goal, center content shows remaining; over goal, it states the excess; without a goal or with a partial total, it shows logged.
-- Always state Logged and Goal nearby. Unknown is not 0% or 100%.
-- Use a neutral indicator—no alarm red, success green, glow, gradient, or Activity-ring imitation.
+- `ProgressBar` (primitive) owns the horizontal track, bounded fill, goal marker, clamping, unavailable state, `meter` semantics with `aria-valuetext`, and reduced-motion behavior.
+- `CalorieBudgetBar` (feature) owns Home wording and data: the 40/48 figure is remaining while below the goal, `0 kcal remaining` at it, the excess above it; `consumed · %` and `Goal` are stated beside the track; without a goal the logged amount is shown with `Set goal` and no bar is drawn; a partial total is labelled and has no percentage.
+- Macros sit under the bar as `24 / 120 g` with a track only when a user-entered target exists; otherwise the logged grams alone. Unknown is `Not available`, never zero; partial subtotals say so.
+- Digits are tabular; formats are stable (`1,600`, `20 %`). Over goal the fill stops at the marker and the text states the excess—no red, green, glow, gradient, or ring imitation. `ProgressRing` is deprecated and has no product consumer.
+
+### Meals
+
+- `MealGroup` is one grouped surface titled `Today's meals` with a subtotal; `MealSection` rows for Breakfast, Lunch, Dinner, Snacks are always present, separated by hairlines, each with a filled (logged) or hollow (empty) indicator paired with text—the kcal subtotal or the `Add breakfast` action—never colour alone.
+- `MealEntryRow` reuses the food-row anatomy (name, portion, kcal, chevron) and opens the entry for editing. A newly added entry is highlighted briefly with the disclosure motion token; the highlight never delays interaction.
+- `MealPicker` is a radio group of four chips (check mark + selected surface + boundary) shared by the Add-to-meal sheet and existing-entry review.
+
+### Water
+
+- `WaterTracker` is one surface with two sibling controls: `Edit water, 1.25 of 2 litres` (label, figure, track) and `Add 250 millilitres of water` (`+250 ml`). No clickable container wraps a button.
+- Quick add animates the figure and the fill from the previous to the new total over the `value-change` motion token (350 ms, standard easing), announces once (`250 ml added. 1.5 litres today.`), and shows a confirmation with `Undo`. Repeated taps accumulate from the latest total. Reduced motion updates instantly.
+- `WaterSheet` offers presets 150 / 250 / 350 / 500 ml as radio chips, a labelled `Custom amount` in ml, `Add water` (disabled while nothing valid is chosen), and a secondary `Edit today's total` mode with `Save total`. It is a `ModalSheet`: focus contained and returned, Escape dismisses, the footer owns the bottom safe area.
+
+### Add to meal sheet
+
+- One `AddToMealSheet` for foods and recipes: optional thumbnail, name and basis, `MealPicker`, amount or servings with the review's unit (unit changes stay on review), a recalculated calorie + macro preview, and a single final action `Add to {meal}`; `Cancel` closes without mutation.
+- No exact time picker. Disabled while the amount is invalid; duplicate activation is blocked.
+
+### Camera stage
+
+- `CameraStage` is the shared dark viewfinder for barcode and photo: stage surface, four focus corners, a text status chip, an optional moving scan line (barcode, while scanning only), an optional circular framing guide (photo), and the captured frame when one exists.
+- Barcode: `Scanning` chip and scan line while scanning; on a read the corners and chip switch to the detected treatment (colour plus wording), the line stops, and `Looking up product` is announced; failures keep the read code visible.
+- Photo: `Frame the food` chip, a 72 px circular shutter below the stage, and the review-before-anything note beneath it.
+- Production shows no simulator, flash, zoom, or camera-mode chrome; the caption says the prototype uses fixture media. Reduced motion removes the scan line and detection transition.
+
+### Search field actions
+
+- `SearchField` has one trailing action slot after the clear control: Food scope → `Scan barcode` icon button; Recipes scope and browse → `Filters` icon button whose applied count is shown as a badge and spoken in the name (`Filters, 2 active`). Applied chips render beneath the field. There is no separate left-aligned Filters button.
 
 ### Log food sheet
 
@@ -113,13 +157,18 @@ Limit grouped surfaces. On Home, one grouped daily-overview surface is appropria
 ### Food review
 
 - Keep food identity, amount, unit, basis, calorie result, and available nutrition understandable and correctable.
-- New candidate: `Add to today` primary, `Done` exits without logging.
-- Existing entry: `Update entry`; `Remove entry` confirms; changed content protects against accidental discard.
+- New candidate: `Add to today` primary opens the Add-to-meal sheet (the commit is the sheet's `Add to {meal}`); `Done` exits without logging.
+- Existing entry: a `MealPicker` above the amount; `Update entry` commits meal and portion together; `Remove entry` confirms; changed content protects against accidental discard.
 - Unknown data is explicit. Do not infer unsupported unit conversions.
 
 ### Recipe discovery
 
-Order content as identity -> why it matches -> relevant calories/protein/time -> supporting imagery/metadata. Use only known criteria and data. Avoid unexplained scores, decorative match percentages, badge clouds, and ratings presented as suitability.
+Order content as identity -> why it matches -> relevant calories/protein/time -> supporting imagery/metadata. Use only known criteria and data. Avoid unexplained scores, decorative match percentages, badge clouds, and ratings presented as suitability. Cards show a real 4:3 photograph; the fallback frame appears only for an absent or failed image.
+
+### Recipe details
+
+- Order: hero (16:9, full width) -> time chip and dietary badges -> title with `Add` beside it -> nutrition surface (calories with per-serving basis, macros, `Show all nutrition`) -> ingredients (count, bordered list) -> method (count, numbered steps each on a light surface).
+- `Add` is the only primary action and opens the Add-to-meal sheet; there is no sticky action footer, bookmark, share, checklist, or rating. The root navigation stays fixed beneath.
 
 ## Interaction and motion
 
@@ -127,6 +176,7 @@ Order content as identity -> why it matches -> relevant calories/protein/time ->
 - Keep transitions short and interruptible. Respect reduced motion.
 - No looping decoration, bouncing icons, comprehension-delaying counters, or animation on every card.
 - Loading, empty, error, disabled, unavailable, destructive, and success states must be visually and semantically distinct.
+- Approved motion and its tokens: water quick-add fill and figure (`value-change`, 350 ms), sheet enter/exit and scrim fade (`sheet`), toast enter/exit (`sheet`), barcode scan line (continuous only while scanning; `scan-sweep`, 1.6 s), code detection and the pending transition (`feedback`), new meal-entry highlight (`disclosure`). Every one collapses to an instant state under reduced motion, and none is the only feedback.
 
 ## Accessibility
 

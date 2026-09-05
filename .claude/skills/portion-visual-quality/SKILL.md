@@ -26,12 +26,17 @@ Operate inside `PRODUCT.md`, `DESIGN.md`, current UX contracts, tokens, and reus
 
 ## Product-specific checks
 
-- Bottom navigation remains three destinations plus the separate 56 px `Log food` action.
+- Bottom navigation remains three destinations plus the separate 56 px `Log food` action; it is fixed, borderless, on the canvas surface, and never overlaps content, sheets, dialogs, or the keyboard.
 - Root, focused, and overlay layouts each own safe areas exactly once; never draw OS chrome.
-- Home progress states remaining/logged/over-goal/unavailable truthfully and without judgmental color.
-- Log food choices are equal methods and never imply a commit.
+- Home reads header (logo, date, `Set goal`/`Edit goal`) → calorie budget bar and macros → recommended recipe → the four meals → water. The budget states remaining/logged/reached/over/partial truthfully, with a blue information fill and no judgmental colour; macro targets appear only when the user entered them.
+- Recommended recipe wording is `Recommended recipe` or `Matches all N filters` — never goal-fit or health claims.
+- Water shows amount and reference in text, uses the water tokens, and its quick add gives a visible, announced, undoable confirmation.
+- Log food choices are equal methods and never imply a commit; the commit is the Add-to-meal sheet's `Add to {meal}` from every path, including Recipe Details' `Add`.
 - Food Review keeps identity, portion, unit, basis, result, and correction visible.
-- Recipe results explain matching with active criteria and known values; avoid fake scores or badge clouds.
+- Barcode and photo use the shared dark camera stage with text status chips; no simulator, flash, or camera chrome in production; the copy says the media is a fixture.
+- Search fields carry their trailing action (barcode or filters with a count) on the right; applied filter chips sit beneath.
+- Recipe results explain matching with active criteria and known values; avoid fake scores or badge clouds. Every catalogue recipe shows a licensed local photo; `No photo` is the fallback only.
+- Attached UI references are composition evidence: adopt hierarchy and spacing, reject unsupported controls (bookmark, share, checklists, ratings, device chrome), and never copy their photography. Record adopt/adapt/reject in the ledger.
 
 ## Responsive and accessibility checks
 

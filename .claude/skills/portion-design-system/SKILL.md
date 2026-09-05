@@ -42,15 +42,19 @@ Do not promote a one-off until at least two real consumers need the same contrac
 
 - Use `Container`, `Grid`, and `GridItem`; the four-column grid guides alignment rather than forcing ordinary content into columns.
 - Use `RootScreenLayout`, `FocusedFlowLayout`, and overlay patterns for their intended families.
-- Safe-area padding has one owner. Header owns top; navigation/focused footer/sheet footer owns bottom; content does not duplicate it.
-- Keep target sizes at least 48 x 48 CSS px; `Log food` is 56 x 56.
+- Safe-area padding has one owner. Header owns top; navigation/focused footer/sheet footer owns bottom; content does not duplicate it. The root navigation is fixed to the viewport; `RootScreenLayout` measures it and reserves bottom padding and scroll padding — no screen adds its own.
+- `AppHeader` variants are root (`PortionLogo` + context + trailing), section (title + trailing) and focused (Back + title + trailing). `PortionLogo` is the only brand rendering; the dot is decorative.
+- Progress is `ProgressBar` (horizontal, goal marker, `meter` semantics); `ProgressRing` is deprecated with no product consumer.
+- `Toast` is the confirmation pattern (status role, optional Undo, anchored above the fixed navigation). `CameraStage` is the shared dark viewfinder. Water tokens (`water.*`) and camera tokens (`camera.*`) are semantic families; never reuse action blue or nutrient accents for them.
+- Sibling controls, never a clickable container around a button (the water tracker is the reference case).
+- Keep target sizes at least 48 x 48 CSS px; `Log food` is 56 x 56; the photo shutter is 72 x 72.
 - Design for 320–430 CSS px and 200% text through intrinsic layout, wrapping, and container queries where local width is what matters.
 
 ## Storybook contract
 
 Add or update colocated stories for meaningful reusable states, keyboard behavior, focus visibility, responsive reflow, enlarged text, and safe-area ownership. Stories consume production components; they are not alternate implementations.
 
-Document reusable UI, not all 42 application frames. Add screen-level harnesses only when they provide durable interaction or regression coverage.
+Document reusable UI, not every application frame. The mapped product-state stories (one per ledger row in `docs/design/hifi-decisions.md`) render production screens with deterministic fixtures and are the state-evidence layer; component microstates stay in component stories. Every motion story has a reduced-motion counterpart or assertion.
 
 ## Verification
 
