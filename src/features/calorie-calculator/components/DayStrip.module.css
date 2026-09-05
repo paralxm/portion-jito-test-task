@@ -53,6 +53,8 @@
   cursor: grabbing;
 }
 
+/* An unselected day is weekday and number on the canvas — no tile, border or shadow; the
+   48 px hit area and the control radius (for the focus ring and the selected fill) stay. */
 .day {
   display: flex;
   flex-direction: column;
@@ -62,9 +64,9 @@
   min-block-size: 56px;
   padding-block: var(--portion-ref-space-8);
   padding-inline: var(--portion-ref-space-4);
-  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border: var(--portion-border-width-default) solid transparent;
   border-radius: var(--portion-radius-control);
-  background: var(--portion-color-background-canvas);
+  background: transparent;
   color: var(--portion-color-text-primary);
   scroll-snap-align: center;
   cursor: pointer;
@@ -100,7 +102,6 @@
 @media (hover: hover) {
   .day:not(:disabled, [data-selected]):hover {
     background: var(--portion-color-background-surface);
-    border-color: var(--portion-color-border-control);
   }
 }
 
@@ -118,10 +119,10 @@
   background: var(--portion-color-text-on-action);
 }
 
+/* A day after today keeps its place in the row as muted text, with no tile to read as a control. */
 .day:disabled {
   color: var(--portion-color-state-disabled-text);
-  border-color: var(--portion-color-state-disabled-surface);
-  background: var(--portion-color-state-disabled-surface);
+  background: transparent;
   cursor: not-allowed;
 }
 

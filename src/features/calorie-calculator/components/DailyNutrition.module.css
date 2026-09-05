@@ -1,6 +1,7 @@
-/* The calorie card and the macro cards read as one section: the same outer width, a
-   close gap (one step, not a section gap) and related radii — grouped for the focal
-   calorie surface, card for each macro. No wrapper border is drawn around the group. */
+/* The calorie card and the macro cards read as one section: the same outer width, the
+   same surface (canvas with the decorative border at the card radius) and a close gap
+   (one step, not a section gap). No wrapper border is drawn around the group; the
+   calorie card leads by its figure, not by a darker fill. */
 .section {
   display: flex;
   flex-direction: column;

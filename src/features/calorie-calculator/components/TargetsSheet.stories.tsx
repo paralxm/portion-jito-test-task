@@ -44,6 +44,7 @@ export const Entry: Story = {
     await expect(within(dialog).getByRole('button', { name: /Help me estimate/ })).toBeVisible();
     await userEvent.click(within(dialog).getByRole('button', { name: /I know my goal/ }));
     await expect(within(dialog).getByLabelText('Daily calorie target')).toBeVisible();
+    await expect(within(dialog).getByText(/Applies from today until you change it/)).toBeVisible();
   },
 };
 

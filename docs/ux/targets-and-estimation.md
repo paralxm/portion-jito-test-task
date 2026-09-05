@@ -4,7 +4,9 @@ Owner: `docs/ux/` (behaviour). Composition lives in `DESIGN.md` §Targets sheet;
 
 ## Scope
 
-Targets stay optional. Nothing asks for them on first use, no average-person target is applied automatically, and logging, calculation and recipe discovery work without them. Existing saved targets are kept until the person changes them. Targets are effective-dated (ledger §12 A6): a save applies from today onward and never rewrites earlier days.
+Targets stay optional. Nothing asks for them on first use, no average-person target is applied automatically, and logging, calculation and recipe discovery work without them. Existing saved targets are kept until the person changes them.
+
+Targets are effective-dated (ledger §12 A6, §13.9): every save — manual or estimated — records a period starting on the local day of saving and lasting until the next change; the editor says so ("Applies from today until you change it."). Saving while viewing an earlier day still starts the period today, so that day keeps whatever was in force then; several saves on one day replace that day's period; removing targets records a cleared period from today and leaves earlier periods, entries and water untouched. The history lives in the existing versioned record, survives reloads and the local midnight rollover, and a version-1 record's single goal migrates as one period from the migration day — no historical value is invented.
 
 ## Entry
 

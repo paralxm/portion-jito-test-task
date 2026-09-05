@@ -230,7 +230,7 @@ export function TargetsSheet({ open, goal, onSave, onRemove, onCancel, initialSt
 
   if (step === 'entry') {
     title = 'Set daily goal';
-    description = 'How would you like to set it? Optional — logging and recipes work without a target, and it applies from today onward.';
+    description = 'How would you like to set it? Optional — logging and recipes work without a target. Applies from today until you change it.';
     body = (
       <Stack gap={8}>
         <MethodOption icon={Calculator} title="Help me estimate" description="Three short questions, then a reviewed estimate you can adjust" onClick={() => setStep('about')} />
@@ -247,7 +247,7 @@ export function TargetsSheet({ open, goal, onSave, onRemove, onCancel, initialSt
   } else if (step === 'manual') {
     const editing = goal !== null;
     title = editing ? 'Edit targets' : 'Set daily goal';
-    description = editing ? 'Changes apply from today onward; earlier days keep the targets they had.' : 'Applies from today onward. Entries and recipe filters stay as they are.';
+    description = editing ? 'Applies from today until you change it. Earlier days keep the targets they had.' : 'Applies from today until you change it. Entries and recipe filters stay as they are.';
     body = (
       <Stack gap={16}>
         {goal?.source === 'estimated' && goal.estimate ? (
@@ -556,7 +556,7 @@ export function TargetsSheet({ open, goal, onSave, onRemove, onCancel, initialSt
         </div>
       );
     } else {
-      description = 'Review it, adjust it if you like, then save. Nothing is applied until you do.';
+      description = 'Review it, adjust it if you like, then save. Applies from today until you change it.';
       const summary = `${inputs.sex}, ${inputs.age}, ${Math.round(inputs.heightCm)} cm, ${Math.round(inputs.weightKg * 10) / 10} kg, ${activityLabel(inputs.activity).toLowerCase()}`;
       body = (
         <Stack gap={16}>
