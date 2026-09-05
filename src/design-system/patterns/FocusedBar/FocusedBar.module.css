@@ -1,0 +1,36 @@
+/* The bar owns the top safe area once; its row is 48 | 1fr | 48 so the centre is centred
+   on the container whatever the two actions hold. */
+.bar {
+  padding-block-start: var(--portion-safe-area-top);
+  background: var(--portion-color-background-canvas);
+  border-block-end: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--portion-size-target-minimum) minmax(0, 1fr) var(--portion-size-target-minimum);
+  align-items: center;
+  column-gap: var(--portion-ref-space-8);
+  /* The bar's own minimum height, not a spacing value; the safe area is additional. */
+  min-block-size: 56px;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--portion-size-target-minimum);
+  min-block-size: var(--portion-size-target-minimum);
+  flex-shrink: 0;
+}
+
+.centre {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+}
+
+.step {
+  white-space: nowrap;
+}

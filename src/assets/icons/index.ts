@@ -31,6 +31,7 @@ export const ICON_SYMBOL_IDS = new Set<string>([
   'pencil-simple-regular',
   'plus-bold',
   'plus-regular',
+  'question-regular',
   'sliders-horizontal-regular',
   'squares-four-regular',
   'warning-regular',

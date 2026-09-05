@@ -1,0 +1,91 @@
+/* The whole card is the control; the native radio stays in the tree for semantics and
+   keyboard, visually hidden. The boundary is always one border width, so a state change
+   never moves the layout. */
+.card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+  min-block-size: var(--portion-size-target-minimum);
+  padding: var(--portion-ref-space-16);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-canvas);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-selection) var(--portion-motion-easing-standard);
+}
+
+.input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+.title {
+  min-inline-size: 0;
+}
+
+/* The indicator slot is reserved whether or not the mark is shown: 24 px, the icon's box. */
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: var(--portion-ref-space-24);
+  block-size: var(--portion-ref-space-24);
+  color: var(--portion-color-action-primary);
+}
+
+@media (hover: hover) {
+  .card:not([data-disabled], [data-checked]):hover {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.card[data-checked] {
+  border-color: var(--portion-color-action-primary);
+  background: var(--portion-color-action-selected-surface, var(--portion-color-background-surface));
+}
+
+.card[data-disabled] {
+  color: var(--portion-color-state-disabled-text);
+  cursor: not-allowed;
+}
+
+.card:has(.input:focus-visible) {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+}
+
+/* Tile: an equal-width member of a horizontal pair; the indicator leads and the title is centred in the remaining space. */
+.card[data-presentation='tile'] {
+  flex-direction: row-reverse;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0%;
+  padding-block: var(--portion-ref-space-12);
+}
+
+.card[data-presentation='tile'] .text {
+  flex: 0 1 auto;
+  align-items: center;
+  text-align: center;
+}
