@@ -6,6 +6,8 @@ export interface DiscardChangesDialogProps {
   onKeepEditing: () => void;
   /** Only this clears the draft and returns to the recorded task origin. */
   onDiscard: () => void;
+  /** The consequence in words for this task; defaults to the food task's copy. */
+  body?: string;
 }
 
 /** The shared copy of the exit confirmation (ledger §12 D3). */
@@ -23,10 +25,10 @@ export const DISCARD_CHANGES_COPY = {
  * action carries the system's error tokens and says what it does in words, so colour is
  * never the only cue.
  */
-export function DiscardChangesDialog({ open, onKeepEditing, onDiscard }: DiscardChangesDialogProps) {
+export function DiscardChangesDialog({ open, onKeepEditing, onDiscard, body = DISCARD_CHANGES_COPY.body }: DiscardChangesDialogProps) {
   return (
     <ConfirmDialog open={open} title={DISCARD_CHANGES_COPY.title} confirmLabel={DISCARD_CHANGES_COPY.discard} cancelLabel={DISCARD_CHANGES_COPY.keep} destructive onConfirm={onDiscard} onCancel={onKeepEditing}>
-      {DISCARD_CHANGES_COPY.body}
+      {body}
     </ConfirmDialog>
   );
 }

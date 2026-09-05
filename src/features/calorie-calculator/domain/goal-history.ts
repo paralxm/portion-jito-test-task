@@ -37,10 +37,40 @@ export function goalForDay(history: GoalHistory, dayKey: string): DailyGoal | nu
   return current && isValidGoal(current.kcal) ? current : null;
 }
 
-/** Records a goal (or a clear, `null`) from a day onward; later periods are dropped because the edit supersedes them. */
-export function setGoalFrom(history: GoalHistory, dayKey: string, goal: DailyGoal | null): GoalPeriod[] {
-  const kept = history.filter((period) => compareDayKeys(period.from, dayKey) < 0);
+export interface RecordOptions {
+  /** Keep periods that start after `dayKey` (an immediate save that leaves a scheduled change in place); by default the save supersedes them. */
+  keepLater?: boolean;
+}
+
+/**
+ * Records a goal (or a clear, `null`) from a day onward. One record per day: saving
+ * again on the same day replaces that day's values. Later periods are dropped because
+ * the save supersedes them — a future-dated save therefore replaces any other pending
+ * change, and a removal from today cancels one — unless `keepLater` asks to keep them.
+ */
+export function setGoalFrom(history: GoalHistory, dayKey: string, goal: DailyGoal | null, options: RecordOptions = {}): GoalPeriod[] {
+  const kept = history.filter((period) => compareDayKeys(period.from, dayKey) < 0 || (options.keepLater === true && compareDayKeys(period.from, dayKey) > 0));
   return normalise([...kept, { from: dayKey, goal }]);
+}
+
+/** The period in force today (the latest starting on or before today), or `null` before the first. */
+export function currentPeriod(history: GoalHistory, todayKey: string): GoalPeriod | null {
+  let current: GoalPeriod | null = null;
+  for (const period of history) {
+    if (compareDayKeys(period.from, todayKey) <= 0) current = period;
+    else break;
+  }
+  return current;
+}
+
+/** The one scheduled change: the earliest period starting after today, or `null`. */
+export function pendingPeriod(history: GoalHistory, todayKey: string): GoalPeriod | null {
+  return history.find((period) => compareDayKeys(period.from, todayKey) > 0) ?? null;
+}
+
+/** Drops every period starting after today; the current period and the past stay as they are. */
+export function cancelPending(history: GoalHistory, todayKey: string): GoalPeriod[] {
+  return history.filter((period) => compareDayKeys(period.from, todayKey) <= 0);
 }
 
 /** The latest period's goal — what "the goal" means once the history is at least one period long. */

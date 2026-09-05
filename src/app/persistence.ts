@@ -97,6 +97,7 @@ function readGoal(raw: unknown): DailyGoal | null {
   if (isOneOf(raw.preset, PRESET_OPTIONS)) goal.preset = raw.preset as MacroPreset;
   const estimate = readEstimate(raw.estimate);
   if (estimate) goal.estimate = estimate;
+  if (raw.adjusted === true) goal.adjusted = true;
   return goal;
 }
 
@@ -178,12 +179,15 @@ export function loadRecord(storage: RecordStorage | null, options?: ParseOptions
   }
 }
 
-export function saveRecord(storage: RecordStorage | null, record: PersistedRecord): void {
-  if (!storage) return;
+/** Writes the record; `false` when the device refused (quota, privacy mode), so a caller that must confirm persistence can say so. */
+export function saveRecord(storage: RecordStorage | null, record: PersistedRecord): boolean {
+  if (!storage) return false;
   try {
     storage.setItem(RECORD_KEY, serialiseRecord(record));
+    return true;
   } catch {
     // Quota or privacy mode: the session keeps working in memory.
+    return false;
   }
 }
 
