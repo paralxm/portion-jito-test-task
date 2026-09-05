@@ -9,6 +9,8 @@ export interface DailyNutritionProps {
   /** The targets in force on the shown day, for the optional macro targets. `null` when none. */
   goal: DailyGoal | null;
   onSetTargets?: () => void;
+  /** The one scheduled change after today, when today is shown. */
+  scheduledNote?: string;
   pastDay?: boolean;
   /** The visible heading text, e.g. "Today's nutrition"; rendered for assistive technology only. */
   heading: string;
@@ -24,7 +26,7 @@ export interface DailyNutritionProps {
  * each macro card shows the logged grams, and its target with its own track only when
  * the person entered that target. Unknown and partial values keep their words.
  */
-export function DailyNutrition({ summary, goal, onSetTargets, pastDay = false, heading, className }: DailyNutritionProps) {
+export function DailyNutrition({ summary, goal, onSetTargets, scheduledNote, pastDay = false, heading, className }: DailyNutritionProps) {
   const macros = {
     protein: { value: summary.protein.value, partial: !summary.protein.complete, target: goal?.proteinG ?? null },
     carbohydrates: { value: summary.carbohydrates.value, partial: !summary.carbohydrates.complete, target: goal?.carbohydratesG ?? null },
@@ -36,7 +38,7 @@ export function DailyNutrition({ summary, goal, onSetTargets, pastDay = false, h
         {heading}
       </h2>
       <Surface tone="canvas" border="decorative" radius="card" padding={16} className={styles.calories}>
-        <CalorieBudgetBar summary={summary} onSetTargets={onSetTargets} pastDay={pastDay} />
+        <CalorieBudgetBar summary={summary} onSetTargets={onSetTargets} scheduledNote={scheduledNote} pastDay={pastDay} />
       </Surface>
       <div aria-label="Macronutrients logged">
         <NutritionMacros size="compact" presentation="cards" protein={macros.protein} carbohydrates={macros.carbohydrates} fat={macros.fat} />

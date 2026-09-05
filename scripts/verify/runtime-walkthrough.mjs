@@ -102,11 +102,19 @@ async function addManualFood(page, name, kcal, meal = 'breakfast') {
 async function setGoal(page, kcal) {
   await scoped().getByRole('button', { name: 'Set targets' }).click();
   await scoped().getByRole('button', { name: /I know my goal/ }).click();
-  await scoped().getByRole('textbox', { name: 'Daily calorie target' }).fill(String(kcal));
+  await page.waitForTimeout(300);
+  await scoped().getByRole('textbox', { name: 'Daily calories' }).fill(String(kcal));
   await scoped().getByRole('radio', { name: 'Custom' }).click();
-  await scoped().getByRole('button', { name: 'Save', exact: true }).click();
+  await scoped().getByRole('button', { name: 'Save targets' }).click();
   await page.waitForTimeout(250);
 }
+/** The local day key of today plus `days`, the way the app keys days. */
+const dayKeyFrom = (days) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const editor = () => page.locator('[data-screen="targets-editor"]:not([hidden]), [data-screen="targets-review"]:not([hidden])');
 
 // --- Journey 1: calories for a food, added to a meal --------------------------------
 let page = await newPage(390, 844);
@@ -133,7 +141,9 @@ await check(page, 'the day strip is compact: no previous / next week buttons, to
     const today = home.querySelector('[role="radio"][aria-label$=", today"]');
     const future = home.querySelectorAll('[role="radio"]:disabled').length;
     const headings = Array.from(home.querySelectorAll('h2')).map((h) => h.textContent);
-    return weekButtons === 0 && !!today && today.getAttribute('aria-checked') === 'true' && future >= 1 && headings.indexOf('Recipe to try') < headings.findIndex((h) => /meals/.test(h));
+    // A Sunday is the week's last tile, so no later day of that week exists to disable.
+    const laterDays = new Date().getDay() === 0 ? 0 : 1;
+    return weekButtons === 0 && !!today && today.getAttribute('aria-checked') === 'true' && future >= laterDays && headings.indexOf('Recipe to try') < headings.findIndex((h) => /meals/.test(h));
   }),
 );
 await check(page, 'navigation is fixed, borderless, and the content reserves its height', () => fixedNavigationHolds(page));
@@ -142,14 +152,22 @@ await check(page, 'navigation is fixed, borderless, and the content reserves its
 await scoped().getByRole('button', { name: 'Set targets' }).click();
 await page.waitForTimeout(350);
 await shot(page, '02-targets-entry');
-await check(page, 'Set targets opens the entry sheet with its two routes', async () => {
+await check(page, 'Set targets opens the entry sheet: the two routes, the reassurance note, Close and no Cancel footer', async () => {
   const d = await page.locator('dialog[open]').innerText();
-  return d.includes('Set daily goal') && d.includes('How would you like to set it?') && d.includes('Help me estimate') && d.includes('I know my goal');
+  const cancel = await page.locator('dialog[open]').getByRole('button', { name: 'Cancel' }).count();
+  return d.includes('Set daily goal') && d.includes('Choose how to set your target.') && d.includes('Help me estimate') && d.includes('I know my goal') && d.includes('You can change your targets anytime from Home.') && cancel === 0;
 });
 await scoped().getByRole('button', { name: /I know my goal/ }).click();
-await scoped().getByRole('textbox', { name: 'Daily calorie target' }).fill('2000');
+await page.waitForTimeout(350);
+await check(page, 'I know my goal opens the focused manual editor: heading focused, no bottom navigation, Starts Today, one Save targets', async () => {
+  const t = await visibleText();
+  const nav = await page.locator('[data-screen="targets-editor"]:not([hidden]) nav').count();
+  const focused = await page.evaluate(() => document.activeElement?.tagName);
+  return t.includes('Set daily targets') && t.includes('Starts') && t.includes('Today') && t.includes('From today until you change it.') && nav === 0 && focused === 'H1' && (await scoped().getByRole('button', { name: 'Save targets' }).count()) === 1;
+});
+await scoped().getByRole('textbox', { name: 'Daily calories' }).fill('2000');
 await check(page, 'a preset suggests grams from the calorie target and says so', async () => {
-  const d = await page.locator('dialog[open]').innerText();
+  const d = await visibleText();
   return d.includes('Suggested macros') && d.includes('100 g') && d.includes('250 g') && d.includes('67 g') && d.includes('Not personalised');
 });
 await scoped().getByRole('radio', { name: 'Custom' }).click();
@@ -158,8 +176,8 @@ await scoped().getByLabel(/^Carbohydrates/).fill('220');
 await scoped().getByLabel(/^Fat/).fill('65');
 await page.waitForTimeout(100);
 await shot(page, '02-targets-custom');
-await check(page, 'custom grams state their energy against the target without changing either', async () => (await page.locator('dialog[open]').innerText()).includes('1,945 kcal, 55 kcal below'));
-await scoped().getByRole('button', { name: 'Save', exact: true }).click();
+await check(page, 'custom grams state their energy against the target without changing either', async () => (await visibleText()).includes('1,945 kcal, 55 kcal below'));
+await scoped().getByRole('button', { name: 'Save targets' }).click();
 await page.waitForTimeout(250);
 await shot(page, '03-home-goal-empty');
 await check(page, 'goal 2,000 with nothing logged: 2,000 remaining, 0 %, targets shown', async () => {
@@ -706,55 +724,197 @@ await check(page, 'confirmed removal recalculates Home (900 kcal logged) with th
   return t.includes('900 kcal logged') && !t.includes('Vegetable rice bowl') && t.includes('Edit targets');
 });
 
-// Help me estimate: three steps, the reviewed estimate, an explicit save
+// Help me estimate: three focused steps, the reviewed estimate, an explicit save
 await scoped().getByRole('button', { name: 'Edit targets' }).click();
 await page.waitForTimeout(350);
-await check(page, 'Edit targets opens the saved values (2,000 kcal, custom 120 / 220 / 65 g)', async () =>
-  (await scoped().getByRole('textbox', { name: 'Daily calorie target' }).inputValue()) === '2000' && (await page.locator('dialog[open]').getByRole('textbox', { name: /^Protein/ }).inputValue()) === '120');
-await scoped().getByRole('button', { name: 'Help me estimate instead' }).click();
-await page.waitForTimeout(200);
+await check(page, 'Edit targets opens the focused editor with the saved values (2,000 kcal, custom 120 / 220 / 65 g) and Estimate instead', async () =>
+  (await scoped().getByRole('textbox', { name: 'Daily calories' }).inputValue()) === '2000' && (await editor().getByRole('textbox', { name: /^Protein/ }).inputValue()) === '120' && (await visibleText()).includes('Entered by you'));
+await scoped().getByRole('button', { name: 'Estimate instead' }).click();
+await page.waitForTimeout(250);
 await shot(page, '50b-estimate-about');
-await scoped().getByRole('button', { name: 'Continue' }).click();
-await check(page, 'the About you step refuses blank fields without leaving', async () => {
-  const d = await page.locator('dialog[open]').innerText();
-  return d.includes('About you') && d.includes('Enter your age');
+await check(page, 'About you: step 1/3 in the bar, Back and Help, the heading below, no navigation, the keyboard not summoned', async () => {
+  const t = await visibleText();
+  const nav = await page.locator('[data-screen="targets-about"]:not([hidden]) nav').count();
+  const focused = await page.evaluate(() => document.activeElement?.tagName);
+  return t.includes('About you') && t.includes('1/3') && nav === 0 && focused !== 'INPUT' && (await scoped().getByRole('button', { name: 'Help' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Back' }).count()) === 1;
 });
-const sheet = () => page.locator('dialog[open]');
-await sheet().getByRole('textbox', { name: 'Age' }).fill('34');
-await sheet().getByRole('radio', { name: 'Female' }).check();
-await sheet().getByRole('textbox', { name: 'Height' }).fill('168');
-await sheet().getByRole('textbox', { name: 'Weight' }).fill('62');
 await scoped().getByRole('button', { name: 'Continue' }).click();
-await sheet().getByRole('radio', { name: /Lightly active/ }).check();
-await page.waitForTimeout(100);
+await check(page, 'the About you step refuses blank fields without leaving and focuses the first', async () => {
+  const t = await visibleText();
+  const focused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? document.activeElement?.id);
+  return t.includes('About you') && t.includes('Enter your age') && (await scoped().getByRole('textbox', { name: 'Age' }).evaluate((el) => el === document.activeElement));
+});
+const step = () => page.locator('[data-screen^="targets-"]:not([hidden])');
+await step().getByRole('textbox', { name: 'Age' }).fill('34');
+await step().getByText('Female', { exact: true }).click();
+await step().getByRole('textbox', { name: 'Height' }).fill('168');
+await step().getByRole('textbox', { name: 'Weight' }).fill('62');
+await check(page, 'Female / Male are equal-width tiles; switching Weight to lb converts the typed value (62 kg → 136.7 lb) and back', async () => {
+  const widths = await step().getByRole('radio', { name: /^(Female|Male)$/ }).evaluateAll((els) => els.map((el) => el.closest('label').getBoundingClientRect().width));
+  await step().getByRole('radio', { name: 'lb' }).click();
+  const lb = await step().getByRole('textbox', { name: 'Weight' }).inputValue();
+  await step().getByRole('radio', { name: 'kg' }).click();
+  const kg = await step().getByRole('textbox', { name: 'Weight' }).inputValue();
+  return widths.length === 2 && Math.abs(widths[0] - widths[1]) < 1 && lb === '136.7' && kg === '62';
+});
+await scoped().getByRole('button', { name: 'Help' }).click();
+await page.waitForTimeout(150);
+await shot(page, '50e-estimate-help');
+await check(page, 'Help is a short dialog with a Calculation details disclosure; Escape closes it, focus returns to Help and the draft is intact', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  const disclosed = d.includes('Calculation details') && !d.includes('Dietary Reference Intakes');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(100);
+  const focused = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
+  return d.includes('Why these details?') && disclosed && focused === 'Help' && (await step().getByRole('textbox', { name: 'Age' }).inputValue()) === '34';
+});
+await scoped().getByRole('button', { name: 'Continue' }).click();
+await page.waitForTimeout(200);
+await check(page, 'Your activity: 2/3, four selection cards, nothing auto-advances', async () => {
+  const t = await visibleText();
+  await step().getByText('Lightly active', { exact: true }).click();
+  await page.waitForTimeout(100);
+  return t.includes('Your activity') && t.includes('2/3') && t.includes('Think about a typical week.') && (await step().getByRole('radio').count()) === 4 && (await visibleText()).includes('Your activity');
+});
 await shot(page, '50c-estimate-lifestyle');
 await scoped().getByRole('button', { name: 'Continue' }).click();
-await sheet().getByRole('radio', { name: /Lose weight/ }).check();
-await scoped().getByRole('button', { name: 'See the estimate' }).click();
 await page.waitForTimeout(200);
+await step().getByText('Lose weight', { exact: true }).click();
+await check(page, 'Your goal: 3/3, Lose / Maintain / Gain, the primary action is Review estimate', async () => {
+  const t = await visibleText();
+  return t.includes('Your goal') && t.includes('3/3') && (await scoped().getByRole('button', { name: 'Review estimate' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'Review estimate' }).click();
+await page.waitForTimeout(250);
 await shot(page, '50d-estimate-review');
-await check(page, 'the review labels the estimate, shows the maintenance figure and the deficit, and never calls it medical', async () => {
-  const d = await page.locator('dialog[open]').innerText();
-  return d.includes('Estimated daily target') && d.includes('1,699') && d.includes('Maintenance estimate 2,199 kcal') && d.includes('500 kcal below') && d.includes('not a measurement or medical advice') && (await scoped().getByRole('textbox', { name: 'Daily calorie target' }).inputValue()) === '1699';
+await check(page, 'the review is a full screen: Estimated, the centred 1,699 with kcal/day, Adjust, the goal · activity summary, no step count, Save targets', async () => {
+  const t = await visibleText();
+  const centred = await page.evaluate(() => {
+    const screen = document.querySelector('[data-screen="targets-review"]:not([hidden])');
+    const figure = Array.from(screen.querySelectorAll('span')).find((el) => el.textContent === '1,699');
+    const r = figure.getBoundingClientRect();
+    const c = screen.getBoundingClientRect();
+    return Math.abs((r.left + r.right) / 2 - (c.left + c.right) / 2) < 2;
+  });
+  return t.includes('Your daily target') && t.includes('Estimated') && t.includes('1,699') && t.includes('kcal/day') && t.includes('An estimate you can adjust.') && t.includes('Lose weight · Lightly active') && !/\d\/3/.test(t) && centred && (await scoped().getByRole('button', { name: 'Save targets' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'Adjust' }).click();
+await page.waitForTimeout(100);
+await step().getByRole('textbox', { name: 'Daily calories' }).fill('1650');
+await scoped().getByRole('button', { name: 'Done' }).click();
+await page.waitForTimeout(100);
+await check(page, 'Adjust edits the same number in place and labels it adjusted; the custom grams from the saved target stay explicit', async () => {
+  const t = await visibleText();
+  return t.includes('1,650') && !t.includes('1,699') && t.includes('Adjusted from the estimate') && (await editor().getByRole('textbox', { name: /^Protein/ }).inputValue()) === '120';
 });
 await scoped().getByRole('button', { name: 'Back' }).click();
-await check(page, 'Back keeps the goal answer', async () => (await sheet().getByRole('radio', { name: /Lose weight/ }).isChecked()) === true);
-await scoped().getByRole('button', { name: 'See the estimate' }).click();
+await page.waitForTimeout(200);
+await check(page, 'Back keeps the goal answer', async () => (await step().getByRole('radio', { name: /Lose weight/ }).isChecked()) === true);
+await scoped().getByRole('button', { name: 'Review estimate' }).click();
+await page.waitForTimeout(200);
+await scoped().getByRole('button', { name: 'Edit details' }).click();
+await page.waitForTimeout(200);
+await check(page, 'Edit details returns to About you with the values kept', async () => (await visibleText()).includes('About you') && (await step().getByRole('textbox', { name: 'Age' }).inputValue()) === '34');
+await scoped().getByRole('button', { name: 'Continue' }).click();
+await scoped().getByRole('button', { name: 'Continue' }).click();
+await scoped().getByRole('button', { name: 'Review estimate' }).click();
+await page.waitForTimeout(250);
 await scoped().getByRole('button', { name: 'Save targets' }).click();
 await page.waitForTimeout(300);
-await check(page, 'saving the estimate applies it once: 1,699 − 900 = 799 remaining, entries untouched', async () => {
+await check(page, 'saving the estimate applies it once, returns to Home and confirms: 1,699 − 900 = 799 remaining, entries untouched', async () => {
   const t = await visibleText();
-  return t.includes('799') && t.includes('kcal remaining') && t.includes('900') && t.includes('consumed') && t.includes('1,699 kcal');
+  const body = await page.locator('body').innerText();
+  return t.includes('799') && t.includes('kcal remaining') && t.includes('900') && t.includes('consumed') && t.includes('1,699 kcal') && body.includes('Targets saved.') && (await page.locator('[data-screen="home"]:not([hidden])').count()) === 1;
 });
 await scoped().getByRole('button', { name: 'Edit targets' }).click();
 await page.waitForTimeout(350);
-await check(page, 'an estimated target explains its assumptions and offers an explicit recalculation', async () => {
-  const d = await page.locator('dialog[open]').innerText();
-  return d.includes('Estimated from female, 34, 168 cm, 62 kg, lightly active') && (await scoped().getByRole('button', { name: 'Recalculate estimate' }).count()) === 1;
+await check(page, 'an estimated target shows a compact source row and an explicit Recalculate', async () => {
+  const d = await visibleText();
+  return d.includes('Estimated · Lose weight · Lightly active') && (await scoped().getByRole('button', { name: 'Recalculate' }).count()) === 1;
 });
-await scoped().getByRole('button', { name: 'Cancel' }).click();
+await scoped().getByRole('button', { name: 'Cancel changes' }).click();
 await page.waitForTimeout(200);
-await check(page, 'Cancel keeps the saved targets', async () => { const t = await visibleText(); return t.includes('799') && t.includes('1,699 kcal'); });
+await check(page, 'Cancel changes on an untouched editor leaves at once and keeps the saved targets', async () => { const t = await visibleText(); return t.includes('799') && t.includes('1,699 kcal') && (await page.locator('dialog[open]').count()) === 0; });
+
+// Recalculate, the exit guard, scheduling, a refused write and the cancelled schedule (ledger §14)
+await scoped().getByRole('button', { name: 'Edit targets' }).click();
+await page.waitForTimeout(300);
+await scoped().getByRole('button', { name: 'Recalculate' }).click();
+await page.waitForTimeout(250);
+await check(page, 'Recalculate prefills About you (34, female, 168 cm, 62 kg) at 1/3', async () => {
+  const t = await visibleText();
+  return t.includes('About you') && t.includes('1/3') && (await step().getByRole('textbox', { name: 'Age' }).inputValue()) === '34' && (await step().getByRole('radio', { name: 'Female' }).isChecked()) && (await step().getByRole('textbox', { name: 'Height' }).inputValue()) === '168';
+});
+await step().getByRole('textbox', { name: 'Age' }).fill('35');
+await page.goBack();
+await page.waitForTimeout(250);
+await check(page, 'browser Back with an edited draft opens Discard changes?; Keep editing stays on the step', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Keep editing' }).click();
+  await page.waitForTimeout(150);
+  return d.includes('Discard changes?') && d.includes('Saved targets, food and water stay') && (await visibleText()).includes('About you') && (await step().getByRole('textbox', { name: 'Age' }).inputValue()) === '35';
+});
+await scoped().getByRole('button', { name: 'Back' }).click();
+await page.waitForTimeout(250);
+await check(page, 'Back from the first step after Recalculate returns to the editor', async () => (await visibleText()).includes('Edit targets'));
+await scoped().getByRole('button', { name: 'Cancel changes' }).click();
+await page.waitForTimeout(200);
+await check(page, 'Cancel changes with edits confirms; Discard changes returns to Home with the saved targets', async () => {
+  const opened = (await page.locator('dialog[open]').innerText()).includes('Discard changes?');
+  await page.locator('dialog[open]').getByRole('button', { name: 'Discard changes' }).click();
+  await page.waitForTimeout(250);
+  return opened && (await visibleText()).includes('1,699 kcal');
+});
+await scoped().getByRole('button', { name: 'Edit targets' }).click();
+await page.waitForTimeout(300);
+await scoped().getByRole('button', { name: 'Change', exact: true }).click();
+await editor().getByLabel('Start date').fill(dayKeyFrom(1));
+await editor().getByRole('textbox', { name: 'Daily calories' }).fill('1750');
+await page.waitForTimeout(100);
+await shot(page, '50f-targets-scheduled-date');
+await check(page, 'a future start says the current targets stay until then', async () => (await visibleText()).includes('Your current targets stay until then.'));
+await page.evaluate(() => {
+  window.__setItem = Storage.prototype.setItem;
+  Storage.prototype.setItem = function () { throw new Error('QuotaExceededError'); };
+});
+await scoped().getByRole('button', { name: 'Save targets' }).click();
+await page.waitForTimeout(250);
+await shot(page, '50g-targets-save-failed');
+await check(page, 'a refused write keeps the draft on screen and offers Try again; nothing is applied', async () => {
+  const t = await visibleText();
+  return t.includes('Not saved') && (await editor().getByRole('textbox', { name: 'Daily calories' }).inputValue()) === '1750' && (await scoped().getByRole('button', { name: 'Try again' }).count()) === 1 && (await page.locator('[data-screen="home"]:not([hidden])').count()) === 0;
+});
+await page.evaluate(() => { Storage.prototype.setItem = window.__setItem; });
+await scoped().getByRole('button', { name: 'Try again' }).click();
+await page.waitForTimeout(300);
+await shot(page, '50h-home-scheduled');
+await check(page, 'the retry saves once: Home keeps 1,699 in force and states the one scheduled change', async () => {
+  const t = await visibleText();
+  return t.includes('1,699 kcal') && t.includes('Scheduled: 1,750 kcal from tomorrow.') && (await page.locator('body').innerText()).includes('Targets saved. They start');
+});
+await check(page, 'the stored history holds one record for tomorrow after today’s', async () =>
+  page.evaluate(() => {
+    const record = JSON.parse(localStorage.getItem('portion.record'));
+    const d = new Date();
+    const localToday = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const later = record.goals.filter((p) => p.from > localToday);
+    return later.length === 1 && later[0].goal.kcal === 1750;
+  }),
+);
+await scoped().getByRole('button', { name: 'Edit targets' }).click();
+await page.waitForTimeout(300);
+await check(page, 'the editor states the scheduled change and that today’s targets last until it', async () => {
+  const t = await visibleText();
+  return t.includes('Scheduled: 1,750 kcal from') && t.includes('when your scheduled change starts');
+});
+await scoped().getByRole('button', { name: 'Cancel scheduled change' }).click();
+await page.waitForTimeout(250);
+await check(page, 'Cancel scheduled change keeps the current targets and drops the schedule', async () => {
+  const t = await visibleText();
+  await scoped().getByRole('button', { name: 'Cancel changes' }).click();
+  await page.waitForTimeout(250);
+  return !t.includes('Scheduled:') && (await visibleText()).includes('1,699 kcal') && !(await visibleText()).includes('Scheduled:');
+});
 
 // Targets apply from today until changed: they survive a reload, and an edit made while viewing a past day starts today.
 await page.reload();
@@ -763,10 +923,10 @@ await check(page, 'after a reload the saved targets are still in force (1,699 kc
   const t = await visibleText();
   await scoped().getByRole('button', { name: 'Edit targets' }).click();
   await page.waitForTimeout(300);
-  const d = await page.locator('dialog[open]').innerText();
-  await scoped().getByRole('button', { name: 'Cancel' }).click();
+  const d = await visibleText();
+  await scoped().getByRole('button', { name: 'Cancel changes' }).click();
   await page.waitForTimeout(200);
-  return t.includes('1,699 kcal') && d.includes('Recalculate estimate') && d.includes('Applies from today until you change it');
+  return t.includes('1,699 kcal') && d.includes('Recalculate') && d.includes('From today until you change it.');
 });
 await scoped().getByRole('radio', { name: /, today$/ }).evaluate((el) => el.previousElementSibling?.click());
 await page.waitForTimeout(300);
@@ -775,11 +935,15 @@ await check(page, 'a past day shows no target of its own (none was in force then
   return t.includes('Yesterday') && t.includes('No target was set for this day') && (await scoped().getByRole('button', { name: 'Set targets' }).count()) === 1;
 });
 await scoped().getByRole('button', { name: 'Set targets' }).click();
-await scoped().getByRole('button', { name: /I know my goal/ }).click();
-await scoped().getByRole('textbox', { name: 'Daily calorie target' }).fill('1800');
-await scoped().getByRole('button', { name: 'Save', exact: true }).click();
 await page.waitForTimeout(300);
-await check(page, 'saving while viewing a past day changes nothing for that day', async () => (await visibleText()).includes('No target was set for this day'));
+await check(page, 'Set targets on a past day while today has targets opens today’s editor (the save replaces today’s period)', async () => {
+  const t = await visibleText();
+  return t.includes('Edit targets') && (await scoped().getByRole('textbox', { name: 'Daily calories' }).inputValue()) === '1699' && t.includes('From today until you change it.');
+});
+await scoped().getByRole('textbox', { name: 'Daily calories' }).fill('1800');
+await scoped().getByRole('button', { name: 'Save targets' }).click();
+await page.waitForTimeout(300);
+await check(page, 'saving while viewing a past day restores that day, changes nothing for it and says the target starts today', async () => (await visibleText()).includes('No target was set for this day') && (await page.locator('body').innerText()).includes('Targets saved from today. Nothing changes yesterday.'));
 await scoped().getByRole('button', { name: 'Today', exact: true }).click();
 await page.waitForTimeout(300);
 await check(page, 'the new target is in force from today (1,800 kcal), replacing today’s earlier save', async () => {
@@ -788,11 +952,28 @@ await check(page, 'the new target is in force from today (1,800 kcal), replacing
 });
 await scoped().getByRole('button', { name: 'Edit targets' }).click();
 await page.waitForTimeout(300);
-await scoped().getByRole('button', { name: 'Remove targets' }).click();
+await scoped().getByRole('button', { name: 'Change', exact: true }).click();
+await editor().getByLabel('Start date').fill(dayKeyFrom(1));
+await scoped().getByRole('button', { name: 'Save targets' }).click();
 await page.waitForTimeout(300);
-await check(page, 'removing targets applies from today and keeps the entries and water', async () => {
+await scoped().getByRole('button', { name: 'Edit targets' }).click();
+await page.waitForTimeout(300);
+await scoped().getByRole('button', { name: 'Remove targets' }).click();
+await page.waitForTimeout(200);
+await shot(page, '50i-targets-remove-confirm');
+await check(page, 'Remove targets confirms first and names the scheduled change it also cancels; Keep targets changes nothing', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  await page.locator('dialog[open]').getByRole('button', { name: 'Keep targets' }).click();
+  await page.waitForTimeout(150);
+  return d.includes('Remove daily targets') && d.includes('Food, water and past targets will stay.') && d.includes('also cancels the change scheduled for') && (await visibleText()).includes('Edit targets');
+});
+await scoped().getByRole('button', { name: 'Remove targets' }).click();
+await page.waitForTimeout(200);
+await page.locator('dialog[open]').getByRole('button', { name: 'Remove targets' }).click();
+await page.waitForTimeout(300);
+await check(page, 'removing targets applies from today, cancels the scheduled change and keeps the entries and water', async () => {
   const t = await visibleText();
-  return t.includes('900') && t.includes('kcal logged') && (await scoped().getByRole('button', { name: 'Set targets' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Edit water, 1 litre of 2 litres' }).count()) === 1;
+  return t.includes('900') && t.includes('kcal logged') && !t.includes('Scheduled:') && (await page.locator('body').innerText()).includes('The scheduled change is cancelled.') && (await scoped().getByRole('button', { name: 'Set targets' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Edit water, 1 litre of 2 litres' }).count()) === 1;
 });
 await check(page, 'the stored history keeps every period (the estimate, today’s replacement and the removal) rather than rewriting the past', async () =>
   page.evaluate(() => {
@@ -1008,8 +1189,9 @@ await page.close();
   const local = () => clockPage.locator('[data-screen]:not([hidden]), dialog[open]');
   await local().getByRole('button', { name: 'Set targets' }).click();
   await local().getByRole('button', { name: /I know my goal/ }).click();
-  await local().getByRole('textbox', { name: 'Daily calorie target' }).fill('2100');
-  await local().getByRole('button', { name: 'Save', exact: true }).click();
+  await clockPage.waitForTimeout(300);
+  await local().getByRole('textbox', { name: 'Daily calories' }).fill('2100');
+  await local().getByRole('button', { name: 'Save targets' }).click();
   await clockPage.waitForTimeout(300);
   await local().getByRole('button', { name: 'Add 250 millilitres of water' }).click();
   await clockPage.waitForTimeout(500);

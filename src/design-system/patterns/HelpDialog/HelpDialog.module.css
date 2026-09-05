@@ -1,0 +1,77 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100%;
+  max-block-size: none;
+  margin: 0;
+  padding: var(--portion-spacing-page-inset);
+  border: 0;
+  background: transparent;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog[open] {
+  display: flex;
+}
+
+.dialog::backdrop {
+  background: var(--portion-color-overlay-scrim);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-heading-to-description);
+  inline-size: 100%;
+  max-inline-size: 360px;
+  max-block-size: 100%;
+  overflow-y: auto;
+  padding: var(--portion-ref-space-24);
+  border-radius: var(--portion-radius-sheet);
+  background: var(--portion-color-background-canvas);
+  color: var(--portion-color-text-primary);
+  box-shadow: var(--portion-shadow-sheet);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-paragraph);
+  min-inline-size: 0;
+}
+
+/* The disclosure is a plain summary at the action-small size; its content keeps the
+   supporting size and wraps without a second surface. */
+.details {
+  min-inline-size: 0;
+}
+
+.summary {
+  cursor: pointer;
+  min-block-size: var(--portion-size-target-minimum);
+  display: flex;
+  align-items: center;
+  color: var(--portion-color-action-primary);
+}
+
+.summary:focus-visible {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+  border-radius: var(--portion-radius-control-compact);
+}
+
+.detailsBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-paragraph);
+  padding-block-start: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.actions {
+  padding-block-start: var(--portion-ref-space-8);
+}

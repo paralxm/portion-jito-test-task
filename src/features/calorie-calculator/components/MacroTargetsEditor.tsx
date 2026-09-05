@@ -65,14 +65,15 @@ export function MacroTargetsEditor({ kcal, preset, onPresetChange, custom, onCus
 
       {preset !== 'custom' ? (
         <div className={styles.suggested} aria-labelledby={`${id}-suggested`}>
-          <Text as="h3" id={`${id}-suggested`} variant="label" color="primary">
+          <Text as="p" id={`${id}-suggested`} variant="label" color="primary">
             Suggested macros
           </Text>
           {suggested ? (
             <dl className={styles.list}>
               {TARGET_FIELDS.map((field) => (
                 <div key={field.key} className={styles.row}>
-                  <dt>
+                  <dt className={styles.name}>
+                    <span className={styles.marker} data-nutrient={field.share} aria-hidden="true" />
                     <Text variant="body" color="primary">
                       {field.label}
                     </Text>
@@ -82,7 +83,7 @@ export function MacroTargetsEditor({ kcal, preset, onPresetChange, custom, onCus
                       {suggested[field.key]} g
                     </Text>
                     <Text variant="supporting" numeric color="secondary">
-                      {Math.round(PRESET_SHARES[preset][field.share] * 100)} % of energy
+                      {Math.round(PRESET_SHARES[preset][field.share] * 100)} %
                     </Text>
                   </dd>
                 </div>
@@ -93,8 +94,8 @@ export function MacroTargetsEditor({ kcal, preset, onPresetChange, custom, onCus
               Enter a calorie target to see the suggested grams.
             </Text>
           )}
-          <Text as="p" variant="caption" color="secondary" wrap>
-            A suggestion from the calorie target using the {PRESET_OPTIONS.find((o) => o.id === preset)?.description} split, within the adult Acceptable Macronutrient Distribution Ranges. Not personalised.
+          <Text as="p" variant="supporting" color="secondary" wrap>
+            Suggested from your calories. Not personalised.
           </Text>
         </div>
       ) : (

@@ -1,0 +1,48 @@
+/* Content and footer share the page inset; the heading sits one section step below the bar. */
+.content {
+  padding-block-start: var(--portion-ref-space-24);
+  padding-block-end: var(--portion-ref-space-24);
+}
+
+.footer {
+  padding-block: var(--portion-ref-space-12);
+}
+
+.group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
+}
+
+.legend {
+  padding: 0;
+}
+
+/* Two equal-width options; each grows with its label and never clips it. */
+.pair {
+  display: flex;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+.pair > * {
+  flex: 1 1 0%;
+  min-inline-size: 0;
+}
+
+.unsupported {
+  outline: none;
+  min-inline-size: 0;
+}
+
+/* Selection cards stack with the 12 px token; height follows content. */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}

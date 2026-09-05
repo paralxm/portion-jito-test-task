@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { currentGoal, goalForDay, migrateLegacyGoal, setGoalFrom } from './goal-history';
+import { cancelPending, currentGoal, currentPeriod, goalForDay, migrateLegacyGoal, pendingPeriod, setGoalFrom } from './goal-history';
 
 describe('goal history', () => {
   it('has no goal before the first period and the period goal from its day on', () => {
@@ -37,5 +37,30 @@ describe('goal history', () => {
 
   it('ignores an invalid stored goal for a day', () => {
     expect(goalForDay([{ from: '2026-09-01', goal: { kcal: -1 } }], '2026-09-02')).toBeNull();
+  });
+
+  it('a future-dated save leaves today unchanged and becomes the one pending change; another future save replaces it', () => {
+    const today = '2026-09-05';
+    const base = setGoalFrom([], '2026-09-01', { kcal: 2000 });
+    const scheduled = setGoalFrom(base, '2026-09-08', { kcal: 1800 });
+    expect(goalForDay(scheduled, today)?.kcal).toBe(2000);
+    expect(goalForDay(scheduled, '2026-09-08')?.kcal).toBe(1800);
+    expect(pendingPeriod(scheduled, today)).toEqual({ from: '2026-09-08', goal: { kcal: 1800 } });
+    expect(currentPeriod(scheduled, today)?.from).toBe('2026-09-01');
+    const replaced = setGoalFrom(cancelPending(scheduled, today), '2026-09-10', { kcal: 1700 });
+    expect(replaced.filter((p) => p.from > today)).toEqual([{ from: '2026-09-10', goal: { kcal: 1700 } }]);
+  });
+
+  it('an immediate save keeps a pending change only when asked; a removal from today cancels it', () => {
+    const today = '2026-09-05';
+    const scheduled = setGoalFrom(setGoalFrom([], '2026-09-01', { kcal: 2000 }), '2026-09-08', { kcal: 1800 });
+    const kept = setGoalFrom(scheduled, today, { kcal: 2100 }, { keepLater: true });
+    expect(goalForDay(kept, today)?.kcal).toBe(2100);
+    expect(pendingPeriod(kept, today)?.goal?.kcal).toBe(1800);
+    const removed = setGoalFrom(scheduled, today, null);
+    expect(goalForDay(removed, today)).toBeNull();
+    expect(pendingPeriod(removed, today)).toBeNull();
+    expect(goalForDay(removed, '2026-09-04')?.kcal).toBe(2000);
+    expect(cancelPending(scheduled, today)).toEqual(setGoalFrom([], '2026-09-01', { kcal: 2000 }));
   });
 });

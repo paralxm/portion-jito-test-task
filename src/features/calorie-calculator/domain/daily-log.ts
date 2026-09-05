@@ -51,6 +51,8 @@ export interface DailyGoal {
   source?: GoalSource;
   preset?: MacroPreset;
   estimate?: EstimateRecord;
+  /** True when an estimated target's calories were changed by hand on review or later; the estimate record still describes the equation output. */
+  adjusted?: boolean;
 }
 
 /** Local calendar-day key, e.g. 2026-09-04. Never a UTC date. */

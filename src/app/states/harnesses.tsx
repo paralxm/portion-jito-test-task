@@ -20,10 +20,12 @@ import { filterRecipes, searchRecipes, type RecipeCriteria } from '../../feature
 import { NO_FOOD_FILTERS, type FoodFilters } from '../../features/calorie-calculator/domain/food-search';
 import { SearchScreen, type SearchScope } from '../screens/SearchScreen';
 
-export interface HomeWithWaterProps extends Omit<HomeScreenProps, 'waterMl' | 'onAddWater' | 'onSetWaterTotal' | 'entries' | 'goal' | 'onGoalChange' | 'selectedDayKey' | 'todayKey' | 'onSelectDay' | 'streak'> {
+export interface HomeWithWaterProps extends Omit<HomeScreenProps, 'waterMl' | 'onAddWater' | 'onSetWaterTotal' | 'entries' | 'goal' | 'onSetTargets' | 'selectedDayKey' | 'todayKey' | 'onSelectDay' | 'streak'> {
   /** Entries of any day; the harness selects the day's subset the way App does. */
   entries: readonly FoodEntry[];
   goal: DailyGoal | null;
+  /** The targets action is the app's; the harness only records the call. */
+  onSetTargets?: () => void;
   /** Water for the initially selected day (other days start at 0). */
   initialWaterMl: number;
   todayKey: string;
@@ -36,10 +38,9 @@ export interface HomeWithWaterProps extends Omit<HomeScreenProps, 'waterMl' | 'o
  * the streak from the entries and the confirmation toast — so day selection, quick add
  * and Undo can be exercised in one story.
  */
-export function HomeWithWater({ initialWaterMl, entries, goal, todayKey, initialSelectedDayKey, onSelectDay, ...rest }: HomeWithWaterProps) {
+export function HomeWithWater({ initialWaterMl, entries, goal, todayKey, initialSelectedDayKey, onSelectDay, onSetTargets, ...rest }: HomeWithWaterProps) {
   const [selectedDayKey, setSelectedDayKey] = useState(initialSelectedDayKey ?? todayKey);
   const [water, setWater] = useState<Record<string, number>>({ [selectedDayKey]: initialWaterMl });
-  const [goalState, setGoalState] = useState(goal);
   const [toast, setToast] = useState<{ message: string; undo?: () => void } | null>(null);
   const waterMl = water[selectedDayKey] ?? 0;
   return (
@@ -47,8 +48,8 @@ export function HomeWithWater({ initialWaterMl, entries, goal, todayKey, initial
       <HomeScreen
         {...rest}
         entries={entriesForDay(entries, selectedDayKey)}
-        goal={goalState}
-        onGoalChange={setGoalState}
+        goal={goal}
+        onSetTargets={onSetTargets ?? (() => undefined)}
         selectedDayKey={selectedDayKey}
         todayKey={todayKey}
         onSelectDay={(dayKey) => {

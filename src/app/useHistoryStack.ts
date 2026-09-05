@@ -22,7 +22,8 @@ export function useHistoryStack(depth: number, onHistoryBack: (steps: number) =>
     } else if (depth < mirrored.current) {
       const steps = mirrored.current - depth;
       mirrored.current = depth;
-      ignore.current += steps;
+      // One traversal fires one popstate event however many entries it crosses.
+      ignore.current += 1;
       window.history.go(-steps);
     }
   }, [depth]);
@@ -39,8 +40,8 @@ export function useHistoryStack(depth: number, onHistoryBack: (steps: number) =>
       const steps = mirrored.current - target;
       const intercepted = back.current(steps);
       if (intercepted) {
-        // The step keeps its history entry while its confirmation is open.
-        ignore.current += steps;
+        // The step keeps its history entry while its confirmation is open (one traversal, one popstate).
+        ignore.current += 1;
         window.history.go(steps);
       } else {
         mirrored.current = target;

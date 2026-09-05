@@ -10,6 +10,8 @@ export interface CalorieBudgetBarProps {
   summary: DailySummary;
   /** The one targets action on Home: Set targets without a calorie target, Edit targets with one. Applies from today. */
   onSetTargets?: () => void;
+  /** The one scheduled change after today ("Scheduled: 1,800 kcal from Sep 8."), stated once beneath the figures. */
+  scheduledNote?: string;
   /** True when the shown day is before today: a missing target is explained as "none was set for this day". */
   pastDay?: boolean;
   className?: string;
@@ -68,7 +70,7 @@ function describeBar(summary: DailySummary): string {
  * arithmetic and persistence belong to the feature. Without a target no bar is drawn (a
  * meaningless empty track is not a state) and no percentage or remainder is invented.
  */
-export function CalorieBudgetBar({ summary, onSetTargets, pastDay = false, className }: CalorieBudgetBarProps) {
+export function CalorieBudgetBar({ summary, onSetTargets, scheduledNote, pastDay = false, className }: CalorieBudgetBarProps) {
   const f = figure(summary);
   const note = summary.state === 'no-goal' && pastDay ? PAST_NO_GOAL : status(summary);
   const hasTarget = summary.goalKcal !== null;
@@ -86,7 +88,7 @@ export function CalorieBudgetBar({ summary, onSetTargets, pastDay = false, class
           </Text>
         </p>
         {onSetTargets ? (
-          <Button variant={hasTarget ? 'text' : 'secondary'} size="small" onClick={onSetTargets} aria-haspopup="dialog" className={styles.action}>
+          <Button variant={hasTarget ? 'text' : 'secondary'} size="small" onClick={onSetTargets} aria-haspopup={hasTarget ? undefined : 'dialog'} className={styles.action}>
             {hasTarget ? 'Edit targets' : 'Set targets'}
           </Button>
         ) : null}
@@ -135,6 +137,11 @@ export function CalorieBudgetBar({ summary, onSetTargets, pastDay = false, class
       {note ? (
         <Text as="p" variant="supporting" color="secondary" wrap className={styles.note}>
           {note}
+        </Text>
+      ) : null}
+      {scheduledNote ? (
+        <Text as="p" variant="supporting" color="secondary" wrap className={styles.note}>
+          {scheduledNote}
         </Text>
       ) : null}
     </div>

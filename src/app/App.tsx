@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { MethodSheet, NavigationBar, Toast, type Destination, type EntryMethod, type ViewMode } from '../design-system';
 import type { FoodCandidate, Portion } from '../features/calorie-calculator/domain/calculation';
-import { createEntry, entriesForDay, updateEntryPortion, type DailyGoal, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
-import { compareDayKeys, dayPhrase } from '../features/calorie-calculator/domain/day-keys';
-import { goalForDay, setGoalFrom, type GoalHistory } from '../features/calorie-calculator/domain/goal-history';
+import { createEntry, entriesForDay, updateEntryPortion, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
+import { compareDayKeys, dayPhrase, describeDay } from '../features/calorie-calculator/domain/day-keys';
+import { parseAboutDraft } from '../features/calorie-calculator/domain/energy-estimate';
+import { cancelPending, goalForDay, pendingPeriod, setGoalFrom, type GoalHistory } from '../features/calorie-calculator/domain/goal-history';
 import { computeStreak } from '../features/calorie-calculator/domain/streak';
 import { foodCatalogue, samplePhotoImage } from '../features/calorie-calculator/domain/fixtures';
 import { NO_FOOD_FILTERS, type FoodFilters } from '../features/calorie-calculator/domain/food-search';
@@ -22,6 +23,10 @@ import { HomeScreen, type RecommendedRecipe } from '../features/calorie-calculat
 import { ManualEntryScreen } from '../features/calorie-calculator/screens/ManualEntryScreen';
 import { ManualPortionScreen } from '../features/calorie-calculator/screens/ManualPortionScreen';
 import { PhotoScreen } from '../features/calorie-calculator/screens/PhotoScreen';
+import { EstimateStepScreen } from '../features/calorie-calculator/targets/EstimateStepScreen';
+import { TargetEditorScreen, type SaveOutcome } from '../features/calorie-calculator/targets/TargetEditorScreen';
+import { TargetsEntrySheet } from '../features/calorie-calculator/targets/TargetsEntrySheet';
+import { buildGoal, describePending, draftFromGoal, draftSnapshot, newTargetsDraft, resolveStart, withEstimate, type TargetsDraft, type TargetsRoute } from '../features/calorie-calculator/targets/targets-draft';
 import { toggleTime } from '../features/recipe-discovery/domain/discovery';
 import { activeCriteriaCount, filterRecipes, matchEvidence, removeCriterion, toggleDietary, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
 import { recipeToCandidate } from '../features/recipe-discovery/domain/recipe-entry';
@@ -51,7 +56,13 @@ type FlowStepInput =
   | { kind: 'manual-portion'; candidate: FoodCandidate }
   | { kind: 'review'; candidate: FoodCandidate; from: EntryMethod }
   | { kind: 'entry'; entryId: string }
-  | { kind: 'recipe'; recipeId: string; criteriaSource: 'search' | 'browse' | 'home' };
+  | { kind: 'recipe'; recipeId: string; criteriaSource: 'search' | 'browse' | 'home' }
+  /** The targets task (ledger §14): the three estimate steps, the review, and the one editor. */
+  | { kind: 'targets-about' }
+  | { kind: 'targets-activity' }
+  | { kind: 'targets-goal' }
+  | { kind: 'targets-review' }
+  | { kind: 'targets-editor'; mode: 'manual' | 'edit' };
 type FlowStep = FlowStepInput & { id: number };
 
 let stepSequence = 0;
@@ -88,6 +99,20 @@ interface ManualTask {
   meal: MealType | null;
   provenance?: NonNullable<FoodCandidate['provenance']>;
 }
+
+/**
+ * The targets task's draft, owned at flow level (ledger §14) so Back, Help and Edit
+ * details keep every value: the route, the inputs, the reviewed estimate, the calories,
+ * the macro choice and the start date. `initial` is the snapshot dirtiness is measured
+ * against; `originDay` is the day Home showed when the task began.
+ */
+interface TargetsTask {
+  draft: TargetsDraft;
+  initial: string;
+  originDay: string;
+}
+
+const STORAGE_ERROR = 'Portion could not store the targets on this device. Free some space or leave private browsing, then try again.';
 
 /** Selects the recommended recipe (ledger D-21): the first browse match with evidence, else the first complete recipe with a photo. */
 function recommend(recipes: readonly Recipe[], criteria: RecipeCriteria): RecommendedRecipe | null {
@@ -144,7 +169,9 @@ export default function App() {
   const waterMl = water[selectedDayKey] ?? 0;
   // The goal in force on the selected day; edits record a new period from today (§12 A6).
   const goal = useMemo(() => goalForDay(goals, selectedDayKey), [goals, selectedDayKey]);
-  const changeGoal = (next: DailyGoal | null) => setGoals((history) => setGoalFrom(history, todayKey, next));
+  // The targets in force today and the one scheduled change after it (ledger §14).
+  const currentGoal = useMemo(() => goalForDay(goals, todayKey), [goals, todayKey]);
+  const pending = useMemo(() => pendingPeriod(goals, todayKey), [goals, todayKey]);
   const streak = useMemo(() => computeStreak(entries, todayKey), [entries, todayKey]);
   // Recently added foods derive from confirmed entries only (ledger §11.1).
   const recents = useMemo(() => recentCandidates(entries), [entries]);
@@ -288,6 +315,7 @@ export default function App() {
   };
 
   const push = (input: FlowStepInput) => setFlow((f) => [...f, makeStep(input)]);
+  const isTargetsStep = (step: FlowStep) => step.kind.startsWith('targets-');
   const pop = () => {
     detailsRequestId.current += 1;
     setFlow((f) => f.slice(0, -1));
@@ -296,6 +324,7 @@ export default function App() {
     detailsRequestId.current += 1;
     setTaskOrigin(null);
     endManualTask();
+    setTargetsTask(null);
     setFlow([]);
     setRoot(destination);
   };
@@ -404,6 +433,119 @@ export default function App() {
   };
 
   const openReview = (candidate: FoodCandidate, from: EntryMethod) => push({ kind: 'review', candidate, from });
+
+  // The targets task (ledger §14) ---------------------------------------------
+  const [targetsTask, setTargetsTask] = useState<TargetsTask | null>(null);
+  const [targetsSheetOpen, setTargetsSheetOpen] = useState(false);
+  const updateTargetsDraft = (draft: TargetsDraft) => setTargetsTask((task) => (task ? { ...task, draft } : task));
+  const targetsDirty = targetsTask !== null && draftSnapshot(targetsTask.draft) !== targetsTask.initial;
+  /** Leaves the task to the Home context it started from; the draft is dropped. */
+  const endTargetsTask = () => {
+    setTargetsSheetOpen(false);
+    setTargetsTask(null);
+    setFlow((f) => f.filter((step) => !isTargetsStep(step)));
+  };
+  /** Home's one targets action: saved targets open the editor; none open the route choice. */
+  const openTargets = () => {
+    if (currentGoal) {
+      const draft = draftFromGoal(currentGoal);
+      setTargetsTask({ draft, initial: draftSnapshot(draft), originDay: selectedDayKey });
+      push({ kind: 'targets-editor', mode: 'edit' });
+      return;
+    }
+    setTargetsSheetOpen(true);
+  };
+  /** A route chosen on the entry sheet; a draft retained from Back on the first step is kept. */
+  const chooseTargetsRoute = (route: TargetsRoute) => {
+    setTargetsSheetOpen(false);
+    const draft = { ...(targetsTask?.draft ?? newTargetsDraft(route)), route };
+    setTargetsTask({ draft, initial: targetsTask?.initial ?? draftSnapshot(draft), originDay: targetsTask?.originDay ?? selectedDayKey });
+    push(route === 'estimate' ? { kind: 'targets-about' } : { kind: 'targets-editor', mode: 'manual' });
+  };
+  /** Back from the first step or the manual editor: to the choice, keeping the draft. */
+  const backToTargetsChoice = () => {
+    setFlow((f) => f.slice(0, -1));
+    setTargetsSheetOpen(true);
+  };
+  /** Review estimate: runs the estimate for the validated inputs and opens the review. */
+  const reviewEstimate = () => {
+    const task = targetsTask;
+    if (!task || !task.draft.activity || !task.draft.weightGoal) return;
+    const parsed = parseAboutDraft(task.draft.about);
+    if (!parsed.ok) return;
+    const draft = withEstimate(task.draft, { age: parsed.age, sex: parsed.sex, heightCm: parsed.heightCm, weightKg: parsed.weightKg, activity: task.draft.activity, goal: task.draft.weightGoal });
+    if (!draft.estimate?.result.ok) return;
+    setTargetsTask({ ...task, draft });
+    push({ kind: 'targets-review' });
+  };
+  /** Edit details from the review: back to About you; Continue through the steps returns here. */
+  const editEstimateDetails = () => {
+    setFlow((f) => {
+      const index = f.findIndex((step) => step.kind === 'targets-about');
+      return index < 0 ? f.slice(0, -1) : f.slice(0, index + 1);
+    });
+  };
+  /** The manual editor with the draft kept, when the chosen goal cannot be estimated. */
+  const useManualTargets = () => {
+    setTargetsTask((task) => (task ? { ...task, draft: { ...task.draft, route: 'manual', estimate: null } } : task));
+    setFlow((f) => {
+      const editor = f.findIndex((step) => step.kind === 'targets-editor');
+      return editor < 0 ? [...f.filter((step) => !isTargetsStep(step)), makeStep({ kind: 'targets-editor', mode: 'manual' })] : f.slice(0, editor + 1);
+    });
+  };
+  /** Recalculate from the editor: the three steps prefilled from the saved estimate; Back returns to the editor. */
+  const recalculateTargets = () => {
+    setTargetsTask((task) => (task ? { ...task, draft: { ...task.draft, route: 'estimate' } } : task));
+    push({ kind: 'targets-about' });
+  };
+  /** Writes a goal history to the device before it becomes state, so a refused write keeps the draft. */
+  const commitGoals = (next: GoalHistory): boolean => {
+    if (!saveRecord(storage, { version: 2, entries, goals: next, water, waterReferenceMl, searchView: foodView, recipeView })) return false;
+    setGoals(next);
+    return true;
+  };
+  /** Save targets: exactly one record for the start day; an immediate save keeps a scheduled change. */
+  const saveTargets = (): SaveOutcome => {
+    const task = targetsTask;
+    if (!task) return { ok: false, storageError: STORAGE_ERROR };
+    const built = buildGoal(task.draft);
+    if (!built.ok) return { ok: false, kcalError: built.kcalError, macroErrors: built.macroErrors };
+    const start = resolveStart(task.draft.startDayKey, todayKey);
+    if (!start.ok) return { ok: false, startError: start.error };
+    const startsToday = start.dayKey === todayKey;
+    const keepsPending = startsToday && pending !== null;
+    // One pending change at most: a future save replaces any other scheduled period; an immediate save keeps it.
+    if (!commitGoals(setGoalFrom(startsToday ? goals : cancelPending(goals, todayKey), start.dayKey, built.goal, { keepLater: keepsPending }))) return { ok: false, storageError: STORAGE_ERROR };
+    const originPast = compareDayKeys(task.originDay, todayKey) < 0;
+    const message = !startsToday
+      ? `Targets saved. They start ${describeDay(start.dayKey).long}.${currentGoal ? ' Your current targets stay until then.' : ''}`
+      : keepsPending && pending
+        ? `Targets saved. Until ${describeDay(pending.from).monthDay}, when your scheduled change starts.`
+        : originPast
+          ? `Targets saved from today. Nothing changes ${dayPhrase(task.originDay, todayKey)}.`
+          : 'Targets saved. From today until you change them.';
+    setToast({ message });
+    endTargetsTask();
+    return { ok: true };
+  };
+  /** Remove targets: clears today's targets and any scheduled change after one confirmation. */
+  const removeTargets = () => {
+    const hadPending = pending !== null;
+    if (!commitGoals(setGoalFrom(goals, todayKey, null))) {
+      setToast({ message: STORAGE_ERROR });
+      return;
+    }
+    setToast({ message: hadPending ? 'Targets removed from today. The scheduled change is cancelled.' : 'Targets removed from today.' });
+    endTargetsTask();
+  };
+  /** Cancels the one scheduled change; the current targets stay. */
+  const cancelScheduledTargets = () => {
+    if (!commitGoals(cancelPending(goals, todayKey))) {
+      setToast({ message: STORAGE_ERROR });
+      return;
+    }
+    setToast({ message: 'Scheduled change cancelled. Your current targets stay.' });
+  };
 
   /** The meal the task starts with: the Home row's meal, else the time-of-day suggestion (D-17). */
   const startingMeal = () => (taskOrigin?.meal ? { meal: taskOrigin.meal, hint: PRESELECTED_MEAL_HINT } : { meal: suggestMeal(), hint: SUGGESTED_MEAL_HINT });
@@ -598,6 +740,62 @@ export default function App() {
           />
         );
       }
+      case 'targets-about':
+      case 'targets-activity':
+      case 'targets-goal': {
+        if (!targetsTask) return null;
+        const stepName = step.kind === 'targets-about' ? 'about' : step.kind === 'targets-activity' ? 'activity' : 'goal';
+        const beneathEditor = flow.some((s) => s.kind === 'targets-editor');
+        return (
+          <EstimateStepScreen
+            step={stepName}
+            draft={targetsTask.draft}
+            onDraftChange={updateTargetsDraft}
+            dirty={targetsDirty}
+            onContinue={stepName === 'about' ? () => push({ kind: 'targets-activity' }) : stepName === 'activity' ? () => push({ kind: 'targets-goal' }) : reviewEstimate}
+            onBack={stepName === 'about' && !beneathEditor ? backToTargetsChoice : pop}
+            onExit={endTargetsTask}
+            onUseManual={useManualTargets}
+          />
+        );
+      }
+      case 'targets-review':
+        if (!targetsTask) return null;
+        return (
+          <TargetEditorScreen
+            mode="review"
+            draft={targetsTask.draft}
+            onDraftChange={updateTargetsDraft}
+            current={currentGoal}
+            pending={pending}
+            todayKey={todayKey}
+            dirty={targetsDirty}
+            onSave={saveTargets}
+            onBack={pop}
+            onExit={endTargetsTask}
+            onEditDetails={editEstimateDetails}
+            onCancelPending={cancelScheduledTargets}
+          />
+        );
+      case 'targets-editor':
+        if (!targetsTask) return null;
+        return (
+          <TargetEditorScreen
+            mode={step.mode}
+            draft={targetsTask.draft}
+            onDraftChange={updateTargetsDraft}
+            current={currentGoal}
+            pending={pending}
+            todayKey={todayKey}
+            dirty={targetsDirty}
+            onSave={saveTargets}
+            onBack={step.mode === 'manual' ? backToTargetsChoice : endTargetsTask}
+            onExit={endTargetsTask}
+            onRecalculate={step.mode === 'edit' ? recalculateTargets : undefined}
+            onRemove={step.mode === 'edit' ? removeTargets : undefined}
+            onCancelPending={cancelScheduledTargets}
+          />
+        );
       case 'recipe':
         return (
           <RecipeDetailsScreen
@@ -618,7 +816,8 @@ export default function App() {
         <HomeScreen
           entries={dayEntries}
           goal={goal}
-          onGoalChange={changeGoal}
+          onSetTargets={openTargets}
+          scheduledNote={pending && selectedDayKey === todayKey ? describePending(pending, todayKey) : undefined}
           selectedDayKey={selectedDayKey}
           todayKey={todayKey}
           onSelectDay={selectDay}
@@ -706,6 +905,8 @@ export default function App() {
       ))}
 
       <MethodSheet open={methodOpen} onRequestClose={() => setMethodOpen(false)} onChoose={chooseMethod} />
+
+      <TargetsEntrySheet open={targetsSheetOpen} onChoose={chooseTargetsRoute} onRequestClose={endTargetsTask} />
 
       <AddToMealSheet
         open={pendingAdd !== null}

@@ -1,0 +1,19 @@
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
+  min-inline-size: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.starts {
+  min-inline-size: 0;
+}
