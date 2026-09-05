@@ -1,7 +1,7 @@
 import { useId, useState, type ReactNode } from 'react';
 import { Barcode } from '@phosphor-icons/react';
 
-import { AppHeader, AppliedCriterionChip, Button, EmptyState, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl, segmentedOptionId, Text, ViewToggle, type ViewMode } from '../../design-system';
+import { AppHeader, AppliedCriterionChip, Button, EmptyState, IconButton, LoadingState, ResultsHeading, RootScreenLayout, SearchField, SegmentedControl, segmentedOptionId, Text, ViewToggle, type ViewMode } from '../../design-system';
 import type { FoodCandidate } from '../../features/calorie-calculator/domain/calculation';
 import { activeFoodFilterCount, collectFoods, describeFoodFilter, foodCountText, NO_FOOD_FILTERS, type FoodFilters } from '../../features/calorie-calculator/domain/food-search';
 import { FoodCollection } from '../../features/calorie-calculator/components/FoodCollection';
@@ -44,14 +44,17 @@ export interface SearchScreenProps {
   recipeCatalogue: readonly Recipe[];
   /** Whether the catalogue has loaded; `idle` is treated as loading. */
   recipeCatalogueStatus: RequestStatus;
-  /** Recipes-scope criteria: a snapshot copied from browsing, edited independently here. */
+  /** Recipes-scope criteria: a snapshot copied from discovery, edited independently here. */
   criteria: RecipeCriteria;
   onApplyCriteria: (criteria: RecipeCriteria) => void;
   onRemoveCriterion: (key: CriterionKey) => void;
+  /** The presentation of the recipe results; persisted by the app, independent of the food view (ledger §13). */
+  recipeView: ViewMode;
+  onRecipeViewChange: (view: ViewMode) => void;
   /** A food result opens review; it does not replace the current calculation. */
   onOpenFood: (candidate: FoodCandidate) => void;
   onOpenRecipe: (id: string) => void;
-  /** The field's barcode shortcut in Food scope: opens the scanner in one tap (ledger D-27). */
+  /** The scanner beside the Food field: opens the barcode flow in one tap (ledger §12 B5, §13). */
   onScanBarcode: () => void;
   onRetry: () => void;
   onEnterManually: () => void;
@@ -59,13 +62,15 @@ export interface SearchScreenProps {
 }
 
 /**
- * S02 — shared Search. Two scopes over one query field. Food: the barcode shortcut sits
- * in the field; a compact toolbar under it carries the List / Grid toggle and, at its
- * end, the food filter action (All / Foods / Drinks); with an empty query the tab shows
- * "Recently added" (from confirmed entries) above the rest of the catalogue, and a query
- * produces one unified result set across both. Recipes: the filter action sits in the
- * field and applied chips beneath it; results combine the query with the criteria.
- * Loading, no matches and service failure stay distinct states.
+ * S02 — shared Search (ledger §13). One structure for both scopes: the query field
+ * (with the icon-only scanner beside it in Food only) → the Food / Recipes tabs → the
+ * results toolbar with List / Grid at the start and the scope's one filter action at
+ * the end → applied criteria as chips → the count → the results. Food: with an empty
+ * query the tab shows "Recently added" (from confirmed entries) above the rest of the
+ * catalogue, and a query produces one unified result set. Recipes: with an empty query
+ * the whole catalogue narrowed by the criteria; a query combines with the criteria.
+ * Switching the view changes presentation only; loading, no matches and failure stay
+ * distinct states.
  */
 export function SearchScreen({
   scope,
@@ -87,6 +92,8 @@ export function SearchScreen({
   criteria,
   onApplyCriteria,
   onRemoveCriterion,
+  recipeView,
+  onRecipeViewChange,
   onOpenFood,
   onOpenRecipe,
   onScanBarcode,
@@ -114,8 +121,6 @@ export function SearchScreen({
   const foodStatus = browsing ? 'ready' : food.status;
 
   // --- Recipes scope ----------------------------------------------------------------
-  // Without a query the whole catalogue shows, narrowed by the criteria; a query yields
-  // the service's results (already combined with the criteria by the caller).
   const browsingRecipes = scope === 'recipes' && trimmed === '';
   const recipeStatus: RequestStatus = browsingRecipes ? (recipeCatalogueStatus === 'idle' ? 'loading' : recipeCatalogueStatus) : recipes.status;
   const recipeResults = browsingRecipes ? filterRecipes(uniqueRecipes(recipeCatalogue), criteria) : uniqueRecipes(recipes.results);
@@ -282,35 +287,28 @@ export function SearchScreen({
       </EmptyState>
     );
   } else {
-    content = <RecipeList recipes={recipeResults} criteria={criteria} onOpen={onOpenRecipe} aria-labelledby={resultsId} />;
+    content = <RecipeList recipes={recipeResults} criteria={criteria} view={recipeView} onOpen={onOpenRecipe} aria-labelledby={resultsId} />;
   }
 
   const appliedFood = describeFoodFilter(foodFilters);
 
   return (
     <RootScreenLayout header={<AppHeader variant="section" title="Search" />} navigation={navigation}>
-      {/* Food scope: the scanner is a sibling action beside the field — a labelled button that
-          starts a flow, never a submit or a toggle (ledger §12 B5); under 22 rem it moves below
-          the field at full width rather than squeezing its label. Recipes scope keeps the filter
-          action inside the field. */}
-      <div className={styles.fieldFrame}>
-        <div className={styles.fieldRow} data-scope={scope}>
-          <SearchField
-            label={scope === 'food' ? 'Search foods' : 'Search recipes'}
-            value={query}
-            onChange={onQueryChange}
-            onSubmit={() => onSubmit()}
-            onClear={onClear}
-            placeholder={scope === 'food' ? 'Food or dish' : 'Recipe name or ingredient'}
-            action={scope === 'recipes' ? <FilterAction count={active} expanded={filtersOpen} onClick={() => setFiltersOpen(true)} /> : undefined}
-            className={styles.field}
-          />
-          {scope === 'food' ? (
-            <Button variant="secondary" icon={Barcode} onClick={onScanBarcode} className={styles.scan}>
-              Scan barcode
-            </Button>
-          ) : null}
-        </div>
+      {/* Food scope: the scanner is an icon-only sibling beside the field, named and titled
+          "Scan barcode" — a labelled button that starts a flow, never a submit or a toggle
+          (ledger §13); the field takes the room it releases. Recipes scope has no in-field
+          action: its filter action lives in the results toolbar like the Food one. */}
+      <div className={styles.fieldRow} data-scope={scope}>
+        <SearchField
+          label={scope === 'food' ? 'Search foods' : 'Search recipes'}
+          value={query}
+          onChange={onQueryChange}
+          onSubmit={() => onSubmit()}
+          onClear={onClear}
+          placeholder={scope === 'food' ? 'Food, dish or drink' : 'Recipe name or ingredient'}
+          className={styles.field}
+        />
+        {scope === 'food' ? <IconButton icon={Barcode} label="Scan barcode" title="Scan barcode" variant="outlined" onClick={onScanBarcode} className={styles.scan} /> : null}
       </div>
 
       {/* The scope switch owns the results panel below, so it is exposed as tabs. */}
@@ -353,7 +351,13 @@ export function SearchScreen({
           />
         </>
       ) : (
-        <CriteriaToolbar criteria={criteria} sheetOpen={filtersOpen} onCloseSheet={() => setFiltersOpen(false)} onApply={onApplyCriteria} onRemove={onRemoveCriterion} />
+        <>
+          <div className={styles.toolbar}>
+            <ViewToggle value={recipeView} onChange={onRecipeViewChange} label="Recipe view" />
+            <FilterAction count={active} expanded={filtersOpen} onClick={() => setFiltersOpen(true)} label="Recipe filters" />
+          </div>
+          <CriteriaToolbar criteria={criteria} sheetOpen={filtersOpen} onCloseSheet={() => setFiltersOpen(false)} onApply={onApplyCriteria} onRemove={onRemoveCriterion} />
+        </>
       )}
 
       <section role="tabpanel" id={panelId} className={styles.results} aria-labelledby={segmentedOptionId(scopeId, scope)}>

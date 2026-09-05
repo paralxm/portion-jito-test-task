@@ -45,7 +45,7 @@ const meta = {
     docs: {
       description: {
         component: `
-S01 — Home, the daily overview (ledger D-31). Region order in both states: root header (lockup, \`Today · Sep 4\`, **Set goal** / **Edit goal**) → the calorie budget (remaining figure, consumed · %, goal, the bar with its marker, compact macros with optional targets) → one **Recommended recipe** (or *Matches your filters* with active browse criteria) → **Today's meals** with Breakfast, Lunch, Dinner and Snacks always present → **Water** with the quick add → the fixed bar with Home current.
+S01 — Home, the daily overview (ledger §13, after H-REF 1). Region order in both states: root header (lockup, \`Today · Sep 4\`, the streak) → the compact day strip → **Daily nutrition** (the calorie card with the only **Set targets** / **Edit targets** action, the bar with its marker, consumed · % and the target; three macro cards with their own tracks when targets exist) → one compact **Recipe to try** (or *Matches your preferences* with active discovery preferences; a factual "fits in your remaining" line when it does) → **Today's meals** with Breakfast, Lunch, Dinner and Snacks always present → **Water** with the quick add and the adjustable reference → the fixed bar with Home current.
 
 **S01-1** is "no committed entries today", **S01-2** "one or more" — decided by entry count, never by the energy sum, so a valid zero-kcal entry still populates its meal. No goal is set by default; 2,000 / 2,200 kcal are demonstration values. Home has no inline calculator and no large Log food button: the bar's plus and each meal's add action start the food task.
         `,
@@ -58,41 +58,47 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const EmptyNoGoal: Story = {
-  name: 'S01-1 — no entries, no goal (launch state)',
+  name: 'S01-1 — first use: nothing logged, no targets (launch state)',
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1, name: 'Home' })).toBeInTheDocument();
     await expect(canvas.getByText('Today · Sep 4')).toBeVisible();
-    await expect(canvas.getAllByRole('button', { name: 'Set goal' }).length).toBeGreaterThanOrEqual(1);
+    await expect(canvas.getByRole('button', { name: 'Set targets' })).toBeVisible();
+    await expect(canvas.getAllByText('0').length).toBeGreaterThanOrEqual(1);
     await expect(canvas.getByText('kcal logged')).toBeVisible();
-    // No goal: no meaningless empty bar is drawn.
-    await expect(canvas.queryByRole('meter', { name: 'Calories logged against your goal' })).toBeNull();
+    // No target: no meaningless empty bar, percentage or remainder is drawn.
+    await expect(canvas.queryByRole('meter', { name: 'Calories logged against your target' })).toBeNull();
+    await expect(canvas.queryByText(/remaining/)).toBeNull();
+    // The recommendation sits above the meals.
+    const recipe = canvas.getByRole('heading', { name: 'Recipe to try' });
+    const meals = canvas.getByRole('heading', { name: 'Today’s meals' });
+    await expect(recipe.compareDocumentPosition(meals) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     for (const meal of ['Breakfast', 'Lunch', 'Dinner', 'Snacks']) await expect(canvas.getByRole('heading', { level: 3, name: meal })).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Add dinner' }));
     await expect(args.onAddToMeal).toHaveBeenCalledWith('dinner');
     await expect(canvas.queryByRole('button', { name: /Log (first )?food/ })).not.toBeNull(); // the bar's plus only
     await expect(canvas.getAllByRole('button', { name: /Log (first )?food/ })).toHaveLength(1);
-    await expect(canvas.getByRole('heading', { name: 'Recommended recipe' })).toBeInTheDocument();
   },
 };
 
 export const BudgetFixture: Story = {
-  name: 'Partial — 1,600 remaining, 400 consumed · 20 %, macro targets',
+  name: 'Full targets — 1,600 remaining, 400 consumed · 20 %, macro cards with tracks',
   args: { entries: budget, goal: budgetFixtureGoal, waterMl: 1250 },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('1,600')).toBeVisible();
     await expect(canvas.getByText('kcal remaining')).toBeVisible();
     await expect(canvas.getByText(/20 %/)).toBeVisible();
-    await expect(canvas.getByRole('meter', { name: 'Calories logged against your goal' })).toHaveAttribute('aria-valuetext', '400 of 2,000 kcal, 20 %');
+    await expect(canvas.getByRole('meter', { name: 'Calories logged against your target' })).toHaveAttribute('aria-valuetext', '400 of 2,000 kcal, 20 %');
     await expect(canvas.getByRole('meter', { name: 'Protein against your target' })).toHaveAttribute('aria-valuetext', '24 of 120 g');
-    await expect(canvas.getByRole('button', { name: 'Edit goal' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Edit targets' })).toBeVisible();
+    await expect(canvas.getByText(/One serving fits in your remaining 1,600 kcal/)).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Edit water, 1.25 litres of 2 litres' })).toBeVisible();
   },
 };
 
 export const Populated: Story = {
-  name: 'S01-2 — two entries, goal 2,200 (850 remaining)',
+  name: 'S01-2 — two entries, calorie-only target 2,200 (850 remaining)',
   args: { entries: populated, goal: { kcal: 2200 } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
@@ -111,31 +117,33 @@ export const Populated: Story = {
 };
 
 export const PopulatedNoGoal: Story = {
-  name: 'S01-2 — two entries, no goal',
+  name: 'S01-2 — logged without targets',
   args: { entries: populated },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('1,350')).toBeVisible();
     await expect(canvas.getByText('kcal logged')).toBeVisible();
-    await expect(canvas.getByText(/Set a goal to see what remains/)).toBeVisible();
+    await expect(canvas.getByText(/Set a calorie target to see what remains/)).toBeVisible();
+    await expect(canvas.queryByRole('meter', { name: /against your target/ })).toBeNull();
+    await expect(canvas.getByText('90')).toBeVisible();
   },
 };
 
 export const GoalReached: Story = {
-  name: 'Goal reached — 0 remaining',
+  name: 'Target reached — 0 remaining',
   args: { entries: populated, goal: { kcal: 1350 } },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText('Daily goal reached.')).toBeVisible();
+    await expect(within(canvasElement).getByText('Daily target reached.')).toBeVisible();
   },
 };
 
 export const GoalExceeded: Story = {
-  name: 'Goal exceeded — 150 over, stated in words',
+  name: 'Target exceeded — 150 over, stated in words',
   args: { entries: populated, goal: { kcal: 1200 } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('150 kcal over your set goal.')).toBeVisible();
-    await expect(canvas.getByText('kcal over goal')).toBeVisible();
+    await expect(canvas.getByText('150 kcal over your target.')).toBeVisible();
+    await expect(canvas.getByText('kcal over target')).toBeVisible();
     await expect(canvasElement.querySelector('[data-over]')).not.toBeNull();
   },
 };
@@ -175,7 +183,7 @@ export const RecipeCriteriaApplied: Story = {
   args: { entries: populated, goal: { kcal: 2200 }, recommended: { recipe: fixtureR, evidence: matchEvidence(fixtureR, { caloriesMax: 460 }) } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { name: 'Matches your filters' })).toBeInTheDocument();
+    await expect(canvas.getByRole('heading', { name: 'Matches your preferences' })).toBeInTheDocument();
     await expect(canvas.getByText('Matches all 1 filter')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Lentil soup' }));
     await expect(args.onOpenRecipe).toHaveBeenCalledWith('recipe-lentil-soup');
@@ -184,15 +192,44 @@ export const RecipeCriteriaApplied: Story = {
   },
 };
 
-export const GoalEditor: Story = {
-  name: 'Goal editor — set, edit, clear, cancel',
+export const SetTargets: Story = {
+  name: 'Set targets from Home — the entry sheet, the manual path, one save',
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Set goal' })[0]);
-    const dialog = await canvas.findByRole('dialog', { name: 'Set goal' });
-    await userEvent.type(within(dialog).getByLabelText('Daily goal'), '2200');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Apply' }));
-    await expect(args.onGoalChange).toHaveBeenLastCalledWith({ kcal: 2200, proteinG: null, carbohydratesG: null, fatG: null });
+    await userEvent.click(canvas.getByRole('button', { name: 'Set targets' }));
+    const dialog = await canvas.findByRole('dialog', { name: 'Set daily goal' });
+    await userEvent.click(within(dialog).getByRole('button', { name: /I know my goal/ }));
+    await userEvent.type(within(dialog).getByLabelText('Daily calorie target'), '2200');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await expect(args.onGoalChange).toHaveBeenLastCalledWith({ kcal: 2200, proteinG: 110, carbohydratesG: 275, fatG: 73, preset: 'balanced', source: 'manual' });
+    await expect(args.onGoalChange).toHaveBeenCalledTimes(1);
+  },
+};
+
+export const EditTargetsRemove: Story = {
+  name: 'Edit targets — opens the saved values; Remove targets keeps the entries',
+  args: { entries: budget, goal: budgetFixtureGoal, waterMl: 1250 },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit targets' }));
+    const dialog = await canvas.findByRole('dialog', { name: 'Edit targets' });
+    await expect(within(dialog).getByLabelText('Daily calorie target')).toHaveValue('2000');
+    await expect(within(dialog).getByLabelText(/^Protein/)).toHaveValue('120');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Remove targets' }));
+    await expect(args.onGoalChange).toHaveBeenLastCalledWith(null);
+    await expect(canvas.getByRole('button', { name: /Yoghurt bowl with oats/ })).toBeVisible();
+  },
+};
+
+export const PastDay: Story = {
+  name: 'An earlier day — that day’s record, no target in force',
+  args: { entries: budget, goal: null, selectedDayKey: '2026-09-03', waterMl: 500 },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Yesterday · Sep 3')).toBeVisible();
+    await expect(canvas.getByText(/No target was set for this day/)).toBeVisible();
+    await expect(canvas.getByRole('heading', { name: 'Yesterday’s meals' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Today' })).toBeVisible();
   },
 };
 

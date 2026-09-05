@@ -36,6 +36,8 @@ const meta = {
     criteria: {},
     onApplyCriteria: fn(),
     onRemoveCriterion: fn(),
+    recipeView: 'list',
+    onRecipeViewChange: fn(),
     onOpenFood: fn(),
     onOpenRecipe: fn(),
     onScanBarcode: fn(),
@@ -48,7 +50,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'S02 — shared Search with Food and Recipes scopes over one query. Food (ledger §11.1): the barcode shortcut stays in the field; a compact toolbar under it holds the List / Grid toggle and the food filter action (All / Foods / Drinks); with an empty query the tab shows the catalogue at once — "Recently added" (from confirmed entries only) above "Explore foods" when history exists — and a query yields one unified result set with a unique-item count. Food results are never filtered by recipe criteria; Recipes results combine the query with the applied criteria snapshot. Idle, loading, results, no matches and service failure stay distinct.',
+          'S02 — shared Search with Food and Recipes scopes over one structure (ledger §13): the query field (the icon-only scanner beside it in Food), the tabs, the results toolbar with List / Grid at the start and the scope’s one filter action at the end, applied chips, the count, the results. Food (ledger §11.1): the food filter action offers All / Foods / Drinks; with an empty query the tab shows the catalogue at once — "Recently added" (from confirmed entries only) above "Explore foods" when history exists — and a query yields one unified result set with a unique-item count. Food results are never filtered by recipe criteria; Recipes results combine the query with the applied criteria snapshot and switch between rows and a grid of tiles without changing the set. Idle, loading, results, no matches and service failure stay distinct.',
       },
     },
   },
@@ -237,16 +239,16 @@ export const EnlargedText: Story = {
 };
 
 export const RecipesScope: Story = {
-  name: 'Recipes scope — the filter action moves into the field, the query is kept',
+  name: 'Recipes scope — the filter action stays in the toolbar, the query is kept',
   render: () => <WithFoodSearch initialQuery="lentil" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('1 item found');
     await userEvent.click(canvas.getByRole('tab', { name: 'Recipes' }));
     await expect(canvas.getByRole('searchbox')).toHaveValue('lentil');
-    await expect(canvas.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Recipe filters' })).toBeInTheDocument();
     await expect(canvas.queryByRole('button', { name: 'Scan barcode' })).toBeNull();
-    await expect(canvas.queryByRole('radio', { name: 'List' })).toBeNull();
+    await expect(canvas.getByRole('radio', { name: 'List' })).toBeInTheDocument();
   },
 };
 
@@ -260,5 +262,53 @@ export const QueryResults: Story = {
     await expect(names).toHaveLength(2);
     await expect(names[0]).toContain('Oatmeal');
     await expect(names[1]).toContain('Oat drink');
+  },
+};
+
+export const RecipesCatalogueList: Story = {
+  name: 'Recipes scope — the shared toolbar, the catalogue as rows, the filter action in the toolbar',
+  args: { scope: 'recipes' },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('tab', { name: 'Recipes' })).toHaveAttribute('aria-selected', 'true');
+    await expect(canvas.queryByRole('button', { name: 'Scan barcode' })).toBeNull();
+    await expect(canvas.getByRole('radio', { name: 'List' })).toHaveAttribute('aria-checked', 'true');
+    await expect(canvas.getByRole('button', { name: 'Recipe filters' })).toBeVisible();
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('10 recipes');
+    await expect(canvas.getByRole('list', { name: 'All recipes' })).toHaveAttribute('data-view', 'list');
+    await userEvent.click(canvas.getByRole('radio', { name: 'Grid' }));
+    await expect(args.onRecipeViewChange).toHaveBeenCalledWith('grid');
+    await userEvent.click(canvas.getByRole('button', { name: 'Recipe filters' }));
+    const sheet = await canvas.findByRole('dialog', { name: 'Filters' });
+    await expect(within(sheet).getByRole('button', { name: 'Vegan' })).toBeVisible();
+    await expect(within(sheet).getByLabelText(/^Maximum/)).toBeVisible();
+  },
+};
+
+export const RecipesGrid: Story = {
+  name: 'Recipes scope — grid of tiles: the same recipes, order and count as the list',
+  args: { scope: 'recipes', recipeView: 'grid', criteria: { caloriesMax: 460 } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const list = canvas.getByRole('list', { name: 'Matching recipes' });
+    await expect(list).toHaveAttribute('data-view', 'grid');
+    await expect(within(list).getAllByRole('listitem')).toHaveLength(8);
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('8 recipes match your filters');
+    await expect(canvas.getByRole('button', { name: 'Recipe filters, 1 active' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Remove filter: Under 460 kcal' })).toBeVisible();
+    await expect(within(list).getAllByRole('listitem')[0]).toHaveTextContent('Lentil soup');
+  },
+};
+
+export const ScannerIconOnly: Story = {
+  name: 'Food scope — the scanner is an icon-only sibling named Scan barcode; the field keeps the room',
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const scan = canvas.getByRole('button', { name: 'Scan barcode' });
+    await expect(scan).toHaveAttribute('title', 'Scan barcode');
+    await expect(scan).not.toHaveTextContent('Scan barcode');
+    expect(scan.getBoundingClientRect().width).toBeLessThanOrEqual(56);
+    await userEvent.click(scan);
+    await expect(args.onScanBarcode).toHaveBeenCalledTimes(1);
   },
 };

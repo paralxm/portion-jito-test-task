@@ -63,9 +63,10 @@ export const S01_1: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1, name: 'Home' })).toBeInTheDocument();
-    await expect(canvas.getAllByText('2,200').length).toBeGreaterThanOrEqual(2); // the figure and the goal
+    await expect(canvas.getAllByText(/2,200/).length).toBeGreaterThanOrEqual(2); // the figure and the target
     await expect(canvas.getByText('kcal remaining')).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Edit goal' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Edit targets' })).toBeVisible();
+    await expect(canvas.getByRole('heading', { name: 'Recipe to try' })).toBeInTheDocument();
     for (const meal of ['Breakfast', 'Lunch', 'Dinner', 'Snacks']) await expect(canvas.getByRole('heading', { level: 3, name: meal })).toBeInTheDocument();
     await expect(canvas.getByRole('button', { name: 'Add breakfast' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
@@ -126,6 +127,8 @@ export const S02_1: Story = {
       criteria={{}}
       onApplyCriteria={fn()}
       onRemoveCriterion={fn()}
+    recipeView="list"
+    onRecipeViewChange={fn()}
       onOpenFood={fn()}
       onOpenRecipe={fn()}
       onScanBarcode={fn()}
@@ -150,21 +153,24 @@ export const S03_1: Story = {
     docs: {
       description: {
         story:
-          'Purpose: curated discovery without criteria (ledger §12 B1, after R2): the real count, the search entry with the filter action at its end, quick dietary chips, and the Featured / under-30-minutes / 30 g-protein rails, every card with its licensed photo (D-28); the complete catalogue lives in Search / Recipes. Entry: Recipes root, catalogue loaded. Fixture: the ten-recipe catalogue. Primary action: a card → S08-2; a chip or Filters → S03-2; View all / Browse all → S02-11. Limitation: none.',
+          'Purpose: discovery without a search field (ledger §13, after H-REF 2): the featured recipe with its photograph, quick preferences (dietary, one time bound, count, Reset), the under-30-minutes and 30 g-protein collections as photographic rails, every card with its licensed photo (D-28), and Browse all; text search, the numeric filters and the complete catalogue live in Search / Recipes. Entry: Recipes root, catalogue loaded. Fixture: the ten-recipe catalogue. Primary action: the featured recipe or a card → S08-2; a chip → S03-2; View all / Browse all → S02-11. Limitation: none.',
       },
     },
   },
   render: () => (
-    <RecipesScreen recipes={recipeCatalogue} criteria={{}} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onToggleDietary={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
+    <RecipesScreen recipes={recipeCatalogue} criteria={{}} status="ready" onClearCriteria={fn()} onToggleDietary={fn()} onToggleTime={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { name: 'Featured' })).toBeInTheDocument();
+    await expect(canvas.getByRole('article', { name: /^Featured recipe/ })).toBeInTheDocument();
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('10 recipes');
     await expect(canvas.getByRole('group', { name: 'Dietary' })).toBeInTheDocument();
+    await expect(canvas.getByRole('group', { name: /Preparation time/ })).toBeInTheDocument();
     await expect(canvas.queryByText('No photo')).toBeNull();
     await expect(canvas.queryByText(/Matches all/)).toBeNull();
-    await expect(canvas.getByRole('button', { name: 'Filters' })).toBeVisible();
+    await expect(canvas.queryByRole('searchbox')).toBeNull();
+    await expect(canvas.queryByRole('button', { name: /^Filters/ })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Browse all 10 recipes' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Recipes' })).toHaveAttribute('aria-current', 'page');
   },
 };
@@ -188,7 +194,7 @@ export const S01_5: Story = {
     await expect(canvas.getByRole('heading', { name: 'Yesterday’s meals' })).toBeInTheDocument();
     await expect(canvas.getByText('400')).toBeVisible();
     await expect(canvas.getByText('kcal logged')).toBeVisible();
-    await expect(canvas.getByText(/No goal was set for this day/)).toBeVisible();
+    await expect(canvas.getByText(/No target was set for this day/)).toBeVisible();
     await expect(canvas.getByRole('radio', { name: /Thursday, September 3$/ })).toBeChecked();
     await expect(canvas.getByRole('radio', { name: /Friday, September 4, today$/ })).not.toBeChecked();
     await expect(canvas.getByRole('radio', { name: /Saturday, September 5, not available yet/ })).toBeDisabled();
@@ -223,6 +229,56 @@ export const S01_6: Story = {
     await expect(within(sheet).getByText(/Water, opening the app, reaching a goal or looking at a day do not count/)).toBeVisible();
     await userEvent.click(within(sheet).getByRole('button', { name: 'Close' }));
     await expect(canvas.queryByRole('dialog', { name: 'Logging streak' })).toBeNull();
+  },
+};
+
+export const O09: Story = {
+  name: 'O09 — Set daily goal (entry sheet over Home)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: targets stay optional and start from a choice of route (ledger §13.4): Help me estimate or I know my goal. Entry: Set targets on the calorie card (the only targets action). Fixture: nothing logged, no targets. Primary action: either route. Secondary: Cancel / close → nothing changes. Limitation: none.',
+      },
+    },
+  },
+  render: () => home([], null, 0, { targetsSheetOpen: true }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const dialog = await canvas.findByRole('dialog', { name: 'Set daily goal' });
+    await expect(within(dialog).getByText(/How would you like to set it/)).toBeVisible();
+    await expect(within(dialog).getByRole('button', { name: /Help me estimate/ })).toBeVisible();
+    await expect(within(dialog).getByRole('button', { name: /I know my goal/ })).toBeVisible();
+  },
+};
+
+export const O09_2: Story = {
+  name: 'O09-2 — Estimated daily target (review before saving)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the estimate is reviewed, explained and adjustable before anything is applied (ledger §13.4): the figure, the inputs and the maintenance estimate in words, the deficit for a loss goal, the nutrition preference and its suggested grams, one Save targets. Entry: See the estimate after the three steps. Fixture: female, 34, 168 cm, 62 kg, lightly active, lose weight → 2,199 − 500 = 1,699 kcal. Primary action: Save targets → Home with the new targets. Secondary: Back keeps the answers. Limitation: the play function walks the three steps.',
+      },
+    },
+  },
+  render: () => home([], null, 0, { targetsSheetOpen: true, targetsSheetStep: 'about' }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole('dialog', { name: 'About you' });
+    await userEvent.type(canvas.getByLabelText('Age'), '34');
+    await userEvent.click(canvas.getByLabelText('Female'));
+    await userEvent.type(canvas.getByLabelText('Height'), '168');
+    await userEvent.type(canvas.getByLabelText('Weight'), '62');
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
+    await userEvent.click(canvas.getByLabelText(/Lightly active/));
+    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
+    await userEvent.click(canvas.getByLabelText(/Lose weight/));
+    await userEvent.click(canvas.getByRole('button', { name: 'See the estimate' }));
+    const dialog = await canvas.findByRole('dialog', { name: 'Estimated daily target' });
+    await expect(within(dialog).getByText('1,699')).toBeVisible();
+    await expect(within(dialog).getByText(/Maintenance estimate 2,199 kcal/)).toBeVisible();
+    await expect(within(dialog).getByRole('button', { name: 'Save targets' })).toBeVisible();
   },
 };
 

@@ -22,6 +22,13 @@ export interface NutritionMacrosProps {
    * on Home, subordinate to the calorie budget.
    */
   size?: 'secondary' | 'compact';
+  /**
+   * `row` (default) lays the three values out on the surface they sit on; `cards` gives
+   * each nutrient its own bounded card — Home's three macro cards under the calorie card
+   * (ledger §13, after H-REF 1) — with the value, the target when one exists and the
+   * card's own track; an unset target leaves the card complete with the logged grams.
+   */
+  presentation?: 'row' | 'cards';
   /** `stale` when the draft amount is invalid: no value is presented as current. */
   status?: NutritionValueStatus;
   className?: string;
@@ -32,13 +39,13 @@ export interface NutritionMacrosProps {
  * Missing constituents are handled independently: an unknown value is named, a partial
  * subtotal says so, and neither is ever shown as zero. With a target the value reads
  * "24 / 120 g" over a compact track in the category's accent — a supporting identifier,
- * never the only meaning.
+ * never the only meaning. Without a target there is no track and no invented denominator.
  */
-export function NutritionMacros({ protein, carbohydrates, fat, size = 'secondary', status = 'known', className }: NutritionMacrosProps) {
+export function NutritionMacros({ protein, carbohydrates, fat, size = 'secondary', presentation = 'row', status = 'known', className }: NutritionMacrosProps) {
   const values: Record<Exclude<NutrientCategory, 'energy' | 'fibre' | 'vitamins' | 'minerals'>, MacroValue> = { protein, carbohydrates, fat };
   return (
     <div className={[styles.root, className].filter(Boolean).join(' ')}>
-      <div className={styles.macros} data-size={size} role="list">
+      <div className={styles.macros} data-size={size} data-presentation={presentation} role="list">
         {MACRO_ORDER.map((key) => {
           const item = values[key as keyof typeof values];
           const meta = NUTRIENT_CATEGORIES[key];

@@ -53,6 +53,9 @@ export function WaterTracker({ totalMl, goalMl = WATER_GOAL_ML, onQuickAdd, onOp
                   {formatWater(shownMl).endsWith('ml') ? 'ml' : 'L'} / {formatWater(goalMl)}
                 </Text>
               </span>
+              <Text as="span" variant="caption" color="secondary" className={styles.reference}>
+                Adjustable reference
+              </Text>
             </span>
             <span className={styles.chevron} aria-hidden="true">
               <Icon icon={CaretRight} size="small-action" />

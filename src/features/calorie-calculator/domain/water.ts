@@ -5,6 +5,8 @@
  */
 
 export const WATER_GOAL_ML = 2000;
+/** The daily reference can be changed by the person; the bounds keep a typo from setting an implausible bound. */
+export const WATER_REFERENCE_RANGE_ML = { min: 500, max: 5000 } as const;
 export const WATER_QUICK_ADD_ML = 250;
 export const WATER_PRESETS_ML: readonly number[] = [150, 250, 350, 500];
 /** A single addition is capped so a typo cannot record an implausible amount. */

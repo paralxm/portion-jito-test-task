@@ -1,12 +1,5 @@
-/* The calorie budget is the focal grouped surface (light surface, grouped radius); the
-   recommended recipe, the meal group and the water tracker are each one group of their
-   own; nothing else on Home is a card. */
-.today {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portion-ref-space-16);
-}
-
+/* The daily-nutrition section is the focal group; the recommended recipe, the meal group
+   and the water tracker are each one group of their own; nothing else on Home is a card. */
 .section {
   display: flex;
   flex-direction: column;
@@ -23,4 +16,9 @@
   justify-content: space-between;
   gap: var(--portion-ref-space-8);
   min-inline-size: 0;
+}
+
+/* The factual fit line sits with the card's other facts, not as a claim above the title. */
+.fit {
+  margin-block-start: var(--portion-ref-space-4);
 }

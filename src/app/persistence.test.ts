@@ -16,7 +16,7 @@ describe('persistence', () => {
   it('round-trips entries, the goal history, water and the view', () => {
     const storage = fakeStorage();
     const goals = [{ from: '2026-09-01', goal: { kcal: 2000, proteinG: 120, carbohydratesG: null, fatG: null } }];
-    saveRecord(storage, { version: 2, entries: [entry], goals, water: { '2026-09-04': 750 }, searchView: 'grid' });
+    saveRecord(storage, { version: 2, entries: [entry], goals, water: { '2026-09-04': 750 }, waterReferenceMl: 2500, searchView: 'grid', recipeView: 'grid' });
     const loaded = loadRecord(storage, (id) => (id === fixtureC.id ? '/assets/rice-new456.webp' : undefined));
     expect(loaded.entries).toHaveLength(1);
     expect(loaded.entries[0].id).toBe('e1');
@@ -26,6 +26,27 @@ describe('persistence', () => {
     expect(loaded.goals).toEqual(goals);
     expect(loaded.water).toEqual({ '2026-09-04': 750 });
     expect(loaded.searchView).toBe('grid');
+    expect(loaded.recipeView).toBe('grid');
+    expect(loaded.waterReferenceMl).toBe(2500);
+  });
+
+  it('keeps the provenance and estimate, defaults an older goal to no provenance, and drops a partial estimate', () => {
+    const estimate = { method: 'nasem-2023-eer', age: 34, sex: 'female', heightCm: 168, weightKg: 62, activity: 'low-active', goal: 'lose', eerKcal: 2050, adjustmentKcal: -500 };
+    const goals = [{ from: '2026-09-01', goal: { kcal: 1550, proteinG: 116, carbohydratesG: 174, fatG: 43, source: 'estimated', preset: 'higher-protein', estimate } }];
+    const loaded = parseRecord(JSON.stringify({ version: 2, entries: [], goals }));
+    expect(loaded.goals[0].goal).toEqual(goals[0].goal);
+    const legacy = parseRecord(JSON.stringify({ version: 2, entries: [], goals: [{ from: '2026-09-01', goal: { kcal: 2000 } }] })).goals[0].goal;
+    expect(legacy?.source).toBeUndefined();
+    const partial = parseRecord(JSON.stringify({ version: 2, entries: [], goals: [{ from: '2026-09-01', goal: { kcal: 2000, source: 'estimated', preset: 'nonsense', estimate: { method: 'nasem-2023-eer', age: 34 } } }] })).goals[0].goal;
+    expect(partial?.estimate).toBeUndefined();
+    expect(partial?.preset).toBeUndefined();
+    expect(partial?.source).toBe('estimated');
+  });
+
+  it('falls back to the default water reference outside the supported range', () => {
+    expect(parseRecord(JSON.stringify({ version: 2, entries: [], waterReferenceMl: 100 })).waterReferenceMl).toBe(2000);
+    expect(parseRecord(JSON.stringify({ version: 2, entries: [], waterReferenceMl: 3000 })).waterReferenceMl).toBe(3000);
+    expect(parseRecord(JSON.stringify({ version: 1, entries: [] })).recipeView).toBe('list');
   });
 
   it('migrates a version-1 record: entries and water kept, the single goal becomes a period from the migration day', () => {

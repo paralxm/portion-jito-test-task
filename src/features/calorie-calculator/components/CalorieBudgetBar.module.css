@@ -5,17 +5,20 @@
   min-inline-size: 0;
 }
 
-/* The figure leads; the optional Set goal sits at its end on the same row. */
+/* The figure leads; the one targets action sits at its end on the same row. */
 .headline {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--portion-ref-space-12);
   flex-wrap: wrap;
 }
 
+/* The figure gives way before the action does: its caption wraps under the number so the
+   targets action keeps the top-right corner at every width. */
 .figure {
   display: flex;
+  flex: 1 1 8rem;
   align-items: baseline;
   flex-wrap: wrap;
   column-gap: var(--portion-ref-space-8);
@@ -30,7 +33,11 @@
   white-space: nowrap;
 }
 
-/* "400 consumed · 20 %" at the start, "Goal 2,000" at the end, on one line when it fits. */
+.action {
+  flex-shrink: 0;
+}
+
+/* "790 kcal consumed · 40 %" at the start, "Target 2,000 kcal" at the end, on one line when it fits. */
 .stats {
   min-inline-size: 0;
 }
@@ -44,7 +51,25 @@
   row-gap: var(--portion-ref-space-4);
 }
 
+.consumed {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+/* The legend dot repeats the fill's colour beside the consumed amount; the words carry the meaning. */
+.legendDot {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--portion-radius-round);
+  background: var(--portion-color-action-primary);
+  flex-shrink: 0;
+  align-self: center;
+}
+
 .goal {
+  margin: 0;
   white-space: nowrap;
 }
 

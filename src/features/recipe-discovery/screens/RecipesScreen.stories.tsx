@@ -4,8 +4,9 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { NavigationBar } from '../../../design-system/patterns/NavigationBar/NavigationBar';
 import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
+import { toggleTime } from '../domain/discovery';
 import { recipeCatalogue } from '../domain/fixtures';
-import { removeCriterion, toggleDietary, type RecipeCriteria } from '../domain/matching';
+import { toggleDietary, type RecipeCriteria } from '../domain/matching';
 import { RecipesScreen, type RecipesStatus } from './RecipesScreen';
 
 const navigation = <NavigationBar selected="recipes" onSelect={fn()} onLogFood={fn()} />;
@@ -17,10 +18,9 @@ function Harness({ status, initialCriteria, onOpenRecipe, onOpenSearch, onRetry 
       recipes={recipeCatalogue}
       criteria={criteria}
       status={status}
-      onApplyCriteria={setCriteria}
-      onRemoveCriterion={(key) => setCriteria((c) => removeCriterion(c, key))}
       onClearCriteria={() => setCriteria({})}
       onToggleDietary={(id) => setCriteria((c) => toggleDietary(c, id))}
+      onToggleTime={(minutes) => setCriteria((c) => toggleTime(c, minutes))}
       onRetry={onRetry}
       onOpenRecipe={onOpenRecipe}
       onOpenSearch={onOpenSearch}
@@ -32,13 +32,13 @@ function Harness({ status, initialCriteria, onOpenRecipe, onOpenSearch, onRetry 
 const meta = {
   title: 'Product compositions/Recipes (S03)',
   component: RecipesScreen,
-  args: { recipes: recipeCatalogue, criteria: {}, status: 'ready', onApplyCriteria: fn(), onRemoveCriterion: fn(), onClearCriteria: fn(), onToggleDietary: fn(), onRetry: fn(), onOpenRecipe: fn(), onOpenSearch: fn(), navigation },
+  args: { recipes: recipeCatalogue, criteria: {}, status: 'ready', onClearCriteria: fn(), onToggleDietary: fn(), onToggleTime: fn(), onRetry: fn(), onOpenRecipe: fn(), onOpenSearch: fn(), navigation },
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         component:
-          'S03 — curated discovery (ledger §12 B1, after R2): the real count, a search entry into Search’s Recipes scope, the numeric filter sheet, quick dietary chips that toggle constraints at once (AND; vegan implies vegetarian), and groups derived from each recipe’s own record — Featured (editorial flag), Ready in under 30 minutes, 30 g protein or more — as photographic rails whose "View all" hands Search a criteria snapshot. No matches and service failure are separate states with their own recovery.',
+          'S03 — discovery without a search field (ledger §13, after H-REF 2): one featured recipe with prominent photography, quick preferences (dietary toggles combined with AND, one exclusive time bound, the active count and Reset), thematic collections derived from each recipe’s own record — Ready in under 30 minutes, 30 g protein or more — as photographic rails whose "View all" hands Search a criteria snapshot, and Browse all recipes. Empty collections are omitted; no match is one state with Reset; service failure keeps the preferences.',
       },
     },
   },
@@ -48,92 +48,66 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Discovery: Story = {
-  name: 'Discovery — real count, three groups, quick chips',
+  name: 'Discovery — featured recipe, quick preferences, two collections, browse all',
   render: (args) => <Harness status="ready" initialCriteria={{}} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('searchbox')).toBeNull();
+    await expect(canvas.getByRole('article', { name: /^Featured recipe: Lentil soup/ })).toBeInTheDocument();
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('10 recipes');
-    await expect(canvas.getByRole('heading', { name: 'Featured' })).toBeInTheDocument();
     await expect(canvas.getByRole('heading', { name: 'Ready in under 30 minutes' })).toBeInTheDocument();
     await expect(canvas.getByRole('heading', { name: '30 g protein or more' })).toBeInTheDocument();
-    await expect(canvas.queryByText(/Matches/)).toBeNull();
-    await expect(canvas.queryByText(/Popular/)).toBeNull();
-    await userEvent.click(canvas.getAllByRole('button', { name: 'Lentil soup' })[0]);
-    await expect(args.onOpenRecipe).toHaveBeenCalledWith('recipe-lentil-soup');
-    await userEvent.click(canvas.getByRole('button', { name: 'Search recipes' }));
-    await expect(args.onOpenSearch).toHaveBeenLastCalledWith({});
+    await expect(canvas.queryByRole('heading', { name: 'Featured' })).toBeNull();
+    await expect(canvas.queryByText('No photo')).toBeNull();
+    await userEvent.click(within(canvas.getByRole('article', { name: /^Featured recipe/ })).getByRole('button', { name: 'Lentil soup' }));
+    await expect(args.onOpenRecipe).toHaveBeenLastCalledWith('recipe-lentil-soup');
     await userEvent.click(canvas.getByRole('button', { name: /^View all \d+ in Ready in under 30 minutes/ }));
     await expect(args.onOpenSearch).toHaveBeenLastCalledWith({ preparationMax: 30 });
+    await userEvent.click(canvas.getByRole('button', { name: /^View all \d+ in 30 g protein or more/ }));
+    await expect(args.onOpenSearch).toHaveBeenLastCalledWith({ proteinMin: 30 });
     await userEvent.click(canvas.getByRole('button', { name: 'Browse all 10 recipes' }));
     await expect(args.onOpenSearch).toHaveBeenLastCalledWith({});
   },
 };
 
-export const QuickChips: Story = {
-  name: 'Quick chips — multi-select, AND, All clears',
+export const QuickPreferences: Story = {
+  name: 'Quick preferences — dietary AND, one time bound, count and Reset',
   render: (args) => <Harness status="ready" initialCriteria={{}} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const summary = () => canvas.getByRole('status', { name: 'Results summary' });
-    const group = () => canvas.getByRole('group', { name: 'Dietary' });
-    await expect(within(group()).getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
-    await userEvent.click(within(group()).getByRole('button', { name: 'Vegetarian' }));
-    await expect(within(group()).getByRole('button', { name: 'Vegetarian' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(within(group()).getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
-    // Vegan recipes count as vegetarian: traybake, tofu and the curry join the four declared vegetarian ones.
-    await expect(summary()).toHaveTextContent('7 recipes match your filters');
-    await userEvent.click(within(group()).getByRole('button', { name: 'Gluten-free' }));
-    await expect(within(group()).getByRole('button', { name: 'Gluten-free' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(summary()).toHaveTextContent('3 recipes match your filters');
-    await expect(canvas.getAllByText('Matches all 2 filters').length).toBeGreaterThanOrEqual(1);
-    await userEvent.click(within(group()).getByRole('button', { name: 'All' }));
-    await expect(within(group()).getByRole('button', { name: 'Vegetarian' })).toHaveAttribute('aria-pressed', 'false');
+    const dietary = () => within(canvas.getByRole('group', { name: 'Dietary' }));
+    const time = () => within(canvas.getByRole('group', { name: /Preparation time/ }));
+    await expect(canvas.getByText('None active')).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'Reset' })).toBeNull();
+    await userEvent.click(dietary().getByRole('button', { name: 'Vegetarian' }));
+    await expect(dietary().getByRole('button', { name: 'Vegetarian' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByText('1 active')).toBeVisible();
+    await userEvent.click(time().getByRole('button', { name: 'Under 30 min' }));
+    await expect(time().getByRole('button', { name: 'Under 30 min' })).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(time().getByRole('button', { name: 'Under 15 min' }));
+    await expect(time().getByRole('button', { name: 'Under 15 min' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(time().getByRole('button', { name: 'Under 30 min' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(canvas.getByText('2 active')).toBeVisible();
+    await expect(summary()).toHaveTextContent(/match your preferences/);
+    // The featured recipe and the collections follow the preferences.
+    await expect(canvas.queryByRole('article', { name: /^Featured recipe: Lentil soup/ })).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: /^View all/ }));
+    await expect(args.onOpenSearch).toHaveBeenLastCalledWith({ dietary: ['vegetarian'], preparationMax: 15 });
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
     await expect(summary()).toHaveTextContent('10 recipes');
-  },
-};
-
-export const ApplyFilters: Story = {
-  name: 'Apply, remove and clear numeric filters from the sheet',
-  render: (args) => <Harness status="ready" initialCriteria={{}} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: /^Filters/ }));
-    const dialog = canvas.getByRole('dialog', { name: 'Filters' });
-    await userEvent.type(within(dialog).getByLabelText(/Protein per serving/), '30');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Vegetarian' }));
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Apply filters' }));
-    await expect(canvas.queryByRole('dialog')).toBeNull();
-    await expect(canvas.getByRole('button', { name: 'Remove filter: 30 g protein or more' })).toBeInTheDocument();
-    // The dietary constraint shows as the pressed quick chip, not a second chip.
-    await expect(canvas.queryByRole('button', { name: 'Remove filter: Vegetarian' })).toBeNull();
-    const group = () => canvas.getByRole('group', { name: 'Dietary' });
-    await expect(within(group()).getByRole('button', { name: 'Vegetarian' })).toHaveAttribute('aria-pressed', 'true');
-    const summary = () => canvas.getByRole('status', { name: 'Results summary' });
-    await expect(summary()).toHaveTextContent('No recipes match your filters');
-    await userEvent.click(within(group()).getByRole('button', { name: 'Vegetarian' }));
-    await expect(summary()).toHaveTextContent('2 recipes match your filters');
-    await userEvent.click(canvas.getByRole('button', { name: 'Remove filter: 30 g protein or more' }));
-    await expect(summary()).toHaveTextContent('10 recipes');
-  },
-};
-
-export const Filtered: Story = {
-  render: (args) => <Harness status="ready" initialCriteria={{ caloriesMin: 300, caloriesMax: 500, proteinMin: 10, dietary: ['vegan'] }} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('2 recipes match your filters');
-    await expect(canvas.getAllByText('Matches all 3 filters').length).toBeGreaterThanOrEqual(1);
-    await expect(canvas.getByRole('button', { name: 'Filters, 3 active' })).toBeVisible();
+    await expect(canvas.getByText('None active')).toBeVisible();
   },
 };
 
 export const NoMatch: Story = {
-  name: 'No matches — change or clear filters',
-  render: (args) => <Harness status="ready" initialCriteria={{ preparationMax: 5 }} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
+  name: 'No matches — one empty state with Reset',
+  render: (args) => <Harness status="ready" initialCriteria={{ dietary: ['vegan', 'dairy-free'], preparationMax: 15 }} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('No recipes match your filters');
-    await userEvent.click(canvas.getByRole('button', { name: 'Clear all filters' }));
+    await expect(canvas.getAllByText('No recipes match your preferences').length).toBeGreaterThanOrEqual(1);
+    await expect(canvas.queryAllByRole('heading', { name: /Ready in under|protein or more/ })).toHaveLength(0);
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset preferences' }));
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('10 recipes');
   },
 };
@@ -146,19 +120,18 @@ export const Loading: Story = {
 };
 
 export const Failure: Story = {
-  name: 'Service failure — retry keeps filters',
-  args: { status: 'failure', criteria: { caloriesMax: 500 } },
+  name: 'Service failure — retry keeps the preferences',
+  args: { status: 'failure', criteria: { dietary: ['vegan'] } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('alert')).toHaveTextContent('Recipes could not be loaded');
-    await expect(canvas.getByRole('button', { name: 'Remove filter: Under 500 kcal' })).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Try again' }));
     await expect(args.onRetry).toHaveBeenCalledTimes(1);
   },
 };
 
 export const Narrow320: Story = {
-  name: 'Narrow — 320',
+  name: 'Narrow — 320: rails scroll, the page never does',
   render: (args) => <Harness status="ready" initialCriteria={{}} onOpenRecipe={args.onOpenRecipe} onOpenSearch={args.onOpenSearch} onRetry={args.onRetry} />,
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   play: async ({ canvasElement }) => {

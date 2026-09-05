@@ -5,18 +5,18 @@
   min-inline-size: 0;
 }
 
-/* Week controls: previous, the range (and Today when away from it), next. */
-.controls {
+/* The month of the selected day at the start; Today at the end while another day is selected. */
+.caption {
   display: flex;
   align-items: center;
-  gap: var(--portion-ref-space-4);
+  justify-content: space-between;
+  gap: var(--portion-ref-space-8);
   min-inline-size: 0;
+  min-block-size: var(--portion-ref-space-32);
 }
 
-.range {
-  flex: 1 1 auto;
+.month {
   min-inline-size: 0;
-  text-align: center;
   white-space: nowrap;
 }
 
@@ -24,21 +24,33 @@
   flex-shrink: 0;
 }
 
-/* Seven equal tiles. When seven 48 px targets do not fit (320 px, enlarged text) the row
-   scrolls instead of shrinking the targets; the scrollbar stays visible for the keyboard. */
+/* One row of equal tiles that scrolls sideways; the targets never shrink. The row keeps
+   the page inset on both sides so the first and last tiles reach the edges of the shell
+   like the reference, while a focus ring at either edge is never clipped. */
 .days {
   display: grid;
   grid-auto-flow: column;
   /* At least the 48 px target, and at least 3 rem so enlarged text never squeezes a tile. */
-  grid-auto-columns: minmax(max(var(--portion-size-target-minimum), 3rem), 1fr);
+  grid-auto-columns: max(var(--portion-size-target-minimum), 3rem);
   gap: var(--portion-ref-space-4);
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
   padding-block: var(--portion-ref-space-4);
-  /* Room for the focus ring at the row's edges without clipping it. */
-  padding-inline: var(--portion-ref-space-4);
-  margin-inline: calc(var(--portion-ref-space-4) * -1);
-  scrollbar-width: thin;
+  padding-inline: var(--portion-spacing-page-inset);
+  margin-inline: calc(var(--portion-spacing-page-inset) * -1);
+  scrollbar-width: none;
+  cursor: grab;
+  touch-action: pan-x pan-y;
+  min-inline-size: 0;
+}
+
+.days::-webkit-scrollbar {
+  display: none;
+}
+
+.days:active {
+  cursor: grabbing;
 }
 
 .day {

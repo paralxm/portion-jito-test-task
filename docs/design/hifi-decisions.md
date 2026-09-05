@@ -744,3 +744,94 @@ Fixed during verification: a literal backspace byte inside a story regex (`/^g\b
 Rendered inspection (the batched review): the runtime captures of Home empty / populated / earlier day / 320 / 320 at 200 %, the method sheet at 390 / 320 / 390 at 200 %, the barcode and photo reviews, the correction draft, manual steps 1 and 2, the discard dialog, discovery, the Search recipe snapshot and the recipe details hero; the Storybook captures of every new state row and variant. Findings and fixes are in D-57 and §12.3.
 
 Not exercised: a real device or screen reader, a live software keyboard, a real camera or file picker (the photo field is exercised with a generated file in Storybook), native swipe-back, an overnight session (midnight is exercised with a mocked clock and a rewritten day key), a refresh with a changed draft (documented limitation D-52).
+
+## 13. Revision H2 (2026-09-05) — Home composition, Recipes discovery, Search alignment, Set / Edit targets
+
+### 13.1 Baseline and scope
+
+- Baseline: `feat/redesign-r1-r6` at `4e78c22` (R1–R6 close-out, §12; `main` at `30d54d9` does not yet include it). Working branch `feat/redesign-home-recipes-targets` from that tip. Tree clean at the start.
+- Two references, in attachment order: **H-REF 1 Home** (compact day strip, calorie summary card, three macro cards with their own bars, meal groups, water) and **H-REF 2 Recipes** (photographic featured recipe, quick preferences, horizontal thematic collections, browse all). Deliberate departures: the recipe recommendation goes above Today's meals; the existing header and navigation stay; existing catalogue and detail screens only; targets follow the estimate policy in §13.4.
+- Affected areas: `HomeScreen`, `DayStrip`, `CalorieBudgetBar` → the daily-nutrition composition (calorie card + macro cards), `NutritionMacros` (cards presentation), `GoalSheet` → `TargetsSheet` (entry → manual path / estimate path), `goal-history` + `daily-log` (`DailyGoal` provenance), `persistence` (additive fields), `WaterTracker` / `WaterSheet` (adjustable reference), `RecipesScreen` + `discovery.ts` (featured recipe, quick preferences with exclusive time options, collections), `SearchScreen` + `RecipeList` (scanner icon-only, shared results toolbar in both scopes, recipe list / grid), `App` wiring, stories, walkthrough, captures, docs.
+- Preserved: header (lockup, date, streak), navigation, acquisition flows, catalogue and recipe identities, Recipe Details and Add to meal, saved entries / water / history.
+
+### 13.2 Checkpoint (kept current; see the end of this section for the close-out)
+
+- Status: closed out — see §13.7 (verification record) and §13.8 (close-out checkpoint).
+
+### 13.3 References — adopt / adapt / reject
+
+| Element | H-REF 1 Home | Decision |
+| --- | --- | --- |
+| Compact day strip | Row of weekday/date tiles, selected filled, today dotted | Adopt: one scrolling row, no calendar container, no week buttons; Today action and month caption added for keyboard and orientation; future days disabled (the reference shows none). |
+| Calorie card | Remaining prominent, bar, consumed / target legend, `Edit targets` top right | Adopt; wording and the no-target / reached / over / partial states from the existing contract; no "on track". |
+| Three macro cards | Name with colour marker, `45 / 120 g`, own bar | Adopt as `NutritionMacros` cards; the bar only with a user target; unknown / partial words kept. |
+| Meal groups, water | Grouped meals with Add actions; water surface with `+250 ml` | Preserved from Stage A / R1; the reference's `(Adjustable reference)` caption adopted, and the reference made adjustable so the caption is true. |
+| Recipe to try | Card with "High protein pick", "Fits remaining 1,210 kcal", `View recipe` | Adapt: `Recipe to try` above the meals; the fit line kept only as a factual comparison with a complete total; "High protein pick" rejected (an unsupported claim); the card itself opens the recipe (no duplicate link); "All recipes" kept. |
+| Status bar, home indicator, sample data | Device chrome; 1,210 / 790 / 2,000 example numbers | Rejected; fixtures stay internally consistent (400 of 2,000 etc.). |
+
+| Element | H-REF 2 Recipes | Decision |
+| --- | --- | --- |
+| Header "THE DAILY EDIT" | Lockup with a tagline | Rejected: the section header `Recipes` stays. |
+| Recipe of the day | Large photo, "RECIPE OF THE DAY" label, time · kcal, title | Adapt: `Featured recipe` label (no daily selection logic exists), the label on a canvas chip over the photo, facts and title beneath; opens the existing detail by id. |
+| Quick preferences | "0 active · Reset", dietary chips, time chips | Adopt: dietary toggles (AND), exclusive time chips (under 15 / 30 min / 1 h), active count, Reset. |
+| Collections | "Ready in under 30 minutes" and "30g protein or more" rails with `View all →` | Adopt with the existing rules and tiles; empty collections omitted; one empty state with Reset. |
+| Browse all recipes | Dark full-width button | Adapt: the secondary full-width button (no dark surface). |
+| Search field | Absent | Adopt: removed, no substitute; text search and numeric filters live in Search's Recipes scope. |
+
+### 13.4 Decisions (continuing §12.5)
+
+- **D-58 Day strip.** One scrolling radio row of whole weeks from a week before the earlier of (today − 3 weeks) and the selected day to the end of today's week; selecting the earliest tile reveals another week, so all history stays reachable by touch; arrow keys, Home and End move the selection; mouse drag scrolls (a drag never counts as a tap); the selected tile is scrolled into view; the row bleeds to the shell's edges and owns its overflow.
+- **D-59 Daily nutrition.** `DailyNutrition` = calorie card + three `NutritionMacros` cards, one 8 px step apart, no wrapper border; the calorie card's only action is `Set targets` / `Edit targets`; the bar precedes the legend (`● 790 consumed · 40 %` / `Target 2,000 kcal`); without a target the card shows the logged amount alone and never a percentage, remainder or "on track"; a macro card carries a bar only with a user target and never looks disabled without one.
+- **D-60 Targets model.** `DailyGoal` gains `source` (manual / estimated), `preset` and `estimate` (method, inputs, EER, adjustment); additive on record version 2, older goals read as manual; a goal without a preset opens as Custom so nothing is suggested the person did not choose.
+- **D-61 Estimate policy.** 2023 NASEM adult EER (Table S-3) per sex and activity category; maintain = EER; lose = EER − 500 kcal/day (NHLBI 1998, lower end) refused under 1,200 kcal/day (the bound common to the NHLBI low-calorie ranges); gain = maintenance with an explicit "no surplus added" notice — a documented blocker, not a substitution; adults 19+ only; the NIDDK planner is not reproduced. Sources and the eligibility limits are in `docs/ux/targets-and-estimation.md`.
+- **D-62 Macro presets.** Balanced 20/50/30, Higher protein 30/45/25, Lower carb 25/45/30 — all inside the adult AMDR (the two lower-carbohydrate presets stop at the 45 % floor); grams by the Atwater factors at full precision, whole grams saved; presets recompute with the calories; Custom keeps its grams across calorie changes and states a mismatch without changing anything.
+- **D-63 Targets sheet.** Entry (`Set daily goal` — `Help me estimate` / `I know my goal` as `MethodOption` rows) → the manual editor or the three steps and the review; Back keeps drafts; dismissal with edits uses `DiscardChangesDialog`; `Recalculate estimate` (estimated goal) and `Help me estimate instead` (manual goal) make re-estimation explicit; `Remove targets` clears from today and touches nothing else.
+- **D-64 Recommendation.** Above the meals as `Recipe to try` / `Matches your preferences`; the one added line `One serving fits in your remaining N kcal` only when a complete total is below the target and the recipe's per-serving kcal are within the remainder; selection logic unchanged (D-21).
+- **D-65 Water reference.** `waterReferenceMl` on the record (500–5,000 ml, default 2,000), changed from the water sheet's `Change the reference` mode, applied to every day, labelled `Adjustable reference` on the tracker.
+- **D-66 Discovery.** No search field and no in-page filter sheet; `featuredRecipe` = the first flagged recipe with a photo satisfying the preferences (else the first matching with a photo; null only when nothing matches); preferences = the dietary set + one exclusive time bound (`toggleTime`); collections `quick` and `protein` only (the featured rail is replaced by the featured card); Reset clears every criterion; View all / Browse all hand Search the preferences (+ the collection rule).
+- **D-67 Search alignment.** One structure in both scopes; the Food scanner is an icon-only outlined `IconButton` with title and name "Scan barcode"; the Recipes scope gets the toolbar (`ViewToggle` + `Recipe filters`) and `RecipeList` rows / tiles; `recipeView` persists beside `searchView`; the filter sheet is unchanged.
+
+### 13.5 Impeccable use (recorded before each invocation)
+
+- Session context: `node .claude/skills/impeccable/scripts/context.mjs --target src/features/calorie-calculator/screens/HomeScreen.tsx` → PRODUCT.md / DESIGN.md loaded; Operate mode confirmed.
+- Problem: technical slop in seven new or rewritten families → tool: `detect.mjs --json src` after the implementation and again before the close-out → expected: an empty list. Result: recorded in §13.7.
+- Problem: composition drift from H-REF 1 / 2 → tool: the `critique` reference's Assessment A checklist applied inline to the rendered captures in the focused review (§13.7: proximity, similarity, common region, hierarchy, contrast, consistency, responsive) → expected: material fixes only. Result: recorded in §13.7.
+- `adapt`, `layout` and `typeset` were not invoked as commands; reflow findings are fixed at their owning CSS.
+
+### 13.6 Inventory — recomputed: exactly 57 rows
+
+55 rows of §12.6 + O09 (the targets entry sheet) + O09-2 (the reviewed estimate) = **57**. Reopened with changed composition: S01-1 / S01-2 / S01-5 / S01-6 (strip, nutrition cards, recommendation order, water caption), S03-1 / S03-2 (discovery without a search field), S02-1 … S02-4 and S02-7 … S02-10 (icon-only scanner), S02-5 / S02-6 / S02-11 (the Recipes toolbar, list / grid), O02 / O02-2 (opened from Search's toolbar). The old goal-editor states are superseded by O09 / O09-2 and the targets editor.
+
+| # | Portion ID | Surface | State / purpose | Entry | Controls → outcome | Mode |
+| --- | --- | --- | --- | --- | --- | --- |
+| 56 | **O09** | Set daily goal (overlay) | The targets entry: "How would you like to set it?" with Help me estimate / I know my goal | Set targets on the calorie card | Either route → the editor or About you; Cancel / close → unchanged | runtime + story |
+| 57 | **O09-2** | Estimated daily target (overlay) | The reviewed estimate: figure, assumptions, warnings, editable calories, preference and suggested grams, Save targets | See the estimate after Goal | Save targets → Home with the new targets from today; Back → Goal with the answers kept | runtime + story |
+
+### 13.7 Verification record (2026-09-05, H2 close-out)
+
+| Command | Result |
+| --- | --- |
+| `npm run tokens:check` | 268 tokens validated; generated output current |
+| `npm run icons:check` | current after `npm run icons:build` (the calculator glyph added for the targets entry, the unused caret-left removed) |
+| `npm run typecheck` | clean |
+| `npm run test:unit` | 20 files, 133 tests passed (energy estimate: the report's worked example, every activity category, the goal policy and the 1,200 kcal floor, unit conversions and the About you parser; macro presets inside the AMDR, Atwater grams, mismatch; persistence: provenance round-trip, partial estimate dropped, water reference range, recipe view; discovery: featured recipe, exclusive time bound, preference count) |
+| `npm run build` | ok |
+| `node scripts/verify/runtime-walkthrough.mjs` | 108 passed, 0 failed; no console or page errors; 70 captures |
+| `npm run build-storybook` | ok |
+| `node scripts/verify/storybook-captures.mjs` | 176 captures, 0 with problems (57 states, 23 variants, 96 component / foundation) |
+| `npx vitest run --project storybook` (isolated, after the layout fixes) | 83 files, 523 tests passed; a11y addon at `error`; the day-strip file rerun after its story fix: 6 passed |
+| `node scripts/verify/contrast-matrix.mjs --check` | 73 pairs, 0 failing |
+| `node .claude/skills/impeccable/scripts/detect.mjs --json src` | `[]` (before and after the layout fixes) |
+| lint | no lint script exists in `package.json`; not run |
+
+Regressions covered explicitly: Recipe Details unchanged (walkthrough: hero, time chip, Add beside the title, 7 items / 3 steps, no sticky footer, fixed bar; Lane E S08-1 … S08-4 stories unchanged and passing); Add to meal from details unchanged (2 servings → 900 kcal, one Add to {meal}, Cancel writes nothing, the entry lands under Dinner and reopens with servings; Lane E O05-2); recipe ids stable from Home, Recipes and Search (the featured card, the rail tiles and the Search rows open `recipe-lentil-soup` by id, asserted in the Recipes stories); Search list ↔ grid identical sets (asserted in the walkthrough by title order); transferred criteria agree with counts (View all → both chips, Browse all → the preference alone, `N recipes match your filters` equal to the row count); Back restores discovery with its preference and scroll (asserted); saved data migration (v1 goal, v2 goals without provenance, partial estimate, out-of-range reference); no-target and partial-target rendering (Daily nutrition stories); water increments separate from drink logging (Stage B checks kept); fixed navigation clearance at 320 / 393 / 430 and 200 % (kept); keyboard (day strip arrows / Home / End, Tab through the method sheet) and reduced motion (kept).
+
+Focused review of the rendered changes (the `critique` checklist, §13.5): proximity — the calorie card and the three macro cards read as one section (8 px step, shared width); similarity — both Search scopes carry the same field → tabs → toolbar → chips → count structure, the scanner and the filter action are both icon buttons; common region — meal groups, the preferences block and the toolbar are bounded once each; hierarchy — the nutrition section dominates, the recommendation is one compact card, meals and water follow; contrast / figure-ground — one primary action per surface (Set targets, Save, Add to {meal}, Browse all), no coloured containers beyond the light calorie surface and the warning messages; consistency — Back keeps drafts, Cancel keeps saved values, Apply / Save commit once, Reset clears; responsive — 320, 393, 430 and 200 % inspected. Defects found in the batched review and fixed at their owning layer: the calorie card's action wrapping under the figure (the figure now yields), the consumed / target legend wrapping at 393 and breaking "20 %" (shorter legend, non-breaking space), the sheet footer breaking "Continue" mid-word at 320 / 200 % (footer actions wrap whole), the age placeholder colliding with its unit, a lone "g" on a macro card at 320 (target and unit kept together), discovery headers squeezing titles to one word per line at 200 % (the action drops beneath), the review copy "for lose weight" → "to lose weight", and the earlier-day strip story ending on Today (now ends on the earlier day so the capture matches its name). Evidence fixes: four walkthrough locators (a joined figure string, the water reference label, the "Under 30 min" chip against a View all label, dialog-scoped estimate fields) and the discovery preference used for the details journey (Lentil soup is not declared vegetarian; the time bound keeps it featured).
+
+Not exercised: a real device or screen reader, a live software keyboard, mouse-drag scrolling of the day strip (pointer events are implemented; the stories and walkthrough use taps, keys and native scrolling), native swipe-back, an overnight session, a person's real energy requirement (the estimate is checked against the report's equations, not against a measurement).
+
+### 13.8 Close-out checkpoint
+
+- Requirements: Home (order, compact strip, calorie card, macro cards, recommendation, meals, water with the adjustable reference), Recipes discovery (no search field, featured recipe, quick preferences, collections, navigation into Search, Back restoring state), Search (icon-only scanner, shared toolbar in both scopes, recipe list / grid, the filter sheet from the toolbar), Set / Edit targets (entry, manual path with presets and custom grams, estimate path with review, provenance, migration, removal) — all implemented and verified above. Nothing incomplete. Documented policy blocker: no verified surplus for a gain goal, shown as maintenance with the explicit notice (§13.4 D-61, docs/ux/targets-and-estimation.md).
+- Branch `feat/redesign-home-recipes-targets` from `feat/redesign-r1-r6` at `4e78c22`. Commits and the push result are in the final report; the tracked evidence is `verification/` (57 states + 23 variants, 56 runtime, 75 component captures) with `verification/manifest.md`.
+- Running tasks: none. Blockers: none. Next action if resumed: none for this revision; a later pass starts from the reviewed branch.

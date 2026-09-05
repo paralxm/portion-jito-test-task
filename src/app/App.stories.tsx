@@ -27,7 +27,7 @@ export const Launch: Story = {
     await expect(canvas.getByRole('heading', { level: 1, name: 'Home' })).toBeInTheDocument();
     await expect(canvas.getByRole('button', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
     await expect(canvas.getByText('Nothing logged')).toBeVisible();
-    await expect(canvas.getAllByRole('button', { name: 'Set goal' }).length).toBeGreaterThanOrEqual(1);
+    await expect(canvas.getByRole('button', { name: 'Set targets' })).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Log food' }));
     await expect(canvas.getByRole('dialog', { name: 'Log food' })).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: /Enter manually/ }));

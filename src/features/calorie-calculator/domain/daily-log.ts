@@ -11,6 +11,8 @@
  * arithmetic and the entry shape. Unknown values stay unknown — a missing nutrient never
  * becomes zero, and a partial total says so instead of pretending to be complete.
  */
+import type { EstimateRecord } from './energy-estimate';
+import type { MacroPreset } from './macro-presets';
 import { parseAmount, scaleNutrition, type FoodCandidate, type NutritionValues, type Portion } from './calculation';
 import { MEAL_ORDER, type MealType } from './meal';
 
@@ -31,12 +33,24 @@ export interface FoodEntry {
   result: NutritionValues;
 }
 
-/** The optional daily goal: calories, plus optional user-entered macro targets in grams (never derived). */
+/** Where a goal's numbers came from: typed by the person, or produced by the estimate path and saved after review (ledger §13.4). */
+export type GoalSource = 'manual' | 'estimated';
+
+/**
+ * The optional daily targets: calories plus optional macro targets in grams. The grams
+ * are either the person's own (preset `custom`, any of them unset) or the suggested
+ * grams of a named preset derived from the calorie target; `estimate` keeps the inputs
+ * and assumptions an estimated target was produced from, so it can be explained and
+ * recalculated later. Missing provenance on an older record reads as `manual`.
+ */
 export interface DailyGoal {
   kcal: number;
   proteinG?: number | null;
   carbohydratesG?: number | null;
   fatG?: number | null;
+  source?: GoalSource;
+  preset?: MacroPreset;
+  estimate?: EstimateRecord;
 }
 
 /** Local calendar-day key, e.g. 2026-09-04. Never a UTC date. */

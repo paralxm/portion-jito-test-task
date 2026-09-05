@@ -645,3 +645,15 @@ Recorded in `docs/design/hifi-decisions.md` §12 (reference mapping, requirement
 | Components | `DayStrip`, `StreakIndicator`, `PortionForm` + `usePortionDraft`, `PhotoField`, `DiscardChangesDialog`; `RecipeCard` `presentation="tile"`; `MethodOption` `presentation` (row / card) and `tone="quiet"`; `CriteriaToolbar` `hideDietary`; `CalorieBudgetBar` owns the goal action; `NutritionMacros` compact row stacks under 17 rem | Components/*, Patterns/* |
 | Screens | Home (strip, streak, selected day, order), Recipes (discovery), Search (recipe catalogue, sibling scanner), Manual entry step 1 and the new step 2, Food review (R5 hierarchy), Method sheet (R6), Recipe details hero containment | Product compositions/* |
 | Verification | new state stories S01-5, S01-6, S02-11, S06-4, S06-5, O08 and variants; component captures 74–81; walkthrough steps for the strip, the streak, the discovery chips, the catalogue in Search, the two-step manual task with Back/Edit retention, browser Back through the guard, barcode corrections, photo retake, the R6 sheet at 200 % | `verification/manifest.md` |
+
+## 2026-09-05 — Revision H2: Home composition, Recipes discovery, Search alignment, targets
+
+Recorded in `docs/design/hifi-decisions.md` §13. What changed in the system:
+
+| Area | Change | Where |
+| --- | --- | --- |
+| Domain | `energy-estimate.ts` (2023 DRI adult EER equations, unit conversions, the goal policy, the About you draft parser), `macro-presets.ts` (AMDR-bounded shares, Atwater grams, mismatch); `DailyGoal` gains `source`, `preset` and `estimate`; `discovery.ts` gains the featured recipe and the exclusive time preference; `water.ts` gains the reference range | `src/features/calorie-calculator/domain/`, `src/features/recipe-discovery/domain/`, `docs/ux/targets-and-estimation.md` |
+| App shell | the record keeps `waterReferenceMl` and `recipeView` (additive, version 2); goal provenance survives a reload | `src/app/persistence.ts` |
+| Components | `NutritionMacros` `presentation="cards"`; `DailyNutrition` (calorie card + macro cards); `CalorieBudgetBar` without macros, bar before the legend, targets wording; `DayStrip` as one scrolling row (drag, keyboard, Today) without week buttons; `TargetsSheet` + `MacroTargetsEditor` replace `GoalSheet`; `FeaturedRecipeCard`; `RecipeList` `view`; `WaterSheet` reference mode; `WaterTracker` caption | feature components |
+| Screens | Home (order: strip → nutrition → recommendation → meals → water), Recipes (no search field; featured, quick preferences, collections, browse all), Search (icon-only scanner; the shared toolbar in both scopes; recipe list / grid) | `HomeScreen`, `RecipesScreen`, `SearchScreen` |
+| Verification | new stories for the day strip, daily nutrition, the targets sheet, discovery preferences, the Recipes scope's list / grid and the scanner; state rows O09 and O09-2; walkthrough journeys for targets (manual and estimate), the water reference, discovery preferences, the Recipes toolbar and the view switch | `*.stories.tsx`, `scripts/verify/` |

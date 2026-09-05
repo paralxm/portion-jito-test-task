@@ -123,6 +123,7 @@ export function WithFoodSearch({ initialQuery = '', initialView = 'list', initia
   const [scope, setScope] = useState<SearchScope>('food');
   const [query, setQuery] = useState(initialQuery);
   const [view, setView] = useState<ViewMode>(initialView);
+  const [recipeView, setRecipeView] = useState<ViewMode>('list');
   const [filters, setFilters] = useState<FoodFilters>(initialFilters);
   const [criteria, setCriteria] = useState<RecipeCriteria>({});
   const trimmed = query.trim();
@@ -149,6 +150,8 @@ export function WithFoodSearch({ initialQuery = '', initialView = 'list', initia
       criteria={criteria}
       onApplyCriteria={setCriteria}
       onRemoveCriterion={() => {}}
+      recipeView={recipeView}
+      onRecipeViewChange={setRecipeView}
       onOpenFood={onOpenFood}
       onOpenRecipe={() => {}}
       onScanBarcode={onScanBarcode}
