@@ -57,6 +57,14 @@ export const Today: Story = {
     await expect(canvas.queryByRole('button', { name: 'Today' })).toBeNull();
     await expect(canvas.queryByRole('button', { name: /week/ })).toBeNull();
     await expect(canvas.getByText('September 2026')).toBeVisible();
+    // Unselected and future days are text on the canvas; only the selected day is filled.
+    const unselected = getComputedStyle(canvas.getByRole('radio', { name: 'Thursday, September 3' }));
+    const future = getComputedStyle(canvas.getByRole('radio', { name: /Saturday, September 5/ }));
+    const selected = getComputedStyle(canvas.getByRole('radio', { name: 'Friday, September 4, today' }));
+    expect(unselected.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(unselected.borderTopColor).toBe('rgba(0, 0, 0, 0)');
+    expect(future.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(selected.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
   },
 };
 

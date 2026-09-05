@@ -755,6 +755,54 @@ await check(page, 'an estimated target explains its assumptions and offers an ex
 await scoped().getByRole('button', { name: 'Cancel' }).click();
 await page.waitForTimeout(200);
 await check(page, 'Cancel keeps the saved targets', async () => { const t = await visibleText(); return t.includes('799') && t.includes('1,699 kcal'); });
+
+// Targets apply from today until changed: they survive a reload, and an edit made while viewing a past day starts today.
+await page.reload();
+await page.waitForTimeout(400);
+await check(page, 'after a reload the saved targets are still in force (1,699 kcal, estimated)', async () => {
+  const t = await visibleText();
+  await scoped().getByRole('button', { name: 'Edit targets' }).click();
+  await page.waitForTimeout(300);
+  const d = await page.locator('dialog[open]').innerText();
+  await scoped().getByRole('button', { name: 'Cancel' }).click();
+  await page.waitForTimeout(200);
+  return t.includes('1,699 kcal') && d.includes('Recalculate estimate') && d.includes('Applies from today until you change it');
+});
+await scoped().getByRole('radio', { name: /, today$/ }).evaluate((el) => el.previousElementSibling?.click());
+await page.waitForTimeout(300);
+await check(page, 'a past day shows no target of its own (none was in force then)', async () => {
+  const t = await visibleText();
+  return t.includes('Yesterday') && t.includes('No target was set for this day') && (await scoped().getByRole('button', { name: 'Set targets' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'Set targets' }).click();
+await scoped().getByRole('button', { name: /I know my goal/ }).click();
+await scoped().getByRole('textbox', { name: 'Daily calorie target' }).fill('1800');
+await scoped().getByRole('button', { name: 'Save', exact: true }).click();
+await page.waitForTimeout(300);
+await check(page, 'saving while viewing a past day changes nothing for that day', async () => (await visibleText()).includes('No target was set for this day'));
+await scoped().getByRole('button', { name: 'Today', exact: true }).click();
+await page.waitForTimeout(300);
+await check(page, 'the new target is in force from today (1,800 kcal), replacing today’s earlier save', async () => {
+  const t = await visibleText();
+  return t.includes('1,800 kcal') && !t.includes('1,699 kcal');
+});
+await scoped().getByRole('button', { name: 'Edit targets' }).click();
+await page.waitForTimeout(300);
+await scoped().getByRole('button', { name: 'Remove targets' }).click();
+await page.waitForTimeout(300);
+await check(page, 'removing targets applies from today and keeps the entries and water', async () => {
+  const t = await visibleText();
+  return t.includes('900') && t.includes('kcal logged') && (await scoped().getByRole('button', { name: 'Set targets' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Edit water, 1 litre of 2 litres' }).count()) === 1;
+});
+await check(page, 'the stored history keeps every period (the estimate, today’s replacement and the removal) rather than rewriting the past', async () =>
+  page.evaluate(() => {
+    const record = JSON.parse(localStorage.getItem('portion.record'));
+    const today = record.goals[record.goals.length - 1];
+    return Array.isArray(record.goals) && record.goals.length >= 1 && today.goal === null && record.goals.every((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.from));
+  }),
+);
+await setGoal(page, 2000);
+await page.waitForTimeout(300);
 await page.close();
 
 // --- Responsive / enlarged text ----------------------------------------------
@@ -958,6 +1006,11 @@ await page.close();
   await clockPage.clock.install({ time: before });
   await clockPage.goto(base);
   const local = () => clockPage.locator('[data-screen]:not([hidden]), dialog[open]');
+  await local().getByRole('button', { name: 'Set targets' }).click();
+  await local().getByRole('button', { name: /I know my goal/ }).click();
+  await local().getByRole('textbox', { name: 'Daily calorie target' }).fill('2100');
+  await local().getByRole('button', { name: 'Save', exact: true }).click();
+  await clockPage.waitForTimeout(300);
   await local().getByRole('button', { name: 'Add 250 millilitres of water' }).click();
   await clockPage.waitForTimeout(500);
   const shownBefore = await clockPage.locator('[data-screen]:not([hidden])').innerText();
@@ -969,6 +1022,7 @@ await page.close();
     const fmt = (d) => d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
     return shownBefore.includes('250 ml') && shownBefore.includes(fmt(before)) && shownAfter.includes('0 ml') && shownAfter.includes(fmt(after)) && after.getDate() !== before.getDate();
   });
+  await check(clockPage, 'targets saved before midnight stay in force on the new day until changed', async () => shownBefore.includes('2,100 kcal') && shownAfter.includes('2,100 kcal') && shownAfter.includes('Edit targets'));
   await ctx.close();
 }
 

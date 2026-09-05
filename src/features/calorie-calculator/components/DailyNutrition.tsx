@@ -18,8 +18,9 @@ export interface DailyNutritionProps {
 /**
  * Home's daily-nutrition section (ledger §13, after H-REF 1): one coordinated group made
  * of the dominant calorie card and, directly beneath it, the three macro cards — Protein,
- * Carbs and Fat — sharing its outer alignment and width, with close spacing and related
- * surfaces, and no extra wrapper border. A calorie target does not imply macro targets:
+ * Carbs and Fat — sharing its outer alignment, width and surface (canvas, decorative
+ * border, card radius), with close spacing and no extra wrapper border. The calorie card
+ * leads through its 40/48 figure, not a darker fill. A calorie target does not imply macro targets:
  * each macro card shows the logged grams, and its target with its own track only when
  * the person entered that target. Unknown and partial values keep their words.
  */
@@ -34,7 +35,7 @@ export function DailyNutrition({ summary, goal, onSetTargets, pastDay = false, h
       <h2 id="home-nutrition-heading" className="portion-visually-hidden">
         {heading}
       </h2>
-      <Surface tone="surface" border="none" radius="grouped" padding={16} className={styles.calories}>
+      <Surface tone="canvas" border="decorative" radius="card" padding={16} className={styles.calories}>
         <CalorieBudgetBar summary={summary} onSetTargets={onSetTargets} pastDay={pastDay} />
       </Surface>
       <div aria-label="Macronutrients logged">

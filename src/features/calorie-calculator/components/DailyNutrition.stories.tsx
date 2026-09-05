@@ -19,7 +19,7 @@ const meta = {
     docs: {
       description: {
         component: `
-**Purpose.** Home's daily-nutrition section (ledger §13, after H-REF 1): one coordinated group — the dominant calorie card and, directly beneath it, three macro cards sharing its width — with no extra wrapper border. Built on \`ProgressBar\`; it formats and labels the \`DailySummary\` and \`DailyGoal\` it is given and owns no entries, arithmetic or persistence.
+**Purpose.** Home's daily-nutrition section (ledger §13, after H-REF 1): one coordinated group — the calorie card and, directly beneath it, three macro cards sharing its width and its surface (canvas, decorative border, card radius) — with no extra wrapper border; the calorie card leads through its 40/48 figure, not a darker fill. Built on \`ProgressBar\`; it formats and labels the \`DailySummary\` and \`DailyGoal\` it is given and owns no entries, arithmetic or persistence.
 
 **Calorie card.** *Remaining* (target − consumed) while below the target; \`0 kcal remaining\` at it; the excess above it (\`150 kcal over target\`); without a target, or with a partial total, the logged amount itself (\`0 kcal logged\` at first). The one \`Set targets\` / \`Edit targets\` action sits at the top right. With a target the track carries a marker and \`consumed · %\` and \`Target\` are stated beneath it; without one no bar, percentage or remainder is invented, and nothing is inferred from the amount logged so far.
 
@@ -46,6 +46,11 @@ export const FullTargets: Story = {
     await expect(canvas.getByRole('meter', { name: 'Protein against your target' })).toHaveAttribute('aria-valuetext', '24 of 120 g');
     await expect(canvas.getByRole('meter', { name: 'Fat against your target' })).toHaveAttribute('aria-valuetext', '14 of 65 g');
     await expect(canvas.getByRole('button', { name: 'Edit targets' })).toBeVisible();
+    // The calorie card and the macro cards share one surface: the same background and border colour.
+    const calorie = getComputedStyle(canvas.getByRole('button', { name: 'Edit targets' }).closest('section')!.querySelector<HTMLElement>(':scope > *:nth-child(2)')!);
+    const macro = getComputedStyle(canvas.getAllByRole('listitem')[0]);
+    expect(calorie.backgroundColor).toBe(macro.backgroundColor);
+    expect(calorie.borderTopColor).toBe(macro.borderTopColor);
   },
 };
 
