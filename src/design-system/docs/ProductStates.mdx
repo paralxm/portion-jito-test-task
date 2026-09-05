@@ -1,12 +1,12 @@
 import { Meta } from '@storybook/addon-docs/blocks';
 
-<Meta title="Product states/00 Index — the 41 low-fi states" />
+<Meta title="Product states/00 Index — the 51 product states" />
 
-# The 41 low-fi states
+# The 51 product states
 
-Every frame of the Figma low-fidelity section **175:2 “Low-fidelity — Complete Core Journeys”** maps to exactly one story under *Product states*. Each story renders the production screen with deterministic fixtures (baseline `2026-09-04T12:00:00Z`) and is captured at 393 × 852. The design ledger — inventory columns, transition matrix, reference synthesis, content model, asset register and decisions — is `docs/design/hifi-decisions.md`; this page is the Storybook-side index, not a second specification.
+Every frame of the Figma low-fidelity section **175:2 “Low-fidelity — Complete Core Journeys”** maps to exactly one story under *Product states* (41 rows, IDs and nodes preserved), and the 2026-09-05 redesign added five user-visible states for Add-to-meal and water tracking (ledger §10.3). Each story renders the production screen with deterministic fixtures (baseline `2026-09-04T12:00:00Z`) and is captured at 393 × 852. The design ledger — inventory columns, transition matrix, reference decisions, content model, asset register and decisions — is `docs/design/hifi-decisions.md`; this page is the Storybook-side index, not a second specification.
 
-**Verification mode.** *runtime + story*: the state occurs in the real app flow and is also frozen here. *story*: a passive or hard-to-trigger state that the prototype cannot reach honestly (no camera, no failing catalogue recipe, no scriptable keyboard), reproduced deterministically from production code.
+**Verification mode.** *runtime + story*: the state occurs in the real app flow and is also frozen here. *story*: a passive or hard-to-trigger state that the prototype cannot reach honestly (no camera, no failing catalogue recipe, no scriptable keyboard, no simulator controls in the product — ledger D-24), reproduced deterministically from production code.
 
 | # | Portion ID | Figma frame · node | Story (Product states / …) | Mode |
 | --- | --- | --- | --- | --- |
@@ -20,21 +20,21 @@ Every frame of the Figma low-fidelity section **175:2 “Low-fidelity — Comple
 | 8 | S02-4 | Search / Food · request failure · 176:118 | Lane B → S02-4 | runtime + story |
 | 9 | S07-1 | Food review / From search · 176:157 | Lane B → S07-1 | runtime + story |
 | 10 | S07-2 | Food review / Invalid portion · 176:201 | Lane B → S07-2 | runtime + story |
-| 11 | S07-3 | Food review / Replaces current calculation · 176:247 (repurposed: Edit logged entry) | Lane B → S07-3 | runtime + story |
+| 11 | S07-3 | Food review / Replaces current calculation · 176:247 (repurposed: Edit logged entry, now with the meal picker) | Lane B → S07-3 | runtime + story |
 | 12 | S04-1 | Barcode / Scanning · 178:5 | Lane C1 → S04-1 | runtime + story |
 | 13 | S04-2 | Barcode / Code read · lookup pending · 178:20 | Lane C1 → S04-2 | runtime + story |
-| 14 | S04-3 | Barcode / Code not readable · 178:31 | Lane C1 → S04-3 | runtime + story |
-| 15 | S04-4 | Barcode / Product not found · 178:47 | Lane C1 → S04-4 | runtime + story |
-| 16 | S04-5 | Barcode / Lookup service failure · 178:65 | Lane C1 → S04-5 | runtime + story |
+| 14 | S04-3 | Barcode / Code not readable · 178:31 | Lane C1 → S04-3 | story |
+| 15 | S04-4 | Barcode / Product not found · 178:47 | Lane C1 → S04-4 | story |
+| 16 | S04-5 | Barcode / Lookup service failure · 178:65 | Lane C1 → S04-5 | story |
 | 17 | P01 | Conceptual system permission request · 178:81 | Lane C1 → P01 | story |
-| 18 | S04-6 | Barcode / Camera access denied · 178:94 | Lane C1 → S04-6 | runtime + story |
+| 18 | S04-6 | Barcode / Camera access denied · 178:94 | Lane C1 → S04-6 | story |
 | 19 | S07-4 | Food review / From barcode · 178:109 | Lane C1 → S07-4 | runtime + story |
 | 20 | S05-1 | Photo / Capture · 179:5 | Lane C2 → S05-1 | runtime + story |
 | 21 | S05-2 | Photo / Preview · 179:12 | Lane C2 → S05-2 | runtime + story |
 | 22 | S05-3 | Photo / Analysing · 179:21 | Lane C2 → S05-3 | runtime + story |
 | 23 | S05-4 | Photo / Suggested matches · 179:31 | Lane C2 → S05-4 | runtime + story |
 | 24 | S05-5 | Photo / No usable match · 179:57 | Lane C2 → S05-5 | story |
-| 25 | S05-6 | Photo / Analysis failure · 179:70 | Lane C2 → S05-6 | runtime + story |
+| 25 | S05-6 | Photo / Analysis failure · 179:70 | Lane C2 → S05-6 | story |
 | 26 | S07-5 | Food review / From photo · estimate · 179:81 | Lane C2 → S07-5 | runtime + story |
 | 27 | S06-1 | Manual entry / Empty · 180:5 | Lane D → S06-1 | runtime + story |
 | 28 | S06-2 | Manual entry / Filled · keyboard inset · 180:43 | Lane D → S06-2 | story |
@@ -49,9 +49,19 @@ Every frame of the Figma low-fidelity section **175:2 “Low-fidelity — Comple
 | 37 | S08-2 | Recipe details / Loading · 181:289 | Lane E → S08-2 | runtime + story |
 | 38 | S08-1 | Recipe details / Loaded · 181:237 | Lane E → S08-1 | runtime + story |
 | 39 | S08-3 | Recipe details / Unavailable · 181:317 | Lane E → S08-3 | story |
-| 40 | S08-4 | Recipe details / No photo · long title · partial nutrition (crop) · 181:350 | Lane E → S08-4 | runtime + story |
+| 40 | S08-4 | Recipe details / No photo · long title · partial nutrition (crop) · 181:350 | Lane E → S08-4 | story (the catalogue recipe now has a photo, D-28) |
 | 41 | S02-6 | Search / Recipes · no matches · 181:193 | Lane E → S02-6 | runtime + story |
+| 42 | O05 | Add to meal / From food review (redesign 2026-09-05) | Lane B → O05 | runtime + story |
+| 43 | O05-2 | Add to meal / From recipe details (redesign 2026-09-05) | Lane E → O05-2 | runtime + story |
+| 44 | S01-4 | Home / Water quick-add confirmation with Undo (redesign 2026-09-05) | Lane A → S01-4 | runtime + story |
+| 45 | O06 | Water sheet / Add (redesign 2026-09-05) | Lane A → O06 | runtime + story |
+| 46 | O06-2 | Water sheet / Edit today’s total (redesign 2026-09-05) | Lane A → O06-2 | runtime + story |
+| 47 | S02-7 | Search / Food · first use: the catalogue at once (Stage B 2026-09-05) | Lane B → S02-7 | runtime + story |
+| 48 | S02-8 | Search / Food · Recently added above Explore foods (Stage B) | Lane B → S02-8 | runtime + story |
+| 49 | S02-9 | Search / Food · grid view (Stage B) | Lane B → S02-9 | runtime + story |
+| 50 | O07 | Food filters (overlay) (Stage B) | Lane B → O07 | runtime + story |
+| 51 | S02-10 | Search / Food · Drinks only applied (Stage B) | Lane B → S02-10 | runtime + story |
 
 Excluded on purpose: **176:5** (a board reference behind O01) and **185:2** (S01-3, a superseded 320 px Home composition outside this section; the 320 px capture of S01-2 is the narrow witness).
 
-Beyond the 41 baseline captures, each lane carries representative variants at 320 and 430 px, at 200 % text, and with the iPhone 16 safe-area fixture (59 / 34) for the root, focused and sheet families.
+Beyond the 51 baseline captures, each lane carries representative variants at 320 and 430 px, at 200 % text, with the iPhone 16 safe-area fixture (59 / 34) for the root, focused and sheet families, and under reduced motion for the budget, water and scanner motion.

@@ -1,0 +1,17 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.legend {
+  padding: 0;
+}
+
+.hint {
+  margin-block-start: calc(var(--portion-spacing-label-to-control) * -1 + var(--portion-spacing-control-to-helper));
+}

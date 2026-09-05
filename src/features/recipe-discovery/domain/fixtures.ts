@@ -3,11 +3,11 @@
  * others are fictional recipes with synthetic values used to exercise filtering, long
  * titles, missing data and the no-photo treatment. None is nutrition advice.
  *
- * Photographs are local, licensed assets registered in docs/design/hifi-decisions.md §5.
- * The traybake and the long-title pasta deliberately have no photo: they exercise the
- * No photo treatment on cards (S03-1) and details (S08-4).
+ * Photographs are local, licensed assets registered in docs/design/hifi-decisions.md §5;
+ * every catalogue recipe has one (ledger D-28). The No photo treatment is exercised by
+ * stories with a fixture whose image is removed (S08-4), never by the catalogue.
  */
-import { chickenSaladPhoto, lentilSoupPhoto, tofuStirFryPhoto } from '../../../assets/images';
+import { chickenSaladPhoto, lentilSoupPhoto, pastaRoastedVegetablesPhoto, tofuStirFryPhoto, vegetableTraybakePhoto } from '../../../assets/images';
 import type { Recipe } from './matching';
 
 /** A neutral, clearly artificial placeholder image (not a photograph), kept for component stories. */
@@ -51,6 +51,7 @@ export const recipeCatalogue: readonly Recipe[] = [
   {
     id: 'recipe-traybake',
     title: 'Roasted vegetable and chickpea traybake',
+    imageUrl: vegetableTraybakePhoto,
     servingGrams: 350,
     energyKcal: 420,
     proteinG: 14,
@@ -65,6 +66,7 @@ export const recipeCatalogue: readonly Recipe[] = [
   {
     id: 'recipe-pasta-long',
     title: 'Wholegrain pasta with roasted vegetables and tahini dressing',
+    imageUrl: pastaRoastedVegetablesPhoto,
     servingGrams: 400,
     energyKcal: 610,
     proteinG: 19,

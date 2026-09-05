@@ -1,0 +1,138 @@
+.section {
+  min-inline-size: 0;
+}
+
+/* The card is the container its row queries; the row reflows when the card is narrow. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-12);
+  container-type: inline-size;
+}
+
+/* Two sibling controls side by side; the content control takes the remaining width. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+/* The content control: glyph, label and figure. Its hit area is the whole left part of
+   the row; the ring is drawn with the standard offset because the card has room for it. */
+.content {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+  min-block-size: var(--portion-size-target-minimum);
+  margin-block: calc(var(--portion-ref-space-4) * -1);
+  padding: var(--portion-ref-space-4);
+  margin-inline-start: calc(var(--portion-ref-space-4) * -1);
+  border: 0;
+  border-radius: var(--portion-radius-control);
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+@media (hover: hover) {
+  .content:hover {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.content:active {
+  background: var(--portion-color-background-sunken);
+}
+
+/* The water glyph on its tinted disc: a labelled identifier beside the word "Water". */
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--portion-ref-space-32);
+  block-size: var(--portion-ref-space-32);
+  border-radius: var(--portion-radius-round);
+  background: var(--portion-color-water-surface);
+  color: var(--portion-color-water-text);
+  flex-shrink: 0;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+  flex: 1 1 auto;
+}
+
+.figure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--portion-ref-space-4);
+  flex-wrap: wrap;
+}
+
+.figure > * {
+  white-space: nowrap;
+}
+
+/* Under 18 rem of card width (enlarged text at 320) the quick add drops under the content
+   control at full width; the two stay siblings. */
+@container (max-width: 18rem) {
+  .row {
+    flex-wrap: wrap;
+  }
+
+  .quickAdd {
+    inline-size: 100%;
+  }
+}
+
+.chevron {
+  display: inline-flex;
+  color: var(--portion-color-text-secondary);
+}
+
+/* Quick add: a tinted water control at the 48 px target with the water text colour. */
+.quickAdd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--portion-ref-space-4);
+  flex-shrink: 0;
+  min-block-size: var(--portion-size-target-minimum);
+  padding-inline: var(--portion-ref-space-12);
+  border: var(--portion-border-width-default) solid var(--portion-color-water-surface);
+  border-radius: var(--portion-radius-control);
+  background: var(--portion-color-water-surface);
+  color: var(--portion-color-water-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+@media (hover: hover) {
+  .quickAdd:hover {
+    border-color: var(--portion-color-water-accent);
+  }
+}
+
+.quickAdd:active {
+  border-color: var(--portion-color-water-text);
+}
+
+.bar {
+  min-inline-size: 0;
+}
+
+.note {
+  min-inline-size: 0;
+}

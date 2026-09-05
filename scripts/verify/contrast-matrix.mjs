@@ -40,7 +40,8 @@ const hex = (c) => `#${[c.r, c.g, c.b].map((n) => Math.round(n).toString(16).pad
 /** Composited foreground/background pair and its WCAG 2.x ratio. Translucent colours are composited, never treated as opaque. */
 function pair(fgPath, bgPath) {
   let bg = rgba(bgPath);
-  if (bg.a < 1) bg = composite(bg, rgba('semantic.color.background.canvas'));
+  // Translucent backgrounds composite over the canvas, except the camera chips, which only ever sit on the stage.
+  if (bg.a < 1) bg = composite(bg, rgba(bgPath.includes('camera.') ? 'semantic.color.camera.stage' : 'semantic.color.background.canvas'));
   let fg = rgba(fgPath);
   if (fg.a < 1) fg = composite(fg, bg);
   const l1 = luminance(fg);
@@ -68,6 +69,8 @@ const PAIRS = [
   ['Secondary button pressed label', 'action.pressed', 'action.secondary-surface', 4.5, ''],
   ['Text button hover', 'action.primary', 'action.secondary-surface', 4.5, 'text button hover fill'],
   ['Selected chip, applied chip, count badge', 'action.pressed', 'action.selected-surface', 4.5, ''],
+  ['View toggle selected option (label and glyph) on the selected surface', 'action.primary', 'action.selected-surface', 4.5, 'ViewToggle: List / Grid'],
+  ['View toggle unselected option on the sunken track', 'text.primary', 'background.sunken', 4.5, 'ViewToggle'],
   ['Selected chip boundary', 'action.primary', 'background.canvas', 3, 'non-text boundary'],
   ['Destructive button label', 'feedback.error.foreground', 'feedback.error.surface', 4.5, 'tinted destructive button'],
   ['Error message text', 'feedback.error.foreground', 'feedback.error.surface', 4.5, 'InlineMessage error'],
@@ -89,11 +92,24 @@ const PAIRS = [
   ['Selected navigation surface against the group surface', 'navigation.selected-surface', 'navigation.surface', 1, 'informational: selection is also carried by the bold glyph and the label'],
   ['Unselected segment label on the sunken track', 'text.primary', 'background.sunken', 4.5, 'segmented-label 14/20 500'],
   ['Disabled selected segment label on the disabled surface', 'state.disabled.text', 'state.disabled.surface', 1, 'informational: exempt inactive state'],
-  ['Progress indicator on track', 'progress.indicator', 'progress.track', 3, 'ProgressRing arc against its track'],
-  ['Progress indicator on surface', 'progress.indicator', 'background.surface', 3, 'ring on the Home group'],
+  ['Progress indicator on track', 'progress.indicator', 'progress.track', 3, 'calorie budget fill against its track'],
+  ['Progress indicator on surface', 'progress.indicator', 'background.surface', 3, 'budget fill on the Home group'],
+  ['Progress marker on indicator', 'progress.marker', 'progress.indicator', 0, 'goal tick over the fill in the reached/over states: separated by its 1 px canvas halo, and the words state the excess (informational)'],
+  ['Progress marker on track', 'progress.marker', 'progress.track', 3, 'goal tick over the track'],
   ['Progress track on surface', 'progress.track', 'background.surface', 0, 'non-essential guide'],
-  ['Ring centre figure on surface', 'text.primary', 'background.surface', 4.5, 'CalorieProgressRing number'],
-  ['Ring caption on surface', 'text.secondary', 'background.surface', 4.5, 'kcal remaining'],
+  ['Budget figure on surface', 'text.primary', 'background.surface', 4.5, 'CalorieBudgetBar number'],
+  ['Budget caption on surface', 'text.secondary', 'background.surface', 4.5, 'kcal remaining'],
+  ['Water text on canvas', 'water.text', 'background.canvas', 4.5, 'water status line, quick-add label on the water surface (see next)'],
+  ['Water text on water surface', 'water.text', 'water.surface', 4.5, 'quick-add label and the drop glyph disc'],
+  ['Water accent on canvas', 'water.accent', 'background.canvas', 3, 'water fill (non-text)'],
+  ['Water accent on water track', 'water.accent', 'water.track', 3, 'water fill against its track'],
+  ['Brand mark on canvas', 'brand.mark', 'background.canvas', 3, 'the portion dot (decorative; informational check)'],
+  ['Camera stage text on stage', 'camera.stage-text', 'camera.stage', 4.5, 'guidance and captions on the dark viewfinder'],
+  ['Chip text on chip surface over stage', 'camera.stage-text', 'camera.chip-surface', 4.5, 'status chip (translucent fill composited on the stage)'],
+  ['Chip text on chip surface over image', 'camera.stage-text', 'camera.chip-surface-on-image', 4.5, 'status chip over a captured frame (composited on the stage as the darkest plausible ground; a photo can only be lighter than a black frame is not guaranteed, so the 72 % ink is the guard)'],
+  ['Detected frame on stage', 'camera.detected', 'camera.stage', 3, 'corners and scan line once a code is read'],
+  ['Stage text on detected chip', 'camera.stage', 'camera.detected', 4.5, 'the Code read chip uses the stage colour as its text'],
+  ['Camera frame on stage', 'camera.frame', 'camera.stage', 3, 'focus corners and circular guide while scanning'],
   ['Nutrition marker: energy on canvas', 'nutrition.energy.accent', 'background.canvas', 3, 'labelled category marker'],
   ['Nutrition marker: protein on canvas', 'nutrition.protein.accent', 'background.canvas', 3, ''],
   ['Nutrition marker: carbohydrates on canvas', 'nutrition.carbohydrates.accent', 'background.canvas', 3, ''],

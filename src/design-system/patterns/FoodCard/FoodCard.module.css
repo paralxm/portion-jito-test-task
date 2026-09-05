@@ -1,0 +1,79 @@
+/* One tappable object: the card is the boundary, the photo sits inside it at the control
+   radius (concentric with the card's 12 px corner minus its 12 px padding step), and the
+   name's ::after stretches the hit area over the whole card. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-12);
+  padding: var(--portion-ref-space-12);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-canvas);
+  min-inline-size: 0;
+  transition: background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
+}
+
+.media {
+  border-radius: var(--portion-radius-control);
+  overflow: hidden;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}
+
+.titleRow {
+  min-inline-size: 0;
+}
+
+.titleButton {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.titleButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.titleButton:focus-visible {
+  outline: none;
+}
+
+.card:has(.titleButton:focus-visible) {
+  outline: var(--portion-focus-ring-width) solid var(--portion-focus-ring-color);
+  outline-offset: var(--portion-focus-ring-offset);
+}
+
+@media (hover: hover) {
+  .card:has(.titleButton:hover) {
+    background: var(--portion-color-background-surface);
+  }
+}
+
+.card:has(.titleButton:active) {
+  background: var(--portion-color-background-sunken);
+}
+
+/* The value and its basis stay one unit: the figure first, the basis beside it while it
+   fits and beneath it otherwise. */
+.figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--portion-ref-space-8);
+  margin-block-start: var(--portion-ref-space-4);
+}

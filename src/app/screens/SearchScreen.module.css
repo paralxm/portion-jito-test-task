@@ -5,12 +5,37 @@
   min-inline-size: 0;
 }
 
-.list {
+/* The compact toolbar under the field: the presentation toggle first, the filter action
+   at the end. It wraps rather than shrinking either control. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.chips {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.sections {
+  display: flex;
   flex-direction: column;
-  gap: var(--portion-ref-space-4);
+  gap: var(--portion-spacing-section);
+  min-inline-size: 0;
+}
+
+.subsection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
   min-inline-size: 0;
 }

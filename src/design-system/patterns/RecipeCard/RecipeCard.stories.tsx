@@ -3,12 +3,11 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { Stack } from '../../primitives/layout/Stack';
 import { withRootFontSize, expectNoHorizontalOverflow } from '../../storybook/decorators';
+import { lentilSoupPhoto } from '../../../assets/images';
 import { RecipeCard } from './RecipeCard';
 
-/** A clearly artificial placeholder — the repository ships no photographs. */
-const placeholder =
-  'data:image/svg+xml;utf8,' +
-  encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#e4e8ec"/><circle cx="200" cy="150" r="70" fill="#c2c7cd"/><circle cx="200" cy="150" r="46" fill="#f7f8fa"/></svg>');
+/** A registered local photograph (ledger §5); evidence of appearance only. */
+const placeholder = lentilSoupPhoto;
 
 const meta = {
   title: 'Patterns/RecipeCard',

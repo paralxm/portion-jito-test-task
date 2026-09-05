@@ -3,12 +3,15 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { NavigationBar, type Destination } from '../../design-system';
 import { withIPhone16PortraitSafeAreas, withRootFontSize, expectNoHorizontalOverflow } from '../../design-system/storybook/decorators';
+import { foodCatalogue } from '../../features/calorie-calculator/domain/fixtures';
+import { NO_FOOD_FILTERS } from '../../features/calorie-calculator/domain/food-search';
 import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import { filterRecipes, searchRecipes, type Recipe, type RecipeCriteria } from '../../features/recipe-discovery/domain/matching';
 import { RecipeDetailsScreen, type RecipeDetailsState } from '../../features/recipe-discovery/screens/RecipeDetailsScreen';
 import { RecipesScreen } from '../../features/recipe-discovery/screens/RecipesScreen';
 import { SearchScreen } from '../screens/SearchScreen';
-import { detailsCriteria, filteredCriteria, impossibleCriteria, longTitleNoPhotoPartial } from './stateFixtures';
+import { WithAddToMeal } from './harnesses';
+import { detailsCriteria, filteredCriteria, impossibleCriteria, longTitleNoPhotoPartial, recipeCandidate, servingPortion } from './stateFixtures';
 
 const nav = (selected: Destination) => <NavigationBar selected={selected} onSelect={fn()} onLogFood={fn()} />;
 const idle = { status: 'idle', results: [] } as const;
@@ -20,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Low-fi lane E (181:2): suitability is explained only through the criteria the user selected, and finding a suitable recipe completes the task. Covers filtered results, the filter sheet and its invalid-range state, Search’s Recipes scope with results and with no matches, and the four recipe-details states.',
+          'Low-fi lane E (181:2): suitability is explained only through the criteria the user selected, and finding a suitable recipe completes the task. Covers filtered results, the filter sheet (opened from the field’s trailing filter action, D-27) and its invalid-range state, Search’s Recipes scope with results and with no matches, the four recipe-details states with the title-side Add, and the Add-to-meal sheet for a recipe added by the 2026-09-05 redesign (O05-2).',
       },
     },
   },
@@ -42,12 +45,19 @@ const recipeSearch = (query: string, criteria: RecipeCriteria) => (
     onSubmit={fn()}
     onClear={fn()}
     food={idle}
+    catalogue={foodCatalogue}
+    recents={[]}
+    foodFilters={NO_FOOD_FILTERS}
+    onApplyFoodFilters={fn()}
+    foodView="list"
+    onFoodViewChange={fn()}
     recipes={{ status: 'ready', results: filterRecipes(searchRecipes(recipeCatalogue, query), criteria) }}
     criteria={criteria}
     onApplyCriteria={fn()}
     onRemoveCriterion={fn()}
     onOpenFood={fn()}
     onOpenRecipe={fn()}
+    onScanBarcode={fn()}
     onRetry={fn()}
     onEnterManually={fn()}
     navigation={nav('search')}
@@ -55,7 +65,7 @@ const recipeSearch = (query: string, criteria: RecipeCriteria) => (
 );
 
 const details = (state: RecipeDetailsState, criteria: RecipeCriteria = detailsCriteria, selected: Destination = 'recipes') => (
-  <RecipeDetailsScreen state={state} criteria={criteria} onBack={fn()} onRetry={fn()} navigation={nav(selected)} />
+  <RecipeDetailsScreen state={state} criteria={criteria} onBack={fn()} onRetry={fn()} onAdd={fn()} navigation={nav(selected)} />
 );
 
 export const S03_2: Story = {
@@ -168,7 +178,7 @@ export const S08_1: Story = {
     docs: {
       description: {
         story:
-          'Purpose: serving basis, nutrition, ingredients and steps; the origin tab stays selected; evaluating the recipe completes the task. Entry: load succeeded. Fixture: fixture R (Lentil soup, 1 serving = 300 g, 450 kcal) with criteria under 500 kcal and 20 g protein or more, both met. Primary action: Show all nutrition (disclosure). Secondary: Back to results. Limitation: none.',
+          'Purpose: serving basis, nutrition, ingredients and steps; the origin tab stays selected; evaluating the recipe completes the task. Entry: load succeeded. Fixture: fixture R (Lentil soup, 1 serving = 300 g, 450 kcal) with criteria under 500 kcal and 20 g protein or more, both met. Primary action: Add (beside the title) → O05-2. Secondary: Show all nutrition (disclosure); Back to results. Limitation: none.',
       },
     },
   },
@@ -180,6 +190,38 @@ export const S08_1: Story = {
     await expect(canvas.getAllByRole('img', { name: 'Met' })).toHaveLength(2);
     await expect(canvas.getByText('450')).toBeVisible();
     await expect(canvas.getByRole('heading', { name: 'Ingredients' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Add Lentil soup to a meal' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Recipes' })).toHaveAttribute('aria-current', 'page');
+  },
+};
+
+// ---- Row added by the 2026-09-05 redesign (ledger §10.3) ------------------------------
+
+export const O05_2: Story = {
+  name: 'O05-2 — Add to meal / From recipe details',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the same Add-to-meal sheet for a recipe: servings instead of grams, the thumbnail when the recipe has a photo, the per-serving basis. Entry: Add beside the title on S08-1. Fixture: fixture R (1 serving = 300 g, 450 kcal); dinner preselected (story fixture). Primary action: Add to dinner → one recipe entry, Home. Secondary: Cancel → S08-1 unchanged. Limitation: the story composes the details screen and the sheet the way App does.',
+      },
+    },
+  },
+  render: () => (
+    <WithAddToMeal candidate={recipeCandidate} portion={servingPortion} meal="dinner" hint="Suggested for this time of day. Change it if you like." onConfirm={fn()}>
+      {details({ status: 'loaded', recipe: fixtureR })}
+    </WithAddToMeal>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const dialog = canvas.getByRole('dialog', { name: 'Add to meal' });
+    await expect(within(dialog).getByRole('radio', { name: 'Dinner' })).toBeChecked();
+    await expect(within(dialog).getByLabelText('Servings')).toHaveValue('1');
+    await expect(within(dialog).getByText('450')).toBeVisible();
+    await userEvent.clear(within(dialog).getByLabelText('Servings'));
+    await userEvent.type(within(dialog).getByLabelText('Servings'), '2');
+    await expect(within(dialog).getByText('900')).toBeVisible();
+    await expect(within(dialog).getByRole('button', { name: 'Add to dinner' })).toBeEnabled();
   },
 };
 
@@ -208,7 +250,7 @@ export const S08_4: Story = {
     docs: {
       description: {
         story:
-          'Purpose: a missing image does not block content, a long title wraps, and a missing nutrient is named as unknown rather than zero. Entry: a loaded recipe with those properties. Fixture: the long-title pasta recipe without a photo and with protein not available, under a 10 g protein filter. Primary action: as S08-1. Limitation: the partial-nutrition combination is a story fixture; the runtime pasta recipe has known protein.',
+          'Purpose: a missing image does not block content, a long title wraps, and a missing nutrient is named as unknown rather than zero. Entry: a loaded recipe with those properties. Fixture: the long-title pasta recipe with its photo removed and protein not available, under a 10 g protein filter. Primary action: as S08-1. Limitation: story fixture — the runtime pasta recipe has a licensed photo (D-28) and known protein; the fallback frame appears in the runtime only for a failed image.',
       },
     },
   },

@@ -260,7 +260,7 @@ export const IPhone16PortraitSafeAreaReference: Story = {
   render: () => (
     <IPhone16PortraitReviewFrame>
       <RootScreenLayout
-        header={<AppHeader title="Safe-area reference" showWordmark />}
+        header={<AppHeader variant="root" title="Safe-area reference" context="Today · Sep 4" />}
         navigation={<NavigationBar selected="home" onSelect={() => undefined} onLogFood={() => undefined} />}
       >
         <Surface tone="surface" border="decorative" radius="card" padding={16}>

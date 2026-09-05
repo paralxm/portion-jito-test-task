@@ -1,0 +1,105 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-section-title-to-content);
+  min-inline-size: 0;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+}
+
+/* The grouped surface clips its rows to its 16 radius; entries sit on the canvas inside it. */
+.group {
+  overflow: hidden;
+}
+
+.meal {
+  min-inline-size: 0;
+}
+
+.meal + .meal {
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+/* Header row: indicator, name, subtotal, add action. Min height keeps the 48 px target.
+   When the row cannot hold them side by side (enlarged text at 320) the subtotal and the
+   action wrap under the name instead of overlapping it. */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--portion-ref-space-8) var(--portion-ref-space-12);
+  min-block-size: 56px;
+  padding-block: var(--portion-ref-space-8);
+  padding-inline: var(--portion-spacing-page-inset);
+}
+
+/* A 10 px dot (its own fixed size, not spacing): hollow for an empty meal, filled once
+   something is logged. Always paired with the subtotal or the add action. */
+.indicator {
+  inline-size: 10px;
+  block-size: 10px;
+  border-radius: var(--portion-radius-round);
+  border: var(--portion-border-width-indicator) solid var(--portion-color-border-control);
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.indicator[data-populated] {
+  border-color: var(--portion-color-action-primary);
+  background: var(--portion-color-action-primary);
+}
+
+.name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.subtotal {
+  white-space: nowrap;
+}
+
+.addMore {
+  color: var(--portion-color-action-primary);
+  /* The 48 px target overlaps the row's inset so the glyph aligns with the row edge. */
+  margin-inline-end: calc(var(--portion-ref-space-12) * -1);
+}
+
+.add {
+  margin-inline-end: calc(var(--portion-ref-space-12) * -1);
+  margin-inline-start: auto;
+}
+
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+/* Entry rows reuse the food-row anatomy; the last row drops its own divider so the
+   meal's hairline is the only separator. */
+.entries > li:last-child .entry button {
+  border-block-end: 0;
+}
+
+/* A just-added entry: a brief tinted surface that fades on the disclosure token. */
+.entry[data-highlighted] button {
+  animation: entry-added var(--portion-motion-transition-disclosure) var(--portion-motion-easing-standard) 1 both;
+  animation-duration: calc(var(--portion-motion-transition-disclosure) * 8);
+}
+
+@keyframes entry-added {
+  from {
+    background: var(--portion-color-action-selected-surface);
+  }
+  to {
+    background: var(--portion-color-background-canvas);
+  }
+}

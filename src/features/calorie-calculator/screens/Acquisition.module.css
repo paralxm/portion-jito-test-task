@@ -1,45 +1,86 @@
-/* Shared by the barcode and photo steps. The camera is simulated in this prototype:
-   the viewfinder is a neutral region with a frame, never a fake video feed. */
+/* Shared by the barcode and photo steps. The camera is simulated in this prototype: the
+   shared CameraStage shows fixture media, never a fake live feed. */
 
-.viewfinder {
+/* Guidance under the stage: a compact title and one supporting line. */
+.guidance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-title-to-secondary);
+  min-inline-size: 0;
+}
+
+/* Fixture media on the stage: a drawn sample barcode (bars from a repeating gradient),
+   on a white label so it reads as a printed code. Its size is that of the guide. */
+.sampleBarcode {
+  inline-size: 60%;
+  block-size: 46%;
+  padding: var(--portion-ref-space-8) var(--portion-ref-space-12);
+  border-radius: var(--portion-radius-control-compact);
+  background:
+    repeating-linear-gradient(
+      to right,
+      var(--portion-color-camera-stage) 0 2px,
+      transparent 2px 4px,
+      var(--portion-color-camera-stage) 4px 7px,
+      transparent 7px 9px,
+      var(--portion-color-camera-stage) 9px 10px,
+      transparent 10px 13px
+    )
+    content-box,
+    var(--portion-color-camera-stage-text);
+}
+
+/* The shutter: a 72 px circular control (above the 56 px action minimum) with the camera
+   glyph and its visible label beneath, centred under the stage. */
+.shutterRow {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.shutter {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: var(--portion-ref-space-12);
-  aspect-ratio: 4 / 3;
-  margin-inline: calc(var(--portion-spacing-page-inset) * -1);
-  padding: var(--portion-ref-space-24);
-  background: var(--portion-color-background-sunken);
-  text-align: center;
+  gap: var(--portion-ref-space-4);
+  inline-size: 72px;
+  block-size: 72px;
+  padding: 0;
+  border: var(--portion-border-width-indicator) solid var(--portion-color-action-primary);
+  border-radius: var(--portion-radius-round);
+  background: var(--portion-color-action-primary);
+  color: var(--portion-color-text-on-action);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard),
+    border-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
 }
 
-.frame {
-  inline-size: 70%;
-  max-inline-size: 240px;
-  aspect-ratio: 3 / 2;
-  border: 2px dashed var(--portion-color-border-control);
-  border-radius: var(--portion-radius-structure);
+/* The label lives inside the control but at the caption's smallest allowed size is too
+   small for a button label, so it sits outside the circle visually. */
+.shutter > span {
+  position: absolute;
+  transform: translateY(calc(72px / 2 + var(--portion-ref-space-12)));
+  color: var(--portion-color-text-primary);
+  white-space: nowrap;
 }
 
-.frame[data-paused] {
-  border-style: solid;
-  border-color: var(--portion-color-action-primary);
+.shutterRow {
+  padding-block-end: var(--portion-ref-space-24);
 }
 
-.preview {
-  aspect-ratio: 4 / 3;
-  margin: 0;
-  margin-inline: calc(var(--portion-spacing-page-inset) * -1);
-  background: var(--portion-color-background-sunken);
-  overflow: hidden;
+@media (hover: hover) {
+  .shutter:hover {
+    background: var(--portion-color-action-hover);
+    border-color: var(--portion-color-action-hover);
+  }
 }
 
-.previewImage {
-  display: block;
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: cover;
+.shutter:active {
+  background: var(--portion-color-action-pressed);
+  border-color: var(--portion-color-action-pressed);
 }
 
 .actions {
@@ -64,23 +105,7 @@
   gap: var(--portion-ref-space-8);
 }
 
-/* Prototype controls are visibly separate from product UI: dashed boundary, plain
-   secondary text, and a legend that says what they are. */
-.demo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--portion-ref-space-8);
-  margin: 0;
-  padding: var(--portion-spacing-card-padding);
-  border: var(--portion-border-width-default) dashed var(--portion-color-border-control);
-  border-radius: var(--portion-radius-grouped);
-  min-inline-size: 0;
-}
-
-.demo > legend {
-  padding: 0;
-}
-
+/* Alternate methods beneath the stage: small text actions in a wrapping row. */
 .demoActions {
   display: flex;
   flex-wrap: wrap;

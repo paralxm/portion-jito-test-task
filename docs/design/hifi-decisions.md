@@ -1,6 +1,6 @@
 # Portion Hi-Fi decisions ledger
 
-Updated: 2026-09-04. Branch: `feat/hifi-screens` (from `main` at `a7c76c4`). Owner of this file: the Hi-Fi product pass. It is the compact, resumable record of the 41-state inventory, the transition model, the reference synthesis, the content model, the asset register and every material interpretation. Product truth stays in `PRODUCT.md`; behaviour stays in `docs/ux/`; visual composition stays in `DESIGN.md`. This ledger records how those were applied, not a second specification.
+Updated: 2026-09-05 (Stage B close-out, §11.7; Stage A close-out, §10.9). Baseline pass: 2026-09-04. Branch: `feat/hifi-screens` (from `main` at `a7c76c4`). Owner of this file: the Hi-Fi product pass. It is the compact, resumable record of the state inventory (41 rows in the baseline pass, 46 after the §10 redesign, 51 after Stage B §11), the transition model, the reference synthesis, the content model, the asset register and every material interpretation. Product truth stays in `PRODUCT.md`; behaviour stays in `docs/ux/`; visual composition stays in `DESIGN.md`. This ledger records how those were applied, not a second specification.
 
 ## 0. Sources read for this pass (in the required order)
 
@@ -15,7 +15,7 @@ Figma, read-only through the connected MCP:
 
 Evidence limits: the low-fi interiors are text-free placeholder geometry (board header 175:5/175:6: “Placeholder bars mean omitted content; loading is drawn separately”), so wording, wrapping and semantics come from the contracts and this ledger, never from bar widths. Prototype reactions were not executed in Figma; the arrows are the connector evidence.
 
-## 1. Inventory — exactly 41 rows
+## 1. Inventory — the 41 baseline rows (count superseded: §10.3 holds the 46-row inventory)
 
 Count: Lane A 4 + Lane B 7 + Lane C1 8 + Lane C2 7 + Lane D 6 + Lane E 9 = **41**. Excluded on purpose: 176:5 “Origin beneath — the invoking screen (board reference)” (a board aid behind O01, not a state) and every Label/Caption/Lane-title frame. **S01-3 (185:2)** sits outside section 175:2; the audit (F-03) records it as a superseded current-calculation composition, so it is not an inventory row. Its intent — a 320 px witness of S01-2 — is covered by the 320 px captures of S01-2.
 
@@ -242,12 +242,27 @@ Register (filled in §8 after acquisition; every row must have a verifiable item
 | chicken-salad | `src/assets/images/recipes/chicken-salad.webp` | `recipe-chicken-salad` | Unsplash | Zayed Ahmed Zadu (`/@zayed_ahmed_zadu`) | https://unsplash.com/photos/grilled-chicken-salad-with-vegetables-and-nuts-top-view-bly5KOy6zNM | https://unsplash.com/license | 2026-09-04 | 1200 × 900 centre crop; 16:9 hero by cover | empty alt |
 | tofu-stir-fry | `src/assets/images/recipes/tofu-stir-fry.webp` | `recipe-tofu` | Unsplash | tommao wang (`/@tommaomaoer`) | https://unsplash.com/photos/pan-fried-golden-tofu-with-green-vegetables-in-a-white-bowl-HUc9rHGfgM4 | https://unsplash.com/license | 2026-09-04 | 1200 × 900 centre crop; 16:9 hero by cover | empty alt |
 | sample-capture | `src/assets/images/foods/sample-capture.webp` | the photo flow’s captured frame (S05-2…S05-6), a rice bowl | Unsplash | Shashi Chaturvedula (`/@thephotographermom`) | https://unsplash.com/photos/cooked-rice-with-green-peas-and-carrots-on-stainless-steel-bowl-oYvZ-stypr4 | https://unsplash.com/license | 2026-09-04 | 1200 × 900 centre crop (4:3 preview) | “Sample image standing in for your photo” — it carries the meaning that this is a sample, not the user’s food |
-| — (fallback) | — | `recipe-traybake` | — | — | — | — | — | intentional **No photo** | the only licensed candidates found were either Unsplash+ (paid) or depicted a different dish (a skillet with bread), so the slot stays honest |
-| — (fallback) | — | `recipe-pasta-long` | — | — | — | — | — | intentional **No photo** (the S03-1 / S08-4 no-photo case) | — |
+| vegetable-traybake | `src/assets/images/recipes/vegetable-traybake.webp` | `recipe-traybake` (“Roasted vegetable and chickpea traybake”; the photo shows roasted peppers, aubergine and cauliflower on a tray — chickpeas are not visible, so the image is appearance only) | Pexels | Anthony Rahayel (`/@anthony-rahayel-125801377`) | https://www.pexels.com/photo/36367576/ | https://www.pexels.com/license/ | 2026-09-05 | Pexels CDN centre crop 1200 × 900 (`auto=compress&cs=tinysrgb&w=1200&h=900&fit=crop`), encoded to WebP q0.72 by Chromium (`.verification/to-webp.mjs`, no dependency added); 16:9 hero by `object-fit: cover` | empty alt beside the visible title |
+| pasta-roasted-vegetables | `src/assets/images/recipes/pasta-roasted-vegetables.webp` | `recipe-pasta-long` (“Wholegrain pasta with roasted vegetables and tahini dressing”; penne with courgette and peppers on a plate) | Pexels | Ravi Sharma (`/@ravinepz`) | https://www.pexels.com/photo/penne-pasta-dish-in-a-plate-7458755/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| greek-yoghurt | `src/assets/images/foods/greek-yoghurt.webp` | `food-yoghurt` (“Greek yoghurt, plain”; two bowls of plain yoghurt on a blue tray) | Pexels | elif tekkaya (`/@eliftekkaya`) | https://www.pexels.com/photo/white-ceramic-bowls-on-blue-tray-10809243/ | https://www.pexels.com/license/ | 2026-09-05 | 1200 × 900 centre crop (4:3 thumbnail and card) | empty alt |
+| almond-butter | `src/assets/images/foods/almond-butter.webp` | `food-almond-butter` (a jar of almond butter with almonds and crackers; the crackers are not part of the item) | Pexels | cole yap (`/@cole-yap-2149136300`) | https://www.pexels.com/photo/delicious-almond-butter-with-crackers-on-plate-33657317/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| salad-leaves | `src/assets/images/foods/salad-leaves.webp` | `food-salad-leaves` (“Mixed salad leaves”) | Pexels | Eleonora Vokueva (`/@eleonora-vokueva-2161345723`) | https://www.pexels.com/photo/fresh-mixed-green-salad-leaves-close-up-37416573/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| oatmeal | `src/assets/images/foods/oatmeal.webp` | `food-oatmeal` (“Oatmeal with blueberries and banana”; the photo also shows walnuts, which the synthetic values do not include) | Pexels | Cup of Couple (`/@cup-of-couple`) | https://www.pexels.com/photo/an-oatmeal-with-fresh-fruits-topping-on-a-white-surface-7655878/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| banana | `src/assets/images/foods/banana.webp` | `food-banana` | Pexels | Mr. Pugo (`/@mrpugo`) | https://www.pexels.com/photo/fresh-yellow-bananas-on-wooden-surface-33203199/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| avocado-toast | `src/assets/images/foods/avocado-toast.webp` | `food-avocado-toast` (sliced avocado on wholegrain toast) | Pexels | Nicola Barts (`/@nicola-barts`) | https://www.pexels.com/photo/an-avocado-toast-on-a-plate-7936662/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| hummus | `src/assets/images/foods/hummus.webp` | `food-hummus` (hummus with olive oil and chickpeas) | Pexels | Anthony Rahayel (`/@anthony-rahayel-125801377`) | https://www.pexels.com/photo/creamy-hummus-with-olive-oil-and-chickpeas-36367568/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| scrambled-eggs | `src/assets/images/foods/scrambled-eggs.webp` | `food-scrambled-eggs` (“Scrambled eggs on toast”) | Pexels | juliane Monari (`/@julianemonarifotografia`) | https://www.pexels.com/photo/scrambled-egg-and-bread-on-plate-19842428/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| sparkling-water | `src/assets/images/drinks/sparkling-water.webp` | `food-sparkling-water` (a glass of sparkling water) | Pexels | Sam Mai (`/@sam-mai-322739881`) | https://www.pexels.com/photo/a-close-up-shot-of-a-glass-of-sparkling-water-13723906/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| orange-juice | `src/assets/images/drinks/orange-juice.webp` | `food-orange-juice` | Pexels | Anna Pyshniuk (`/@anna-pyshniuk-2453945`) | https://www.pexels.com/photo/orange-juice-in-a-glass-6414118/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| oat-drink | `src/assets/images/drinks/oat-drink.webp` | `food-oat-drink` (“Oat drink, unsweetened”; the catalogue drink and the sample barcode share this identity) | Pexels | Polina Tankilevitch (`/@polina-tankilevitch`) | https://www.pexels.com/photo/milk-in-clear-glass-jar-4187717/ | https://www.pexels.com/license/ | 2026-09-05 | as above | empty alt |
+| — (shared) | `src/assets/images/foods/sample-capture.webp`, `recipes/lentil-soup.webp`, `recipes/pasta-roasted-vegetables.webp`, `recipes/chicken-salad.webp` | `food-c`, `food-lentil-soup`, `food-pasta-long`, `food-chicken-salad` reuse the registered photographs above (Stage B, §11.2) | — | — | — | — | 2026-09-05 | as above | empty alt |
+| — (baseline pass) | — | `recipe-traybake`, `recipe-pasta-long` | — | — | — | — | 2026-09-04 | were intentional **No photo** in the baseline pass (Unsplash candidates were paid or the wrong dish); superseded 2026-09-05 by the two Pexels rows above (D-28) | — |
 
 Rejected candidates and why (so the search is not repeated): Jezebel Rose KGw62KtHzxA (butternut squash, not lentil); Monika Grabkowska VVPC-DEBi2I (pumpkin/sweet-potato soup); Max Griss xVgE_mCA8fk (sweet-potato soup); Zayed Ahmed Zadu VNYi27uNrxE (egg-drop soup); Kateryna Hliznitsova ZWKLCjeAdZ8 and Maryam Sicard KxUIupj29iU / ekoJ6j-0BEA (Unsplash+); Chefitt BKKZqbMShzo (roasted vegetables with bread in a skillet — no chickpeas, bread could read as part of the recipe); Christopher Stites aCfju9BMtP8 (breakfast platter). Files were fetched through the item’s Unsplash download endpoint and resized server-side to 1200 × 900 WebP (`fm=webp&w=1200&h=900&fit=crop&q=72`); no image-conversion dependency was added. Sizes: 65–210 KB (the chicken salad is the largest at 210 KB; it is the only slot rendered at the 16:9 hero size on a 2× display).
 
-Alt-text rule applied: recipe images sit beside the visible title, add no information the title lacks, and use empty alt; the photo-flow sample uses “Sample image standing in for your photo”.
+Alt-text rule applied: recipe and catalogue images sit beside the visible title, add no information the title lacks, and use empty alt; the photo-flow sample uses “Sample image standing in for your photo”.
+
+Stage B search (2026-09-05, Pexels, per query the first page of results was shortlisted and the chosen item page checked for “Free to use” and the creator’s name): rejected the yoghurt bowls with granola and fruit (29516115, 4006347 — toppings the plain item does not have), the oat-milk bottle in oats (8681508 — the bottle, not a glass), the Perrier bottle (18212879 — a brand), the Pixabay-account orange juice (158053 — no named creator) and the almond-toast items (7167855, 20605006 — peanut butter on toast, not the spread).
 
 ## 6. Material interpretations and decisions
 
@@ -277,7 +292,7 @@ No product-changing conflict remains open. No hard blocker was found.
 - Captures: every mapped story at 393 × 852; representative states at 320 and 430; 200 % text and the 59/34 safe-area fixture for the root, focused and sheet families; runtime walkthrough captures for every runtime-mode row.
 - Commands: `npm run tokens:check`, `npm exec --no -- tsc --noEmit`, `npm run build`, `npm run build-storybook`, `npm exec --no -- vitest run`, `node scripts/verify/runtime-walkthrough.mjs`, `node scripts/verify/storybook-captures.mjs`, `node scripts/verify/contrast-matrix.mjs --check`, detector.
 
-## 8. Status (final, 2026-09-04)
+## 8. Status (baseline pass, final 2026-09-04 — superseded by §10.8 for reopened rows)
 
 All 41 rows have production UI, a mapped deterministic story, a 393 × 852 capture and a recorded verification mode. Commands and results are in §9; the tracked evidence set and its inspection notes are `verification/manifest.md`.
 
@@ -327,7 +342,7 @@ All 41 rows have production UI, a mapped deterministic story, a 393 × 852 captu
 
 Story-only rows and why they are not user-navigable routes: **P01** is the OS prompt (only the app’s waiting state is app UI; the prototype has no camera, D-6); **S05-5** needs an analyser that returns nothing, which the fixed-suggestion prototype cannot do honestly (D-9); **S06-2** needs a software keyboard, which cannot be scripted (D-7); **S08-3** needs a catalogue recipe that fails to load, and a deliberately failing recipe would be an invented evaluator path (D-5). Every other row occurs in the real runtime flow and is exercised by the walkthrough.
 
-## 9. Verification record (final, 2026-09-04)
+## 9. Verification record (baseline pass, final 2026-09-04 — see §10.9 for the redesign)
 
 | Check | Command | Result |
 | --- | --- | --- |
@@ -345,3 +360,268 @@ Story-only rows and why they are not user-navigable routes: **P01** is the OS pr
 Impeccable sequence applied (bounded, inline from the installed references): context once (`--target src/app/App.tsx`) → critique of the Home, Search/Review, Recipes and Details renders (findings D-11–D-15) → layout/typeset not needed (no shared cause found; tokens, Inter and roles untouched) → clarify done manually against §4 → adapt through the 320 / 430 / 200 % variants and the state stories’ overflow assertions → harden through the invalid, unknown, failure, keyboard-inset and safe-area states → animate not needed (no new transition) → audit through axe on every story plus manual keyboard checks in the play functions → one polish pass (D-12, D-13). Rendered inspection at 393 (all 41), 320 and 430 (representative rows) and 200 % is recorded in the manifest.
 
 Not verified here: a real screen reader or device pass, native iOS safe-area behaviour, and a live software keyboard; these remain manual checks.
+
+## 10. Redesign checkpoint — 2026-09-05
+
+A controlled product/UI redesign of the completed 2026-09-04 pass, driven by the new brief (four attached UI references: a selected Home, a barcode scanner, a photo capture and a recipe-detail composition). This section is the resumable record for that pass; §§1–9 stay as the baseline history and are not rewritten. Where a §10 decision changes a §6 decision, §10 wins.
+
+### 10.1 Baseline reconstructed from the repository (no chat history was available)
+
+- Git: `feat/hifi-screens` at `e229cbe` = `origin/feat/hifi-screens`, clean worktree, upstream set; `origin/main` has since merged this branch as PR #8 (`fd11590`), which does not affect continuing here. Nothing after `e229cbe` exists locally or remotely on the branch. Remote: `paralxm/portion-jito-test-task`.
+- Commits that produced the state: `97905ad` (41 states as production UI, Lane A–E state stories, photography, fixtures) and `e229cbe` (tracked captures: 41 states + 18 variants + runtime set, `verification/manifest.md`).
+- Complete: all 41 rows of §1 (§8), verification record §9 (tokens 235, tsc 0, unit 50, storybook 378, walkthrough 40 checks, 101 captures, 58 contrast pairs, detector clean). Story-only by design: P01, S05-5, S06-2, S08-3 (D-5, D-6, D-7, D-9). Nothing uncommitted.
+- What this brief reopens: Home (S01-1, S01-2, O01 as an overlay over the new Home), Search (S02-1…S02-6: field trailing actions and filter placement), Recipes (S03-1, S03-2: photos, filter placement), the barcode lane (P01, S04-1…S04-6, S07-4: dark stage, simulator removal, meal commit), the photo lane (S05-1…S05-6, S07-5), every review row (S07-1, S07-2, S07-3, S07-6: Add-to-meal commit, meal picker on an existing entry), recipe details (S08-1…S08-4: hero, Add, nutrition hierarchy) and O02/O02-2 (opened from the new trailing filter action). Not reopened: S06-1, S06-2, S06-3, O03, O04 (focused header unchanged, no navigation, no commit).
+- Impeccable: `context.mjs --target src/app/App.tsx` was run once for this session. Its `AUTONOMY_DIRECTIVE_CHECK` asks for a structured interview; the repository contract (`CLAUDE.md`: Impeccable is a refinement/QA toolkit inside PRODUCT/DESIGN/UX authority, Operate mode) and the brief's "continue autonomously" rule take precedence, so no interview was held and the brief is the design authority. The router also reports no local image converter; photography is therefore fetched pre-sized from the provider again (§5 method).
+
+### 10.2 The four attached references — adopt / adapt / reject
+
+| Reference | Element | Decision | Reason |
+| --- | --- | --- | --- |
+| Home (selected) | Compact header: lowercase wordmark + blue dot, `Today · Sep 4`, trailing `Edit goal` | **Adopt** | Matches the brief's AppHeader root variant; the wordmark and dot become `PortionLogo`; the date is the real local day; the action is `Set goal` / `Edit goal` |
+| Home | Horizontal calorie budget: large remaining figure, `consumed · %`, `Goal`, track with goal marker | **Adopt** | Replaces the ring (D-19); the marker gives the bar a visible bound so 0 % and unknown differ |
+| Home | Blue fill on the budget track | **Adapt** | Blue is allowed as *information* by DESIGN.md; the fill never changes colour for reached/over; words carry the state (D-20) |
+| Home | Macro rows `24 / 120 g` with coloured bars | **Adapt** | Targets appear only when the user entered them in the goal editor (D-18); tracks use the existing nutrient accents; unknown stays `Not available` |
+| Home | Recipe card `FITS YOUR GOALS`, `High protein option` | **Reject** wording, **adapt** placement | Portion has no goal-fit criteria; the card reads `Recommended recipe`, or `Matches all N filters` only with active browse criteria (D-21). Uppercase label and green badges rejected (no health claims, no badge clouds) |
+| Home | `Today's meals` grouped list with a filled/empty dot and `+ Add dinner` | **Adopt** | One grouped surface with row separation (D-16); the dot is paired with text (kcal or the add action), never colour alone |
+| Home | Water row with drop icon, `1.25 / 2 L`, `+250 ml` | **Adopt** | `WaterTracker` with sibling controls (D-22); cyan family distinct from action blue |
+| Home | Bottom bar with a fourth `Add` cell | **Reject** | Portion keeps three destinations plus the separate 56 px circular `Log food`; only the missing top border and the fixed position are adopted (D-26) |
+| Home | Status bar / device frame | **Reject** | No OS chrome (DESIGN.md) |
+| Barcode | Dark camera stage, focus corners, `Searching` chip, moving scan line, instruction hierarchy | **Adopt** | `CameraStage` component; the chip is text, the corners are drawn boxes, the line animates only while scanning and not under reduced motion |
+| Barcode | Flash action | **Reject** | No runtime capability |
+| Barcode | `PROTOTYPE · Simulate scanner responses` panel | **Reject** | Simulator controls leave production; deterministic phases are story-only (D-24) |
+| Photo | Dark stage, grid, circular guide, `Center meal in frame` chip, `Frame the food` heading | **Adapt** | Same `CameraStage`; the circular guide and one chip are kept, the grid is dropped (decorative); copy stays Portion's (`Frame the food, then take the photo`) |
+| Photo | `Review before saving` note | **Adapt** | Kept as Portion's existing sentence (`You will see a suggestion to check before anything is calculated`) in an info surface under the stage |
+| Photo | Large circular shutter | **Adopt** | 72 px circular shutter (`Take photo`), above the 56 px action minimum |
+| Photo | `AUTO · 1×`, `Food Scanner` chip, prototype footer | **Reject** | Fake camera chrome; the runtime is fixture-backed and says so under the stage |
+| Recipe detail | Full-width 16:9 hero, time chip + dietary badge above the title, title + `Add` beside it | **Adopt** | `Add` opens `AddToMealSheet` (D-23); no sticky footer; the root bar stays |
+| Recipe detail | Bookmark, share, ingredient checkboxes | **Reject** | Not in scope (PRODUCT.md non-goals) |
+| Recipe detail | Nutrition surface: `CALORIES 610 kcal`, `Per serving (400 g)` badge, three macro tiles, `Show all nutrition` | **Adapt** | The existing `NutritionSummary` sits on one grouped surface with the basis kept as text beside the value (no badge, no card-in-card tiles) |
+| Recipe detail | Ingredients list with `6 items`, numbered method step cards with `3 steps` | **Adapt** | Counts as plain supporting text; ingredients as a bordered list; steps numbered on a light surface each (one group per step) |
+| All four | Sample food photography inside the references | **Reject** | Never copied; production photos come from the §5 register (Unsplash) |
+
+### 10.3 Inventory — recomputed: exactly 46 rows
+
+Count: the 41 baseline rows (IDs and Figma nodes preserved) + 5 new user-visible product states = **46**. The count changed because the brief adds two product capabilities with their own decisions and outcomes: Add-to-meal (a commit step with a meal decision) and water tracking (a quick-add outcome with Undo, and a sheet with two modes). Component microstates (invalid amounts in the sheet, preset selection, animation frames, the unassigned-meal guard) stay in component stories.
+
+Reopened baseline rows (36): S01-1, S01-2, O01, S02-1, S02-2, S02-3, S02-4, S02-5, S02-6, S03-1, S03-2, S04-1, S04-2, S04-3, S04-4, S04-5, S04-6, P01, S07-1, S07-2, S07-3, S07-4, S07-5, S07-6, S05-1, S05-2, S05-3, S05-4, S05-5, S05-6, S08-1, S08-2, S08-3, S08-4, O02, O02-2. Preserved unchanged (5): S06-1, S06-2, S06-3, O03, O04.
+
+New rows:
+
+| # | Portion ID | Surface | State / purpose | Entry | Regions | Controls → outcome | Data | Fixture | Mode |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 42 | **O05** | `AddToMealSheet` over S07 (new mode) | Choose the meal and confirm the amount before one entry is created | `Add to today` on S07-1/4/5/6 with a valid portion | Item name + basis; Breakfast / Lunch / Dinner / Snacks (radio chips; preselected from the Home row that started the task, else the time-of-day suggestion); Amount with the review's unit; recalculated calories + macros; footer `Add to lunch` (+ Cancel) | Add to {meal} → one `FoodEntry` with `meal`, Home S01-2, status "Added to lunch"; Cancel / close / Escape → S07 unchanged | one entry appended | Fixture C 300 g, lunch suggested at the 12:00 baseline | both |
+| 43 | **O05-2** | `AddToMealSheet` over S08-1 | The same sheet for a recipe: servings instead of grams, thumbnail when the recipe has a photo | `Add` beside the recipe title | Thumbnail, title, `Per serving (300 g)`; meal chips; Servings (1); preview per the servings; `Add to dinner` | Add → recipe entry (candidate built from the recipe, 1 serving = 300 g), Home; Cancel → S08-1 unchanged | one entry | Fixture R, dinner preselected (story fixture) | both |
+| 44 | **S01-4** | Home / Water quick-add confirmation | The outcome of `+250 ml`: total and fill updated, confirmation with Undo | `Add 250 millilitres of water` on S01-1/S01-2 | Water tracker at the new total; status toast "250 ml added. 1.5 litres today." with `Undo` | Undo → previous total, toast closes; timeout/close → toast closes; repeated taps accumulate | water total for the day | 1,250 → 1,500 ml (story); runtime 0 → 250 | both |
+| 45 | **O06** | `WaterSheet` · add | Add a chosen amount to today's water | `Edit water, … of 2 litres` on Home | Total / goal; presets 150 / 250 / 350 / 500 ml (radio chips); `Custom amount` (ml); `Add water` (disabled until a preset or valid custom); `Edit today's total` | Add water → total updated, sheet closes, status; Cancel → unchanged | water total | 1,250 ml, preset 250 selected in the story | both |
+| 46 | **O06-2** | `WaterSheet` · edit total | Replace today's total directly | `Edit today's total` inside O06 | `Today's total` (ml) prefilled; `Save total` (disabled while invalid); `Back to adding` | Save total → total replaced; Back → O06 | water total | 1,250 ml, draft 1,000 | both |
+
+### 10.4 Transition additions and changes
+
+| From | Event | Guard | Next / outcome | Data | Notes |
+| --- | --- | --- | --- | --- | --- |
+| S01 meal row | `Add breakfast` / `Add to lunch` (per meal) | — | O01 with a **meal context** | task origin records `{ root, flow, meal }` | the meal preselects O05 later; the bar's Log food has no meal context |
+| S07 new | `Add to today` | valid portion, energy known | **O05** | none until confirmed | replaces direct entry creation (D-23) |
+| O05 | `Add to {meal}` | valid amount, meal chosen, not yet submitted | entry appended with `meal`, Home S01-2, toast "Added to lunch"; the new row is highlighted briefly | one entry | duplicate activation blocked |
+| O05 | Cancel / close / Escape | — | S07 unchanged | none | focus returns to `Add to today` |
+| S08-1 | `Add` | — | **O05-2** with servings = 1 | none | the recipe becomes a `FoodCandidate` (`source: 'recipe'`, units serving + g) only inside the sheet |
+| O05-2 | `Add to {meal}` | as O05 | recipe entry appended, Home | one entry | the Home row reopens it in S07-3 with servings |
+| S01 | recommended recipe card | — | S08-2 with origin Home (Home stays selected; Back → Home) | none | D-21 |
+| S07-3 | Meal picker | — | draft meal; `Update entry` commits meal + portion together | entry `meal` replaced, id and day kept | new for existing entries |
+| S01 | `+250 ml` | — | **S01-4** | water total += 250 | functional update, so rapid taps never drop an increment |
+| S01-4 | Undo | toast open | previous total restored | water total | announced once |
+| S01 | Water content (`Edit water…`) | — | **O06** | none | sibling control, not a nested button |
+| O06 | Add water | preset or valid custom (1–5,000 ml) | total += amount, close, status | water total | — |
+| O06 | Edit today's total | — | **O06-2** | none | mode inside the same dialog |
+| O06-2 | Save total | 0–10,000 ml integer | total replaced, close, status | water total | — |
+| S01 | `Set goal` / `Edit goal` (header) | — | goal editor (title `Set goal` / `Edit goal`) | goal kcal + optional macro targets | D-18 |
+| S02 Food | barcode trailing action | — | S04-1 (task origin = Search) | none | one tap (D-27) |
+| S02 Recipes / S03 | filter trailing action | — | O02 | draft | replaces the left `Filters` button (D-27) |
+| S04-1 | (prototype camera) fixture read after 1.8 s | not already looking up | S04-2 → S07-4 | none | D-24: the runtime path; other outcomes are story phases |
+
+### 10.5 Product and data-model decisions (new IDs continue §6)
+
+| ID | Question | Decision | Reversibility |
+| --- | --- | --- | --- |
+| D-16 | Meal model | Every committed entry carries `meal: 'breakfast' \| 'lunch' \| 'dinner' \| 'snack'`. `createEntry` requires it. The stored type also admits `null` as an *unassigned* guard for a record that predates the field: no persisted store exists (session memory only, ui-contract 2.4), so no such record can occur at runtime; `MealGroup` renders an `Unassigned` section with a `Choose meal` action when one exists (component story only, never a ledger row). Home always shows all four meals, empty ones included | documented; schema is additive |
+| D-17 | Meal suggestion | `suggestMeal(date)`: 05:00–10:59 breakfast, 11:00–15:59 lunch, 16:00–21:59 dinner, otherwise snack (local time). Used only to preselect O05 when the task has no meal context; the choice is always visible and editable; no eating time is asked or stored | — |
+| D-18 | Goal wording and macro targets | `Set a daily goal` → `Set goal`; with a goal → `Edit goal` (header action and editor title). The editor also takes optional protein / carbohydrate / fat targets in grams; they are user-entered, never derived (PRODUCT.md non-goal: automatic goal calculation). Without a target a macro shows its logged grams alone | — |
+| D-19 | Ring replaced | `CalorieBudgetBar` (feature) on the new `ProgressBar` primitive replaces `CalorieProgressRing` everywhere. `CalorieProgressRing` is removed (no consumer). `ProgressRing` stays exported as a deprecated primitive with no product consumer; its stories are kept but it leaves the curated capture set | reversible via git |
+| D-20 | Budget colours | Fill = `progress.indicator` → action blue (information about progress toward a user-set bound, not calorie quality). Reached and over-goal keep the same fill; the excess is stated in words (`150 kcal over goal`) and the marker stays visible; no red/green | — |
+| D-21 | Recommendation truth | Home shows one recipe: with active browse criteria and ≥ 1 match, the first match with `Matches all N filters`; otherwise the first catalogue recipe with a photo and complete calories/protein, labelled `Recommended recipe`. `Fits your goals` never appears (no goal-fit fixture criteria) | — |
+| D-22 | Water | Per local day, in ml, session-only like entries. Default daily target 2,000 ml is a product default shown as the bound (`of 2 L`), not advice. Quick add 250; presets 150 / 250 / 350 / 500; custom 1–5,000 ml; edit total 0–10,000 ml; integers only. Over the target the excess is stated. Display in litres to two decimals (`1.25 / 2 L`), ml under 1 L (`250 ml / 2 L`) | — |
+| D-23 | Commit through Add-to-meal | S07 new mode: `Add to today` opens O05; `Add to {meal}` is the single commit. Recipe Detail: `Add` opens O05-2. Existing mode keeps `Update entry` direct and gains a meal picker. `Done` is unchanged (task origin, D-4) | supersedes §2 row "S07 new · Add to today" |
+| D-24 | Simulator controls removed | Production shows no prototype/debug controls. Barcode: `readBarcodeService` (services.ts) resolves the fixture code `5012345678900` 1,800 ms after scanning starts; the stage caption says a sample barcode is read by this prototype. Photo: `Take photo` yields the labelled sample; analysis returns fixed suggestions. Not-found, lookup-failed, unreadable, denied and analysis-failed phases are reached only through `initialPhase` in stories/tests → verification mode **story** for S04-3, S04-4, S04-5, S04-6, S05-6; runtime keeps S04-1, S04-2, S07-4, S05-1…S05-4, S07-5 | supersedes §8 modes for those rows |
+| D-25 | P01 | Unchanged as a conceptual system layer; the mapped story renders the app-owned waiting state on the dark stage with the explanation that the real prompt is outside the app | — |
+| D-26 | Fixed navigation | `NavigationBar` is `position: fixed` at the viewport bottom, owns the bottom safe area once, no top border, canvas surface with the restrained `shadow.navigation` token; `RootScreenLayout` measures the bar and reserves bottom padding + scroll padding; hidden as a unit for the keyboard. Recipe Detail keeps the root bar and has no second sticky footer | — |
+| D-27 | Search trailing actions | `SearchField` gains an `action` slot: Food scope → `Scan barcode` icon button (opens S04-1 in one tap); Recipes scope and browse → `Filters` icon button with a count badge and the name `Filters, N active`; the left `Filters` button is removed; applied chips sit under the field | — |
+| D-28 | Photography | Every catalogue recipe has a licensed local photo (traybake and pasta added, §10.6). `No photo` remains the resilient fallback for a failed or absent image; S08-4 keeps its no-photo fixture as a story state (`imageUrl` removed in the fixture), so the principal S03-1 state shows five photographs | — |
+| D-29 | Recipe Detail composition | Hero 16:9 full width; time chip + dietary badges; title with `Add` (primary, one word) beside it; nutrition on one grouped surface; ingredients as a bordered list with a count; numbered steps each on a light surface; no bookmark/share/checkboxes/ratings | — |
+| D-30 | Toast | New `Toast` pattern: bottom-anchored above the fixed bar (`--portion-navigation-inset`), `role="status"`, optional action (`Undo`), auto-dismiss after 6 s, sheet motion tokens, instant under reduced motion; used for water quick add and Add-to-meal success | — |
+| D-31 | Home order | Header → budget bar + macros → recommended recipe → Today's meals → Water → fixed bar. The large in-body `Log food` button is removed; the bar's plus and the per-meal add actions are the entry points | — |
+
+### 10.6 Photography (acquired 2026-09-05; register rows in §5)
+
+Inventory before this pass: `lentil-soup`, `chicken-salad`, `tofu-stir-fry`, `sample-capture` (all Unsplash, 1200 × 900 WebP). Added: `vegetable-traybake` and `pasta-roasted-vegetables` from Pexels (free Pexels licence; the Unsplash candidates for both dishes were Unsplash+ paid items or the wrong dish, as in the baseline pass). Because no image converter is installed, the Pexels CDN delivered the 1200 × 900 centre crop as JPEG and Chromium (via Playwright) encoded it to WebP; the helper is `.verification/to-webp.mjs` (ignored, no dependency added). Every catalogue recipe now has a photo; the reference photographs were never used.
+
+### 10.7 Implementation sequence (frozen)
+
+1. Ledger, PRODUCT.md, DESIGN.md, skills (this checkpoint) — commit.
+2. Shared tokens/components: `PortionLogo`, `AppHeader` variants, `ProgressBar` + `CalorieBudgetBar`, goal editor (`Set goal`, macro targets), meal domain + `MealGroup`/`MealSection`/`MealEntryRow`/`MealPicker`, water domain + `WaterTracker`/`WaterSheet`, `Toast`, `AddToMealSheet`, fixed `NavigationBar` + `RootScreenLayout`, Home, App wiring — commit.
+3. `SearchField` action slot, Search/Recipes screens, `CameraStage`, Barcode/Photo without simulator, services — commit.
+4. Recipe Detail + Add, `RecipeCard`, photography + register — commit.
+5. Lane stories, index, captures/walkthrough/contrast scripts, manifest, docs, final verification — commit, push.
+
+### 10.8 Status of reopened and new rows (2026-09-05)
+
+Every row has production UI, a mapped deterministic story with a play function (axe at `error`), a 393 × 852 capture and a recorded verification mode. Rows verified as **story** are the prototype's unreachable phases: with the simulator controls gone (D-24) the not-found, lookup-failed, unreadable, denied and analysis-failed phases have no runtime trigger, so they join P01, S05-5, S06-2 and S08-3 as deterministic stories.
+
+| # | ID | Row | Story (Product states / …) | Capture (393 × 852, `verification/storybook/`) | Verification |
+| --- | --- | --- | --- | --- | --- |
+| 1 | S01-1 | reopened | Lane A → S01-1 | `states/S01-1-175-10.png` | runtime + story · walkthrough 01-home-empty / 03-home-goal-empty |
+| 2 | S01-2 | reopened | Lane A → S01-2 | `states/S01-2-175-38.png` | runtime + story · walkthrough 10-home-populated / 51-home-320/393/430 |
+| 3 | S02-1 | reopened | Lane A → S02-1 | `states/S02-1-175-93.png` | runtime + story · walkthrough 06-search-food-results |
+| 4 | S03-1 | reopened | Lane A → S03-1 | `states/S03-1-175-158.png` | runtime + story · walkthrough 32-recipes-browse (five photographs) |
+| 5 | O01 | reopened (over the new Home) | Lane B → O01 | `states/O01-176-20.png` | runtime + story · walkthrough 04-method-sheet / 52 / 55 |
+| 6 | S02-2 | reopened | Lane B → S02-2 | `states/S02-2-176-43.png` | runtime + story · walkthrough 05-search-loading |
+| 7 | S02-3 | reopened | Lane B → S02-3 | `states/S02-3-176-77.png` | runtime + story · walkthrough 48-search-no-match |
+| 8 | S02-4 | reopened | Lane B → S02-4 | `states/S02-4-176-118.png` | runtime + story · walkthrough 47-search-failure |
+| 9 | S07-1 | reopened | Lane B → S07-1 | `states/S07-1-176-157.png` | runtime + story · walkthrough 08-review-300 / 18-review-from-home-origin |
+| 10 | S07-2 | reopened | Lane B → S07-2 | `states/S07-2-176-201.png` | runtime + story · walkthrough 12-entry-invalid-stale |
+| 11 | S07-3 | reopened (meal picker) | Lane B → S07-3 | `states/S07-3-176-247.png` | runtime + story · walkthrough 11-entry-edit (meal moved to Dinner) |
+| 12 | S04-1 | reopened | Lane C1 → S04-1 | `states/S04-1-178-5.png` | runtime + story · walkthrough 19-barcode-scanning |
+| 13 | S04-2 | reopened | Lane C1 → S04-2 | `states/S04-2-178-20.png` | runtime + story · walkthrough 20-barcode-looking-up |
+| 14 | S04-3 | reopened | Lane C1 → S04-3 | `states/S04-3-178-31.png` | story (deterministic, D-24) |
+| 15 | S04-4 | reopened | Lane C1 → S04-4 | `states/S04-4-178-47.png` | story (deterministic, D-24) |
+| 16 | S04-5 | reopened | Lane C1 → S04-5 | `states/S04-5-178-65.png` | story (deterministic, D-24) |
+| 17 | P01 | reopened | Lane C1 → P01 | `states/P01-178-81.png` | story (deterministic, D-6 / D-25) |
+| 18 | S04-6 | reopened | Lane C1 → S04-6 | `states/S04-6-178-94.png` | story (deterministic, D-24) |
+| 19 | S07-4 | reopened | Lane C1 → S07-4 | `states/S07-4-178-109.png` | runtime + story · walkthrough 21-review-barcode |
+| 20 | S05-1 | reopened | Lane C2 → S05-1 | `states/S05-1-179-5.png` | runtime + story · walkthrough 27-photo-capture |
+| 21 | S05-2 | reopened | Lane C2 → S05-2 | `states/S05-2-179-12.png` | runtime + story · walkthrough 28-photo-preview |
+| 22 | S05-3 | reopened | Lane C2 → S05-3 | `states/S05-3-179-21.png` | runtime + story · walkthrough 29-photo-analysing |
+| 23 | S05-4 | reopened | Lane C2 → S05-4 | `states/S05-4-179-31.png` | runtime + story · walkthrough 30-photo-suggestions |
+| 24 | S05-5 | reopened | Lane C2 → S05-5 | `states/S05-5-179-57.png` | story (deterministic, D-9) |
+| 25 | S05-6 | reopened | Lane C2 → S05-6 | `states/S05-6-179-70.png` | story (deterministic, D-24) |
+| 26 | S07-5 | reopened | Lane C2 → S07-5 | `states/S07-5-179-81.png` | runtime + story · walkthrough 31-review-photo |
+| 27 | S06-1 | preserved | Lane D → S06-1 | `states/S06-1-180-5.png` | runtime + story · walkthrough 23-manual-empty |
+| 28 | S06-2 | preserved | Lane D → S06-2 | `states/S06-2-180-43.png` | story (deterministic, D-7) |
+| 29 | S06-3 | preserved | Lane D → S06-3 | `states/S06-3-180-71.png` | runtime + story · walkthrough 24-manual-errors |
+| 30 | O03 | preserved | Lane D → O03 | `states/O03-180-111.png` | runtime + story · walkthrough 26-manual-discard-dialog |
+| 31 | O04 | preserved | Lane D → O04 | `states/O04-180-134.png` | runtime + story · walkthrough 13-unit-sheet |
+| 32 | S07-6 | reopened | Lane D → S07-6 | `states/S07-6-180-162.png` | runtime + story · walkthrough 25-review-manual |
+| 33 | S03-2 | reopened | Lane E → S03-2 | `states/S03-2-181-5.png` | runtime + story · walkthrough 35-recipes-filtered |
+| 34 | O02 | reopened (opened from the filter action) | Lane E → O02 | `states/O02-181-72.png` | runtime + story · walkthrough 33-filters-sheet |
+| 35 | O02-2 | reopened | Lane E → O02-2 | `states/O02-2-181-117.png` | runtime + story · walkthrough 34-filters-invalid-range |
+| 36 | S02-5 | reopened | Lane E → S02-5 | `states/S02-5-181-133.png` | runtime + story · walkthrough 45-search-recipes-results |
+| 37 | S08-2 | reopened | Lane E → S08-2 | `states/S08-2-181-289.png` | runtime + story · walkthrough 38-recipe-loading |
+| 38 | S08-1 | reopened | Lane E → S08-1 | `states/S08-1-181-237.png` | runtime + story · walkthrough 39-recipe-loaded / 40-recipe-expanded |
+| 39 | S08-3 | reopened | Lane E → S08-3 | `states/S08-3-181-317.png` | story (deterministic, D-5) |
+| 40 | S08-4 | reopened | Lane E → S08-4 | `states/S08-4-181-350.png` | story (the catalogue recipe now has a photo, D-28) |
+| 41 | S02-6 | reopened | Lane E → S02-6 | `states/S02-6-181-193.png` | runtime + story · walkthrough 37-recipes-no-match (browse) and 48 (search) |
+| 42 | O05 | new | Lane B → O05 | `states/O05-add-to-meal-food.png` | runtime + story · walkthrough 09-add-to-meal-sheet |
+| 43 | O05-2 | new | Lane E → O05-2 | `states/O05-2-add-to-meal-recipe.png` | runtime + story · walkthrough 41-recipe-add-sheet / 42-home-with-recipe |
+| 44 | S01-4 | new | Lane A → S01-4 | `states/S01-4-water-quick-add.png` | runtime + story · walkthrough 15-home-water-quick-add (two taps, Undo) |
+| 45 | O06 | new | Lane A → O06 | `states/O06-water-sheet.png` | runtime + story · walkthrough 16-water-sheet |
+| 46 | O06-2 | new | Lane A → O06-2 | `states/O06-2-water-edit-total.png` | runtime + story · walkthrough 17-water-edit-total |
+
+Component-level evidence (not rows): `PortionLogo`, `ProgressBar`, `AppHeader` variants, `CalorieBudgetBar` (no goal / partial / reached / over / partial total), `MealGroup` (empty / populated / long names / unassigned guard / picker), `WaterTracker` (zero / partial / reached / over / quick add + Undo / reduced motion / 320 / 430 / 200 % / safe area), `WaterSheet` (default / preset / custom valid / custom invalid / edit total / invalid total / cancel / keyboard / 320 / 430 / 200 % / safe area), `AddToMealSheet` (food / recipe / meal change / no meal / invalid / partial / cancel / keyboard / 320 / 200 % / safe area / reduced motion), `CameraStage` (scanning / detected / paused / circle / image / reduced motion), `Toast`, `FilterAction`, the Search barcode shortcut and Recipe Details' Add — all under Product compositions / Primitives / Components / Patterns.
+
+### 10.9 Verification record (redesign, Stage A close-out 2026-09-05)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Tokens | `npm run tokens:check` | 268 tokens validated; generated output current |
+| Typecheck | `npm run typecheck` | exit 0 |
+| Unit tests | `npm run test:unit` | 8 files, 59 passed |
+| Storybook tests (play + axe at `error`) | `npm run test:storybook` | 77 files, 458 tests passed |
+| App build | `npm run build` | success |
+| Storybook build | `npm run build-storybook` | success |
+| Runtime walkthrough | `node scripts/verify/runtime-walkthrough.mjs` | 62 checks passed, 0 failed, no console/page errors (goal with targets, meal row → O01 → search → review → Add-to-meal → Home under the chosen meal, entry edit and move, water quick add ×2 + Undo + sheet + edit total, task origin, barcode from the field and late-read guard, manual + discard, photo, recipes/filters/details/Add → 2 servings, recommendation with filters, search scopes and failure, remove; 320 / 393 / 430 with the fixed bar held, 320 + 200 %, 390 + 200 %, reduced motion) |
+| Storybook captures | `node scripts/verify/storybook-captures.mjs` | 130 captures, 0 with problems: 64 component/foundation captures, the 46 mapped states at 393 × 852, 20 variants (320 / 430, 200 % text, safe-area fixture, reduced motion) |
+| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 71 pairs, 0 failing (water accent moved to cyan.700; the marker-on-indicator pair is informational and carries a 1 px canvas halo) |
+| Impeccable detector | `node .claude/skills/impeccable/scripts/detect.mjs --json src` | no findings |
+
+Rendered inspection: every one of the 46 state captures, the 20 variants, the curated component captures and the runtime subset were read at full resolution and recorded in `verification/manifest.md`. Defects found by that reading and fixed before the checkpoint: the recipe-details nutrition card crowded “Carbohydrates” against the Fat marker at 393 px (the secondary macro row now shows the short name between 20 rem and 22 rem, with the full name kept in the accessible label); the photo no-match state carried a “Suggestions ready” chip (now “No match”); the unreadable-barcode state offered Enter manually twice (the row below the message keeps only Search by name); the filter count badge sat on the glyph without separation (2 px inset and a canvas halo); the water sheet refused an out-of-range custom amount without saying why (the range message now shows while typing); the RecipeCard story used an artificial SVG placeholder although the repository ships licensed photographs (now the lentil soup photo).
+
+Harness finding: in the production Storybook build, passive effects flush after a play function has started, so a sheet's reset-on-open effect could overwrite what the play had already typed (the two O05 stories). The three sheets (`AddToMealSheet`, `WaterSheet`, `GoalSheet`) now reset only on a closed → open transition; the state initialisers already reflect the props at mount.
+
+Not verified here: a real screen reader or device pass, native iOS safe-area behaviour, a live software keyboard, and a real camera; these remain manual checks.
+
+### 10.10 Next action (resumable)
+
+Stage A (§10.7 steps 1–5) is implemented, verified (§10.9), committed and pushed at `a789d10`. Stage B followed; see §11.6 for the current next action and §11.7 for its verification record.
+
+## 11. Stage B (2026-09-05) — populated Search, recents, food filters, list/grid, local assets, day rollover
+
+11.1–11.5 were recorded before implementation so the checkpoint stayed resumable; 11.6–11.7 record the close-out. Stage A (§10) shipped first; Stage B reopened S02-1/S02-2/S02-3/S02-4 and added the five rows of 11.4.
+
+### 11.1 Scope
+
+- **Initial catalogue**: the Food tab with an empty query shows a browsable collection at once — 12 foods/dishes and 3 drinks, each with a local licensed photo, a name, calories with an explicit basis (per serving / per 100 g / per 100 ml), concise metadata and the existing review → Add-to-meal route. Existing entries are reused and enriched (fixture C, lentil soup, pasta, yoghurt, almond butter, salad leaves, sparkling water, the oat drink); no duplicates; nothing valid deleted. Drinks carry volume/serving units. Logging a drink never touches the water tracker.
+- **Recently added**: derived from confirmed meal entries only (never viewed items, never seeded records), newest first, deduplicated by the candidate's stable id; adding again moves it to the top; cancelled drafts never appear. Shown above `Explore foods` (the remaining catalogue) when history exists; without history the catalogue shows immediately. History survives reload (see 11.3). Populated history is demonstrated with explicit Storybook fixtures.
+- **Food filters**: All / Foods / Drinks (reliable item data only; no dietary inference from photographs) in the shared filter-sheet pattern with Apply, Clear all, applied chips; dismissing without Apply keeps the previous filters. The barcode shortcut stays inside the field; the Food filter action sits at the right of a compact toolbar under the field; Recipe filtering stays as agreed.
+- **List / Grid**: an accessible toggle (List default) in that toolbar; both views share items, order, query, filters, basis and opening behaviour; the choice persists; grid = two columns, one column at narrow widths / 200 % text without shrinking type or targets.
+- **Count**: an accurate unique-item count with singular/plural wording; a query or filter produces one unified collection across recents and catalogue; clearing restores the recent/catalogue presentation; switching views never resets search state; first-use, no-results, loading and failure states stay distinct.
+
+### 11.2 Assets
+
+- Photographs in `src/assets/images/foods/`, `src/assets/images/drinks/`, `src/assets/images/recipes/`; existing approved assets first (the rice-bowl sample, the lentil-soup, pasta and chicken-salad recipe photos double as food photos), then individually verified Unsplash/Pexels items; WebP through the Chromium encoder; registry rows in §5 (provider, creator, item URL, licence URL, local path, mapping).
+- Icons: the SVGs the UI actually uses, exported faithfully from the installed Phosphor family (regular, plus bold where the UI uses bold) into `src/assets/icons/` as a generated sprite the shared `Icon` component renders through `<use>`; Phosphor's MIT licence retained; API, weights, sizes, colour and accessibility unchanged; no second family, no whole-library copy.
+- App icon / favicon derived from the portion dot mark, documented in DESIGN.md without creating a second identity.
+
+### 11.3 Data consistency
+
+- Local-day basis: the device's local calendar day (`localDayKey`), re-evaluated at midnight while the app stays open; entries and water keep their own day keys; yesterday never reads as today, including after reload.
+- Session persistence in `localStorage` with a versioned schema; a stored entry without a valid meal loads as unassigned (the D-16 guard), never reclassified; no history feature is added.
+- Recalculation verified after add, edit, move (meal change) and delete; water additions must be positive, editing today's total allows zero; rapid taps and Undo neither lose increments nor overwrite later changes.
+
+### 11.4 Inventory — recomputed: exactly 51 rows (2026-09-05, Stage B)
+
+Count: the 46 rows of §10.3 + 5 new user-visible Search states = **51**. Reopened rows: S02-1 (results are now one unified set with a unique-item count: "1 item found"), S02-2, S02-3 (a no-match with a filter applied offers Change filters), S02-4. The catalogue, recents, filters and view are product states with their own entry conditions and outcomes, so they are rows; the List / Grid toggle's two values are one row (S02-9 is the non-default view).
+
+| # | Portion ID | Surface | State / purpose | Entry | Regions | Controls → outcome | Data | Fixture | Mode |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 47 | **S02-7** | Search / Food · first use | The 15-item catalogue at once, list view, no history | Search root, Food scope, empty query, no confirmed entries | Field with the barcode action; Food / Recipes tabs; toolbar: List / Grid (List checked) + Food filters; "All foods · 15 items"; rows with thumbnail, name, detail, kcal per basis | Item → S07-1; Grid → S02-9; Food filters → O07; Scan barcode → S04-1 | catalogue | 12 foods, 3 drinks | runtime + story |
+| 48 | **S02-8** | Search / Food · Recently added | Confirmed foods above the rest of the catalogue | As S02-7 with ≥ 1 confirmed entry (any day) | "Foods · 15 items"; "Recently added" (newest first, one row per identity); "Explore foods" (the rest) | Recent item → S07-1 (same route); a query → unified results | recents = entries; catalogue | 3 entries (banana yesterday, yoghurt this morning, oatmeal now) | runtime + story |
+| 49 | **S02-9** | Search / Food · grid view | The same collection as two columns of cards | Grid in the toolbar (persisted on the device) | Cards: 4:3 photo, name, detail, kcal per basis; one column under 20 rem | Card → S07-1; List → list view; survives reload | view preference | recents + catalogue | runtime + story |
+| 50 | **O07** | Food filters (overlay) | Narrow to foods or drinks from each item's record | Food filters in the toolbar | "Show" radio chips All / Foods / Drinks; Clear all; Apply filters | Apply → S02-10 (or S02-7/8 with All); Close / backdrop / Escape → previous filter kept | filter draft | All | runtime + story |
+| 51 | **S02-10** | Search / Food · Drinks only applied | The applied filter as a chip and in the action's name | Apply with Drinks (or Foods) | "Food filters, 1 active" badge; chip "Drinks only" with remove; "All foods · 3 drinks"; three drink rows | Remove chip / Clear all → S02-7/8; a query combines with the filter; no match → "No drinks match …" + Change filters | filter | 3 drinks | runtime + story |
+
+### 11.5 Decisions (continuing §10.5)
+
+- **D-32 Catalogue and category.** `FoodCandidate.category` is `'food' | 'drink'` (absent = food) from the item's own record; the catalogue holds 12 foods or dishes and 3 drinks, each with a registered local photograph, a name, a detail line and calories with an explicit basis; positions 0–6 are frozen for stories and tests. The sample barcode and the catalogue's oat drink share one identity. Drinks carry ml and a serving in ml; logging a drink never changes the water record.
+- **D-33 Recently added.** Derived from confirmed entries only (`recentCandidates`): newest first by `createdAt`, one row per candidate id, capped at 8; viewed items, cancelled drafts and seeded records never appear. Shown above "Explore foods" when history exists; a query dissolves the sections into one unified, deduplicated result set.
+- **D-34 Food filters.** All / Foods / Drinks in the shared filter-sheet pattern (`FoodFiltersSheet`): a draft that Apply commits, Clear all resets to All, and dismissal keeps the previous filter. The action sits at the end of the compact toolbar under the field, named "Food filters" with the applied count; the barcode shortcut stays in the field. Recipe filtering is unchanged.
+- **D-35 List / Grid.** `ViewToggle` (radio group, 48 px targets, glyph + label) in the toolbar; List is the default, the choice persists in the device record, and the grid is two columns of `FoodCard` falling to one column under 20 rem. Switching never changes items, order, query or filters.
+- **D-36 Counts.** Unique items across every section; wording names what the filter shows: "15 items", "12 foods", "3 drinks", "2 items found", with singular forms. The former "N foods found" wording is superseded because the collection holds drinks too.
+- **D-37 Device record.** `portion.record` (version 1) holds entries, goal, water per day and the Search view; fields are validated on load, unreadable entries are dropped rather than guessed, a missing meal loads as unassigned, and a candidate's photograph is re-resolved from the catalogue by id because built asset URLs are not durable. Entry ids include the creation instant so they stay unique across reloads.
+- **D-38 Local day.** `useLocalDayKey` re-evaluates the local calendar day at midnight (timer to the next local midnight, refreshed on visibility and focus); entries and water keep their own day keys, so an earlier day never reads as today, with or without a reload.
+- **D-39 Icon export.** `scripts/icons/export.mjs` exports only the glyphs the product renders, at the weights it renders them, verbatim from the installed `@phosphor-icons/react` into `src/assets/icons/` (sprite + one SVG each, MIT licence kept); `Icon` draws them through `<use>` and falls back to the React package for any other glyph, so the API, weights, sizes and accessibility are unchanged. `npm run icons:check` guards staleness.
+- **D-40 App icon.** The portion dot alone on canvas white (`public/favicon.svg`, 180 / 192 / 512 PNGs, a maskable variant, `manifest.webmanifest`), generated by `src/assets/favicon/make.mjs`; no second identity.
+- **D-41 Row column priority (found in the rendered review).** At 390 / 393 px the list rows broke long names inside a word (“blueberri-es”, “Scramble-d”) because the grid gave the single-line figure its full width and the name column whatever was left. `FoodResultRow` is now a flex row: the identity keeps a 7.5 rem basis (the catalogue’s longest whole words) and takes the spare width, the calorie value never breaks, and the basis is the part that gives way — wrapping only between “per serving” and its amount, which carries a no-break space (`describeCatalogueBasis`). Under 18 rem (22 rem with a thumbnail, i.e. 320 px at 100 % text and every viewport at 200 %) the figure stacks beneath the identity as before. Verified in the runtime at 320 / 390 / 393 (200 %) / 430 and by the story “Thumbnail with a long name at 390”.
+
+### 11.6 Next action (resumable)
+
+Stage B (11.1–11.3) is implemented, verified (11.7), committed and pushed; the inventory is the 51 rows of 11.4 and every row is captured and inspected in `verification/manifest.md`. Nothing of the agreed scope is open. If work resumes, the remaining items are outside the automated evidence and need a person and a device: a screen-reader pass (VoiceOver) over the Food toolbar, the filter sheet and the grid; the software keyboard over the Search field with the fixed bar; native safe areas; a real camera; and one overnight session to observe the midnight rollover without the mocked clock.
+
+### 11.7 Verification record (Stage B close-out 2026-09-05)
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Tokens | `npm run tokens:check` | 268 tokens validated; generated output current |
+| Icon export | `npm run icons:check` | 30 symbols from 24 glyphs; generated output current |
+| Typecheck | `npm run typecheck` | exit 0 |
+| Unit tests | `npm run test:unit` | 12 files, 80 passed (persistence, local day, recents, food search incl. the basis wording, daily log, calculation, recipes) |
+| App build | `npm run build` | success |
+| Runtime walkthrough | `node scripts/verify/runtime-walkthrough.mjs` | 75 checks passed, 0 failed, no console/page errors — the 62 Stage A checks plus journey 5: catalogue at first use (15 items, List checked), filter sheet → Drinks only (3 drinks, badge and chip), grid view, Orange juice 250 ml → Add to lunch (113 kcal; water stays 0 ml), Recently added above Explore foods, unified “oat” query (2 items found, recent first), reload keeping the grid and the recent drink with its photograph, an earlier day never reading as today, and the midnight rollover under Playwright's mocked clock |
+| Storybook build | `npm run build-storybook` | success |
+| Storybook tests (play + axe at `error`) | `npm run test:storybook` | 80 files, 488 tests passed |
+| Storybook captures | `node scripts/verify/storybook-captures.mjs` | 146 captures, 0 with problems: 73 component/foundation captures (rows 65–73 new), the 51 mapped states at 393 × 852, 22 variants (320 / 430, 200 % text, safe-area fixture, reduced motion; V-S02-9-320 and V-S02-8-200 new) |
+| Contrast matrix | `node scripts/verify/contrast-matrix.mjs --check` | 73 pairs, 0 failing (two ViewToggle pairs added) |
+| Impeccable detector | `node .claude/skills/impeccable/scripts/detect.mjs --json src` | no findings |
+
+Rendered inspection: the five new state captures, both new variants, the nine new component captures, the eight new runtime shots (57–64) and every Stage A capture that Stage B re-rendered were read at full resolution and recorded in `verification/manifest.md`. Runtime rows were also read at 320, 390, 393 + 200 % and 430 through an ad-hoc peek of the Food tab. Defects found by that reading and fixed before the checkpoint: long food names broke inside a word at 390 / 393 in list rows (D-41: the row is now a flex row with a 7.5 rem identity basis, a one-line calorie value and a basis that wraps only before its amount); the basis could break inside its parentheses at 430 (no-break space in `describeCatalogueBasis`); grid cards in one row had unequal heights (the list item is a flex container); the basis line of a per-serving dish read “per 1 serving” (now “per serving (320 g)”); the capture harnesses skipped lazily loaded thumbnails (they now scroll the page and wait, bounded, for the visible screen's images — the unbounded wait hung the runtime walkthrough on hidden mounted screens); the unified-results capture showed the browse state because the interactive story cleared its query (a static QueryResults story is captured instead).
+
+Harness finding: Storybook's Lane B stories count list items, so an applied-filter chip (itself a list) was being counted with the results; the assertions are scoped to the named results list and check the drink identities, not just a count.
+
+Not verified here: a real screen reader or device pass, native iOS safe-area behaviour, a live software keyboard, a real camera, and an unmocked midnight; these remain manual checks (11.6).

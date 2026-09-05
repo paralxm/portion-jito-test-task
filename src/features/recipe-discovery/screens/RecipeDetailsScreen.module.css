@@ -1,13 +1,14 @@
 /* Breaks the MediaFrame hero out to the viewport edge; MediaFrame owns the aspect
-   ratio, background and image/no-photo fill. */
+   ratio, background and image/no-photo fill. The header sits directly above it. */
 .hero {
   margin-inline: calc(var(--portion-spacing-page-inset) * -1);
+  margin-block-start: calc(var(--portion-ref-space-16) * -1);
 }
 
 .identity {
   display: flex;
   flex-direction: column;
-  gap: var(--portion-spacing-title-to-secondary);
+  gap: var(--portion-ref-space-12);
   min-inline-size: 0;
 }
 
@@ -16,14 +17,29 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--portion-ref-space-8);
-  margin-block-start: var(--portion-ref-space-4);
 }
 
 .time {
-  display: inline-flex;
-  align-items: center;
   gap: var(--portion-ref-space-4);
   color: var(--portion-color-text-secondary);
+}
+
+/* Title and the one primary action share a row; the title wraps, the action stays put. */
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+.title {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.add {
+  flex-shrink: 0;
 }
 
 .section {
@@ -33,22 +49,40 @@
   min-inline-size: 0;
 }
 
-.ingredients {
-  list-style: disc;
-  margin: 0;
-  padding-inline-start: var(--portion-ref-space-24);
+.sectionHeader {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  justify-content: space-between;
   gap: var(--portion-ref-space-8);
 }
 
+/* Ingredients: one bordered list, hairlines between rows, on the canvas. */
+.ingredients {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-card);
+  overflow: hidden;
+}
+
+.ingredient {
+  padding-block: var(--portion-ref-space-12);
+  padding-inline: var(--portion-spacing-card-padding);
+}
+
+.ingredient + .ingredient {
+  border-block-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+}
+
+/* Method: each step is one group on the light surface with its number in a circle. */
 .steps {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--portion-spacing-instruction-item);
+  gap: var(--portion-spacing-card-gap);
 }
 
 .step {
@@ -56,6 +90,9 @@
   grid-template-columns: var(--portion-ref-space-32) minmax(0, 1fr);
   gap: var(--portion-ref-space-12);
   align-items: start;
+  padding: var(--portion-spacing-card-padding);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-surface);
 }
 
 .stepNumber {
@@ -65,5 +102,6 @@
   inline-size: var(--portion-ref-space-32);
   block-size: var(--portion-ref-space-32);
   border-radius: var(--portion-radius-round);
-  background: var(--portion-color-background-sunken);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
+  background: var(--portion-color-background-canvas);
 }

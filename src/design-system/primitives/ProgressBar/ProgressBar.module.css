@@ -1,0 +1,54 @@
+/* The bar is a track with a fill inside; both take the compact-control radius (4) so an
+   8 px bar reads as a rounded rule, never as a pill-shaped control. */
+.bar {
+  --portion-bar-height: var(--portion-ref-space-8);
+  --portion-bar-fill: var(--portion-color-progress-indicator);
+  --portion-bar-track: var(--portion-color-progress-track);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.bar[data-size='compact'] {
+  --portion-bar-height: var(--portion-ref-space-4);
+}
+
+.bar[data-tone='water'] {
+  --portion-bar-fill: var(--portion-color-water-accent);
+  --portion-bar-track: var(--portion-color-water-track);
+}
+
+.bar[data-tone='protein'] { --portion-bar-fill: var(--portion-color-nutrition-protein-accent); }
+.bar[data-tone='carbohydrates'] { --portion-bar-fill: var(--portion-color-nutrition-carbohydrates-accent); }
+.bar[data-tone='fat'] { --portion-bar-fill: var(--portion-color-nutrition-fat-accent); }
+
+.track {
+  position: relative;
+  block-size: var(--portion-bar-height);
+  border-radius: var(--portion-radius-control-compact);
+  background: var(--portion-bar-track);
+  overflow: hidden;
+}
+
+.fill {
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--portion-bar-fill);
+  transition: inline-size var(--portion-motion-transition-value-change) var(--portion-motion-easing-standard);
+}
+
+/* The goal marker: a 2 px neutral tick at the bound, drawn over both fill and track. Its
+   2 px width is the indicator border width, not a spacing value. */
+.marker {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: var(--portion-border-width-navigation-indicator);
+  background: var(--portion-color-progress-marker);
+  /* A 1 px canvas halo keeps the tick separated from the fill when the fill reaches it. */
+  box-shadow: 0 0 0 1px var(--portion-color-background-canvas);
+}
+
+/* Unavailable: the track alone, slightly lighter so it cannot be mistaken for 0 %. */
+.bar[data-unavailable] .track {
+  background: var(--portion-color-background-sunken);
+}

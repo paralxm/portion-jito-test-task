@@ -28,7 +28,7 @@ const day = (...entries: (FoodEntry | null)[]) => entries.filter((e): e is FoodE
 
 describe('daily log', () => {
   it('creates an entry as a snapshot with a local day key', () => {
-    const entry = createEntry(oatmeal, { quantity: 300, unitId: 'g' }, { now: new Date(2026, 8, 4, 8, 30).getTime(), id: 'e1' });
+    const entry = createEntry(oatmeal, { quantity: 300, unitId: 'g' }, 'lunch', { now: new Date(2026, 8, 4, 8, 30).getTime(), id: 'e1' });
     expect(entry).not.toBeNull();
     expect(entry?.dayKey).toBe('2026-09-04');
     expect(entry?.result.energyKcal).toBe(550);
@@ -36,12 +36,12 @@ describe('daily log', () => {
 
   it('refuses to create an entry without a calorie value', () => {
     const noEnergy: FoodCandidate = { ...oatmeal, nutrition: { energyKcal: null, proteinG: null, carbohydratesG: null, fatG: null } };
-    expect(createEntry(noEnergy, { quantity: 100, unitId: 'g' })).toBeNull();
-    expect(createEntry(oatmeal, { quantity: 0, unitId: 'g' })).toBeNull();
+    expect(createEntry(noEnergy, { quantity: 100, unitId: 'g' }, 'lunch')).toBeNull();
+    expect(createEntry(oatmeal, { quantity: 0, unitId: 'g' }, 'lunch')).toBeNull();
   });
 
   it('updates a portion in place, keeping id and day', () => {
-    const entry = createEntry(oatmeal, { quantity: 300, unitId: 'g' }, { now: new Date(2026, 8, 4).getTime(), id: 'e1' })!;
+    const entry = createEntry(oatmeal, { quantity: 300, unitId: 'g' }, 'lunch', { now: new Date(2026, 8, 4).getTime(), id: 'e1' })!;
     const updated = updateEntryPortion(entry, { quantity: 150, unitId: 'g' })!;
     expect(updated.id).toBe('e1');
     expect(updated.dayKey).toBe('2026-09-04');
@@ -50,14 +50,14 @@ describe('daily log', () => {
   });
 
   it('selects entries by local day; an earlier day stays associated with its own day', () => {
-    const yesterday = createEntry(oatmeal, { quantity: 300, unitId: 'g' }, { now: new Date(2026, 8, 3, 23, 50).getTime(), id: 'y' })!;
-    const today = createEntry(caesar, { quantity: 350, unitId: 'g' }, { now: new Date(2026, 8, 4, 0, 10).getTime(), id: 't' })!;
+    const yesterday = createEntry(oatmeal, { quantity: 300, unitId: 'g' }, 'lunch', { now: new Date(2026, 8, 3, 23, 50).getTime(), id: 'y' })!;
+    const today = createEntry(caesar, { quantity: 350, unitId: 'g' }, 'lunch', { now: new Date(2026, 8, 4, 0, 10).getTime(), id: 't' })!;
     expect(entriesForDay([yesterday, today], '2026-09-04').map((e) => e.id)).toEqual(['t']);
     expect(localDayKey(new Date(2026, 0, 5))).toBe('2026-01-05');
   });
 
   it('summarises the populated fixture: 1,350 of 2,200, 850 remaining, 61 %', () => {
-    const entries = day(createEntry(oatmeal, { quantity: 300, unitId: 'g' }), createEntry(caesar, { quantity: 350, unitId: 'g' }));
+    const entries = day(createEntry(oatmeal, { quantity: 300, unitId: 'g' }, 'lunch'), createEntry(caesar, { quantity: 350, unitId: 'g' }, 'lunch'));
     const summary = summarizeDay(entries, 2200);
     expect(summary.entryCount).toBe(2);
     expect(summary.energy).toEqual({ kcal: 1350, complete: true });
@@ -82,7 +82,7 @@ describe('daily log', () => {
   });
 
   it('has no ratio and no remainder without a goal, and treats an invalid goal as none', () => {
-    const entries = day(createEntry(oatmeal, { quantity: 300, unitId: 'g' }));
+    const entries = day(createEntry(oatmeal, { quantity: 300, unitId: 'g' }, 'lunch'));
     for (const goal of [null, 0, -5, Number.NaN, Number.POSITIVE_INFINITY]) {
       const summary = summarizeDay(entries, goal);
       expect(summary.state).toBe('no-goal');
@@ -94,7 +94,7 @@ describe('daily log', () => {
   });
 
   it('reports reached at exactly the goal and exceeded above it, capping the ratio', () => {
-    const entries = day(createEntry(oatmeal, { quantity: 300, unitId: 'g' }), createEntry(caesar, { quantity: 350, unitId: 'g' }));
+    const entries = day(createEntry(oatmeal, { quantity: 300, unitId: 'g' }, 'lunch'), createEntry(caesar, { quantity: 350, unitId: 'g' }, 'lunch'));
     const reached = summarizeDay(entries, 1350);
     expect(reached.state).toBe('reached');
     expect(reached.remainingKcal).toBe(0);
@@ -107,8 +107,8 @@ describe('daily log', () => {
   });
 
   it('keeps a valid zero-kcal entry as an entry, and unknown macros unknown', () => {
-    const water = createEntry(foodCatalogue[6], { quantity: 330, unitId: 'ml' })!;
-    const leaves = createEntry(foodCatalogue[5], { quantity: 100, unitId: 'g' })!;
+    const water = createEntry(foodCatalogue[6], { quantity: 330, unitId: 'ml' }, 'lunch')!;
+    const leaves = createEntry(foodCatalogue[5], { quantity: 100, unitId: 'g' }, 'lunch')!;
     const summary = summarizeDay([water, leaves], 2000);
     expect(summary.entryCount).toBe(2);
     expect(summary.energy).toEqual({ kcal: 17, complete: true });
@@ -119,7 +119,7 @@ describe('daily log', () => {
   });
 
   it('marks the total incomplete when an entry has no energy value', () => {
-    const base = createEntry(fixtureC, { quantity: 100, unitId: 'g' })!;
+    const base = createEntry(fixtureC, { quantity: 100, unitId: 'g' }, 'lunch')!;
     const unknownEnergy: FoodEntry = { ...base, id: 'u', result: { ...base.result, energyKcal: null } };
     const summary = summarizeDay([base, unknownEnergy], 2200);
     expect(summary.state).toBe('incomplete');

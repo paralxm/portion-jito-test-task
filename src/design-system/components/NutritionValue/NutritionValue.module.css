@@ -60,3 +60,8 @@
 .basis {
   min-inline-size: 0;
 }
+
+/* A target follows the value at the unit's size and colour: "24 / 120 g". */
+.target {
+  white-space: nowrap;
+}

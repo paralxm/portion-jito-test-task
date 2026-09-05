@@ -10,6 +10,8 @@ import { NutritionSummary } from '../../../design-system/patterns/NutritionSumma
 import { UnitSheet } from '../../../design-system/patterns/UnitSheet/UnitSheet';
 import { FocusedFlowLayout } from '../../../design-system/templates/FocusedFlowLayout/FocusedFlowLayout';
 import { FoodIdentityHeader } from '../components/FoodIdentityHeader';
+import { MealPicker } from '../components/MealPicker';
+import type { MealType } from '../domain/meal';
 import {
   canCalculateEnergy,
   convertQuantity,
@@ -34,16 +36,18 @@ export interface FoodReviewScreenProps {
   mode?: ReviewMode;
   /** Portion to start from; defaults to the reference basis (new) or the entry's portion (existing). */
   initialPortion?: Portion;
+  /** existing: the entry's meal; `null` for the unassigned guard, which must be resolved before Update entry. */
+  initialMeal?: MealType | null;
   /** Back returns to the actual preceding step (new) or Home (existing) with its input intact. */
   onBack: () => void;
   /** Correction route for a new candidate: search or manual entry, decided by the caller. Not offered for an existing entry. */
   onChangeMatch?: () => void;
-  /** new: creates one entry and returns to Home. */
+  /** new: opens the Add-to-meal sheet with this portion; the sheet's Add to {meal} is the commit (ledger D-23). */
   onAddToToday?: (portion: Portion) => void;
   /** new: closes the food task to its invoking surface without logging. */
   onDone?: () => void;
-  /** existing: commits the edited portion to the same entry. */
-  onUpdateEntry?: (portion: Portion) => void;
+  /** existing: commits the edited portion and meal to the same entry. */
+  onUpdateEntry?: (portion: Portion, meal: MealType) => void;
   /** existing: removes the entry after the confirmation. */
   onRemoveEntry?: () => void;
 }
@@ -53,6 +57,7 @@ const sourceExplanation: Record<FoodCandidate['source'], string | null> = {
   barcode: 'Matched from the barcode. If this is not the right product, change it before adding it.',
   photo: 'Suggested from your photo. Check the food and set the amount you will eat — the photo does not measure it.',
   manual: 'Entered by you. The amount below is the portion you are calculating, not the reference basis.',
+  recipe: 'From a recipe. One serving is the recipe’s serving; set the number of servings you will eat.',
 };
 
 /**
@@ -61,10 +66,11 @@ const sourceExplanation: Record<FoodCandidate['source'], string | null> = {
  * completes the calorie task. Adding it to today (or updating an existing entry) is the
  * one explicit commit; Back, Done and Cancel never log anything.
  */
-export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBack, onChangeMatch, onAddToToday, onDone, onUpdateEntry, onRemoveEntry }: FoodReviewScreenProps) {
+export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, initialMeal = null, onBack, onChangeMatch, onAddToToday, onDone, onUpdateEntry, onRemoveEntry }: FoodReviewScreenProps) {
   const startPortion: Portion = initialPortion ?? { quantity: candidate.reference.quantity, unitId: candidate.reference.unitId };
   const [quantity, setQuantity] = useState(() => formatQuantityDraft(startPortion.quantity));
   const [unitId, setUnitId] = useState(startPortion.unitId);
+  const [meal, setMeal] = useState<MealType | null>(initialMeal);
   const [touched, setTouched] = useState(false);
   const [unitSheetOpen, setUnitSheetOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -77,10 +83,11 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
   const result = useMemo(() => (portion ? scaleNutrition(candidate, portion) : null), [candidate, portion]);
   const energyAvailable = canCalculateEnergy(candidate);
   const partial = [candidate.nutrition.proteinG, candidate.nutrition.carbohydratesG, candidate.nutrition.fatG].some((v) => v === null);
-  const dirty = mode === 'existing' && (!portion || portion.quantity !== startPortion.quantity || portion.unitId !== startPortion.unitId);
+  const dirty = mode === 'existing' && (!portion || portion.quantity !== startPortion.quantity || portion.unitId !== startPortion.unitId || meal !== initialMeal);
   // The commit is available only for a valid portion with a calculable result; an invalid
-  // draft keeps the field editable and the guidance beside it.
-  const committable = energyAvailable && portion !== null && result !== null && result.energyKcal !== null;
+  // draft keeps the field editable and the guidance beside it. An existing entry also
+  // needs a meal (the unassigned guard is resolved here, never silently).
+  const committable = energyAvailable && portion !== null && result !== null && result.energyKcal !== null && (mode === 'new' || meal !== null);
 
   const amountError =
     touched && !parsed.ok
@@ -94,15 +101,19 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
   const explanation = mode === 'new' ? sourceExplanation[candidate.source] : null;
   const unit = findUnit(candidate, unitId);
 
-  // One activation creates or updates one entry; a second tap before the app navigates
-  // away must not create a duplicate.
-  const commit = (handler: ((portion: Portion) => void) | undefined) => {
+  // Update entry commits once; a second tap before the app navigates away must not
+  // apply twice. Add to today only opens the Add-to-meal sheet (the sheet owns the
+  // commit and its own guard), so it stays available after the sheet is cancelled.
+  const update = () => {
     setTouched(true);
-    if (submitted.current || !handler) return;
-    if (portion && result && result.energyKcal !== null) {
-      submitted.current = true;
-      handler(portion);
-    }
+    if (submitted.current || !onUpdateEntry || !committable || !portion || !meal) return;
+    submitted.current = true;
+    onUpdateEntry(portion, meal);
+  };
+  const addToToday = () => {
+    setTouched(true);
+    if (!onAddToToday || !committable || !portion) return;
+    onAddToToday(portion);
   };
 
   const requestBack = () => {
@@ -113,7 +124,7 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
   const footer =
     mode === 'existing' ? (
       <Stack gap={8}>
-        <Button variant="primary" size="large" block onClick={() => commit(onUpdateEntry)} disabled={!committable}>
+        <Button variant="primary" size="large" block onClick={update} disabled={!committable}>
           Update entry
         </Button>
         <Button variant="destructive" block onClick={() => setRemoveOpen(true)}>
@@ -122,7 +133,7 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
       </Stack>
     ) : (
       <Stack gap={8}>
-        <Button variant="primary" size="large" block onClick={() => commit(onAddToToday)} disabled={!committable}>
+        <Button variant="primary" size="large" block onClick={addToToday} disabled={!committable} aria-haspopup="dialog">
           Add to today
         </Button>
         <Button variant="text" block onClick={onDone ?? onBack}>
@@ -134,6 +145,10 @@ export function FoodReviewScreen({ candidate, mode = 'new', initialPortion, onBa
   return (
     <FocusedFlowLayout header={<AppHeader variant="focused" title={mode === 'existing' ? 'Edit entry' : 'Review food'} onBack={requestBack} />} footer={footer}>
       <FoodIdentityHeader candidate={candidate} onChangeFood={mode === 'new' ? onChangeMatch : undefined} headingId="review-food-name" />
+
+      {mode === 'existing' ? (
+        <MealPicker value={meal} onChange={setMeal} hint={meal === null ? 'This entry has no meal yet. Choose one to keep it in today’s meals.' : undefined} />
+      ) : null}
 
       {explanation ? (
         <InlineMessage tone="info" announce="none">

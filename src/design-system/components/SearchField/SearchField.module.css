@@ -2,11 +2,30 @@
   min-inline-size: 0;
 }
 
-/* The clear action keeps its 48 px target but its visual sits inside the field. */
+/* Clear and the trailing action sit side by side inside the field's end; each keeps its
+   own 48 px target, and the focus ring is drawn inward so the field never clips it. */
+.actions {
+  display: inline-flex;
+  align-items: center;
+}
+
 .clear {
   color: var(--portion-color-text-secondary);
 }
 
-.clear:focus-visible {
+.clear:focus-visible,
+.action :focus-visible {
   outline-offset: calc(var(--portion-focus-ring-offset) * -1);
+}
+
+/* A hairline separates the action from the clear control when both are present. */
+.clear + .action {
+  border-inline-start: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  margin-inline-start: var(--portion-ref-space-4);
+  padding-inline-start: var(--portion-ref-space-4);
+}
+
+.action {
+  display: inline-flex;
+  color: var(--portion-color-action-primary);
 }

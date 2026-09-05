@@ -8,18 +8,18 @@ Authority: `docs/ux/ui-contract.md` and `docs/ux/low-fidelity.md` own behaviour;
 
 | Layer | Path | What lives there | Storybook |
 | --- | --- | --- | --- |
-| Token source | `src/design-system/tokens/tokens.json` | DTCG 2025.10 `reference` and `semantic` families (217 tokens) | Foundations/Tokens |
+| Token source | `src/design-system/tokens/tokens.json` | DTCG 2025.10 `reference` and `semantic` families (268 tokens after the 2026-09-05 redesign) | Foundations/Tokens |
 | Token generator | `scripts/tokens/build.mjs` | Validation, alias resolution, deterministic `tokens.css` + `tokens.ts` | — |
 | Generated tokens | `src/design-system/tokens/generated/` | `--portion-ref-*` and `--portion-*` custom properties; typed `tokens`, `tokenVars`, `cssVar` | Foundations |
 | Global styles | `src/design-system/styles/` | Inter registration, generated tokens, reset, focus ring, `[hidden]`, reduced motion, safe areas, type classes | Foundations/Typography |
 | Icons | `src/design-system/icons/` | `Icon` wrapper; Storybook-only `catalogue.ts` (134 verified Phosphor glyphs) | Foundations/Icons |
 | Nutrition rules | `src/design-system/nutrition/` | Categories, ordering, formatting (`formatQuantity`), "Not available" wording | — (unit tests) |
-| Primitives | `src/design-system/primitives/` | Text, Stack/Inline, Surface, Separator, Spinner, Button, IconButton, Input, Checkbox/Radio, Badge, ProgressRing, VisuallyHidden | Primitives/* |
+| Primitives | `src/design-system/primitives/` | Text, Stack/Inline, Surface, Separator, Spinner, Button, IconButton, Input, Checkbox/Radio, Badge, PortionLogo, ProgressBar, ProgressRing (deprecated, no product consumer), VisuallyHidden | Primitives/* |
 | Components | `src/design-system/components/` | FormField, TextField, AmountField, UnitControl, SearchField, chips, SegmentedControl, NutritionValue, NutritionMacros, NutrientRow, MatchCriteria, MediaFrame, ResultsHeading, InlineMessage, EmptyState, LoadingState, MethodOption, FoodResultRow | Components/* |
-| Patterns | `src/design-system/patterns/` | NavigationBar, AppHeader, ModalSheet, ConfirmDialog, MethodSheet (2 × 2 of MethodOption), UnitSheet, NutritionSummary (composes NutritionMacros), RecipeCard (composes MediaFrame) | Patterns/* |
+| Patterns | `src/design-system/patterns/` | NavigationBar (fixed by the root layout), AppHeader (root / section / focused), Toast, ModalSheet, ConfirmDialog, MethodSheet (2 × 2 of MethodOption), UnitSheet, NutritionSummary (composes NutritionMacros), RecipeCard (composes MediaFrame) | Patterns/* |
 | Templates | `src/design-system/templates/` | RootScreenLayout, FocusedFlowLayout | Templates/* |
 | Public entry | `src/design-system/index.ts` | Supported exports only (no fixtures, catalogue or stories) | — |
-| Calculator feature | `src/features/calorie-calculator/` | `domain/` (calculation, manual entry, daily log, fixtures incl. Home demo entries, tests), `components/` (`FoodIdentityHeader`, `CalorieProgressRing`, `GoalSheet`), `screens/` (Home daily overview, Food review with new/existing modes, Manual entry, Barcode, Photo) | Product compositions |
+| Calculator feature | `src/features/calorie-calculator/` | `domain/` (calculation, manual entry, daily log, fixtures incl. Home demo entries, tests), `components/` (`FoodIdentityHeader`, `CalorieBudgetBar`, `MealGroup` / `MealSection` / `MealEntryRow` / `MealPicker`, `WaterTracker` / `WaterSheet`, `AddToMealSheet`, `GoalSheet`), `screens/` (Home daily overview, Food review with new/existing modes, Manual entry, Barcode, Photo) | Product compositions |
 | Recipe feature | `src/features/recipe-discovery/` | `domain/` (matching, fixtures, tests), `components/` (filters sheet, criteria toolbar, list), `screens/` (Recipes, Recipe details, composes MediaFrame + ResultsHeading) | Product compositions |
 | App shell | `src/app/` | `App.tsx` navigation and the session daily record (entries, goal, local day), shared `SearchScreen` (composes `SegmentedControl`), simulated `services.ts`, keyboard and scroll hooks | Product compositions/App |
 | Storybook helpers | `src/design-system/storybook/` | Enlarged-text and text-spacing decorators, contrast helpers (not exported) | — |
@@ -603,3 +603,33 @@ Rendered inspection (full resolution, by reading the files): navigation at 390 a
 - The 10 px active label is below Apple's 11 pt guidance for native text; it is a browser prototype in CSS px, the label is redundant with the glyph and surface, and the decision is recorded here and in the visual direction.
 - The branch is unmerged; the Figma capture of the final screens and deployment remain open items from §16.10.
 - An untracked `docs/ux/audits/` directory (the user's own pre-Hi-Fi audit and Figma exports) was present during this pass and was deliberately left out of every commit.
+
+
+## 2026-09-05 — Hi-Fi redesign (meals, water, budget bar, fixed navigation, camera stage)
+
+The sections above are the dated record of earlier passes and are not rewritten. The redesign is recorded in `docs/design/hifi-decisions.md` §10 (inventory, references, decisions D-16–D-31, verification). What changed in the system:
+
+| Area | Change | Where |
+| --- | --- | --- |
+| Tokens | `brand.*`, `water.*`, `camera.*`, `progress.marker` (and `progress.indicator` → action blue as information), `typography.wordmark-compact`, `shadow.navigation`, motion `value-change` (350 ms), `scan-sweep` (1.6 s), `toast`; reference cyan 50/700/800, neutral 950 and alphas, blue 300 | `tokens.json` → 268 tokens |
+| Primitives | `PortionLogo` (the only brand rendering; default/compact, default/monochrome/inverse); `ProgressBar` (`meter`, marker, tones, unavailable). `ProgressRing` is deprecated with no product consumer; `CalorieProgressRing` was removed | Primitives/PortionLogo, Primitives/ProgressBar |
+| Components | `CameraStage` (dark viewfinder, chip, corners/circle, scan line, image); `SearchField` gained one trailing `action` slot; `NutritionValue`/`NutritionMacros` gained user-entered targets ("24 / 120 g" + compact track) | Components/* |
+| Patterns | `AppHeader` variants root / section / focused; `NavigationBar` lost its top border and gained the navigation shadow; `Toast` (status, Undo, above the fixed bar) | Patterns/* |
+| Templates | `RootScreenLayout` fixes the navigation slot to the viewport, measures it and publishes `--portion-navigation-inset` + scroll padding | Templates/RootScreenLayout |
+| Calculator feature | meal model (`meal.ts`: four meals, `suggestMeal`), `daily-log.ts` entries carry `meal` (null = unassigned guard), `DailyGoal` with optional targets, `water.ts`; `CalorieBudgetBar`, `MealGroup`/`MealPicker`, `WaterTracker`/`WaterSheet`, `AddToMealSheet`; Home recomposed; review's Add to today opens the sheet; barcode/photo without simulator controls | Product compositions/* |
+| Recipe feature | `FilterAction` in the field, `CriteriaToolbar` = chips + sheet, Recipe Details with title-side `Add`, `recipeToCandidate` for meal entries, every catalogue recipe photographed | Product compositions/* |
+| Verification | 46 mapped state stories + variants, `scripts/verify/*` updated (walkthrough covers meals, water, Add-to-meal, fixed bar, reduced motion; captures 130 files; contrast 71 pairs) | `verification/manifest.md` |
+
+## 2026-09-05 — Stage B: the populated Food tab, device record, local icons and app icon
+
+Recorded in `docs/design/hifi-decisions.md` §11 (scope, assets, data consistency, the 51-row inventory, decisions D-32–D-40). What changed in the system:
+
+| Area | Change | Where |
+| --- | --- | --- |
+| Domain | `FoodCandidate.category` (`food` / `drink`); the 15-item catalogue with registered photographs (`fixtures.ts`, positions 0–6 frozen); `food-search.ts` (filters, unified collection, count wording); `recents.ts` (from confirmed entries only); `local-day.ts` (midnight arithmetic); reload-safe entry ids | `src/features/calorie-calculator/domain/` |
+| App shell | `persistence.ts` (versioned `portion.record`: entries, goal, water per day, Search view; validated on load, photos re-resolved by id); `useLocalDayKey` (midnight + visibility); `catalogue-images.ts`; Search wiring for catalogue, recents, filters and view | `src/app/` |
+| Components | `ViewToggle` (radio group List / Grid); `FoodResultRow` gained a thumbnail and became a flex row whose identity keeps a 7.5 rem basis while the basis text gives way (D-41); `FoodCard` pattern for the grid; `FilterAction` gained a `label` | Components/ViewToggle, Components/FoodResultRow, Patterns/FoodCard |
+| Feature | `FoodFiltersSheet` (All / Foods / Drinks in the shared sheet pattern); `FoodCollection` (list or two-column grid, one column under 20 rem); Search's Food scope recomposed (toolbar under the field, Recently added / Explore foods, unified results) | Product compositions/Search (S02) |
+| Icons | `scripts/icons/export.mjs` → `src/assets/icons/` (sprite + per-glyph SVGs + LICENSE, only the glyphs and weights the product renders); `Icon` draws them through `<use>` with the React package as fallback; `npm run icons:check` in `verify` | Foundations/Icons |
+| App icon | `src/assets/favicon/make.mjs` → `public/favicon.svg`, PNG sizes, `manifest.webmanifest`; linked from `index.html` | DESIGN.md → App icon |
+| Verification | 5 new state stories (S02-7 … S02-10, O07) + variants; walkthrough journey 5 (catalogue, filters, grid, drink logging without water, recents, unified query, reload, day boundary, midnight with the mocked clock); capture rows 65–73 | `verification/manifest.md` |

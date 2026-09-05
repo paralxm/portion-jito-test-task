@@ -10,7 +10,7 @@ const navigation = <NavigationBar selected="recipes" onSelect={fn()} onLogFood={
 const meta = {
   title: 'Product compositions/Recipe details (S08)',
   component: RecipeDetailsScreen,
-  args: { state: { status: 'loaded', recipe: fixtureR }, criteria: { caloriesMax: 500, proteinMin: 20 }, onBack: fn(), onRetry: fn(), navigation },
+  args: { state: { status: 'loaded', recipe: fixtureR }, criteria: { caloriesMax: 500, proteinMin: 20 }, onBack: fn(), onRetry: fn(), onAdd: fn(), navigation },
   parameters: {
     layout: 'fullscreen',
     docs: {
@@ -38,6 +38,21 @@ export const Loaded: Story = {
     await expect(canvas.getByText('Vitamin D')).toBeVisible();
     await expect(canvas.getByText('Not available')).toBeInTheDocument();
     await expect(canvas.getAllByRole('listitem').length).toBeGreaterThanOrEqual(fixtureR.ingredients.length + fixtureR.instructions.length);
+    await expect(canvas.getByText('7 items')).toBeVisible();
+    await expect(canvas.getByText('3 steps')).toBeVisible();
+  },
+};
+
+export const AddOpensTheSheet: Story = {
+  name: 'Add beside the title hands the recipe to the Add-to-meal sheet',
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const add = canvas.getByRole('button', { name: 'Add Lentil soup to a meal' });
+    await expect(add).toHaveTextContent('Add');
+    await userEvent.click(add);
+    await expect(args.onAdd).toHaveBeenCalledWith(fixtureR);
+    // No sticky action footer competes with the fixed bar.
+    await expect(canvas.queryByRole('contentinfo')).toBeNull();
   },
 };
 
@@ -51,7 +66,7 @@ export const LoadedNoCriteria: Story = {
 
 export const NoPhotoLongTitle: Story = {
   name: 'Loaded — no photo, long title (S08-4)',
-  args: { state: { status: 'loaded', recipe: recipeCatalogue[2] }, criteria: {} },
+  args: { state: { status: 'loaded', recipe: { ...recipeCatalogue[2], imageUrl: undefined } }, criteria: {} },
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

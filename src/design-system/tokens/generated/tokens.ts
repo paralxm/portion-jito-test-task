@@ -14,9 +14,15 @@ export const tokenVars = {
   "reference.color.neutral.600": "--portion-ref-color-neutral-600",
   "reference.color.neutral.650": "--portion-ref-color-neutral-650",
   "reference.color.neutral.900": "--portion-ref-color-neutral-900",
+  "reference.color.neutral.950": "--portion-ref-color-neutral-950",
   "reference.color.neutral.900-alpha-40": "--portion-ref-color-neutral-900-alpha-40",
   "reference.color.neutral.900-alpha-16": "--portion-ref-color-neutral-900-alpha-16",
+  "reference.color.neutral.900-alpha-8": "--portion-ref-color-neutral-900-alpha-8",
+  "reference.color.neutral.0-alpha-16": "--portion-ref-color-neutral-0-alpha-16",
+  "reference.color.neutral.0-alpha-70": "--portion-ref-color-neutral-0-alpha-70",
+  "reference.color.neutral.950-alpha-72": "--portion-ref-color-neutral-950-alpha-72",
   "reference.color.blue.50": "--portion-ref-color-blue-50",
+  "reference.color.blue.300": "--portion-ref-color-blue-300",
   "reference.color.blue.600": "--portion-ref-color-blue-600",
   "reference.color.blue.700": "--portion-ref-color-blue-700",
   "reference.color.blue.800": "--portion-ref-color-blue-800",
@@ -38,6 +44,9 @@ export const tokenVars = {
   "reference.color.rose.700": "--portion-ref-color-rose-700",
   "reference.color.taupe.50": "--portion-ref-color-taupe-50",
   "reference.color.taupe.700": "--portion-ref-color-taupe-700",
+  "reference.color.cyan.50": "--portion-ref-color-cyan-50",
+  "reference.color.cyan.700": "--portion-ref-color-cyan-700",
+  "reference.color.cyan.800": "--portion-ref-color-cyan-800",
   "reference.font.family.ui": "--portion-ref-font-family-ui",
   "reference.font.weight.regular": "--portion-ref-font-weight-regular",
   "reference.font.weight.medium": "--portion-ref-font-weight-medium",
@@ -104,10 +113,13 @@ export const tokenVars = {
   "reference.focus.ring-width": "--portion-ref-focus-ring-width",
   "reference.focus.ring-offset": "--portion-ref-focus-ring-offset",
   "reference.shadow.sheet": "--portion-ref-shadow-sheet",
+  "reference.shadow.navigation": "--portion-ref-shadow-navigation",
   "reference.motion.duration.instant": "--portion-ref-motion-duration-instant",
   "reference.motion.duration.feedback": "--portion-ref-motion-duration-feedback",
   "reference.motion.duration.disclosure": "--portion-ref-motion-duration-disclosure",
   "reference.motion.duration.overlay": "--portion-ref-motion-duration-overlay",
+  "reference.motion.duration.value-change": "--portion-ref-motion-duration-value-change",
+  "reference.motion.duration.scan-sweep": "--portion-ref-motion-duration-scan-sweep",
   "reference.motion.easing.standard": "--portion-ref-motion-easing-standard",
   "reference.layer.content": "--portion-ref-layer-content",
   "reference.layer.sticky": "--portion-ref-layer-sticky",
@@ -156,6 +168,7 @@ export const tokenVars = {
   "semantic.color.nutrition.minerals.surface": "--portion-color-nutrition-minerals-surface",
   "semantic.color.progress.track": "--portion-color-progress-track",
   "semantic.color.progress.indicator": "--portion-color-progress-indicator",
+  "semantic.color.progress.marker": "--portion-color-progress-marker",
   "semantic.color.navigation.surface": "--portion-color-navigation-surface",
   "semantic.color.navigation.boundary": "--portion-color-navigation-boundary",
   "semantic.color.navigation.content": "--portion-color-navigation-content",
@@ -163,6 +176,19 @@ export const tokenVars = {
   "semantic.color.navigation.selected-content": "--portion-color-navigation-selected-content",
   "semantic.color.navigation.action-surface": "--portion-color-navigation-action-surface",
   "semantic.color.navigation.action-content": "--portion-color-navigation-action-content",
+  "semantic.color.brand.wordmark": "--portion-color-brand-wordmark",
+  "semantic.color.brand.mark": "--portion-color-brand-mark",
+  "semantic.color.brand.inverse": "--portion-color-brand-inverse",
+  "semantic.color.water.accent": "--portion-color-water-accent",
+  "semantic.color.water.surface": "--portion-color-water-surface",
+  "semantic.color.water.track": "--portion-color-water-track",
+  "semantic.color.water.text": "--portion-color-water-text",
+  "semantic.color.camera.stage": "--portion-color-camera-stage",
+  "semantic.color.camera.stage-text": "--portion-color-camera-stage-text",
+  "semantic.color.camera.chip-surface": "--portion-color-camera-chip-surface",
+  "semantic.color.camera.frame": "--portion-color-camera-frame",
+  "semantic.color.camera.detected": "--portion-color-camera-detected",
+  "semantic.color.camera.chip-surface-on-image": "--portion-color-camera-chip-surface-on-image",
   "semantic.typography.main-result.fontFamily": "--portion-typography-main-result-font-family",
   "semantic.typography.main-result.fontSize": "--portion-typography-main-result-font-size",
   "semantic.typography.main-result.fontWeight": "--portion-typography-main-result-font-weight",
@@ -273,6 +299,11 @@ export const tokenVars = {
   "semantic.typography.wordmark.fontWeight": "--portion-typography-wordmark-font-weight",
   "semantic.typography.wordmark.lineHeight": "--portion-typography-wordmark-line-height",
   "semantic.typography.wordmark.letterSpacing": "--portion-typography-wordmark-letter-spacing",
+  "semantic.typography.wordmark-compact.fontFamily": "--portion-typography-wordmark-compact-font-family",
+  "semantic.typography.wordmark-compact.fontSize": "--portion-typography-wordmark-compact-font-size",
+  "semantic.typography.wordmark-compact.fontWeight": "--portion-typography-wordmark-compact-font-weight",
+  "semantic.typography.wordmark-compact.lineHeight": "--portion-typography-wordmark-compact-line-height",
+  "semantic.typography.wordmark-compact.letterSpacing": "--portion-typography-wordmark-compact-letter-spacing",
   "semantic.spacing.page-inset": "--portion-spacing-page-inset",
   "semantic.spacing.card-padding": "--portion-spacing-card-padding",
   "semantic.spacing.card-gap": "--portion-spacing-card-gap",
@@ -311,10 +342,13 @@ export const tokenVars = {
   "semantic.focus.ring-width": "--portion-focus-ring-width",
   "semantic.focus.ring-offset": "--portion-focus-ring-offset",
   "semantic.shadow.sheet": "--portion-shadow-sheet",
+  "semantic.shadow.navigation": "--portion-shadow-navigation",
   "semantic.motion.duration.instant": "--portion-motion-duration-instant",
   "semantic.motion.duration.feedback": "--portion-motion-duration-feedback",
   "semantic.motion.duration.disclosure": "--portion-motion-duration-disclosure",
   "semantic.motion.duration.overlay": "--portion-motion-duration-overlay",
+  "semantic.motion.duration.value-change": "--portion-motion-duration-value-change",
+  "semantic.motion.duration.scan-sweep": "--portion-motion-duration-scan-sweep",
   "semantic.motion.easing.standard": "--portion-motion-easing-standard",
   "semantic.motion.transition.press": "--portion-motion-transition-press",
   "semantic.motion.transition.selection": "--portion-motion-transition-selection",
@@ -323,6 +357,9 @@ export const tokenVars = {
   "semantic.motion.transition.async-result": "--portion-motion-transition-async-result",
   "semantic.motion.transition.sheet": "--portion-motion-transition-sheet",
   "semantic.motion.transition.navigation": "--portion-motion-transition-navigation",
+  "semantic.motion.transition.value-change": "--portion-motion-transition-value-change",
+  "semantic.motion.transition.scan-sweep": "--portion-motion-transition-scan-sweep",
+  "semantic.motion.transition.toast": "--portion-motion-transition-toast",
   "semantic.layer.content": "--portion-layer-content",
   "semantic.layer.sticky": "--portion-layer-sticky",
   "semantic.layer.navigation": "--portion-layer-navigation",
@@ -349,11 +386,17 @@ export const tokens = {
         "600": "#59636e",
         "650": "#52606d",
         "900": "#17212b",
+        "950": "#0b1218",
         "900-alpha-40": "rgb(23 33 43 / 0.4)",
-        "900-alpha-16": "rgb(23 33 43 / 0.16)"
+        "900-alpha-16": "rgb(23 33 43 / 0.16)",
+        "900-alpha-8": "rgb(23 33 43 / 0.08)",
+        "0-alpha-16": "rgb(255 255 255 / 0.16)",
+        "0-alpha-70": "rgb(255 255 255 / 0.7)",
+        "950-alpha-72": "rgb(11 18 24 / 0.72)"
       },
       "blue": {
         "50": "#eaf0ff",
+        "300": "#8fb0ff",
         "600": "#2855d9",
         "700": "#2147b6",
         "800": "#19368f"
@@ -393,6 +436,11 @@ export const tokens = {
       "taupe": {
         "50": "#f3f0ed",
         "700": "#6b6259"
+      },
+      "cyan": {
+        "50": "#ecfeff",
+        "700": "#0e7490",
+        "800": "#155e75"
       }
     },
     "font": {
@@ -489,14 +537,17 @@ export const tokens = {
       "ring-offset": "2px"
     },
     "shadow": {
-      "sheet": "0px -2px 24px 0px rgb(23 33 43 / 0.16)"
+      "sheet": "0px -2px 24px 0px rgb(23 33 43 / 0.16)",
+      "navigation": "0px -2px 12px 0px rgb(23 33 43 / 0.08)"
     },
     "motion": {
       "duration": {
         "instant": "0ms",
         "feedback": "100ms",
         "disclosure": "150ms",
-        "overlay": "200ms"
+        "overlay": "200ms",
+        "value-change": "350ms",
+        "scan-sweep": "1600ms"
       },
       "easing": {
         "standard": "cubic-bezier(0.2, 0, 0, 1)"
@@ -596,7 +647,8 @@ export const tokens = {
       },
       "progress": {
         "track": "#e5e7eb",
-        "indicator": "#17212b"
+        "indicator": "#2855d9",
+        "marker": "#17212b"
       },
       "navigation": {
         "surface": "#f7f8fa",
@@ -606,6 +658,25 @@ export const tokens = {
         "selected-content": "#2855d9",
         "action-surface": "#2855d9",
         "action-content": "#ffffff"
+      },
+      "brand": {
+        "wordmark": "#17212b",
+        "mark": "#2855d9",
+        "inverse": "#ffffff"
+      },
+      "water": {
+        "accent": "#0e7490",
+        "surface": "#ecfeff",
+        "track": "#e5e7eb",
+        "text": "#155e75"
+      },
+      "camera": {
+        "stage": "#0b1218",
+        "stage-text": "#ffffff",
+        "chip-surface": "rgb(255 255 255 / 0.16)",
+        "frame": "rgb(255 255 255 / 0.7)",
+        "detected": "#8fb0ff",
+        "chip-surface-on-image": "rgb(11 18 24 / 0.72)"
       }
     },
     "typography": {
@@ -762,6 +833,13 @@ export const tokens = {
         "fontWeight": "600",
         "lineHeight": "1.333333",
         "letterSpacing": "-0.03em"
+      },
+      "wordmark-compact": {
+        "fontFamily": "'Inter Variable', Inter, system-ui, sans-serif",
+        "fontSize": "1.125rem",
+        "fontWeight": "600",
+        "lineHeight": "1.333333",
+        "letterSpacing": "-0.03em"
       }
     },
     "spacing": {
@@ -818,14 +896,17 @@ export const tokens = {
       "ring-offset": "2px"
     },
     "shadow": {
-      "sheet": "0px -2px 24px 0px rgb(23 33 43 / 0.16)"
+      "sheet": "0px -2px 24px 0px rgb(23 33 43 / 0.16)",
+      "navigation": "0px -2px 12px 0px rgb(23 33 43 / 0.08)"
     },
     "motion": {
       "duration": {
         "instant": "0ms",
         "feedback": "100ms",
         "disclosure": "150ms",
-        "overlay": "200ms"
+        "overlay": "200ms",
+        "value-change": "350ms",
+        "scan-sweep": "1600ms"
       },
       "easing": {
         "standard": "cubic-bezier(0.2, 0, 0, 1)"
@@ -837,7 +918,10 @@ export const tokens = {
         "disclosure": "150ms",
         "async-result": "150ms",
         "sheet": "200ms",
-        "navigation": "200ms"
+        "navigation": "200ms",
+        "value-change": "350ms",
+        "scan-sweep": "1600ms",
+        "toast": "200ms"
       }
     },
     "layer": {

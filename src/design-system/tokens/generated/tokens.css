@@ -11,9 +11,15 @@
   --portion-ref-color-neutral-600: #59636e;
   --portion-ref-color-neutral-650: #52606d;
   --portion-ref-color-neutral-900: #17212b;
+  --portion-ref-color-neutral-950: #0b1218;
   --portion-ref-color-neutral-900-alpha-40: rgb(23 33 43 / 0.4);
   --portion-ref-color-neutral-900-alpha-16: rgb(23 33 43 / 0.16);
+  --portion-ref-color-neutral-900-alpha-8: rgb(23 33 43 / 0.08);
+  --portion-ref-color-neutral-0-alpha-16: rgb(255 255 255 / 0.16);
+  --portion-ref-color-neutral-0-alpha-70: rgb(255 255 255 / 0.7);
+  --portion-ref-color-neutral-950-alpha-72: rgb(11 18 24 / 0.72);
   --portion-ref-color-blue-50: #eaf0ff;
+  --portion-ref-color-blue-300: #8fb0ff;
   --portion-ref-color-blue-600: #2855d9;
   --portion-ref-color-blue-700: #2147b6;
   --portion-ref-color-blue-800: #19368f;
@@ -35,6 +41,9 @@
   --portion-ref-color-rose-700: #a04574;
   --portion-ref-color-taupe-50: #f3f0ed;
   --portion-ref-color-taupe-700: #6b6259;
+  --portion-ref-color-cyan-50: #ecfeff;
+  --portion-ref-color-cyan-700: #0e7490;
+  --portion-ref-color-cyan-800: #155e75;
   --portion-ref-font-family-ui: 'Inter Variable', Inter, system-ui, sans-serif; /* The installed @fontsource-variable/inter asset registers 'Inter Variable'; it is the approved Inter typeface. */
   --portion-ref-font-weight-regular: 400;
   --portion-ref-font-weight-medium: 500;
@@ -101,10 +110,13 @@
   --portion-ref-focus-ring-width: 3px;
   --portion-ref-focus-ring-offset: 2px;
   --portion-ref-shadow-sheet: 0px -2px 24px 0px rgb(23 33 43 / 0.16);
+  --portion-ref-shadow-navigation: 0px -2px 12px 0px rgb(23 33 43 / 0.08);
   --portion-ref-motion-duration-instant: 0ms;
   --portion-ref-motion-duration-feedback: 100ms;
   --portion-ref-motion-duration-disclosure: 150ms;
   --portion-ref-motion-duration-overlay: 200ms;
+  --portion-ref-motion-duration-value-change: 350ms;
+  --portion-ref-motion-duration-scan-sweep: 1600ms;
   --portion-ref-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1); /* Restrained interface easing; an implementation decision, not a research finding. */
   --portion-ref-layer-content: 0;
   --portion-ref-layer-sticky: 10;
@@ -151,8 +163,9 @@
   --portion-color-nutrition-vitamins-surface: var(--portion-ref-color-rose-50);
   --portion-color-nutrition-minerals-accent: var(--portion-ref-color-taupe-700);
   --portion-color-nutrition-minerals-surface: var(--portion-ref-color-taupe-50);
-  --portion-color-progress-track: var(--portion-ref-color-neutral-200); /* Unfilled portion of the progress ring. A non-essential guide (1.29:1 on canvas); the arc, centre text and labels carry the meaning. */
-  --portion-color-progress-indicator: var(--portion-color-nutrition-energy-accent); /* Filled arc of the calorie progress ring: the energy category accent (neutral ink), never an action blue or a success/error colour. 12.6:1 on the track. */
+  --portion-color-progress-track: var(--portion-ref-color-neutral-200); /* Unfilled portion of a progress bar. A non-essential guide; the fill, the marker and the text carry the meaning. */
+  --portion-color-progress-indicator: var(--portion-color-action-primary); /* Fill of the calorie budget bar: blue as information about progress toward a user-set bound, never a success/error colour; it does not change hue when the goal is reached or exceeded. 3.0:1+ on the track and on the surface. */
+  --portion-color-progress-marker: var(--portion-color-text-primary); /* The goal marker on the calorie budget track: a 2 px neutral tick at the bound, visible over the fill and the track. */
   --portion-color-navigation-surface: var(--portion-color-background-surface); /* The compact destination group's fill. */
   --portion-color-navigation-boundary: var(--portion-color-border-decorative); /* The destination group's hairline; the group's fill and its contents identify it, so the hairline is not an essential boundary. */
   --portion-color-navigation-content: var(--portion-color-text-secondary); /* Inactive destination glyphs. 6.1:1 on the group surface. */
@@ -160,6 +173,19 @@
   --portion-color-navigation-selected-content: var(--portion-color-action-primary); /* The active destination's bold glyph and 10/14 label. 5.4:1 on the selected surface. */
   --portion-color-navigation-action-surface: var(--portion-color-action-primary); /* The separate circular Log food action — the one filled element in the bar. */
   --portion-color-navigation-action-content: var(--portion-color-text-on-action); /* The Log food glyph. 6.2:1 on the action surface. */
+  --portion-color-brand-wordmark: var(--portion-color-text-primary); /* The lowercase portion wordmark in the default lockup. */
+  --portion-color-brand-mark: var(--portion-color-action-primary); /* The portion dot beside the wordmark; decorative, no meaning of its own. */
+  --portion-color-brand-inverse: var(--portion-color-text-on-action); /* Wordmark and dot on a dark or action-coloured surface. */
+  --portion-color-water-accent: var(--portion-ref-color-cyan-700); /* Water fill, icon and figure marker. Distinct from action blue and the carbohydrate teal; 3:1+ on canvas and on the water track for the non-text fill. */
+  --portion-color-water-surface: var(--portion-ref-color-cyan-50); /* Tinted surface behind the water quick-add control and icon. */
+  --portion-color-water-track: var(--portion-ref-color-neutral-200); /* Unfilled part of the water track. */
+  --portion-color-water-text: var(--portion-ref-color-cyan-800); /* Water status text and the quick-add label; 4.5:1+ on canvas, surface and the water surface. */
+  --portion-color-camera-stage: var(--portion-ref-color-neutral-950); /* The dark viewfinder surface of the barcode and photo steps — the only dark surface in the product. */
+  --portion-color-camera-stage-text: var(--portion-ref-color-neutral-0); /* Guidance and chip text on the stage. */
+  --portion-color-camera-chip-surface: var(--portion-ref-color-neutral-0-alpha-16); /* Translucent status-chip fill on the stage. */
+  --portion-color-camera-frame: var(--portion-ref-color-neutral-0-alpha-70); /* Focus corners and framing guide while scanning or framing. */
+  --portion-color-camera-detected: var(--portion-ref-color-blue-300); /* Corners, chip and scan-stop treatment once a code is read: light blue for 3:1+ on the stage, paired with wording. */
+  --portion-color-camera-chip-surface-on-image: var(--portion-ref-color-neutral-950-alpha-72); /* Status-chip fill over a captured frame: the stage colour at 72 % so white text stays readable on any photograph. */
   --portion-typography-main-result-font-family: var(--portion-ref-font-family-ui); /* One main calculated calorie value in a result composition. 40/48, 600. */
   --portion-typography-main-result-font-size: var(--portion-ref-font-size-40);
   --portion-typography-main-result-font-weight: var(--portion-ref-font-weight-semibold);
@@ -270,6 +296,11 @@
   --portion-typography-wordmark-font-weight: var(--portion-ref-font-weight-semibold);
   --portion-typography-wordmark-line-height: var(--portion-ref-font-line-height-detail-heading);
   --portion-typography-wordmark-letter-spacing: var(--portion-ref-font-letter-spacing-wordmark);
+  --portion-typography-wordmark-compact-font-family: var(--portion-ref-font-family-ui); /* Compact lockup, 18/24 with the wordmark's tracking, for tight rows; the default lockup stays 24/32. */
+  --portion-typography-wordmark-compact-font-size: var(--portion-ref-font-size-18);
+  --portion-typography-wordmark-compact-font-weight: var(--portion-ref-font-weight-semibold);
+  --portion-typography-wordmark-compact-line-height: var(--portion-ref-font-line-height-compact-title);
+  --portion-typography-wordmark-compact-letter-spacing: var(--portion-ref-font-letter-spacing-wordmark);
   --portion-spacing-page-inset: var(--portion-ref-space-16); /* Mobile page inset; safe-area padding is additional. */
   --portion-spacing-card-padding: var(--portion-ref-space-16);
   --portion-spacing-card-gap: var(--portion-ref-space-12); /* Between card-shaped items in a vertical list, e.g. RecipeCard. Distinct from card-padding, a card's own internal inset. */
@@ -308,10 +339,13 @@
   --portion-focus-ring-width: var(--portion-ref-focus-ring-width);
   --portion-focus-ring-offset: var(--portion-ref-focus-ring-offset);
   --portion-shadow-sheet: var(--portion-ref-shadow-sheet);
+  --portion-shadow-navigation: var(--portion-ref-shadow-navigation); /* Restrained elevation under the fixed bottom navigation, replacing its former top border. */
   --portion-motion-duration-instant: var(--portion-ref-motion-duration-instant);
   --portion-motion-duration-feedback: var(--portion-ref-motion-duration-feedback);
   --portion-motion-duration-disclosure: var(--portion-ref-motion-duration-disclosure);
   --portion-motion-duration-overlay: var(--portion-ref-motion-duration-overlay);
+  --portion-motion-duration-value-change: var(--portion-ref-motion-duration-value-change);
+  --portion-motion-duration-scan-sweep: var(--portion-ref-motion-duration-scan-sweep);
   --portion-motion-easing-standard: var(--portion-ref-motion-easing-standard);
   --portion-motion-transition-press: var(--portion-ref-motion-duration-feedback); /* Button press and release surface change. */
   --portion-motion-transition-selection: var(--portion-ref-motion-duration-feedback); /* Chip, tab and option selection. */
@@ -320,6 +354,9 @@
   --portion-motion-transition-async-result: var(--portion-ref-motion-duration-disclosure); /* Result region replacing a pending state. */
   --portion-motion-transition-sheet: var(--portion-ref-motion-duration-overlay); /* Modal sheet enter and exit. */
   --portion-motion-transition-navigation: var(--portion-ref-motion-duration-overlay); /* Root and focused-flow transitions. */
+  --portion-motion-transition-value-change: var(--portion-ref-motion-duration-value-change); /* A numeric figure and its fill moving from the previous to the new total (water quick add). */
+  --portion-motion-transition-scan-sweep: var(--portion-ref-motion-duration-scan-sweep); /* One pass of the barcode scan line; loops only while scanning. */
+  --portion-motion-transition-toast: var(--portion-ref-motion-duration-overlay); /* Confirmation toast enter and exit. */
   --portion-layer-content: var(--portion-ref-layer-content);
   --portion-layer-sticky: var(--portion-ref-layer-sticky);
   --portion-layer-navigation: var(--portion-ref-layer-navigation);

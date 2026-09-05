@@ -1,0 +1,51 @@
+/* The live region is always mounted (so an announcement is never missed); it sits above
+   the fixed navigation's measured inset, or above the bottom safe area when no bar is
+   shown, and never covers the mobile shell's side insets. */
+.region {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: calc(max(var(--portion-navigation-inset), var(--portion-safe-area-bottom)) + var(--portion-ref-space-12));
+  z-index: var(--portion-layer-navigation);
+  display: flex;
+  justify-content: center;
+  padding-inline: calc(var(--portion-safe-area-left) + var(--portion-spacing-page-inset)) calc(var(--portion-safe-area-right) + var(--portion-spacing-page-inset));
+  pointer-events: none;
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto var(--portion-size-target-minimum);
+  align-items: center;
+  column-gap: var(--portion-ref-space-4);
+  inline-size: 100%;
+  max-inline-size: calc(430px - var(--portion-spacing-page-inset) * 2);
+  padding-block: var(--portion-ref-space-4);
+  padding-inline-start: var(--portion-ref-space-16);
+  padding-inline-end: var(--portion-ref-space-4);
+  background: var(--portion-color-background-canvas);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-card);
+  box-shadow: var(--portion-shadow-sheet);
+  pointer-events: auto;
+  animation: toast-in var(--portion-motion-transition-toast) var(--portion-motion-easing-standard);
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(var(--portion-ref-space-12));
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.message {
+  min-inline-size: 0;
+  padding-block: var(--portion-ref-space-8);
+}
+
+.close {
+  color: var(--portion-color-text-secondary);
+}

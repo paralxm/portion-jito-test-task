@@ -20,9 +20,10 @@
   min-inline-size: 0;
 }
 
-/* Secondary size: two then one column as the row narrows. 21.25 rem is 340 px at 100 %
-   and 680 px at 200 %, which is what makes 320 px + 200 % fall back to one column. */
-@container (max-width: 21.25rem) {
+/* Secondary size: two then one column as the row narrows. 20 rem is 320 px at 100 % (a
+   padded surface at 393 px keeps three columns) and 640 px at 200 %, which is what makes
+   320 px + 200 % fall back to one column. */
+@container (max-width: 20rem) {
   .macros[data-size='secondary'] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -40,4 +41,35 @@
   .macros[data-size='compact'] {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Secondary size between 20 rem and 22 rem (a padded card at 393 px): three columns stay,
+   but the long category name would touch the next marker, so the short name shows and the
+   long one stays in the accessible name. Wider rows and the two-column layout keep the
+   full name. */
+.shortLabel {
+  display: none;
+}
+
+@container (min-width: 20.01rem) and (max-width: 22rem) {
+  .macros[data-size='secondary'] .longLabel {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .macros[data-size='secondary'] .shortLabel {
+    display: inline;
+  }
+}
+
+/* The compact track under a value with a target; one related step below the figure. */
+.track {
+  margin-block-start: var(--portion-ref-space-4);
 }

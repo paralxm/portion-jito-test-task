@@ -6,8 +6,11 @@
 }
 
 .row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto var(--portion-size-icon-small-action);
+  /* A flex row states the priority a grid cannot: the identity keeps a 7.5 rem basis (its longest whole words) and takes
+     the spare width; the figure keeps its natural width and only shrinks (its basis wrapping
+     on word boundaries) once the identity is at its minimum. So a food name wraps between
+     words and the basis gives way first. */
+  display: flex;
   column-gap: var(--portion-ref-space-12);
   align-items: center;
   inline-size: 100%;
@@ -41,11 +44,22 @@
   outline-offset: calc(var(--portion-focus-ring-offset) * -1);
 }
 
+/* With a thumbnail the row gains a leading 4 rem (64 × 48) image column at the control radius. */
+.thumbnail {
+  display: block;
+  flex: 0 0 4rem;
+  inline-size: 4rem;
+  border-radius: var(--portion-radius-control);
+  overflow: hidden;
+  align-self: start;
+}
+
 .identity {
   display: flex;
   flex-direction: column;
   gap: var(--portion-spacing-title-to-secondary);
-  min-inline-size: 0;
+  flex: 1 0 7.5rem;
+  min-inline-size: 7.5rem;
 }
 
 .figure {
@@ -53,12 +67,18 @@
   flex-direction: column;
   align-items: flex-end;
   gap: var(--portion-spacing-title-to-secondary);
+  flex: 0 1 auto;
   text-align: end;
+}
+
+/* The calorie value never breaks; only the basis beneath it wraps (“per serving” / “(350 g)”). */
+.figure > :first-child {
   white-space: nowrap;
 }
 
 .chevron {
   display: inline-flex;
+  flex: 0 0 var(--portion-size-icon-small-action);
   color: var(--portion-color-text-secondary);
 }
 
@@ -66,8 +86,13 @@
    under the identity so a food name never has to break inside a word to make room. */
 @container (max-width: 18rem) {
   .row {
+    display: grid;
     grid-template-columns: minmax(0, 1fr) var(--portion-size-icon-small-action);
     row-gap: var(--portion-spacing-title-to-secondary);
+  }
+
+  .identity {
+    min-inline-size: 0;
   }
 
   .figure {
@@ -79,6 +104,40 @@
   .chevron {
     grid-column: 2;
     grid-row: 1 / span 2;
+    align-self: center;
+  }
+}
+
+/* A thumbnail row needs the photo column too, so it stacks earlier: under 22 rem (320 px at
+   100 % text, every supported viewport at 200 %) it becomes photo → identity → figure. */
+@container (max-width: 22rem) {
+  .row[data-thumbnail] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--portion-size-icon-small-action);
+    row-gap: var(--portion-spacing-title-to-secondary);
+  }
+
+  .row[data-thumbnail] .thumbnail {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .row[data-thumbnail] .identity {
+    grid-column: 1;
+    grid-row: 2;
+    min-inline-size: 0;
+  }
+
+  .row[data-thumbnail] .figure {
+    grid-column: 1;
+    grid-row: 3;
+    align-items: flex-start;
+    text-align: start;
+  }
+
+  .row[data-thumbnail] .chevron {
+    grid-column: 2;
+    grid-row: 1 / span 3;
     align-self: center;
   }
 }
