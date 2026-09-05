@@ -77,13 +77,20 @@ export const Suggestions: Story = {
 
 export const CancelAnalysis: Story = {
   name: 'Cancel during analysis keeps the preview',
+  // A slower fixture than the default 60 ms so Cancel always lands during the analysis, even under a loaded parallel run.
+  args: {
+    analyse: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      return analyse();
+    },
+  },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Take photo' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Analyse photo' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
     await expect(canvas.getByRole('button', { name: 'Analyse photo' })).toBeInTheDocument();
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     // The late response is ignored: still in preview, no suggestions.
     await expect(canvas.queryByRole('group', { name: 'Suggested foods' })).toBeNull();
   },

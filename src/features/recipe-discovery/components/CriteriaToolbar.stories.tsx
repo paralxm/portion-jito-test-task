@@ -45,7 +45,7 @@ export const NoActiveCriteria: Story = {
 
 export const AppliedCriteria: Story = {
   name: 'Applied criteria',
-  args: { criteria: { caloriesMax: 500, proteinMin: 20, dietary: 'vegan' } },
+  args: { criteria: { caloriesMax: 500, proteinMin: 20, dietary: ['vegan'] } },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getAllByRole('listitem')).toHaveLength(3);
   },
@@ -70,7 +70,7 @@ export const FilterActionStates: Story = {
 
 export const OpenSheetAndRemoveChip: Story = {
   name: 'Open the sheet from the action and remove a chip',
-  render: () => <Harness initial={{ caloriesMax: 500, dietary: 'vegan' }} />,
+  render: () => <Harness initial={{ caloriesMax: 500, dietary: ['vegan'] }} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Filters, 2 active' }));
@@ -86,7 +86,7 @@ export const OpenSheetAndRemoveChip: Story = {
 
 export const Narrow320: Story = {
   name: 'Narrow — 320',
-  args: { criteria: { caloriesMin: 300, caloriesMax: 500, proteinMin: 10, preparationMax: 30, dietary: 'vegan' } },
+  args: { criteria: { caloriesMin: 300, caloriesMax: 500, proteinMin: 10, preparationMax: 30, dietary: ['vegan'] } },
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getAllByRole('listitem')).toHaveLength(4);
@@ -96,7 +96,7 @@ export const Narrow320: Story = {
 
 export const EnlargedText: Story = {
   name: 'Enlarged text — 320 at 200 %',
-  args: { criteria: { caloriesMin: 300, caloriesMax: 500, proteinMin: 10, preparationMax: 30, dietary: 'vegan' } },
+  args: { criteria: { caloriesMin: 300, caloriesMax: 500, proteinMin: 10, preparationMax: 30, dietary: ['vegan'] } },
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   decorators: [withRootFontSize(200)],
   play: async ({ canvasElement }) => {

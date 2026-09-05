@@ -25,9 +25,9 @@ type Story = StoryObj<typeof meta>;
 export const Empty: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('radio', { name: 'No preference' })).toHaveAttribute('aria-checked', 'true');
+    await expect(canvas.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(canvas.getByRole('button', { name: 'Apply filters' }));
-    await expect(args.onApply).toHaveBeenCalledWith({ caloriesMin: null, caloriesMax: null, proteinMin: null, preparationMax: null, dietary: null });
+    await expect(args.onApply).toHaveBeenCalledWith({ caloriesMin: null, caloriesMax: null, proteinMin: null, preparationMax: null, dietary: [] });
   },
 };
 
@@ -45,7 +45,7 @@ export const InvalidRange: Story = {
 
 export const ResetThenApply: Story = {
   name: 'Reset all clears the draft; Apply commits it',
-  args: { applied: { caloriesMax: 500, dietary: 'vegan' } },
+  args: { applied: { caloriesMax: 500, dietary: ['vegan'] } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByLabelText(/^Maximum/)).toHaveValue('500');
@@ -53,7 +53,26 @@ export const ResetThenApply: Story = {
     await expect(canvas.getByLabelText(/^Maximum/)).toHaveValue('');
     await expect(args.onApply).not.toHaveBeenCalled();
     await userEvent.click(canvas.getByRole('button', { name: 'Apply filters' }));
-    await expect(args.onApply).toHaveBeenCalledWith({ caloriesMin: null, caloriesMax: null, proteinMin: null, preparationMax: null, dietary: null });
+    await expect(args.onApply).toHaveBeenCalledWith({ caloriesMin: null, caloriesMax: null, proteinMin: null, preparationMax: null, dietary: [] });
+  },
+};
+
+export const MultipleDietary: Story = {
+  name: 'Dietary constraints combine — two toggles, AND, All clears them',
+  args: { applied: { dietary: ['vegan'] } },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const vegan = canvas.getByRole('button', { name: 'Vegan' });
+    await expect(vegan).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
+    await userEvent.click(canvas.getByRole('button', { name: 'Gluten-free' }));
+    await expect(canvas.getByRole('button', { name: 'Gluten-free' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(vegan).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(canvas.getByRole('button', { name: 'Apply filters' }));
+    await expect(args.onApply).toHaveBeenLastCalledWith({ caloriesMin: null, caloriesMax: null, proteinMin: null, preparationMax: null, dietary: ['vegan', 'gluten-free'] });
+    await userEvent.click(canvas.getByRole('button', { name: 'All' }));
+    await expect(vegan).toHaveAttribute('aria-pressed', 'false');
+    await expect(canvas.getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'true');
   },
 };
 

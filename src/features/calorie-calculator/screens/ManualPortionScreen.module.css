@@ -1,0 +1,50 @@
+.step {
+  white-space: nowrap;
+}
+
+/* The identity summary: photo (or the No photo frame), name and basis, then the edit action. */
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+.summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-12);
+  min-inline-size: 0;
+}
+
+.thumbnail {
+  flex: 0 0 5rem;
+  inline-size: 5rem;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--portion-radius-control);
+  overflow: hidden;
+  background: var(--portion-color-background-surface);
+}
+
+.image {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+  min-inline-size: 0;
+}
+
+.edit {
+  align-self: flex-start;
+}
+
+/* The basis phrase never breaks between its number and unit. */
+.basis {
+  white-space: nowrap;
+}

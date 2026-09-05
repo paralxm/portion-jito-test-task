@@ -10,7 +10,8 @@ import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domai
 import { RecipesScreen } from '../../features/recipe-discovery/screens/RecipesScreen';
 import { SearchScreen } from '../screens/SearchScreen';
 import { HomeWithWater } from './harnesses';
-import { budgetEntries, budgetGoal, FIXED_DATE, goal2200, populatedEntries, WATER_PARTIAL_ML } from './stateFixtures';
+import { budgetEntries, budgetGoal, goal2200, populatedEntries, threeDayEntries, TODAY_KEY, WATER_PARTIAL_ML } from './stateFixtures';
+import { addDays } from '../../features/calorie-calculator/domain/day-keys';
 
 const nav = (selected: Destination) => <NavigationBar selected={selected} onSelect={fn()} onLogFood={fn()} />;
 const idle = { status: 'idle', results: [] } as const;
@@ -42,7 +43,7 @@ const home = (entries: readonly FoodEntry[], goal: DailyGoal | null, waterMl = 0
     recommended={recommended}
     onOpenRecipe={fn()}
     onFindRecipes={fn()}
-    now={FIXED_DATE}
+    todayKey={TODAY_KEY}
     navigation={nav('home')}
     {...extra}
   />
@@ -113,6 +114,8 @@ export const S02_1: Story = {
       onSubmit={fn()}
       onClear={fn()}
       food={{ status: 'ready', results: searchFoods('rice') }}
+      recipeCatalogue={recipeCatalogue}
+      recipeCatalogueStatus="ready"
       catalogue={foodCatalogue}
       recents={[]}
       foodFilters={NO_FOOD_FILTERS}
@@ -147,17 +150,18 @@ export const S03_1: Story = {
     docs: {
       description: {
         story:
-          'Purpose: query-free browsing without criteria; every catalogue recipe shows its licensed photo (ledger D-28) and the filter action sits at the end of the search entry. Entry: Recipes root, browse loaded. Fixture: the five-recipe catalogue, including a long-title card and a card whose protein is not available. Primary action: a card → S08-2; Filters → O02. Next: S03-2 after Apply. Limitation: none.',
+          'Purpose: curated discovery without criteria (ledger §12 B1, after R2): the real count, the search entry with the filter action at its end, quick dietary chips, and the Featured / under-30-minutes / 30 g-protein rails, every card with its licensed photo (D-28); the complete catalogue lives in Search / Recipes. Entry: Recipes root, catalogue loaded. Fixture: the ten-recipe catalogue. Primary action: a card → S08-2; a chip or Filters → S03-2; View all / Browse all → S02-11. Limitation: none.',
       },
     },
   },
   render: () => (
-    <RecipesScreen results={recipeCatalogue} criteria={{}} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
+    <RecipesScreen recipes={recipeCatalogue} criteria={{}} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onToggleDietary={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { name: 'All recipes' })).toBeInTheDocument();
-    await expect(canvas.getAllByText('5 recipes').length).toBeGreaterThanOrEqual(1);
+    await expect(canvas.getByRole('heading', { name: 'Featured' })).toBeInTheDocument();
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('10 recipes');
+    await expect(canvas.getByRole('group', { name: 'Dietary' })).toBeInTheDocument();
     await expect(canvas.queryByText('No photo')).toBeNull();
     await expect(canvas.queryByText(/Matches all/)).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Filters' })).toBeVisible();
@@ -166,6 +170,61 @@ export const S03_1: Story = {
 };
 
 // ---- Rows added by the 2026-09-05 redesign (ledger §10.3) -----------------------------
+
+export const S01_5: Story = {
+  name: 'S01-5 — Home / A selected earlier day',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the week strip selects an earlier day and Home shows that day’s record — its entries, totals and water — with the context line, the meals heading and the water sheet naming the day; Today returns to the current day; days after today are unavailable (ledger §12 A3/A4, after R1). Entry: a tile in the strip, previous week, or Home after a commit on that day. Fixture: yesterday (Sep 3) holding the 400-kcal budget entry while the goal history has no goal for it, so the logged amount shows alone with the explanation. Primary action: a meal’s add action → O01 bound to that day. Secondary: Today; an entry row → S07-3. Limitation: none.',
+      },
+    },
+  },
+  render: () => home(threeDayEntries, null, 500, { initialSelectedDayKey: addDays(TODAY_KEY, -1) }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Yesterday · Sep 3')).toBeVisible();
+    await expect(canvas.getByRole('heading', { name: 'Yesterday’s meals' })).toBeInTheDocument();
+    await expect(canvas.getByText('400')).toBeVisible();
+    await expect(canvas.getByText('kcal logged')).toBeVisible();
+    await expect(canvas.getByText(/No goal was set for this day/)).toBeVisible();
+    await expect(canvas.getByRole('radio', { name: /Thursday, September 3$/ })).toBeChecked();
+    await expect(canvas.getByRole('radio', { name: /Friday, September 4, today$/ })).not.toBeChecked();
+    await expect(canvas.getByRole('radio', { name: /Saturday, September 5, not available yet/ })).toBeDisabled();
+    await expect(canvas.getByRole('button', { name: 'Edit water, 500 millilitres of 2 litres' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
+    await expect(canvas.getByText('Today · Sep 4')).toBeVisible();
+    await expect(canvas.getByText('1,350 kcal logged')).toBeVisible();
+    // End on the earlier day so the captured state is the one this row documents.
+    await userEvent.click(canvas.getByRole('radio', { name: /Thursday, September 3$/ }));
+    await expect(canvas.getByText('Yesterday · Sep 3')).toBeVisible();
+    await expect(canvas.getByRole('heading', { name: 'Yesterday’s meals' })).toBeInTheDocument();
+  },
+};
+
+export const S01_6: Story = {
+  name: 'S01-6 — Home / Streak of three days',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the header’s streak counts consecutive local days with at least one confirmed food or recipe entry, ending today (or yesterday while today is open); water, opening the app and goals never count; the control opens the rule (ledger §12 A5). Entry: any Home. Fixture: entries on Sep 2, 3 and 4 → 3 days, including today. Primary action: the streak control → the explanation sheet. Limitation: none.',
+      },
+    },
+  },
+  render: () => home(threeDayEntries, goal2200, WATER_PARTIAL_ML),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const streak = canvas.getByRole('button', { name: /^Streak: 3 days in a row/ });
+    await expect(streak).toHaveTextContent('3');
+    await userEvent.click(streak);
+    const sheet = await canvas.findByRole('dialog', { name: 'Logging streak' });
+    await expect(within(sheet).getByText(/Water, opening the app, reaching a goal or looking at a day do not count/)).toBeVisible();
+    await userEvent.click(within(sheet).getByRole('button', { name: 'Close' }));
+    await expect(canvas.queryByRole('dialog', { name: 'Logging streak' })).toBeNull();
+  },
+};
 
 export const S01_4: Story = {
   name: 'S01-4 — Home / Water quick-add confirmation (Undo available)',

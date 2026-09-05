@@ -107,15 +107,26 @@ export function IPhone16PortraitReviewFrame({ children }: { children: ReactNode 
   );
 }
 
+/** True when the element sits inside a horizontal scroll container that itself fits the viewport: its content scrolls by design and never widens the page. */
+function insideFittingScroller(el: HTMLElement, limit: number): boolean {
+  for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+    const overflowX = getComputedStyle(node).overflowX;
+    if ((overflowX === 'auto' || overflowX === 'scroll') && node.getBoundingClientRect().right <= limit) return true;
+  }
+  return false;
+}
+
 /**
  * Asserts nothing inside `root` (default: the whole document) is wider than the
- * viewport — the one check every 320 CSS px and enlarged-text story needs. Reports the
- * offending element instead of just failing, so a regression names its own cause.
+ * viewport — the one check every 320 CSS px and enlarged-text story needs. Content
+ * inside a horizontal scroll container that fits (a rail, a chip row, the day strip)
+ * scrolls within it and is not page overflow. Reports the offending element instead of
+ * just failing, so a regression names its own cause.
  */
 export async function expectNoHorizontalOverflow(root: HTMLElement = document.documentElement) {
   const limit = window.innerWidth + 1;
   const offenders = Array.from(root.querySelectorAll<HTMLElement>('*'))
-    .filter((el) => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().right > limit)
+    .filter((el) => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().right > limit && !insideFittingScroller(el, limit))
     .map((el) => `${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]} → right edge ${Math.round(el.getBoundingClientRect().right)} (viewport ${window.innerWidth})`);
   if (offenders.length > 0) throw new Error(`Horizontal overflow:\n${offenders.join('\n')}`);
 }

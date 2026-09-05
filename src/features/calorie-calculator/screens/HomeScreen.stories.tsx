@@ -5,13 +5,14 @@ import { NavigationBar } from '../../../design-system/patterns/NavigationBar/Nav
 import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
 import { fixtureR } from '../../recipe-discovery/domain/fixtures';
 import { matchEvidence } from '../../recipe-discovery/domain/matching';
-import { createEntry, type FoodEntry } from '../domain/daily-log';
+import { createEntry, localDayKey, type FoodEntry } from '../domain/daily-log';
 import { foodCatalogue } from '../domain/fixtures';
 import { budgetFixtureEntries, budgetFixtureGoal, homeEntries } from '../domain/home-fixtures';
 import { HomeScreen } from './HomeScreen';
 
 const navigation = <NavigationBar selected="home" onSelect={fn()} onLogFood={fn()} />;
 const now = new Date('2026-09-04T12:00:00Z');
+const todayKey = localDayKey(now);
 
 /** Demonstration data only: the ui-contract §1 Home fixtures (1,350 of 2,200 kcal) and the brief's 400 of 2,000 budget fixture. */
 const populated = homeEntries(now.getTime());
@@ -33,7 +34,10 @@ const meta = {
     waterMl: 0,
     onAddWater: fn(),
     onSetWaterTotal: fn(),
-    now,
+    selectedDayKey: todayKey,
+    todayKey,
+    onSelectDay: fn(),
+    streak: { days: 0, todayLogged: false },
     navigation,
   },
   parameters: {

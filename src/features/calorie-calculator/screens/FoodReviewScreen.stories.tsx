@@ -3,7 +3,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 
 import { expectNoHorizontalOverflow, withRootFontSize } from '../../../design-system/storybook/decorators';
 import type { FoodCandidate } from '../domain/calculation';
-import { barcodeCatalogue, fixtureC, foodCatalogue, photoSuggestions } from '../domain/fixtures';
+import { barcodeCatalogue, fixtureC, foodCatalogue, photoSuggestions, samplePhotoImage } from '../domain/fixtures';
 import { oatmealWithBerries } from '../domain/home-fixtures';
 import { FoodReviewScreen } from './FoodReviewScreen';
 
@@ -17,26 +17,16 @@ const noEnergy: FoodCandidate = {
   units: [{ id: 'g', label: 'g', toReference: 1 }],
 };
 
-const manual: FoodCandidate = {
-  id: 'manual-1',
-  name: 'Lentil soup',
-  detail: 'Entered manually',
-  source: 'manual',
-  reference: { quantity: 1, unitId: 'serving' },
-  nutrition: { energyKcal: 450, proteinG: 24, carbohydratesG: null, fatG: 18 },
-  units: [{ id: 'serving', label: 'serving', toReference: 1 }],
-};
-
 const meta = {
   title: 'Product compositions/Food review (S07)',
   component: FoodReviewScreen,
-  args: { candidate: fixtureC, mode: 'new', onBack: fn(), onChangeMatch: fn(), onAddToToday: fn(), onDone: fn(), onUpdateEntry: fn(), onRemoveEntry: fn() },
+  args: { candidate: fixtureC, mode: 'new', initialMeal: 'lunch', mealHint: 'Suggested for this time of day. Change it if you like.', onBack: fn(), onCancel: fn(), onChangeMatch: fn(), onRetake: fn(), onEditValues: fn(), onAdd: fn(), onUpdateEntry: fn(), onRemoveEntry: fn() },
   parameters: {
     layout: 'fullscreen',
     docs: {
       description: {
         component:
-          'S07 — one review screen for every entry method; only the source explanation differs. The amount to calculate is separate from the nutrition basis and the result previews as you type — reading it completes the calorie task. **Add to today** (enabled only for a calculable result) opens the Add-to-meal sheet, whose *Add to {meal}* is the one explicit commit; **Done** closes the task without logging. Opened from a Home row the screen is in existing-entry mode: the draft starts from the logged portion and meal, a `MealPicker` lets the meal change, **Update entry** commits portion and meal to the same entry, **Remove entry** asks first, and Back with a changed amount offers Keep editing / Discard.',
+          'S07 — one review for every source (ledger §12 E1–E3, after R5): identity (image, name, brand and barcode when the record supplies them, basis, the source stated plainly, the correction actions that source supports) → the shared portion form (amount with − / + and presets from the item’s own units, the live result) → meal and target day → one final **Add to {meal}**, which is the commit; **Cancel** leaves the task and asks first when something changed. A barcode result offers Change product and Edit label values; a photo result shows the captured (sample) frame with Change match, Retake photo and Edit nutrition values. Opened from a Home row the screen is in existing-entry mode: Update entry commits portion and meal to the same entry, Remove entry asks first.',
       },
     },
   },
@@ -46,76 +36,99 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const FromSearch: Story = {
-  name: 'From search — fixture C, Add to today',
+  name: 'From search — fixture C, Add to lunch commits once',
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
+    await expect(canvas.getByText('From search')).toBeVisible();
     await expect(canvas.getByText('180')).toBeInTheDocument();
     const amount = canvas.getByLabelText('Amount to calculate');
     await userEvent.clear(amount);
     await userEvent.type(amount, '300');
     await expect(canvas.getByText('540')).toBeInTheDocument();
-    const add = canvas.getByRole('button', { name: 'Add to today' });
-    await expect(add).toHaveAttribute('aria-haspopup', 'dialog');
+    await expect(canvas.getByRole('radio', { name: 'Lunch' })).toBeChecked();
+    await userEvent.click(canvas.getByRole('radio', { name: 'Dinner' }));
+    const add = canvas.getByRole('button', { name: 'Add to dinner' });
+    await expect(add).not.toHaveAttribute('aria-haspopup');
     await userEvent.click(add);
-    // Add to today hands the portion to the Add-to-meal sheet, which owns the commit (ledger D-23).
-    await expect(args.onAddToToday).toHaveBeenCalledWith({ quantity: 300, unitId: 'g' });
+    await expect(args.onAdd).toHaveBeenCalledWith({ quantity: 300, unitId: 'g' }, 'dinner');
+    await userEvent.click(add);
+    await expect(args.onAdd).toHaveBeenCalledTimes(1);
   },
 };
 
-export const DoneWithoutLogging: Story = {
-  name: 'Done closes the task without logging',
+export const CancelPolicy: Story = {
+  name: 'Cancel — untouched leaves at once; a changed draft asks',
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Done' }));
-    await expect(args.onDone).toHaveBeenCalledTimes(1);
-    await expect(args.onAddToToday).not.toHaveBeenCalled();
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    await expect(args.onCancel).toHaveBeenCalledTimes(1);
+    await expect(args.onAdd).not.toHaveBeenCalled();
+    await userEvent.click(canvas.getByRole('button', { name: 'Increase by 25 g' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    const dialog = canvas.getByRole('alertdialog', { name: 'Discard changes?' });
+    await expect(within(dialog).getByRole('button', { name: 'Keep editing' })).toHaveFocus();
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Keep editing' }));
+    await expect(args.onCancel).toHaveBeenCalledTimes(1);
+    await expect(canvas.getByLabelText('Amount to calculate')).toHaveValue('125');
+    await userEvent.click(canvas.getByRole('button', { name: 'Back' }));
+    await userEvent.click(within(await canvas.findByRole('alertdialog')).getByRole('button', { name: 'Discard changes' }));
+    await expect(args.onBack).toHaveBeenCalledTimes(1);
   },
 };
 
 export const FromBarcode: Story = {
-  name: 'From barcode — a match to check',
+  name: 'S07-4 — from barcode: product image, code, Change product, Edit label values',
   args: { candidate: barcodeCatalogue['5012345678900'] },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(/Matched from the barcode/)).toBeInTheDocument();
-    await expect(canvas.getByRole('button', { name: 'Add to today' })).toBeEnabled();
-    await expect(canvas.queryByRole('alertdialog')).toBeNull();
+    await expect(canvas.getByText('Barcode match')).toBeVisible();
+    await expect(canvas.getByText(/Barcode 5012345678900/)).toBeVisible();
+    await expect(canvas.getByText(/Matched from barcode 5012345678900/)).toBeVisible();
+    await expect(canvas.queryByText(/verified/i)).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Change product' }));
+    await expect(args.onChangeMatch).toHaveBeenCalledTimes(1);
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit label values' }));
+    await expect(args.onEditValues).toHaveBeenCalledTimes(1);
+    await expect(canvas.queryByRole('button', { name: 'Retake photo' })).toBeNull();
+    // Presets come from the record's units: millilitres and its 250 ml serving.
+    await expect(canvas.getByRole('button', { name: '1 serving (250 ml)' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: /bowl/ })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Add to lunch' })).toBeEnabled();
   },
 };
 
 export const FromPhoto: Story = {
-  name: 'From photo — a suggestion to check',
-  args: { candidate: photoSuggestions[0] },
-  play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText(/the photo does not measure it/)).toBeInTheDocument();
-  },
-};
-
-export const FromManual: Story = {
-  name: 'From manual entry — serving basis, unknown carbohydrates',
-  args: { candidate: manual },
-  play: async ({ canvasElement }) => {
+  name: 'S07-5 — from photo: the sample frame, Change match, Retake, Edit nutrition values',
+  args: { candidate: photoSuggestions[0], capturedImageUrl: samplePhotoImage },
+  play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Nutrition basis: per 1 serving')).toBeInTheDocument();
-    await expect(canvas.getAllByText('Not available').length).toBeGreaterThanOrEqual(1);
-    // Only one supported unit: no unit selector is offered.
-    await expect(canvas.queryByRole('button', { name: /Change unit/ })).toBeNull();
+    await expect(canvas.getByText('Photo suggestion')).toBeVisible();
+    await expect(canvas.getByRole('img', { name: /Sample photograph/ })).toBeVisible();
+    await expect(canvas.getByText('Sample photo')).toBeVisible();
+    await expect(canvas.getByText(/the photo does not measure the amount/)).toBeVisible();
+    await expect(canvas.queryByText(/Barcode/)).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Change match' }));
+    await expect(args.onChangeMatch).toHaveBeenCalledTimes(1);
+    await userEvent.click(canvas.getByRole('button', { name: 'Retake photo' }));
+    await expect(args.onRetake).toHaveBeenCalledTimes(1);
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit nutrition values' }));
+    await expect(args.onEditValues).toHaveBeenCalledTimes(1);
   },
 };
 
 export const InvalidAmount: Story = {
-  name: 'Invalid amount blocks Add to today',
+  name: 'S07-2 — invalid amount blocks the commit',
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const amount = canvas.getByLabelText('Amount to calculate');
     await userEvent.clear(amount);
     await userEvent.tab();
-    // The commit is unavailable for an invalid draft; the guidance sits beside the field.
-    const add = canvas.getByRole('button', { name: 'Add to today' });
+    const add = canvas.getByRole('button', { name: 'Add to lunch' });
     await expect(add).toBeDisabled();
     await userEvent.click(add);
-    await expect(args.onAddToToday).not.toHaveBeenCalled();
+    await expect(args.onAdd).not.toHaveBeenCalled();
     await expect(amount).toHaveAccessibleDescription('Enter the amount you want to calculate');
+    await expect(canvas.queryByText('180')).toBeNull();
   },
 };
 
@@ -124,10 +137,10 @@ export const NoEnergy: Story = {
   args: { candidate: noEnergy },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const add = canvas.getByRole('button', { name: 'Add to today' });
+    const add = canvas.getByRole('button', { name: 'Add to lunch' });
     await expect(add).toBeDisabled();
     await userEvent.click(add);
-    await expect(args.onAddToToday).not.toHaveBeenCalled();
+    await expect(args.onAdd).not.toHaveBeenCalled();
     await userEvent.click(canvas.getByRole('button', { name: 'Choose a different food' }));
     await expect(args.onChangeMatch).toHaveBeenCalledTimes(1);
   },
@@ -141,6 +154,14 @@ export const PartialData: Story = {
       .getAllByText('Not available')
       .filter((el) => !el.classList.contains('portion-visually-hidden'));
     await expect(visible).toHaveLength(2);
+  },
+};
+
+export const PastDay: Story = {
+  name: 'Target day — the commit lands on the day the task started from',
+  args: { dayPhrase: 'on Thu, Sep 3' },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText(/adds to your record on Thu, Sep 3/)).toBeVisible();
   },
 };
 
@@ -169,7 +190,7 @@ export const RemoveEntry: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Remove entry' }));
-    const dialog = await canvas.findByRole('alertdialog', { name: 'Remove Oatmeal with mixed berries from today?' });
+    const dialog = await canvas.findByRole('alertdialog', { name: 'Remove Oatmeal with mixed berries from this day?' });
     await userEvent.click(within(dialog).getByRole('button', { name: 'Keep entry' }));
     await expect(args.onRemoveEntry).not.toHaveBeenCalled();
     await userEvent.click(canvas.getByRole('button', { name: 'Remove entry' }));
@@ -183,7 +204,6 @@ export const ExistingEntryDirtyBack: Story = {
   args: { candidate: oatmealWithBerries, mode: 'existing', initialPortion: { quantity: 300, unitId: 'g' }, initialMeal: 'breakfast' },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    // Unchanged: Back leaves directly.
     await userEvent.click(canvas.getByRole('button', { name: 'Back' }));
     await expect(args.onBack).toHaveBeenCalledTimes(1);
     const amount = canvas.getByLabelText('Amount to calculate');
@@ -218,7 +238,7 @@ export const LongName320: Story = {
   args: { candidate: foodCatalogue[2] },
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   play: async ({ canvasElement }) => {
-    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1);
+    await expectNoHorizontalOverflow();
     await expect(within(canvasElement).getByRole('heading', { level: 2 })).toHaveTextContent('Wholegrain pasta with roasted vegetables and tahini dressing');
   },
 };
@@ -227,7 +247,7 @@ export const EnlargedText: Story = {
   name: 'Enlarged text — 200 %',
   decorators: [withRootFontSize(200)],
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: 'Add to today' })).toBeVisible();
+    await expect(within(canvasElement).getByRole('button', { name: 'Add to lunch' })).toBeVisible();
     await expectNoHorizontalOverflow();
   },
 };

@@ -46,6 +46,16 @@ export interface FoodCandidate {
   imageUrl?: string;
   /** Drinks carry volume units and never touch the water tracker; absent means food (ledger §11.1). */
   category?: 'food' | 'drink';
+  /** The brand the matched record supplies, if any; never invented. */
+  brand?: string;
+  /** The code that was read, for a barcode match. */
+  barcode?: string;
+  /**
+   * Set when the values were corrected by the user from a matched or suggested record
+   * (ledger §12 E1): the result is a manual override with its origin kept; the shared
+   * catalogue record is never changed.
+   */
+  provenance?: { kind: 'override'; from: 'barcode' | 'photo'; of: string; barcode?: string };
   reference: ReferenceBasis;
   nutrition: NutritionValues;
   units: readonly SupportedUnit[];

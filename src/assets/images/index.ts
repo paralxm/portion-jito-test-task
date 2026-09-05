@@ -13,6 +13,11 @@ import lentilSoupPhoto from './recipes/lentil-soup.webp';
 import pastaRoastedVegetablesPhoto from './recipes/pasta-roasted-vegetables.webp';
 import tofuStirFryPhoto from './recipes/tofu-stir-fry.webp';
 import vegetableTraybakePhoto from './recipes/vegetable-traybake.webp';
+import salmonRiceBowlPhoto from './recipes/salmon-rice-bowl.webp';
+import yoghurtParfaitPhoto from './recipes/yoghurt-parfait.webp';
+import overnightOatsPhoto from './recipes/overnight-oats.webp';
+import chickpeaCurryPhoto from './recipes/chickpea-curry.webp';
+import vegetableOmelettePhoto from './recipes/vegetable-omelette.webp';
 import sampleCapturePhoto from './foods/sample-capture.webp';
 import greekYoghurtPhoto from './foods/greek-yoghurt.webp';
 import almondButterPhoto from './foods/almond-butter.webp';
@@ -34,17 +39,22 @@ export {
   avocadoToastPhoto,
   bananaPhoto,
   chickenSaladPhoto,
+  chickpeaCurryPhoto,
   greekYoghurtPhoto,
   hummusPhoto,
   lentilSoupPhoto,
   oatDrinkPhoto,
   oatmealPhoto,
   orangeJuicePhoto,
+  overnightOatsPhoto,
   pastaRoastedVegetablesPhoto,
   saladLeavesPhoto,
+  salmonRiceBowlPhoto,
   sampleCapturePhoto,
   scrambledEggsPhoto,
   sparklingWaterPhoto,
   tofuStirFryPhoto,
+  vegetableOmelettePhoto,
   vegetableTraybakePhoto,
+  yoghurtParfaitPhoto,
 };

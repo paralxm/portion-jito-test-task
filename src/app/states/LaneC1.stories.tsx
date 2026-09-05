@@ -179,17 +179,20 @@ export const S07_4: Story = {
     docs: {
       description: {
         story:
-          'Purpose: the same review step with the scanned source shown and correction emphasised before anything is added. Entry: lookup found a product. Fixture: Oat drink, unsweetened, 43 kcal per 100 ml. Primary action: Add to today → O05 (the sheet commits). Secondary: Change food → search; Done; Back → the paused scanner. Limitation: none.',
+          'Purpose: the barcode result in the R5 hierarchy (ledger §12 E1): product image, name, the read code and the basis, the source stated as a match (never verified), then the portion, meal and one final action. Entry: lookup found a product. Fixture: Oat drink, unsweetened, 43 kcal per 100 ml, barcode 5012345678900. Primary action: Add to {meal} → one entry on the bound day. Secondary: Change product → search; Edit label values → S06-4 (a manual override with provenance); Cancel; Back → the paused scanner. Limitation: no brand is shown because the record supplies none.',
       },
     },
   },
-  render: () => <FoodReviewScreen candidate={barcodeCatalogue[BARCODE.found]} mode="new" onBack={fn()} onChangeMatch={fn()} onAddToToday={fn()} onDone={fn()} />,
+  render: () => <FoodReviewScreen candidate={barcodeCatalogue[BARCODE.found]} mode="new" initialMeal="lunch" onBack={fn()} onCancel={fn()} onChangeMatch={fn()} onEditValues={fn()} onAdd={fn()} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText(/Matched from the barcode/)).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Change food' })).toBeVisible();
+    await expect(canvas.getByText('Barcode match')).toBeVisible();
+    await expect(canvas.getByText(/Barcode 5012345678900/)).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Change product' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Edit label values' })).toBeVisible();
     await expect(canvas.getByText('43')).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Add to today' })).toHaveAttribute('aria-haspopup', 'dialog');
+    await expect(canvas.getByRole('button', { name: 'Add to lunch' })).toBeEnabled();
+    await expect(canvas.queryByText(/verified/i)).toBeNull();
   },
 };
 

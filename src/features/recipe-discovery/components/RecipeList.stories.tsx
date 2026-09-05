@@ -34,7 +34,7 @@ export const NoCriteria: Story = {
 
 export const WithCriteria: Story = {
   name: 'Active criteria — per-card evidence',
-  args: { criteria: { caloriesMax: 500, dietary: 'vegan' } },
+  args: { criteria: { caloriesMax: 500, dietary: ['vegan'] } },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getAllByText(/Matches/).length).toBeGreaterThan(0);
   },

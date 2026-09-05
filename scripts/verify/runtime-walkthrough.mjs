@@ -93,8 +93,8 @@ async function addManualFood(page, name, kcal, meal = 'breakfast') {
   await scoped().getByRole('button', { name: /Enter manually/ }).click();
   await scoped().getByLabel('Food or dish name').fill(name);
   await scoped().getByLabel('Calories').fill(String(kcal));
-  await scoped().getByRole('button', { name: 'Continue to review' }).click();
-  await scoped().getByRole('button', { name: 'Add to today' }).click();
+  await scoped().getByRole('button', { name: 'Continue to portion' }).click();
+  await page.waitForTimeout(150);
   await scoped().getByRole('button', { name: populated }).click();
   await page.waitForTimeout(250);
 }
@@ -148,14 +148,15 @@ await shot(page, '04-method-sheet');
 await check(page, 'method sheet is a modal dialog with focus inside, laid out 2 × 2', async () =>
   page.evaluate(() => {
     const d = document.querySelector('dialog[open]');
-    const tile = d?.querySelector('button:not([aria-label="Close"])');
-    const columns = tile ? getComputedStyle(tile.parentElement).gridTemplateColumns.split(' ').length : 0;
-    return !!d && d.contains(document.activeElement) && columns === 2;
+    const options = d ? Array.from(d.querySelectorAll('button:not([aria-label="Close"])')) : [];
+    const pair = options[1] ? getComputedStyle(options[1].parentElement).gridTemplateColumns.split(' ').length : 0;
+    const order = options.map((o) => o.textContent).join('|');
+    return !!d && d.contains(document.activeElement) && pair === 2 && /Search food.*Scan barcode.*Take a photo.*Enter manually/.test(order) && options[0].dataset.presentation === 'row' && options[3].dataset.tone === 'quiet';
   }),
 );
 await scoped().getByRole('button', { name: /Search food/ }).click();
 await page.waitForTimeout(200);
-await check(page, 'Search food opens the Search root (section header) with the barcode action in the field', async () => {
+await check(page, 'Search food opens the Search root (section header) with the scanner as a labelled sibling of the field', async () => {
   const h1 = await page.locator('[data-screen="search"]:visible h1').innerText();
   return h1 === 'Search' && (await scoped().getByRole('button', { name: 'Scan barcode' }).count()) === 1;
 });
@@ -171,14 +172,12 @@ await scoped().getByLabel('Amount to calculate').fill('300');
 await page.waitForTimeout(100);
 await shot(page, '08-review-300');
 await check(page, 'C at 300 g shows 540 kcal on review; no bar on a focused step', async () => (await page.locator('main:visible').innerText()).includes('540') && (await page.locator('nav:visible').count()) === 0);
-await scoped().getByRole('button', { name: 'Add to today' }).click();
-await page.waitForTimeout(350);
-await shot(page, '09-add-to-meal-sheet');
-await check(page, 'Add to today opens the Add-to-meal sheet with Lunch preselected from the Home row', async () => {
-  const dialog = page.locator('dialog[open]');
-  const checked = await dialog.getByRole('radio', { name: 'Lunch' }).getAttribute('aria-checked');
-  return (await dialog.innerText()).includes('Preselected from the meal') && checked === 'true' && (await dialog.innerText()).includes('540');
+await check(page, 'review carries the meal preselected from the Home row, the steps and presets, and one final Add to lunch (no second sheet)', async () => {
+  const t = await page.locator('main:visible').innerText();
+  const checked = await scoped().getByRole('radio', { name: 'Lunch' }).getAttribute('aria-checked');
+  return t.includes('Preselected from the meal') && checked === 'true' && (await scoped().getByRole('button', { name: 'Increase by 25 g' }).count()) === 1 && (await scoped().getByRole('button', { name: '1 serving (300 g)' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Add to today' }).count()) === 0;
 });
+await shot(page, '09-review-commit');
 await scoped().getByRole('button', { name: 'Add to lunch' }).click();
 await page.waitForTimeout(300);
 await shot(page, '10-home-populated');
@@ -263,7 +262,7 @@ await page.waitForTimeout(300);
 await check(page, 'Save total replaces the day (1 litre)', async () => (await scoped().getByRole('button', { name: 'Edit water, 1 litre of 2 litres' }).count()) === 1);
 
 // Task origin (ledger D-4): the bar's Log food from Home → Search food switches to the
-// Search root; Done from the review returns to Home, the surface that opened Log food.
+// Search root; Cancel from the review returns to Home, the surface that opened Log food.
 await scoped().getByRole('button', { name: 'Log food' }).first().click();
 await scoped().getByRole('button', { name: /Search food/ }).click();
 await page.waitForTimeout(300);
@@ -272,9 +271,9 @@ await page.waitForTimeout(900);
 await scoped().getByRole('button', { name: /Vegetable rice bowl/ }).click();
 await page.waitForTimeout(300);
 await shot(page, '18-review-from-home-origin');
-await scoped().getByRole('button', { name: 'Done' }).click();
+await scoped().getByRole('button', { name: 'Cancel' }).click();
 await page.waitForTimeout(300);
-await check(page, 'Done returns to Home, the invoking surface, without logging', async () => {
+await check(page, 'Cancel on an untouched review returns to Home, the invoking surface, without logging or a confirmation', async () => {
   const home = await page.locator('[data-screen="home"]:visible').count();
   return home === 1 && (await visibleText()).includes('540 kcal logged');
 });
@@ -297,7 +296,20 @@ await page.waitForTimeout(1700);
 await shot(page, '20-barcode-looking-up');
 await page.waitForTimeout(900);
 await shot(page, '21-review-barcode');
-await check(page, 'the sample read looks the product up and opens review with the barcode explanation', async () => (await page.locator('main:visible').innerText()).includes('Matched from the barcode'));
+await check(page, 'the sample read looks the product up and opens review as a barcode match with the code, Change product and Edit label values', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return t.includes('Barcode match') && t.includes('Barcode 5012345678900') && (await scoped().getByRole('button', { name: 'Change product' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Edit label values' }).count()) === 1 && !/verified/i.test(t);
+});
+await scoped().getByRole('button', { name: 'Edit label values' }).click();
+await page.waitForTimeout(200);
+await shot(page, '21b-barcode-correction-draft');
+await check(page, 'Edit label values opens the manual first step prefilled from the record, with its provenance stated', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return (await scoped().getByLabel('Food or dish name').inputValue()) === 'Oat drink, unsweetened' && (await scoped().getByLabel('Calories').inputValue()) === '43' && t.includes('original record is unchanged');
+});
+await scoped().getByRole('button', { name: 'Back' }).click();
+await page.waitForTimeout(200);
+await check(page, 'Back from an untouched correction draft returns to the review at once', async () => (await page.locator('main:visible').innerText()).includes('Barcode match'));
 await scoped().getByRole('button', { name: 'Back' }).click();
 await page.waitForTimeout(150);
 await shot(page, '22-barcode-paused-after-back');
@@ -315,28 +327,55 @@ await page.waitForTimeout(900);
 await scoped().getByRole('button', { name: 'Enter manually' }).click();
 await page.waitForTimeout(150);
 await shot(page, '23-manual-empty');
-await scoped().getByRole('button', { name: 'Continue to review' }).click();
+await check(page, 'manual step 1 shows its step label, the optional photo field and Cancel', async () => {
+  const t = await page.locator('main:visible, header:visible').allInnerTexts();
+  const all = t.join(' ');
+  return all.includes('Step 1 of 2') && (await scoped().getByRole('button', { name: 'Add a photo' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Cancel' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'Continue to portion' }).click();
 await page.waitForTimeout(150);
 await shot(page, '24-manual-errors');
 await check(page, 'manual entry focuses first invalid field', async () => page.evaluate(() => document.activeElement?.id?.includes('manual-name') ?? false));
 await scoped().getByLabel('Food or dish name').fill('Lentil soup');
 await scoped().getByLabel('Calories').fill('150');
 await scoped().getByLabel(/^Protein/).fill('8');
-await scoped().getByRole('button', { name: 'Continue to review' }).click();
+await scoped().getByRole('button', { name: 'Continue to portion' }).click();
 await page.waitForTimeout(150);
-await shot(page, '25-review-manual');
+await shot(page, '25-manual-portion');
+await check(page, 'step 2 shows the identity summary, Edit food details, the steps, presets and the live result for 100 g (150 kcal)', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return t.includes('Step 2 of 2') === false && t.includes('Lentil soup') && t.includes('150') && (await scoped().getByRole('button', { name: 'Edit food details' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Increase by 25 g' }).count()) === 1 && (await scoped().getByRole('button', { name: '200 g' }).count()) === 1;
+});
+await scoped().getByLabel('Amount to calculate').fill('250');
+await page.waitForTimeout(100);
+await check(page, '250 g recalculates to 375 kcal', async () => (await page.locator('main:visible').innerText()).includes('375'));
 await scoped().getByRole('button', { name: 'Back' }).click();
 await page.waitForTimeout(150);
-await check(page, 'back from review restores manual draft', async () => (await scoped().getByLabel('Food or dish name').inputValue()) === 'Lentil soup');
-await scoped().getByRole('button', { name: 'Back' }).click();
+await check(page, 'back from step 2 restores the manual draft without a confirmation', async () => (await scoped().getByLabel('Food or dish name').inputValue()) === 'Lentil soup' && (await page.locator('dialog[open]').count()) === 0);
+await scoped().getByRole('button', { name: 'Continue to portion' }).click();
+await page.waitForTimeout(150);
+await check(page, 'continuing again keeps the actual portion at 250 g (the audited reset is fixed)', async () => (await scoped().getByLabel('Amount to calculate').inputValue()) === '250');
+await scoped().getByRole('button', { name: 'Cancel' }).click();
 await page.waitForTimeout(300);
-await shot(page, '26-manual-discard-dialog');
-await check(page, 'dirty manual entry asks before discarding', async () => page.evaluate(() => !!document.querySelector('dialog[open][role="alertdialog"]')));
+await shot(page, '26-discard-changes-dialog');
+await check(page, 'Cancel on the task asks with the shared Discard changes? copy and focuses Keep editing', async () =>
+  page.evaluate(() => {
+    const d = document.querySelector('dialog[open][role="alertdialog"]');
+    return !!d && d.textContent.includes('Discard changes?') && d.textContent.includes('Nothing already logged will be changed') && document.activeElement?.textContent === 'Keep editing';
+  }),
+);
 await scoped().getByRole('button', { name: 'Keep editing' }).click();
 await page.waitForTimeout(150);
-await check(page, 'keep editing preserves the draft', async () => (await scoped().getByLabel('Food or dish name').inputValue()) === 'Lentil soup');
-await scoped().getByRole('button', { name: 'Back' }).click();
-await scoped().getByRole('button', { name: 'Discard' }).click();
+await check(page, 'keep editing preserves the portion draft', async () => (await scoped().getByLabel('Amount to calculate').inputValue()) === '250');
+await page.goBack();
+await page.waitForTimeout(300);
+await check(page, 'browser Back on a dirty task uses the same guard: the confirmation opens and the step stays', async () =>
+  page.evaluate(() => !!document.querySelector('dialog[open][role="alertdialog"]') && !!document.querySelector('[data-screen="manual-portion"]:not([hidden])')),
+);
+await scoped().getByRole('button', { name: 'Keep editing' }).click();
+await page.waitForTimeout(150);
+await scoped().getByRole('button', { name: 'Cancel' }).click();
+await scoped().getByRole('button', { name: 'Discard changes' }).click();
 await page.waitForTimeout(150);
 await check(page, 'discard returns to Search with the query kept', async () => (await scoped().getByRole('searchbox').inputValue()) === 'zzzz');
 await scoped().getByRole('button', { name: 'Clear search' }).click();
@@ -365,9 +404,16 @@ await scoped().getByRole('radio', { name: /Lentil soup/ }).check();
 await scoped().getByRole('button', { name: 'Review selected match' }).click();
 await page.waitForTimeout(150);
 await shot(page, '31-review-photo');
-await scoped().getByRole('button', { name: 'Done' }).click();
+await check(page, 'photo review shows the sample frame as such, the suggestion source and its three correction actions; no barcode metadata', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return t.includes('Photo suggestion') && t.includes('Sample photo') && !t.includes('Barcode') && (await scoped().getByRole('button', { name: 'Change match' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Retake photo' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Edit nutrition values' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'Retake photo' }).click();
 await page.waitForTimeout(200);
-await check(page, 'Done closes the task to Home without logging', async () => {
+await check(page, 'Retake photo returns to capture', async () => (await page.locator('main:visible').innerText()).includes('Frame the food'));
+await scoped().getByRole('button', { name: 'Back' }).click();
+await page.waitForTimeout(200);
+await check(page, 'Back from capture closes the task to Home without logging', async () => {
   const t = await visibleText();
   return (await page.locator('[data-screen="home"]:visible').count()) === 1 && t.includes('540 kcal logged');
 });
@@ -376,16 +422,28 @@ await check(page, 'Done closes the task to Home without logging', async () => {
 await scoped().getByRole('button', { name: 'Recipes', exact: true }).click();
 await page.waitForTimeout(700);
 await shot(page, '32-recipes-browse');
-await check(page, 'every catalogue recipe shows a photograph; the filter action sits at the end of the search entry', async () => {
+await check(page, 'discovery shows the real count, the three groups and the quick chips; every card has a photograph; the filter action sits at the end of the search entry', async () => {
   const noPhoto = await page.locator('[data-screen="recipes"]:visible main').getByText('No photo').count();
   const filters = await scoped().getByRole('button', { name: 'Filters' }).count();
-  return noPhoto === 0 && filters === 1;
+  const t = await page.locator('main:visible').innerText();
+  return noPhoto === 0 && filters === 1 && t.includes('10 recipes') && t.includes('Featured') && t.includes('Ready in under 30 minutes') && t.includes('30 g protein or more') && (await scoped().getByRole('button', { name: 'Vegan' }).getAttribute('aria-pressed')) === 'false';
 });
+await scoped().getByRole('button', { name: 'Vegan' }).click();
+await page.waitForTimeout(150);
+await scoped().getByRole('button', { name: 'Gluten-free' }).click();
+await page.waitForTimeout(150);
+await check(page, 'quick chips combine with AND and apply at once (Vegan + Gluten-free → 2 recipes)', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return t.includes('2 recipes match your filters') && (await scoped().getByRole('button', { name: 'Filters, 2 active' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'All', exact: true }).click();
+await page.waitForTimeout(150);
+await check(page, 'All clears the dietary constraints', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
 await check(page, 'navigation stays fixed on Recipes', () => fixedNavigationHolds(page));
 await scoped().getByRole('button', { name: /^Filters/ }).click();
 await page.waitForTimeout(350);
 await shot(page, '33-filters-sheet');
-await scoped().getByRole('radio', { name: 'Vegan' }).click();
+await page.locator('dialog[open]').getByRole('button', { name: 'Vegan' }).click();
 await scoped().getByLabel('Maximum').fill('100');
 await scoped().getByLabel('Minimum').fill('300');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
@@ -397,11 +455,11 @@ await scoped().getByLabel('Protein per serving, at least').fill('10');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(300);
 await shot(page, '35-recipes-filtered');
-await check(page, 'filtered browse shows evidence per card and the count on the filter action', async () => {
+await check(page, 'filtered discovery shows evidence per card, the pressed Vegan chip and the count on the filter action', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('Matches') && (await scoped().getByRole('button', { name: 'Filters, 3 active' }).count()) === 1;
+  return t.includes('Matches') && (await scoped().getByRole('button', { name: 'Filters, 3 active' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Vegan' }).getAttribute('aria-pressed')) === 'true';
 });
-await scoped().getByRole('button', { name: /Remove filter: Vegan/ }).click();
+await scoped().getByRole('button', { name: 'Vegan' }).click();
 await page.waitForTimeout(150);
 await shot(page, '36-recipes-chip-removed');
 await scoped().getByRole('button', { name: /^Filters/ }).click();
@@ -413,7 +471,7 @@ await scoped().getByRole('button', { name: 'Change filters' }).click();
 await scoped().getByRole('button', { name: 'Reset all' }).click();
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(300);
-await check(page, 'reset + apply clears filters', async () => (await page.locator('main:visible').innerText()).includes('All recipes'));
+await check(page, 'reset + apply clears filters', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
 await scoped().getByRole('button', { name: /^Filters/ }).click();
 await scoped().getByLabel('Maximum').fill('460');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
@@ -421,7 +479,7 @@ await page.waitForTimeout(300);
 await page.evaluate(() => window.scrollTo(0, 200));
 await page.waitForTimeout(100);
 const beforeY = await page.evaluate(() => window.scrollY);
-await scoped().getByRole('button', { name: 'Lentil soup' }).click();
+await scoped().getByRole('button', { name: 'Lentil soup' }).first().click();
 await page.waitForTimeout(150);
 await shot(page, '38-recipe-loading');
 await check(page, 'details keeps Recipes selected while loading', async () => (await currentNav()).includes('Recipes'));
@@ -482,16 +540,16 @@ await page.waitForTimeout(200);
 await check(page, 'All recipes opens the Recipes root with its criteria and scroll kept', async () => {
   const afterY = await page.evaluate(() => window.scrollY);
   log('   scroll before/after:', beforeY, afterY);
-  return (await page.locator('main:visible').innerText()).includes('Matching recipes') && Math.abs(beforeY - afterY) < 5;
+  return (await page.locator('main:visible').innerText()).includes('match your filters') && Math.abs(beforeY - afterY) < 5;
 });
 
 // Browse → Search snapshot, scopes, failure
 await scoped().getByRole('button', { name: 'Search recipes' }).click();
 await page.waitForTimeout(150);
 await shot(page, '44-search-recipes-scope-snapshot');
-await check(page, 'search opens in Recipes scope with snapshot criteria and the filter action in the field', async () => {
+await check(page, 'search opens in Recipes scope with snapshot criteria, the filter action in the field and the catalogue narrowed by them (no query)', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('Under 460 kcal') && (await scoped().getByRole('tab', { name: 'Recipes' }).getAttribute('aria-selected')) === 'true' && (await scoped().getByRole('button', { name: 'Filters, 1 active' }).count()) === 1;
+  return t.includes('Under 460 kcal') && t.includes('Matching recipes') && t.includes('match your filters') && (await scoped().getByRole('tab', { name: 'Recipes' }).getAttribute('aria-selected')) === 'true' && (await scoped().getByRole('button', { name: 'Filters, 1 active' }).count()) === 1;
 });
 await scoped().getByRole('searchbox').fill('lentil');
 await page.waitForTimeout(1000);
@@ -547,12 +605,12 @@ for (const width of [320, 393, 430]) {
     await scoped().getByRole('button', { name: 'Log food' }).first().click();
     await page.waitForTimeout(350);
     await shot(page, '52-method-sheet-320');
-    await check(page, 'method sheet keeps the 2 x 2 grid at 320 with no tile overflow', async () =>
+    await check(page, 'method sheet keeps the card pair side by side at 320 with no option overflow', async () =>
       page.evaluate(() => {
-        const tiles = Array.from(document.querySelectorAll('dialog[open] button:not([aria-label="Close"])'));
-        if (tiles.length !== 4) return false;
-        const columns = getComputedStyle(tiles[0].parentElement).gridTemplateColumns.split(' ').length;
-        return columns === 2 && tiles.every((t) => t.scrollWidth <= t.clientWidth + 1 && getComputedStyle(t).flexDirection === 'column');
+        const options = Array.from(document.querySelectorAll('dialog[open] button:not([aria-label="Close"])'));
+        if (options.length !== 4) return false;
+        const pair = getComputedStyle(options[1].parentElement).gridTemplateColumns.split(' ').length;
+        return pair === 2 && options.every((t) => t.scrollWidth <= t.clientWidth + 1);
       }),
     );
   }
@@ -585,10 +643,11 @@ page = await newPage(390, 844, 'html { font-size: 200% !important; }');
 await scoped().getByRole('button', { name: 'Log food' }).first().click();
 await page.waitForTimeout(350);
 await shot(page, '55-method-sheet-390-200pct');
-await check(page, 'method sheet falls back to one column of rows at 390 + 200%', async () =>
+await check(page, 'method sheet stacks the camera pair at 390 + 200%, keeping the order', async () =>
   page.evaluate(() => {
-    const tile = document.querySelector('dialog[open] button:not([aria-label="Close"])');
-    return tile ? getComputedStyle(tile.parentElement).gridTemplateColumns.split(' ').length === 1 && getComputedStyle(tile).flexDirection === 'row' : false;
+    const options = Array.from(document.querySelectorAll('dialog[open] button:not([aria-label="Close"])'));
+    const tops = options.map((o) => o.getBoundingClientRect().top);
+    return options.length === 4 && getComputedStyle(options[1].parentElement).gridTemplateColumns.split(' ').length === 1 && tops.every((t, i) => i === 0 || t > tops[i - 1]);
   }),
 );
 await scoped().getByRole('button', { name: /Enter manually/ }).click();
@@ -658,8 +717,7 @@ await check(page, 'a drink opens review with its volume basis and units', async 
   return t.includes('Orange juice') && t.includes('per 100 ml') && (await scoped().getByRole('button', { name: 'Change unit, currently ml' }).count()) === 1;
 });
 await scoped().getByLabel('Amount to calculate').fill('250');
-await scoped().getByRole('button', { name: 'Add to today' }).click();
-await page.waitForTimeout(300);
+await page.waitForTimeout(100);
 await scoped().getByRole('button', { name: /^Add to (breakfast|lunch|dinner|snacks)$/ }).click();
 await page.waitForTimeout(400);
 await shot(page, '61-home-drink-logged');

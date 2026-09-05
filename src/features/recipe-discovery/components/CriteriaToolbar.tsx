@@ -13,6 +13,8 @@ export interface CriteriaToolbarProps {
   onApply: (criteria: RecipeCriteria) => void;
   /** Removing an applied chip commits immediately. */
   onRemove: (key: CriterionKey) => void;
+  /** Leave dietary constraints out of the applied row (the Recipes root shows them as quick chips). */
+  hideDietary?: boolean;
 }
 
 /**
@@ -21,8 +23,8 @@ export interface CriteriaToolbarProps {
  * the field's trailing `FilterAction` (ledger D-27); the sheet is a draft, the chips are
  * the committed truth. Renders nothing visible when no criterion is applied.
  */
-export function CriteriaToolbar({ criteria, sheetOpen, onCloseSheet, onApply, onRemove }: CriteriaToolbarProps) {
-  const active = activeCriteria(criteria);
+export function CriteriaToolbar({ criteria, sheetOpen, onCloseSheet, onApply, onRemove, hideDietary = false }: CriteriaToolbarProps) {
+  const active = activeCriteria(criteria).filter((key) => !hideDietary || !key.startsWith('dietary:'));
   return (
     <>
       {active.length > 0 ? (

@@ -223,3 +223,4 @@ Component variants, animation, loading timing, API behavior, focus, scroll mecha
 The latest supplied TF01 export routes manual entry past the shared S07 review. Update that connection and show an explicit identity-correction return path. Keep the successful calorie-result endpoint independent of daily logging. Align TF02's Home CTA and recovery routes with the rules above.
 
 This revision changes the document only. It does not claim either FigJam diagram, any Figma reaction or runtime
+Implemented 2026-09-05 (revision R1–R6, docs/design/hifi-decisions.md §12): manual entry is a two-step task (food details → portion and meal) ending in one final Add to {meal}; barcode and photo review end in the same final action on their own screen; the shared S07 sheet step is removed from every food flow. Recipe Details keeps its Add-to-meal sheet. Every food flow's exit is the shared Discard changes? policy.

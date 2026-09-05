@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createEntry, type FoodEntry } from '../features/calorie-calculator/domain/daily-log';
 import { fixtureC } from '../features/calorie-calculator/domain/fixtures';
+import { goalForDay } from '../features/calorie-calculator/domain/goal-history';
 import { EMPTY_RECORD, loadRecord, parseRecord, RECORD_KEY, saveRecord, serialiseRecord, type RecordStorage } from './persistence';
 
 const fakeStorage = (): RecordStorage & { map: Map<string, string> } => {
@@ -12,18 +13,32 @@ const fakeStorage = (): RecordStorage & { map: Map<string, string> } => {
 const entry = createEntry({ ...fixtureC, imageUrl: '/assets/rice-abc123.webp' }, { quantity: 300, unitId: 'g' }, 'lunch', { now: Date.parse('2026-09-04T12:00:00'), id: 'e1' }) as FoodEntry;
 
 describe('persistence', () => {
-  it('round-trips entries, goal, water and the view', () => {
+  it('round-trips entries, the goal history, water and the view', () => {
     const storage = fakeStorage();
-    saveRecord(storage, { version: 1, entries: [entry], goal: { kcal: 2000, proteinG: 120, carbohydratesG: null, fatG: null }, water: { '2026-09-04': 750 }, searchView: 'grid' });
+    const goals = [{ from: '2026-09-01', goal: { kcal: 2000, proteinG: 120, carbohydratesG: null, fatG: null } }];
+    saveRecord(storage, { version: 2, entries: [entry], goals, water: { '2026-09-04': 750 }, searchView: 'grid' });
     const loaded = loadRecord(storage, (id) => (id === fixtureC.id ? '/assets/rice-new456.webp' : undefined));
     expect(loaded.entries).toHaveLength(1);
     expect(loaded.entries[0].id).toBe('e1');
     expect(loaded.entries[0].dayKey).toBe('2026-09-04');
     expect(loaded.entries[0].meal).toBe('lunch');
     expect(loaded.entries[0].result.energyKcal).toBe(540);
-    expect(loaded.goal).toEqual({ kcal: 2000, proteinG: 120, carbohydratesG: null, fatG: null });
+    expect(loaded.goals).toEqual(goals);
     expect(loaded.water).toEqual({ '2026-09-04': 750 });
     expect(loaded.searchView).toBe('grid');
+  });
+
+  it('migrates a version-1 record: entries and water kept, the single goal becomes a period from the migration day', () => {
+    const text = JSON.stringify({ version: 1, entries: [entry, { ...entry, id: 'y', dayKey: '2026-09-03' }], goal: { kcal: 2000, proteinG: 120 }, water: { '2026-09-03': 500, '2026-09-04': 750 }, searchView: 'grid' });
+    const loaded = parseRecord(text, { migrationDayKey: '2026-09-05' });
+    expect(loaded.version).toBe(2);
+    expect(loaded.entries.map((e) => e.id)).toEqual(['e1', 'y']);
+    expect(loaded.water).toEqual({ '2026-09-03': 500, '2026-09-04': 750 });
+    expect(loaded.goals).toEqual([{ from: '2026-09-05', goal: { kcal: 2000, proteinG: 120, carbohydratesG: null, fatG: null } }]);
+    // Earlier days never receive a goal that was not in force for them.
+    expect(goalForDay(loaded.goals, '2026-09-04')).toBeNull();
+    expect(goalForDay(loaded.goals, '2026-09-05')?.kcal).toBe(2000);
+    expect(parseRecord(JSON.stringify({ version: 1, entries: [] })).goals).toEqual([]);
   });
 
   it('does not store the built photo URL and re-resolves it from the catalogue on load', () => {
@@ -40,15 +55,24 @@ describe('persistence', () => {
 
   it('keeps each entry on its own day so yesterday never reads as today', () => {
     const yesterday = { ...entry, id: 'y', dayKey: '2026-09-03' };
-    const loaded = parseRecord(JSON.stringify({ version: 1, entries: [yesterday, entry] }));
+    const loaded = parseRecord(JSON.stringify({ version: 2, entries: [yesterday, entry] }));
     expect(loaded.entries.map((e) => e.dayKey)).toEqual(['2026-09-03', '2026-09-04']);
   });
 
-  it('drops unreadable entries, invalid goals and negative water instead of failing', () => {
-    const text = JSON.stringify({ version: 1, entries: [{ id: 'broken' }, entry], goal: { kcal: -5 }, water: { '2026-09-04': -10, 'not-a-day': 5, '2026-09-03': 250.4 } });
+  it('drops unreadable entries, invalid goal periods and negative water instead of failing', () => {
+    const text = JSON.stringify({
+      version: 2,
+      entries: [{ id: 'broken' }, entry],
+      goals: [{ from: 'nope', goal: { kcal: 2000 } }, { from: '2026-09-02', goal: { kcal: -5 } }, { from: '2026-09-01', goal: { kcal: 1800 } }],
+      water: { '2026-09-04': -10, 'not-a-day': 5, '2026-09-03': 250.4 },
+    });
     const loaded = parseRecord(text);
     expect(loaded.entries.map((e) => e.id)).toEqual(['e1']);
-    expect(loaded.goal).toBeNull();
+    // Sorted by day; an unreadable goal in a valid period is a clear, never a guess.
+    expect(loaded.goals).toEqual([
+      { from: '2026-09-01', goal: { kcal: 1800, proteinG: null, carbohydratesG: null, fatG: null } },
+      { from: '2026-09-02', goal: null },
+    ]);
     expect(loaded.water).toEqual({ '2026-09-03': 250 });
   });
 

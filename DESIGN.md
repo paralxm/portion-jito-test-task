@@ -96,7 +96,7 @@ Limit grouped surfaces. On Home the grouped surfaces are the calorie budget, the
 
 ### App header
 
-- `AppHeader` has three variants and a screen shows exactly one: **root** (`PortionLogo`, a contextual line such as `Today · Sep 4`, optional trailing action; the screen name is a visually hidden h1), **section** (28/36 screen title with optional trailing action), **focused** (Back, 18/24 title, optional trailing action or status).
+- `AppHeader` has three variants and a screen shows exactly one: **root** (`PortionLogo`, a contextual line such as `Today · Sep 5` or `Thu · Sep 3`, and on Home the streak control as the trailing element; the screen name is a visually hidden h1), **section** (28/36 screen title with optional trailing action), **focused** (Back, 18/24 title, optional trailing action or status such as `Step 1 of 2`).
 - Home uses root; Search and Recipes use section; barcode, photo, manual entry, and review use focused with the navigation hidden; Recipe Details uses focused (`Back`, `Recipe`) with the root navigation kept.
 - The header owns the top safe area exactly once.
 
@@ -110,11 +110,16 @@ Limit grouped surfaces. On Home the grouped surfaces are the calorie budget, the
 - The bar is fixed to the viewport bottom on Home, Search, Recipes, and Recipe Details, centred within the mobile shell, on the canvas surface with no top border and only the restrained `shadow.navigation` elevation. It owns the bottom safe area once; the root layout reserves matching bottom padding and scroll padding so content, dialogs, sheets, and the keyboard never collide with it.
 - Hide the whole navigation unit when the software keyboard or focused flow requires it.
 
+### Day strip and streak
+
+- `DayStrip` (feature) is a radio group of the selected day's week, Monday first: weekday and date on each 48 px tile, today marked with a dot and named `today`, the selected tile filled in action blue with on-action text, future days disabled and named `not available yet`. Previous / next week are icon buttons; `Today` appears as a text action while another day is selected. Seven tiles scroll sideways when they cannot fit (320 px, enlarged text) rather than shrinking below the target; arrow keys move the selection.
+- `StreakIndicator` (feature) is a quiet 48 px control in the root header: a neutral `CalendarCheck` glyph, the count and its unit; its accessible name reads the full explanation and it opens a short `ModalSheet` with the rule. No flame, badge, colour change or pressure copy.
+
 ### Calorie budget
 
 - `ProgressBar` (primitive) owns the horizontal track, bounded fill, goal marker, clamping, unavailable state, `meter` semantics with `aria-valuetext`, and reduced-motion behavior.
-- `CalorieBudgetBar` (feature) owns Home wording and data: the 40/48 figure is remaining while below the goal, `0 kcal remaining` at it, the excess above it; `consumed · %` and `Goal` are stated beside the track; without a goal the logged amount is shown with `Set goal` and no bar is drawn; a partial total is labelled and has no percentage.
-- Macros sit under the bar as `24 / 120 g` with a track only when a user-entered target exists; otherwise the logged grams alone. Unknown is `Not available`, never zero; partial subtotals say so.
+- `CalorieBudgetBar` (feature) owns Home wording and data: the 40/48 figure is remaining while below the goal, `0 kcal remaining` at it, the excess above it; `consumed · %` and `Goal` are stated beside the track once, never duplicated as a second target figure; without a goal the logged amount is shown with `Set goal` and no bar is drawn; a partial total is labelled and has no percentage. The sole `Set goal` / `Edit goal` action lives on this surface; on an earlier day without a goal in force the surface says so and a new goal applies from today.
+- Macros sit under the bar as `24 / 120 g` with a separate compact track directly beneath each nutrient only when a user-entered target exists (the fill capped at 100 %, the numbers always visible); otherwise the logged grams alone. Unknown is `Not available`, never zero; partial subtotals say so. The compact row keeps three columns down to 17 rem, then stacks.
 - Digits are tabular; formats are stable (`1,600`, `20 %`). Over goal the fill stops at the marker and the text states the excess—no red, green, glow, gradient, or ring imitation. `ProgressRing` is deprecated and has no product consumer.
 
 ### Meals
@@ -129,9 +134,15 @@ Limit grouped surfaces. On Home the grouped surfaces are the calorie budget, the
 - Quick add animates the figure and the fill from the previous to the new total over the `value-change` motion token (350 ms, standard easing), announces once (`250 ml added. 1.5 litres today.`), and shows a confirmation with `Undo`. Repeated taps accumulate from the latest total. Reduced motion updates instantly.
 - `WaterSheet` offers presets 150 / 250 / 350 / 500 ml as radio chips, a labelled `Custom amount` in ml, `Add water` (disabled while nothing valid is chosen), and a secondary `Edit today's total` mode with `Save total`. It is a `ModalSheet`: focus contained and returned, Escape dismisses, the footer owns the bottom safe area.
 
-### Add to meal sheet
+### Portion form and the final action
 
-- One `AddToMealSheet` for foods and recipes: optional thumbnail, name and basis, `MealPicker`, amount or servings with the review's unit (unit changes stay on review), a recalculated calorie + macro preview, and a single final action `Add to {meal}`; `Cancel` closes without mutation.
+- `PortionForm` (feature) is the one portion step every commit surface shares (manual step 2, every review, and — for servings — the recipe sheet's arithmetic): a − / + pair of outlined 48 px icon buttons flanking the `AmountField` (steps of 25 g or ml, ¼ serving, 1 piece), a wrapping row of preset chips that come only from the item's own units, the recalculated `NutritionSummary` on the light surface for exactly that amount, then `MealPicker` and, when the commit lands on another day, one informational line naming it.
+- The final action is a single large primary `Add to {meal}` in the focused footer, unavailable while the amount is invalid or no meal is chosen, with a text `Cancel` beneath it. Duplicate activation is blocked. There is no second sheet after it.
+- `DiscardChangesDialog` (feature) is the shared exit confirmation over `ConfirmDialog`: `Discard changes?`, the consequence in words, `Keep editing` (secondary, focused first) and `Discard changes` in the destructive treatment (the error tokens; never a new red, never a red dialog).
+
+### Add to meal sheet (recipes)
+
+- `AddToMealSheet` remains for Recipe Details only, which has collected no portion or meal: thumbnail, name and basis, `MealPicker`, servings, the recalculated preview, the target-day line when it is not today, and the single final action `Add to {meal}`; `Cancel` closes without mutation and never touches any other draft.
 - No exact time picker. Disabled while the amount is invalid; duplicate activation is blocked.
 
 ### Camera stage
@@ -143,15 +154,16 @@ Limit grouped surfaces. On Home the grouped surfaces are the calorie budget, the
 
 ### Search field actions
 
-- `SearchField` has one trailing action slot after the clear control: Food scope → `Scan barcode` icon button; Recipes scope and browse → `Filters` icon button whose applied count is shown as a badge and spoken in the name (`Filters, 2 active`). Applied chips render beneath the field. There is no separate left-aligned Filters button.
+- Food scope: the field keeps only the clear control; `Scan barcode` is a secondary button with icon and visible label beside the field, a sibling that starts a flow (never a submit or a toggle). Under 22 rem of row width it moves below the field at full width instead of squeezing its label or the field's text. It preserves query, filters, view, meal and day context on return.
+- Recipes scope (and the discovery root's search entry): the field's one trailing action slot holds the `Filters` icon button whose applied count is shown as a badge and spoken in the name (`Filters, 2 active`). Applied chips render beneath the field. There is no separate left-aligned Filters button.
 - Food scope adds one compact toolbar under the field: `ViewToggle` (List / Grid, a radio group of 48 px targets with glyph and label) at the start and the `Food filters` action at the end; the applied chip sits beneath. The list uses `FoodResultRow` with a 4 rem thumbnail; the grid uses `FoodCard` (photo above identity, calories with basis) in two columns, one under 20 rem. Both present the same items in the same order. In a row the name has priority: its column never drops under 7.5 rem (the width of the catalogue’s longest words), the calorie value stays on one line and the basis wraps only between `per serving` and its amount; under 18 rem (22 rem with a thumbnail) the figure moves beneath the identity instead.
 
 ### Log food sheet
 
-- Title: `Log food`.
-- Four equal choices: Search food, Scan barcode, Take a photo, Enter manually.
-- Use a 2 x 2 grid when space permits and one-column rows at narrow/200% text through the shared responsive pattern.
-- Choosing a method starts acquisition; it does not commit food.
+- Title: `Log food`, one line saying the food is reviewed before anything is saved, Close at the top right.
+- In this order and hierarchy (after R6): one prominent full-width `Search food` row (`MethodOption` row: tinted icon tile, title, subtitle, chevron); a restrained caption `With the camera` over two equal cards side by side — `Scan barcode` left, `Take a photo` right — sharing one height; a `Separator`; a quieter full-width `Enter manually` row (no tint, no fill). No PRIMARY badge, no drawn home indicator, no decorative frame.
+- Under 17 rem of body width (200 % text on every supported viewport) the card pair stacks, keeping Search → Barcode → Photo → Manual; every supported width at 100 % text keeps the pair. Every option is one button with a 48 px target.
+- Choosing a method starts acquisition; it does not commit food. Dismissal restores the exact origin and focus.
 
 ### Photo suggestions
 
@@ -162,18 +174,24 @@ Limit grouped surfaces. On Home the grouped surfaces are the calorie budget, the
 
 ### Food review
 
-- Keep food identity, amount, unit, basis, calorie result, and available nutrition understandable and correctable.
-- New candidate: `Add to today` primary opens the Add-to-meal sheet (the commit is the sheet's `Add to {meal}`); `Done` exits without logging.
-- Existing entry: a `MealPicker` above the amount; `Update entry` commits meal and portion together; `Remove entry` confirms; changed content protects against accidental discard.
+- One hierarchy for every source (after R5): identity — a 6 rem 4:3 image (the matched record's photograph for a barcode, the captured frame labelled `Sample photo` for a photo, the catalogue photo for search), a label badge stating the source in words (`Barcode match`, `Photo suggestion`, `From search`), the name, brand and detail when the record supplies them, the basis line with the read code for a barcode, then the correction actions the source supports as small secondary buttons — → the shared portion form → meal and day → the single final action.
+- Barcode: `Change product` and `Edit label values`; the note says the values come from the matched record, not a checked label. Photo: `Change match`, `Retake photo` and `Edit nutrition values`; the note says the user checks the match and enters the portion, and that the photo does not measure it. Barcode metadata never appears on a photo result; nothing is called verified.
+- New candidate: `Add to {meal}` commits; `Cancel` leaves the task through the shared exit policy; Back returns to the preceding step. Existing entry: a `MealPicker` above the form; `Update entry` commits meal and portion together; `Remove entry` confirms; changed content protects against accidental discard.
 - Unknown data is explicit. Do not infer unsupported unit conversions.
+
+### Manual entry
+
+- Step 1 of 2, `Food details` (after R3): the step label as the focused header's trailing status; the name field; `PhotoField` (a secondary `Add a photo` button, then a 6 rem preview with `Change photo` / `Remove`); the `Reference amount` group; the `Nutrition for that amount` group with Calories required (`0 is a valid value`) and the optional macros carrying `Leave blank if unknown` beside them. Footer: large primary `Continue to portion`, text `Cancel`.
+- Step 2 of 2, `Portion and meal` (after R4): the identity summary (the user's photo or the No photo frame at 5 rem, name, `Entered by you · nutrition basis …`) with a small secondary `Edit food details`; the shared portion form; the info line separating the actual portion from the reference basis; footer `Add to {meal}` and `Cancel`. Back and Edit keep the draft with no confirmation.
 
 ### Recipe discovery
 
-Order content as identity -> why it matches -> relevant calories/protein/time -> supporting imagery/metadata. Use only known criteria and data. Avoid unexplained scores, decorative match percentages, badge clouds, and ratings presented as suitability. Cards show a real 4:3 photograph; the fallback frame appears only for an absent or failed image.
+- The Recipes root (after R2): section header → the search-entry row with the `Filters` action at its end → the quick dietary chips (multi-select `FilterChip` toggles plus `All`, in a row that scrolls when five do not fit) → the applied numeric chips → the count as the page's status line → the groups. Each group is a section with a 20/28 title stating its rule, one supporting line, a `View all N` text action that never wraps inside its label, and a rail of equal-height `RecipeCard` tiles (`presentation="tile"`: the 4:3 photo above the text) 16 rem wide, scrolling sideways within the page inset with the next tile peeking. A secondary `Browse all N recipes` closes the page.
+- Order card content as identity -> why it matches -> relevant calories/protein/time -> supporting imagery/metadata. Use only known criteria and data. Avoid unexplained scores, decorative match percentages, badge clouds, popularity claims, and ratings presented as suitability. Cards show a real 4:3 photograph; the fallback frame appears only for an absent or failed image.
 
 ### Recipe details
 
-- Order: hero (16:9, full width) -> time chip and dietary badges -> title with `Add` beside it -> nutrition surface (calories with per-serving basis, macros, `Show all nutrition`) -> ingredients (count, bordered list) -> method (count, numbered steps each on a light surface).
+- Order: hero (16:9, bleeding to the edges of the mobile shell only — the Container's page inset is cancelled, never the viewport — and starting directly under the focused header with no negative top offset) -> time chip and dietary badges -> title with `Add` beside it -> nutrition surface (calories with per-serving basis, macros, `Show all nutrition`) -> ingredients (count, bordered list) -> method (count, numbered steps each on a light surface).
 - `Add` is the only primary action and opens the Add-to-meal sheet; there is no sticky action footer, bookmark, share, checklist, or rating. The root navigation stays fixed beneath.
 
 ## Interaction and motion

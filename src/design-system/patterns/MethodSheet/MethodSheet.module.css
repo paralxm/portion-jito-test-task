@@ -1,23 +1,42 @@
-/* The frame is the named query container the tiles read; the grid inside it is what
+/* The frame is the named query container the pair reads; the layout inside it is what
    changes shape (an element cannot query its own size). */
 .frame {
-  container: method-grid / inline-size;
+  container: method-sheet / inline-size;
   min-inline-size: 0;
 }
 
-.grid {
+.methods {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-related);
+  min-inline-size: 0;
+}
+
+.camera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.caption {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Two equal cards side by side; they share the row's height. */
+.pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--portion-spacing-card-gap);
   align-items: stretch;
 }
 
-/* Documented one-column condition: available width under 17 rem (272 px). Every supported
-   viewport at 100 % text keeps the 2 x 2 grid (320 px leaves 288 px of sheet body); 200 %
-   text on every supported width falls to one column of rows. */
-@container method-grid (max-width: 17rem) {
-  .grid {
+/* Documented one-column condition: body width under 20 rem — every supported viewport at
+   100 % text keeps the pair (320 px leaves 288 px of sheet body, 18 rem … see below), so
+   the threshold is 17 rem: 200 % text on every supported width stacks the pair. */
+@container method-sheet (max-width: 17rem) {
+  .pair {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--portion-spacing-related);
   }
 }

@@ -5,6 +5,7 @@ import { NavigationBar } from '../../design-system';
 import { expectNoHorizontalOverflow, withRootFontSize } from '../../design-system/storybook/decorators';
 import { foodCatalogue, searchFoods } from '../../features/calorie-calculator/domain/fixtures';
 import { NO_FOOD_FILTERS } from '../../features/calorie-calculator/domain/food-search';
+import { recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import { WithFoodSearch } from '../states/harnesses';
 import { recentFoods } from '../states/stateFixtures';
 import { SearchScreen } from './SearchScreen';
@@ -30,6 +31,8 @@ const meta = {
     foodView: 'list',
     onFoodViewChange: fn(),
     recipes: idle,
+    recipeCatalogue: recipeCatalogue,
+    recipeCatalogueStatus: 'ready',
     criteria: {},
     onApplyCriteria: fn(),
     onRemoveCriterion: fn(),

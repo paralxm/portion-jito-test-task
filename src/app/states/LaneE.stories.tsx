@@ -32,8 +32,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const browse = (criteria: RecipeCriteria, results: readonly Recipe[] = filterRecipes(recipeCatalogue, criteria)) => (
-  <RecipesScreen results={results} criteria={criteria} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
+const browse = (criteria: RecipeCriteria, recipes: readonly Recipe[] = recipeCatalogue) => (
+  <RecipesScreen recipes={recipes} criteria={criteria} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onToggleDietary={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
 );
 
 const recipeSearch = (query: string, criteria: RecipeCriteria) => (
@@ -52,6 +52,8 @@ const recipeSearch = (query: string, criteria: RecipeCriteria) => (
     foodView="list"
     onFoodViewChange={fn()}
     recipes={{ status: 'ready', results: filterRecipes(searchRecipes(recipeCatalogue, query), criteria) }}
+    recipeCatalogue={recipeCatalogue}
+    recipeCatalogueStatus="ready"
     criteria={criteria}
     onApplyCriteria={fn()}
     onRemoveCriterion={fn()}
@@ -74,17 +76,18 @@ export const S03_2: Story = {
     docs: {
       description: {
         story:
-          'Purpose: applied criteria as removable chips, with match evidence shown only because criteria are active; removing a chip updates results at once. Entry: Apply in O02 from browse. Fixture: Vegan, under 500 kcal, 10 g protein or more → one match. Primary action: a card → S08-2. Secondary: Filters → O02; chip remove. Limitation: none.',
+          'Purpose: applied criteria on discovery — the dietary constraint as the pressed quick chip, the numeric ones as removable chips, match evidence on every card only because criteria are active; the groups keep only matching recipes. Entry: Apply in O02 or a quick chip. Fixture: Vegan, under 500 kcal, 10 g protein or more → two matches (traybake, chickpea curry). Primary action: a card → S08-2. Secondary: Filters → O02; chip remove; View all → S02-11. Limitation: none.',
       },
     },
   },
   render: () => browse(filteredCriteria),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('heading', { name: 'Matching recipes' })).toBeInTheDocument();
-    await expect(canvas.getAllByText('1 recipe matches your filters').length).toBeGreaterThanOrEqual(1);
-    await expect(canvas.getByText('Matches all 3 filters')).toBeVisible();
-    await expect(canvas.getAllByRole('button', { name: /Remove filter/ })).toHaveLength(3);
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('2 recipes match your filters');
+    await expect(canvas.getAllByText('Matches all 3 filters').length).toBeGreaterThanOrEqual(1);
+    await expect(canvas.getAllByRole('button', { name: /Remove filter/ })).toHaveLength(2);
+    await expect(within(canvas.getByRole('group', { name: 'Dietary' })).getByRole('button', { name: 'Vegan' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByRole('button', { name: 'Filters, 3 active' })).toBeVisible();
   },
 };
 
@@ -150,6 +153,28 @@ export const S02_5: Story = {
     await expect(canvas.getAllByText('1 recipe matches your filters').length).toBeGreaterThanOrEqual(1);
     await expect(canvas.getByText(/Matches (all 1 filter|your filter)/)).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Search' })).toHaveAttribute('aria-current', 'page');
+  },
+};
+
+export const S02_11: Story = {
+  name: 'S02-11 — Search / Recipes scope · the catalogue without a query',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Purpose: the complete recipe catalogue with its count lives in Search’s Recipes scope (ledger §12 B2): an empty query shows every recipe, narrowed by the criteria snapshot handed over from discovery, with the filter action in the field and applied chips beneath. Entry: Search recipes, View all or Browse all from S03, or the Recipes tab with an empty query. Fixture: no query, under 460 kcal → the matching catalogue. Primary action: a card → S08-2 with the Search origin. Secondary: Filters → O02. Limitation: none.',
+      },
+    },
+  },
+  render: () => recipeSearch('', { caloriesMax: 460 }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('tab', { name: 'Recipes' })).toHaveAttribute('aria-selected', 'true');
+    await expect(canvas.getByRole('heading', { name: 'Matching recipes' })).toBeInTheDocument();
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent(/\d+ recipes match your filters/);
+    await expect(canvas.getByRole('button', { name: 'Remove filter: Under 460 kcal' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Filters, 1 active' })).toBeVisible();
+    await expect(canvas.queryByText('Search for a recipe')).toBeNull();
   },
 };
 
@@ -311,7 +336,7 @@ export const S03_2_EnlargedText: Story = {
   decorators: [withRootFontSize(200)],
   render: () => browse(filteredCriteria),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText('Matches all 3 filters')).toBeVisible();
+    await expect(within(canvasElement).getAllByText('Matches all 3 filters').length).toBeGreaterThanOrEqual(1);
     await expectNoHorizontalOverflow();
   },
 };

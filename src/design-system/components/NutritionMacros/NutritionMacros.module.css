@@ -35,9 +35,10 @@
   }
 }
 
-/* Compact size keeps three short-labelled columns down to 14 rem (224 px at 100 %; the
-   Home group is 256 px wide at 320 px), then stacks — every supported width at 200 %. */
-@container (max-width: 14rem) {
+/* Compact size keeps three short-labelled columns down to 17 rem (272 px at 100 %: the Home
+   group is 329 px wide at 393 px and 256 px at 320 px), then stacks — so a value with a
+   target ("27.6 / 220 g") never has to break before its unit; every supported width at 200 %. */
+@container (max-width: 17rem) {
   .macros[data-size='compact'] {
     grid-template-columns: minmax(0, 1fr);
   }

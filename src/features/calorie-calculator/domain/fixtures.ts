@@ -45,7 +45,7 @@ const perServing = (grams: number): SupportedUnit[] => [
 export const fixtureC: FoodCandidate = {
   id: 'food-c',
   name: 'Vegetable rice bowl',
-  detail: 'Fixture C',
+  detail: 'Prepared dish',
   source: 'search',
   category: 'food',
   imageUrl: sampleCapturePhoto,
@@ -218,7 +218,7 @@ export const foodCatalogue: readonly FoodCandidate[] = [
 
 /** Barcode lookup fixtures keyed by code. Unknown codes produce "product not found". */
 export const barcodeCatalogue: Readonly<Record<string, FoodCandidate>> = {
-  '5012345678900': { ...oatDrink, source: 'barcode', detail: 'Scanned' },
+  '5012345678900': { ...oatDrink, source: 'barcode', detail: 'Drink', barcode: '5012345678900' },
 };
 
 /** Photo analysis fixtures: suggestions the user must review; none is authoritative. */

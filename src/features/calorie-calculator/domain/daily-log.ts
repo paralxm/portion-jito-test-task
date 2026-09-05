@@ -53,12 +53,15 @@ let entrySequence = 0;
  * Creates an entry from a reviewed candidate, portion and meal. Returns `null` when the
  * portion cannot be calculated or the food has no energy value — such a food can be
  * reviewed but never logged, so Home never receives an entry without calories.
+ * `dayKey` is the target day bound when the task started (ledger §12 A4): an entry
+ * committed after midnight still lands on the day it was started for; without it the
+ * entry belongs to the local day of `now`.
  */
-export function createEntry(candidate: FoodCandidate, portion: Portion, meal: MealType, options: { now?: number; id?: string } = {}): FoodEntry | null {
+export function createEntry(candidate: FoodCandidate, portion: Portion, meal: MealType, options: { now?: number; id?: string; dayKey?: string } = {}): FoodEntry | null {
   const result = scaleNutrition(candidate, portion);
   if (!result || result.energyKcal === null) return null;
   const now = options.now ?? Date.now();
-  return { id: options.id ?? `entry-${now.toString(36)}-${++entrySequence}`, dayKey: localDayKey(new Date(now)), createdAt: now, meal, candidate, portion, result };
+  return { id: options.id ?? `entry-${now.toString(36)}-${++entrySequence}`, dayKey: options.dayKey ?? localDayKey(new Date(now)), createdAt: now, meal, candidate, portion, result };
 }
 
 /** Applies a new portion (and optionally a new meal) to an existing entry, preserving its id and day. `null` when the portion cannot be calculated. */

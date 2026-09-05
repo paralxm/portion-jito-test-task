@@ -28,11 +28,12 @@ Operate inside `PRODUCT.md`, `DESIGN.md`, current UX contracts, tokens, and reus
 
 - Bottom navigation remains three destinations plus the separate 56 px `Log food` action; it is fixed, borderless, on the canvas surface, and never overlaps content, sheets, dialogs, or the keyboard.
 - Root, focused, and overlay layouts each own safe areas exactly once; never draw OS chrome.
-- Home reads header (logo, date, `Set goal`/`Edit goal`) → calorie budget bar and macros → recommended recipe → the four meals → water. The budget states remaining/logged/reached/over/partial truthfully, with a blue information fill and no judgmental colour; macro targets appear only when the user entered them.
+- Home reads header (logo, the selected day's context, the streak) → the week strip → calorie budget bar and macros (the only `Set goal`/`Edit goal`) → the four meals → water → recommended recipe. The budget states remaining/logged/reached/over/partial truthfully, with a blue information fill and no judgmental colour; macro targets appear only when the user entered them, each with its own compact bar beneath the numbers.
 - Recommended recipe wording is `Recommended recipe` or `Matches all N filters` — never goal-fit or health claims.
 - Water shows amount and reference in text, uses the water tokens, and its quick add gives a visible, announced, undoable confirmation.
-- Log food choices are equal methods and never imply a commit; the commit is the Add-to-meal sheet's `Add to {meal}` from every path, including Recipe Details' `Add`.
-- Food Review keeps identity, portion, unit, basis, result, and correction visible.
+- Log food follows the R6 hierarchy (prominent Search food row, the camera card pair under a caption, a separator, the quiet Enter manually row) and never implies a commit; foods commit with the single `Add to {meal}` on their review or portion step, recipes through the Add-to-meal sheet from Recipe Details' `Add`.
+- Food Review keeps identity (image, source stated plainly, record fields only), the shared portion form (steps, item presets, live result), meal, day and the source's own correction actions visible; nothing is called verified.
+- Manual entry is two labelled steps whose draft survives Back and Edit; every food task's exit goes through the shared `Discard changes?` policy.
 - Barcode and photo use the shared dark camera stage with text status chips; no simulator, flash, or camera chrome in production; the copy says the media is a fixture.
 - Search fields carry their trailing action (barcode or filters with a count) on the right; applied filter chips sit beneath.
 - Recipe results explain matching with active criteria and known values; avoid fake scores or badge clouds. Every catalogue recipe shows a licensed local photo; `No photo` is the fallback only.

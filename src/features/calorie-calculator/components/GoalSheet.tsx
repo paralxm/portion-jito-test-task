@@ -88,7 +88,7 @@ export function GoalSheet({ open, goal, onApply, onClear, onCancel }: GoalSheetP
       open={open}
       onRequestClose={onCancel}
       title={goal === null ? 'Set goal' : 'Edit goal'}
-      description="Optional. The goal only changes what Home shows as remaining; targets are yours to enter and are never calculated for you. Entries and recipe filters stay as they are."
+      description="Optional, and it applies from today onward — earlier days keep the goal they had. The goal only changes what Home shows as remaining; targets are yours to enter and are never calculated for you. Entries and recipe filters stay as they are."
       footer={
         <Inline gap={8} distribute="fill" align="stretch">
           <Button variant="secondary" onClick={onCancel}>

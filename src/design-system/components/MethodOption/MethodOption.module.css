@@ -1,15 +1,15 @@
-/* Tile by default: icon above a title/description pair, on the light surface with the
-   card radius. Inside a `method-grid` container narrower than 20 rem the same element
-   becomes a row (icon beside text) — the documented one-column adaptation. */
+/* Row by default: a tinted icon tile, the title/description pair and a trailing chevron,
+   on the light surface at the card radius. The card presentation stacks the same parts.
+   The quiet tone drops the tint and the fill for the secondary method. */
 
 .option {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--portion-spacing-icon-to-label);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--portion-ref-space-12);
   inline-size: 100%;
   min-block-size: var(--portion-size-target-minimum);
-  padding: var(--portion-spacing-card-padding);
+  padding: var(--portion-ref-space-12);
   border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
   border-radius: var(--portion-radius-card);
   background: var(--portion-color-background-surface);
@@ -22,11 +22,18 @@
     border-color var(--portion-motion-transition-press) var(--portion-motion-easing-standard);
 }
 
-/* The glyph is the one accent on the tile: it says "this is an action" in the action
-   colour, while the title stays neutral so four tiles read as a calm set, not four CTAs. */
+/* The glyph on a 40 px tinted tile (its own fixed size, not a spacing value): the one
+   accent, saying "this is an action" in the action colour while the title stays neutral. */
 .glyph {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--portion-radius-control);
+  background: var(--portion-color-action-selected-surface);
   color: var(--portion-color-action-primary);
+  flex-shrink: 0;
 }
 
 .text {
@@ -34,6 +41,46 @@
   flex-direction: column;
   gap: var(--portion-spacing-title-to-secondary);
   min-inline-size: 0;
+}
+
+.cue {
+  display: inline-flex;
+  color: var(--portion-color-text-secondary);
+}
+
+/* Card: glyph and chevron on the first row, the text beneath, stretching to the pair's height. */
+.option[data-presentation='card'] {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  row-gap: var(--portion-ref-space-12);
+  align-content: start;
+  block-size: 100%;
+}
+
+.option[data-presentation='card'] .glyph {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.option[data-presentation='card'] .cue {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+}
+
+.option[data-presentation='card'] .text {
+  grid-column: 1 / span 3;
+  grid-row: 2;
+}
+
+/* Quiet: no fill and a plain glyph; the boundary still marks the target. */
+.option[data-tone='quiet'] {
+  background: var(--portion-color-background-canvas);
+}
+
+.option[data-tone='quiet'] .glyph {
+  background: transparent;
+  color: var(--portion-color-text-secondary);
 }
 
 @media (hover: hover) {
@@ -46,15 +93,4 @@
 .option:active {
   background: var(--portion-color-background-sunken);
   border-color: var(--portion-color-border-control);
-}
-
-/* One-column adaptation: below 17 rem of container width the tile becomes a row — 200 %
-   text on every supported width; every width at 100 % text stays a tile. */
-@container method-grid (max-width: 17rem) {
-  .option {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--portion-ref-space-12);
-    padding-block: var(--portion-ref-space-12);
-  }
 }
