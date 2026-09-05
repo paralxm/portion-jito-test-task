@@ -82,6 +82,11 @@
   white-space: nowrap;
 }
 
+/* The reference's nature, stated beside the figure so the number is never read as a personal need. */
+.reference {
+  white-space: nowrap;
+}
+
 /* Under 18 rem of card width (enlarged text at 320) the quick add drops under the content
    control at full width; the two stay siblings. */
 @container (max-width: 18rem) {

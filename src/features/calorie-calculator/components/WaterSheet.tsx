@@ -7,10 +7,10 @@ import { Inline } from '../../../design-system/primitives/layout/Inline';
 import { Stack } from '../../../design-system/primitives/layout/Stack';
 import { Text } from '../../../design-system/primitives/Text/Text';
 import { ModalSheet } from '../../../design-system/patterns/ModalSheet/ModalSheet';
-import { formatWater, parseWaterAmount, WATER_ADD_MAX_ML, WATER_GOAL_ML, WATER_PRESETS_ML, WATER_TOTAL_MAX_ML } from '../domain/water';
+import { formatWater, parseWaterAmount, WATER_ADD_MAX_ML, WATER_GOAL_ML, WATER_PRESETS_ML, WATER_REFERENCE_RANGE_ML, WATER_TOTAL_MAX_ML } from '../domain/water';
 import styles from './WaterSheet.module.css';
 
-export type WaterSheetMode = 'add' | 'edit-total';
+export type WaterSheetMode = 'add' | 'edit-total' | 'reference';
 
 export interface WaterSheetProps {
   open: boolean;
@@ -20,6 +20,8 @@ export interface WaterSheetProps {
   onAdd: (ml: number) => void;
   /** Replaces today's total and closes. */
   onSaveTotal: (ml: number) => void;
+  /** Replaces the daily reference (every day) and closes; without it the reference cannot be changed here. */
+  onSaveReference?: (ml: number) => void;
   onCancel: () => void;
   /** The day the sheet edits, for its wording: "Today" (default), "Yesterday" or "Thu, Sep 3". */
   dayLabel?: string;
@@ -31,6 +33,12 @@ const ADD_ERRORS = {
   empty: 'Choose an amount or enter one in millilitres',
   invalid: 'Enter whole millilitres, for example 300',
   range: `Enter between 1 and ${WATER_ADD_MAX_ML.toLocaleString('en')} ml`,
+} as const;
+
+const REFERENCE_ERRORS = {
+  empty: 'Enter a daily reference in millilitres, or go back',
+  invalid: 'Enter whole millilitres, for example 2500',
+  range: `Enter between ${WATER_REFERENCE_RANGE_ML.min} and ${WATER_REFERENCE_RANGE_ML.max.toLocaleString('en')} ml`,
 } as const;
 
 const TOTAL_ERRORS = {
@@ -46,13 +54,14 @@ const TOTAL_ERRORS = {
  * field with `Save total`. Both are drafts: Cancel, close, backdrop and Escape change
  * nothing; the sheet contains focus and returns it to the opener.
  */
-export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSaveTotal, onCancel, dayLabel = 'Today', initialMode = 'add' }: WaterSheetProps) {
+export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSaveTotal, onSaveReference, onCancel, dayLabel = 'Today', initialMode = 'add' }: WaterSheetProps) {
   const isToday = dayLabel === 'Today';
   const dayPossessive = isToday ? "today's" : `${dayLabel}'s`;
   const [mode, setMode] = useState<WaterSheetMode>(initialMode);
   const [preset, setPreset] = useState<number | null>(null);
   const [custom, setCustom] = useState('');
   const [totalDraft, setTotalDraft] = useState(String(totalMl));
+  const [referenceDraft, setReferenceDraft] = useState(String(goalMl));
   const [error, setError] = useState<string | undefined>(undefined);
   const submitted = useRef(false);
   // Initialised to the mount state: the state initialisers above already reflect the props,
@@ -69,17 +78,29 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
       setPreset(null);
       setCustom('');
       setTotalDraft(String(totalMl));
+      setReferenceDraft(String(goalMl));
       setError(undefined);
       submitted.current = false;
     }
     wasOpen.current = open;
-  }, [open, initialMode, totalMl]);
+  }, [open, initialMode, totalMl, goalMl]);
 
   const customParse = custom.trim() === '' ? null : parseWaterAmount(custom, { min: 1, max: WATER_ADD_MAX_ML });
   const addValid = preset !== null || (customParse !== null && customParse.ok);
   // A typed amount that cannot be added says why beside the field while the action is unavailable.
   const customError = error ?? (customParse !== null && !customParse.ok ? ADD_ERRORS[customParse.reason] : undefined);
   const totalParse = parseWaterAmount(totalDraft, { min: 0, max: WATER_TOTAL_MAX_ML });
+  const referenceParse = parseWaterAmount(referenceDraft, WATER_REFERENCE_RANGE_ML);
+
+  const saveReference = () => {
+    if (submitted.current || !onSaveReference) return;
+    if (!referenceParse.ok) {
+      setError(REFERENCE_ERRORS[referenceParse.reason]);
+      return;
+    }
+    submitted.current = true;
+    onSaveReference(referenceParse.ml);
+  };
 
   const add = () => {
     if (submitted.current) return;
@@ -122,6 +143,43 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
       </p>
     </div>
   );
+
+  if (mode === 'reference') {
+    return (
+      <ModalSheet
+        open={open}
+        onRequestClose={onCancel}
+        title="Change the daily reference"
+        description="The amount the tracker measures against, for every day. A default to adjust as you like, not a personal requirement or advice."
+        footer={
+          <Inline gap={8} distribute="fill" align="stretch">
+            <Button variant="secondary" onClick={() => { setMode('add'); setError(undefined); }}>
+              Back to adding
+            </Button>
+            <Button variant="primary" onClick={saveReference} disabled={!referenceParse.ok && referenceDraft.trim() !== ''}>
+              Save reference
+            </Button>
+          </Inline>
+        }
+      >
+        <Stack gap={16}>
+          {summary}
+          <AmountField
+            label="Daily reference"
+            value={referenceDraft}
+            onChange={(value) => {
+              setReferenceDraft(value);
+              if (error) setError(undefined);
+            }}
+            unit="ml"
+            error={error}
+            helper={error ? undefined : `Whole millilitres between ${WATER_REFERENCE_RANGE_ML.min} and ${WATER_REFERENCE_RANGE_ML.max.toLocaleString('en')}.`}
+            autoFocus
+          />
+        </Stack>
+      </ModalSheet>
+    );
+  }
 
   if (mode === 'edit-total') {
     return (
@@ -213,11 +271,16 @@ export function WaterSheet({ open, totalMl, goalMl = WATER_GOAL_ML, onAdd, onSav
           error={customError}
           helper={customError ? undefined : `Whole millilitres, up to ${WATER_ADD_MAX_ML.toLocaleString('en')}.`}
         />
-        <div>
+        <Inline gap={8} wrap block>
           <Button variant="text" size="small" onClick={() => { setMode('edit-total'); setError(undefined); }}>
             Edit {dayPossessive} total
           </Button>
-        </div>
+          {onSaveReference ? (
+            <Button variant="text" size="small" onClick={() => { setMode('reference'); setError(undefined); }}>
+              Change the reference ({formatWater(goalMl)})
+            </Button>
+          ) : null}
+        </Inline>
       </Stack>
     </ModalSheet>
   );

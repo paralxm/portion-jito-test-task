@@ -1,11 +1,5 @@
-/* The field and its sibling scanner: one row while the frame is at least 22 rem wide
-   (every supported viewport at 100 % text), the scanner below the field at full width
-   under that (320 px is 20 rem; every viewport at 200 %). */
-.fieldFrame {
-  container-type: inline-size;
-  min-inline-size: 0;
-}
-
+/* The field and, in Food, its icon-only sibling scanner on one row at every width: the
+   48 px button needs no wrapping, and the field keeps the rest. */
 .fieldRow {
   display: flex;
   align-items: center;
@@ -22,20 +16,6 @@
   flex-shrink: 0;
 }
 
-@container (max-width: 22rem) {
-  .fieldRow[data-scope='food'] {
-    flex-wrap: wrap;
-  }
-
-  .fieldRow[data-scope='food'] .field {
-    flex-basis: 100%;
-  }
-
-  .fieldRow[data-scope='food'] .scan {
-    flex: 1 1 100%;
-  }
-}
-
 .results {
   display: flex;
   flex-direction: column;
@@ -43,8 +23,8 @@
   min-inline-size: 0;
 }
 
-/* The compact toolbar under the field: the presentation toggle first, the filter action
-   at the end. It wraps rather than shrinking either control. */
+/* The compact toolbar under the tabs in both scopes: the presentation toggle first, the
+   scope's one filter action at the end. It wraps rather than shrinking either control. */
 .toolbar {
   display: flex;
   flex-wrap: wrap;

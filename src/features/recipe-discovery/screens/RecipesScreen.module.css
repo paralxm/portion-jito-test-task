@@ -1,48 +1,35 @@
-/* The search entry and the filter action share one field-shaped row, mirroring Search's
-   field with its trailing action. */
-.searchRow {
+/* Quick preferences: a labelled block under the featured recipe — the title with the
+   active count at the start, Reset at the end, then the dietary row and the time row. */
+.preferences {
   display: flex;
-  align-items: center;
-  min-inline-size: 0;
-  min-block-size: var(--portion-size-target-minimum);
-  padding-inline-start: var(--portion-ref-space-12);
-  background: var(--portion-color-background-canvas);
-  border: var(--portion-border-width-default) solid var(--portion-color-border-control);
-  border-radius: var(--portion-radius-control);
-}
-
-/* Looks like the search field it leads to, but it is a button: pressing it opens Search
-   in the Recipes scope. It never holds a query itself. Its focus ring is drawn inward
-   because the row's boundary is the visual field. */
-.searchEntry {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
+  flex-direction: column;
   gap: var(--portion-ref-space-8);
   min-inline-size: 0;
-  min-block-size: var(--portion-size-target-minimum);
-  margin-inline-start: calc(var(--portion-ref-space-12) * -1);
-  padding-inline: var(--portion-ref-space-12);
-  border: 0;
-  border-radius: var(--portion-radius-control);
-  background: transparent;
-  color: var(--portion-color-text-secondary);
-  text-align: start;
-  cursor: pointer;
 }
 
-.searchEntry:focus-visible {
-  outline-offset: calc(var(--portion-focus-ring-offset) * -1);
+.preferencesHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
 }
 
-.filter :focus-visible {
-  outline-offset: calc(var(--portion-focus-ring-offset) * -1);
+.preferencesTitle {
+  flex: 1 1 10rem;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
 }
 
-/* Quick dietary chips: one row that scrolls sideways when five chips do not fit (320 px,
-   enlarged text) rather than shrinking them; the chips' 48 px hit areas need the block
-   padding to stay unclipped. */
-.quick {
+/* Each chip row scrolls sideways when its chips do not fit (320 px, enlarged text)
+   rather than shrinking them; the chips' 48 px hit areas need the block padding to
+   stay unclipped. Every chip is a button, so keyboard and assistive technology reach
+   each one without swiping. */
+.chips {
   display: flex;
   gap: var(--portion-ref-space-8);
   overflow-x: auto;
@@ -53,11 +40,11 @@
   min-inline-size: 0;
 }
 
-.quick > * {
+.chips > * {
   flex-shrink: 0;
 }
 
-/* The count sits under the chips as the page's status line; tight to the chips. */
+/* The count sits under the preferences as the page's status line; tight to them. */
 .count {
   margin-block-start: calc(var(--portion-ref-space-12) * -1);
   min-inline-size: 0;
@@ -70,8 +57,10 @@
   min-inline-size: 0;
 }
 
+/* The action keeps its label whole; under a narrow column (200 % text) it drops beneath the title instead of squeezing it. */
 .groupHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--portion-ref-space-8);
@@ -85,6 +74,7 @@
 }
 
 .groupTitle {
+  flex: 1 1 12rem;
   display: flex;
   flex-direction: column;
   gap: var(--portion-ref-space-4);
@@ -92,8 +82,8 @@
 }
 
 /* A rail of tiles: fixed-width photo cards that scroll sideways within the page inset,
-   the next tile peeking so the rail reads as scrollable without a hint. Every tile is a
-   button in a list, so keyboard and assistive technology reach each without swiping. */
+   the next tile peeking so the rail reads as scrollable without a hint. The rail, not
+   the page, owns the horizontal overflow. */
 .rail {
   list-style: none;
   margin: 0;
@@ -104,6 +94,7 @@
   gap: var(--portion-spacing-card-gap);
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
   padding-block: var(--portion-ref-space-4);
   padding-inline: var(--portion-spacing-page-inset);
   margin-inline: calc(var(--portion-spacing-page-inset) * -1);

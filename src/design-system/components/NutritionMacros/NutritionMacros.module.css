@@ -74,3 +74,29 @@
 .track {
   margin-block-start: var(--portion-ref-space-4);
 }
+
+/* Cards presentation: each nutrient is one bounded card on the canvas — a real group of
+   its own (name, value, target, track) — at the card radius beside the calorie surface's
+   grouped radius. The value and its target may wrap onto two lines in a narrow card
+   rather than shrinking; the track always spans the card. */
+.macros[data-presentation='cards'] {
+  column-gap: var(--portion-ref-space-8);
+  row-gap: var(--portion-ref-space-8);
+}
+
+.macros[data-presentation='cards'] .macro {
+  gap: var(--portion-ref-space-4);
+  padding: var(--portion-ref-space-12);
+  border: var(--portion-border-width-default) solid var(--portion-color-border-decorative);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-canvas);
+}
+
+.macros[data-presentation='cards'] .track {
+  margin-block-start: var(--portion-ref-space-4);
+}
+
+/* A partial-total caption or a missing track leaves the card the same height as its neighbours. */
+.macros[data-presentation='cards'] .macro > :last-child {
+  margin-block-start: auto;
+}

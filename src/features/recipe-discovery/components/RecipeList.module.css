@@ -1,9 +1,43 @@
-.list {
+/* The frame is the query container; the lists inside it are what reflow. */
+.frame {
+  container-type: inline-size;
+  min-inline-size: 0;
+}
+
+.list,
+.grid {
   list-style: none;
   margin: 0;
   padding: 0;
+  min-inline-size: 0;
+}
+
+.list {
   display: flex;
   flex-direction: column;
   gap: var(--portion-spacing-card-gap);
+}
+
+/* Two equal columns of tiles; one column under 20 rem (320 px at 100 % text, every
+   supported viewport at 200 %) so cards never shrink their type or targets to fit. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--portion-spacing-card-gap);
+}
+
+/* Tiles in one row share the row's height so the row reads as one line of objects. */
+.grid > li {
+  display: flex;
   min-inline-size: 0;
+}
+
+.grid > li > * {
+  flex: 1 1 auto;
+}
+
+@container (max-width: 20rem) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

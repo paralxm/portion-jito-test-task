@@ -1,0 +1,47 @@
+.group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-spacing-label-to-control);
+}
+
+.legend {
+  padding: 0;
+}
+
+/* The suggested grams on the light surface: one row per nutrient, value and share at the end. */
+.suggested {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+  padding: var(--portion-ref-space-12);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-background-surface);
+  min-inline-size: 0;
+}
+
+.list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-4);
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--portion-ref-space-12);
+  flex-wrap: wrap;
+}
+
+.value {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--portion-ref-space-8);
+  white-space: nowrap;
+}

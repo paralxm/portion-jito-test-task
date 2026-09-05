@@ -1,65 +1,99 @@
-import { useId, useState, type ReactNode } from 'react';
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import { useId, type ReactNode } from 'react';
 
 import { FilterChip } from '../../../design-system/components/Chip/Chip';
 import { EmptyState } from '../../../design-system/components/EmptyState/EmptyState';
 import { LoadingState } from '../../../design-system/components/LoadingState/LoadingState';
-import { Icon } from '../../../design-system/icons/Icon';
 import { Button } from '../../../design-system/primitives/Button/Button';
 import { Text } from '../../../design-system/primitives/Text/Text';
-import { VisuallyHidden } from '../../../design-system/primitives/VisuallyHidden/VisuallyHidden';
 import { AppHeader } from '../../../design-system/patterns/AppHeader/AppHeader';
 import { RecipeCard } from '../../../design-system/patterns/RecipeCard/RecipeCard';
 import { RootScreenLayout } from '../../../design-system/templates/RootScreenLayout/RootScreenLayout';
-import { CriteriaToolbar } from '../components/CriteriaToolbar';
-import { FilterAction } from '../components/FilterAction';
+import { FeaturedRecipeCard } from '../components/FeaturedRecipeCard';
 import { dietaryLabels } from '../components/RecipeList';
-import { discoveryCount, discoveryGroups, HIGH_PROTEIN_MIN_G, QUICK_MAX_MINUTES, type DiscoveryGroup } from '../domain/discovery';
-import { activeCriteriaCount, dietaryOf, DIETARY_OPTIONS, matchEvidence, type CriterionKey, type DietaryPreference, type Recipe, type RecipeCriteria } from '../domain/matching';
+import { discoveryCount, discoveryGroups, featuredRecipe, HIGH_PROTEIN_MIN_G, preferenceCount, QUICK_MAX_MINUTES, selectedTime, TIME_OPTIONS, type DiscoveryGroup } from '../domain/discovery';
+import { activeCriteriaCount, dietaryOf, DIETARY_OPTIONS, matchEvidence, type DietaryPreference, type Recipe, type RecipeCriteria } from '../domain/matching';
 import styles from './RecipesScreen.module.css';
 
 export type RecipesStatus = 'loading' | 'ready' | 'failure';
 
 export interface RecipesScreenProps {
-  /** The whole catalogue; the screen derives its groups and count from it and the criteria. */
+  /** The whole catalogue; the screen derives its featured recipe, collections and count from it and the preferences. */
   recipes: readonly Recipe[];
+  /** The discovery preferences (the dietary set and one time bound) as shared criteria. */
   criteria: RecipeCriteria;
   status: RecipesStatus;
-  onApplyCriteria: (criteria: RecipeCriteria) => void;
-  onRemoveCriterion: (key: CriterionKey) => void;
-  onClearCriteria: () => void;
-  /** A quick chip toggles one dietary constraint and applies at once. */
+  /** A dietary chip toggles one constraint and applies at once. */
   onToggleDietary: (id: DietaryPreference) => void;
+  /** A time chip chooses one bound (or clears it when it is already chosen) and applies at once. */
+  onToggleTime: (minutes: number) => void;
+  /** Reset clears every preference. */
+  onClearCriteria: () => void;
   onRetry: () => void;
   onOpenRecipe: (id: string) => void;
-  /** Opens shared Search in the Recipes scope with a deliberate criteria snapshot (the active criteria, plus a group's rule). */
+  /** Opens shared Search in the Recipes scope with a deliberate criteria snapshot: the preferences, plus a collection's rule for its View all. */
   onOpenSearch: (snapshot: RecipeCriteria) => void;
   navigation: ReactNode;
 }
 
-/** The criteria snapshot a group's "View all" hands to Search: the active criteria plus the group's own rule. */
+/** The criteria snapshot a collection's "View all" hands to Search: the active preferences plus the collection's own rule. */
 export function groupSnapshot(group: DiscoveryGroup['id'], criteria: RecipeCriteria): RecipeCriteria {
   if (group === 'quick') return { ...criteria, preparationMax: Math.min(criteria.preparationMax ?? QUICK_MAX_MINUTES, QUICK_MAX_MINUTES) };
-  if (group === 'protein') return { ...criteria, proteinMin: Math.max(criteria.proteinMin ?? HIGH_PROTEIN_MIN_G, HIGH_PROTEIN_MIN_G) };
-  return { ...criteria };
+  return { ...criteria, proteinMin: Math.max(criteria.proteinMin ?? HIGH_PROTEIN_MIN_G, HIGH_PROTEIN_MIN_G) };
 }
 
 /**
- * S03 — Recipes as curated discovery (ledger §12 B1, after R2): the real count, a search
- * entry that opens Search's Recipes scope, the filter action for the numeric criteria,
- * quick dietary chips that toggle constraints at once (AND), then a small number of
- * groups derived from each recipe's own record — Featured (an editorial flag), Ready in
- * under 30 minutes, 30 g protein or more — as photographic rails. The complete catalogue
- * lives in Search / Recipes; every "View all" hands it a deliberate criteria snapshot.
+ * S03 — Recipes as discovery without a search field (ledger §13, after H-REF 2): the
+ * section header → one featured recipe with prominent photography → quick preferences
+ * (dietary toggles combined with AND, one exclusive time bound, the active count and
+ * Reset) → thematic collections derived from each recipe's record, as photographic rails
+ * → Browse all recipes. Text search and the numeric filters live in Search's Recipes
+ * scope, which every "View all" and "Browse all" opens with the preferences applied.
  */
-export function RecipesScreen({ recipes, criteria, status, onApplyCriteria, onRemoveCriterion, onClearCriteria, onToggleDietary, onRetry, onOpenRecipe, onOpenSearch, navigation }: RecipesScreenProps) {
-  const [filtersOpen, setFiltersOpen] = useState(false);
+export function RecipesScreen({ recipes, criteria, status, onToggleDietary, onToggleTime, onClearCriteria, onRetry, onOpenRecipe, onOpenSearch, navigation }: RecipesScreenProps) {
   const id = useId();
   const active = activeCriteriaCount(criteria);
+  const quick = preferenceCount(criteria);
   const dietary = dietaryOf(criteria);
-  const groups = status === 'ready' ? discoveryGroups(recipes, criteria) : [];
-  const count = status === 'ready' ? discoveryCount(recipes, criteria) : 0;
-  const countText = status !== 'ready' ? '' : active > 0 ? `${count} ${count === 1 ? 'recipe matches' : 'recipes match'} your filters` : `${count} ${count === 1 ? 'recipe' : 'recipes'}`;
+  const time = selectedTime(criteria);
+  const ready = status === 'ready';
+  const featured = ready ? featuredRecipe(recipes, criteria) : null;
+  const groups = ready ? discoveryGroups(recipes, criteria) : [];
+  const count = ready ? discoveryCount(recipes, criteria) : 0;
+  const countText = !ready ? '' : count === 0 ? (active > 0 ? 'No recipes match your preferences' : 'No recipes available') : active > 0 ? `${count} ${count === 1 ? 'recipe matches' : 'recipes match'} your preferences` : `${count} ${count === 1 ? 'recipe' : 'recipes'}`;
+
+  const preferences = (
+    <section aria-labelledby={`${id}-preferences`} className={styles.preferences}>
+      <div className={styles.preferencesHeader}>
+        <div className={styles.preferencesTitle}>
+          <Text as="h2" id={`${id}-preferences`} variant="label" color="primary">
+            Quick preferences
+          </Text>
+          <Text as="p" variant="supporting" color="secondary" numeric aria-live="polite">
+            {quick === 0 ? 'None active' : `${quick} active`}
+          </Text>
+        </div>
+        {active > 0 ? (
+          <Button variant="text" size="small" onClick={onClearCriteria}>
+            Reset
+          </Button>
+        ) : null}
+      </div>
+      <div className={styles.chips} role="group" aria-label="Dietary">
+        {DIETARY_OPTIONS.map((option) => (
+          <FilterChip key={option.id} selected={dietary.includes(option.id)} onClick={() => onToggleDietary(option.id)}>
+            {option.label}
+          </FilterChip>
+        ))}
+      </div>
+      <div className={styles.chips} role="group" aria-label="Preparation time, one at a time">
+        {TIME_OPTIONS.map((option) => (
+          <FilterChip key={option.minutes} selected={time === option.minutes} onClick={() => onToggleTime(option.minutes)}>
+            {option.label}
+          </FilterChip>
+        ))}
+      </div>
+    </section>
+  );
 
   let content: ReactNode;
   if (status === 'loading') {
@@ -75,33 +109,36 @@ export function RecipesScreen({ recipes, criteria, status, onApplyCriteria, onRe
           </Button>
         }
       >
-        The recipe service did not respond. Your filters are kept.
+        The recipe service did not respond. Your preferences are kept.
       </EmptyState>
     );
   } else if (count === 0 && active > 0) {
     content = (
-      <EmptyState
-        kind="no-match"
-        title="No recipes match your filters"
-        actions={
-          <>
-            <Button variant="primary" onClick={() => setFiltersOpen(true)}>
-              Change filters
+      <>
+        {preferences}
+        <EmptyState
+          kind="no-match"
+          title="No recipes match your preferences"
+          actions={
+            <Button variant="primary" onClick={onClearCriteria}>
+              Reset preferences
             </Button>
-            <Button variant="text" onClick={onClearCriteria}>
-              Clear all filters
-            </Button>
-          </>
-        }
-      >
-        Every recipe is compared with all of your filters. Loosen one, or clear them to see every recipe.
-      </EmptyState>
+          }
+        >
+          Every recipe is compared with all of your preferences. Reset them to see every recipe.
+        </EmptyState>
+      </>
     );
   } else if (count === 0) {
     content = <EmptyState title="No recipes available">There is nothing to show yet.</EmptyState>;
   } else {
     content = (
       <>
+        {featured ? <FeaturedRecipeCard recipe={featured} onOpen={onOpenRecipe} /> : null}
+        {preferences}
+        <Text as="p" variant="supporting" color="secondary" numeric role="status" aria-label="Results summary" className={styles.count}>
+          {countText}
+        </Text>
         {groups.map((group) => (
           <section key={group.id} className={styles.group} aria-labelledby={`${id}-${group.id}`}>
             <div className={styles.groupHeader}>
@@ -148,38 +185,6 @@ export function RecipesScreen({ recipes, criteria, status, onApplyCriteria, onRe
 
   return (
     <RootScreenLayout header={<AppHeader variant="section" title="Recipes" />} navigation={navigation}>
-      <div className={styles.searchRow}>
-        <button type="button" className={styles.searchEntry} onClick={() => onOpenSearch({ ...criteria })}>
-          <Icon icon={MagnifyingGlass} size="small-action" />
-          <Text variant="body" color="secondary">
-            Search recipes
-          </Text>
-        </button>
-        <FilterAction count={active} expanded={filtersOpen} onClick={() => setFiltersOpen(true)} className={styles.filter} />
-      </div>
-
-      <div className={styles.quick} role="group" aria-labelledby={`${id}-dietary`}>
-        <VisuallyHidden as="span" id={`${id}-dietary`}>
-          Dietary
-        </VisuallyHidden>
-        <FilterChip selected={dietary.length === 0} onClick={() => (dietary.length > 0 ? onApplyCriteria({ ...criteria, dietary: [] }) : undefined)}>
-          All
-        </FilterChip>
-        {DIETARY_OPTIONS.map((option) => (
-          <FilterChip key={option.id} selected={dietary.includes(option.id)} onClick={() => onToggleDietary(option.id)}>
-            {option.label}
-          </FilterChip>
-        ))}
-      </div>
-
-      <CriteriaToolbar criteria={criteria} hideDietary sheetOpen={filtersOpen} onCloseSheet={() => setFiltersOpen(false)} onApply={onApplyCriteria} onRemove={onRemoveCriterion} />
-
-      <div className={styles.count}>
-        <Text as="p" variant="supporting" color="secondary" numeric role="status" aria-label="Results summary">
-          {status === 'loading' ? '' : status === 'failure' ? '' : count === 0 ? (active > 0 ? 'No recipes match your filters' : 'No recipes available') : countText}
-        </Text>
-      </div>
-
       {content}
     </RootScreenLayout>
   );

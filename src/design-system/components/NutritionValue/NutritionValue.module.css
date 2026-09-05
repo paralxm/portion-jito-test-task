@@ -65,3 +65,11 @@
 .target {
   white-space: nowrap;
 }
+
+/* The target and the unit stay together: a line may break before "/ 120 g", never inside it. */
+.pair {
+  display: inline-flex;
+  align-items: baseline;
+  column-gap: var(--portion-ref-space-4);
+  white-space: nowrap;
+}

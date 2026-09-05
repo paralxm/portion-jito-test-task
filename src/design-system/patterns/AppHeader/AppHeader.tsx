@@ -25,7 +25,7 @@ export interface AppHeaderProps {
   /** Back action for focused steps. Its destination is the actual preceding step, decided by the caller. */
   onBack?: () => void;
   backLabel?: string;
-  /** Trailing control: a contextual action (Set goal, Filters) or a close. */
+  /** Trailing control: a contextual control (the streak on Home, Filters) or a close. */
   trailing?: ReactNode;
   headingLevel?: 1 | 2;
   className?: string;

@@ -100,9 +100,11 @@ async function addManualFood(page, name, kcal, meal = 'breakfast') {
 }
 
 async function setGoal(page, kcal) {
-  await scoped().getByRole('button', { name: 'Set goal' }).first().click();
-  await scoped().getByRole('textbox', { name: 'Daily goal' }).fill(String(kcal));
-  await scoped().getByRole('button', { name: 'Apply' }).click();
+  await scoped().getByRole('button', { name: 'Set targets' }).click();
+  await scoped().getByRole('button', { name: /I know my goal/ }).click();
+  await scoped().getByRole('textbox', { name: 'Daily calorie target' }).fill(String(kcal));
+  await scoped().getByRole('radio', { name: 'Custom' }).click();
+  await scoped().getByRole('button', { name: 'Save', exact: true }).click();
   await page.waitForTimeout(250);
 }
 
@@ -116,29 +118,57 @@ await check(page, 'rendered font is Inter Variable', async () => {
 await check(page, 'launch is S01-1: no entries, no goal, all four meals, Home current, brand lockup', async () => {
   const t = await visibleText();
   const lockup = await page.locator('[data-screen="home"] header [role="img"][aria-label="Portion"]').count();
-  return t.includes('Nothing logged') && t.includes('Set goal') && ['Breakfast', 'Lunch', 'Dinner', 'Snacks'].every((m) => t.includes(m)) && (await currentNav()).includes('Home') && lockup === 1;
+  return t.includes('Nothing logged') && t.includes('kcal logged') && t.includes('Set targets') && !t.includes('remaining') && ['Breakfast', 'Lunch', 'Dinner', 'Snacks'].every((m) => t.includes(m)) && (await currentNav()).includes('Home') && lockup === 1;
 });
-await check(page, 'no goal draws no empty bar; Set goal is offered', async () => (await page.locator('[data-screen="home"] [role="meter"][aria-label="Calories logged against your goal"]').count()) === 0);
+await check(page, 'no target draws no empty bar; the one Set targets action sits on the calorie card, not in the header', async () => {
+  const meters = await page.locator('[data-screen="home"] [role="meter"][aria-label="Calories logged against your target"]').count();
+  const actions = await scoped().getByRole('button', { name: 'Set targets' }).count();
+  const inHeader = await page.locator('[data-screen="home"] header').getByRole('button', { name: /targets/ }).count();
+  return meters === 0 && actions === 1 && inHeader === 0;
+});
+await check(page, 'the day strip is compact: no previous / next week buttons, today marked and later days unavailable, the recommendation above the meals', async () =>
+  page.evaluate(() => {
+    const home = document.querySelector('[data-screen="home"]');
+    const weekButtons = home.querySelectorAll('button[aria-label="Previous week"], button[aria-label="Next week"]').length;
+    const today = home.querySelector('[role="radio"][aria-label$=", today"]');
+    const future = home.querySelectorAll('[role="radio"]:disabled').length;
+    const headings = Array.from(home.querySelectorAll('h2')).map((h) => h.textContent);
+    return weekButtons === 0 && !!today && today.getAttribute('aria-checked') === 'true' && future >= 1 && headings.indexOf('Recipe to try') < headings.findIndex((h) => /meals/.test(h));
+  }),
+);
 await check(page, 'navigation is fixed, borderless, and the content reserves its height', () => fixedNavigationHolds(page));
 
 // Goal with targets
-await scoped().getByRole('button', { name: 'Set goal' }).first().click();
+await scoped().getByRole('button', { name: 'Set targets' }).click();
 await page.waitForTimeout(350);
-await shot(page, '02-goal-sheet');
-await scoped().getByRole('textbox', { name: 'Daily goal' }).fill('2000');
+await shot(page, '02-targets-entry');
+await check(page, 'Set targets opens the entry sheet with its two routes', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  return d.includes('Set daily goal') && d.includes('How would you like to set it?') && d.includes('Help me estimate') && d.includes('I know my goal');
+});
+await scoped().getByRole('button', { name: /I know my goal/ }).click();
+await scoped().getByRole('textbox', { name: 'Daily calorie target' }).fill('2000');
+await check(page, 'a preset suggests grams from the calorie target and says so', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  return d.includes('Suggested macros') && d.includes('100 g') && d.includes('250 g') && d.includes('67 g') && d.includes('Not personalised');
+});
+await scoped().getByRole('radio', { name: 'Custom' }).click();
 await scoped().getByLabel(/^Protein/).fill('120');
 await scoped().getByLabel(/^Carbohydrates/).fill('220');
 await scoped().getByLabel(/^Fat/).fill('65');
-await scoped().getByRole('button', { name: 'Apply' }).click();
+await page.waitForTimeout(100);
+await shot(page, '02-targets-custom');
+await check(page, 'custom grams state their energy against the target without changing either', async () => (await page.locator('dialog[open]').innerText()).includes('1,945 kcal, 55 kcal below'));
+await scoped().getByRole('button', { name: 'Save', exact: true }).click();
 await page.waitForTimeout(250);
 await shot(page, '03-home-goal-empty');
 await check(page, 'goal 2,000 with nothing logged: 2,000 remaining, 0 %, targets shown', async () => {
   const t = await visibleText();
-  const label = await page.locator('[data-screen="home"] [role="meter"][aria-label="Calories logged against your goal"]').getAttribute('aria-valuetext');
+  const label = await page.locator('[data-screen="home"] [role="meter"][aria-label="Calories logged against your target"]').getAttribute('aria-valuetext');
   log('   budget valuetext:', label);
   // The macro target renders as "0 / 120 g" (with a hidden "of" for assistive technology).
   const targets = await page.locator('[data-screen="home"] [role="meter"][aria-label="Protein against your target"]').getAttribute('aria-valuetext');
-  return t.includes('kcal remaining') && t.includes('Edit goal') && label === '0 of 2,000 kcal, 0 %' && targets === '0 of 120 g';
+  return t.includes('kcal remaining') && t.includes('Edit targets') && t.includes('Target 2,000') && label === '0 of 2,000 kcal, 0 %' && targets === '0 of 120 g';
 });
 
 // A meal row starts the task with its meal preselected.
@@ -184,7 +214,7 @@ await shot(page, '10-home-populated');
 await check(page, 'Add to lunch returns Home (S01-2): 540 kcal logged under Lunch, 27 %, one confirmation', async () => {
   const t = await visibleText();
   const section = await page.locator('[data-screen="home"] section[aria-labelledby^="meal-"]', { has: page.getByRole('button', { name: /Vegetable rice bowl/ }) }).getAttribute('aria-labelledby');
-  const label = await page.locator('[data-screen="home"] [role="meter"][aria-label="Calories logged against your goal"]').getAttribute('aria-valuetext');
+  const label = await page.locator('[data-screen="home"] [role="meter"][aria-label="Calories logged against your target"]').getAttribute('aria-valuetext');
   const status = await page.getByRole('status').filter({ hasText: 'Added to' }).innerText();
   log('   section/valuetext/status:', section, label, status);
   return t.includes('540 kcal logged') && section === 'meal-lunch' && label === '540 of 2,000 kcal, 27 %' && status.includes('Added to lunch') && (await currentNav()).includes('Home');
@@ -260,6 +290,20 @@ await scoped().getByLabel("Today's total", { exact: true }).fill('1000');
 await scoped().getByRole('button', { name: 'Save total' }).click();
 await page.waitForTimeout(300);
 await check(page, 'Save total replaces the day (1 litre)', async () => (await scoped().getByRole('button', { name: 'Edit water, 1 litre of 2 litres' }).count()) === 1);
+await check(page, 'the water reference is labelled adjustable, never personal', async () => (await visibleText()).includes('Adjustable reference'));
+await scoped().getByRole('button', { name: /^Edit water/ }).click();
+await page.waitForTimeout(350);
+await scoped().getByRole('button', { name: /Change the reference/ }).click();
+await scoped().getByRole('textbox', { name: 'Daily reference' }).fill('2500');
+await scoped().getByRole('button', { name: 'Save reference' }).click();
+await page.waitForTimeout(300);
+await check(page, 'the reference changes for the tracker (1 L of 2.5 L) without touching the total', async () => (await scoped().getByRole('button', { name: 'Edit water, 1 litre of 2.5 litres' }).count()) === 1);
+await scoped().getByRole('button', { name: /^Edit water/ }).click();
+await page.waitForTimeout(350);
+await scoped().getByRole('button', { name: /Change the reference/ }).click();
+await scoped().getByRole('textbox', { name: 'Daily reference' }).fill('2000');
+await scoped().getByRole('button', { name: 'Save reference' }).click();
+await page.waitForTimeout(300);
 
 // Task origin (ledger D-4): the bar's Log food from Home → Search food switches to the
 // Search root; Cancel from the review returns to Home, the surface that opened Log food.
@@ -421,72 +465,133 @@ await check(page, 'Back from capture closes the task to Home without logging', a
 // --- Journey 2: recipes -------------------------------------------------------
 await scoped().getByRole('button', { name: 'Recipes', exact: true }).click();
 await page.waitForTimeout(700);
-await shot(page, '32-recipes-browse');
-await check(page, 'discovery shows the real count, the three groups and the quick chips; every card has a photograph; the filter action sits at the end of the search entry', async () => {
+await shot(page, '32-recipes-discovery');
+await check(page, 'discovery has no search field: a featured recipe, quick preferences with the count, the two collections, every card photographed, Browse all', async () => {
   const noPhoto = await page.locator('[data-screen="recipes"]:visible main').getByText('No photo').count();
-  const filters = await scoped().getByRole('button', { name: 'Filters' }).count();
+  const searchboxes = await scoped().getByRole('searchbox').count();
+  const filters = await scoped().getByRole('button', { name: /^Filters/ }).count();
+  const featured = await scoped().getByRole('article', { name: /^Featured recipe/ }).count();
   const t = await page.locator('main:visible').innerText();
-  return noPhoto === 0 && filters === 1 && t.includes('10 recipes') && t.includes('Featured') && t.includes('Ready in under 30 minutes') && t.includes('30 g protein or more') && (await scoped().getByRole('button', { name: 'Vegan' }).getAttribute('aria-pressed')) === 'false';
+  return noPhoto === 0 && searchboxes === 0 && filters === 0 && featured === 1 && t.includes('10 recipes') && t.includes('None active') && !t.includes('Featured\n') && t.includes('Ready in under 30 minutes') && t.includes('30 g protein or more') && t.includes('Browse all 10 recipes') && (await scoped().getByRole('button', { name: 'Vegan' }).getAttribute('aria-pressed')) === 'false';
 });
 await scoped().getByRole('button', { name: 'Vegan' }).click();
 await page.waitForTimeout(150);
 await scoped().getByRole('button', { name: 'Gluten-free' }).click();
 await page.waitForTimeout(150);
-await check(page, 'quick chips combine with AND and apply at once (Vegan + Gluten-free → 2 recipes)', async () => {
+await check(page, 'dietary preferences combine with AND and apply at once (Vegan + Gluten-free → 2 recipes, 2 active)', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('2 recipes match your filters') && (await scoped().getByRole('button', { name: 'Filters, 2 active' }).count()) === 1;
+  return t.includes('2 recipes match your preferences') && t.includes('2 active');
 });
-await scoped().getByRole('button', { name: 'All', exact: true }).click();
+await scoped().getByRole('button', { name: 'Under 30 min', exact: true }).click();
 await page.waitForTimeout(150);
-await check(page, 'All clears the dietary constraints', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
+await scoped().getByRole('button', { name: 'Under 15 min', exact: true }).click();
+await page.waitForTimeout(150);
+await check(page, 'time preferences are mutually exclusive (Under 15 replaces Under 30) and count once (3 active)', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return (await scoped().getByRole('button', { name: 'Under 15 min', exact: true }).getAttribute('aria-pressed')) === 'true' && (await scoped().getByRole('button', { name: 'Under 30 min', exact: true }).getAttribute('aria-pressed')) === 'false' && t.includes('3 active');
+});
+await shot(page, '33-recipes-no-match');
+await check(page, 'preferences that remove every match show one empty state with Reset, not repeated empty headings', async () => {
+  const headings = await page.locator('[data-screen="recipes"]:visible main h2').allInnerTexts();
+  return headings.filter((h) => /Ready in under|protein or more/.test(h)).length === 0 && (await scoped().getByRole('button', { name: 'Reset preferences' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'Reset preferences' }).click();
+await page.waitForTimeout(150);
+await check(page, 'Reset clears every preference', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
 await check(page, 'navigation stays fixed on Recipes', () => fixedNavigationHolds(page));
-await scoped().getByRole('button', { name: /^Filters/ }).click();
+await check(page, 'the collection rails scroll inside themselves; the page never scrolls sideways', async () =>
+  page.evaluate(() => {
+    const rails = Array.from(document.querySelectorAll('[data-screen="recipes"]:not([hidden]) ul'));
+    return document.documentElement.scrollWidth <= window.innerWidth + 1 && rails.some((r) => r.scrollWidth > r.clientWidth + 1);
+  }),
+);
+
+// The numeric filters and the list / grid live in Search's Recipes scope.
+await scoped().getByRole('button', { name: 'Search', exact: true }).click();
+await page.waitForTimeout(150);
+await scoped().getByRole('tab', { name: 'Recipes' }).click();
+await page.waitForTimeout(300);
+await check(page, 'the Recipes scope reuses the Food toolbar: List / Grid at the start, the filter action at the end, no scanner, no in-field action', async () => {
+  const list = await scoped().getByRole('radio', { name: 'List' }).count();
+  const filters = await scoped().getByRole('button', { name: 'Recipe filters' }).count();
+  const scanner = await scoped().getByRole('button', { name: 'Scan barcode' }).count();
+  return list === 1 && filters === 1 && scanner === 0 && (await page.locator('main:visible').innerText()).includes('All recipes');
+});
+await scoped().getByRole('button', { name: 'Recipe filters' }).click();
 await page.waitForTimeout(350);
-await shot(page, '33-filters-sheet');
+await shot(page, '34-recipe-filters-sheet');
 await page.locator('dialog[open]').getByRole('button', { name: 'Vegan' }).click();
 await scoped().getByLabel('Maximum').fill('100');
 await scoped().getByLabel('Minimum').fill('300');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(150);
-await shot(page, '34-filters-invalid-range');
+await shot(page, '34b-recipe-filters-invalid-range');
 await check(page, 'min > max is refused', async () => (await page.locator('dialog[open]').innerText()).includes('at least the minimum'));
 await scoped().getByLabel('Maximum').fill('500');
 await scoped().getByLabel('Protein per serving, at least').fill('10');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(300);
-await shot(page, '35-recipes-filtered');
-await check(page, 'filtered discovery shows evidence per card, the pressed Vegan chip and the count on the filter action', async () => {
+await shot(page, '35-search-recipes-filtered');
+await check(page, 'filtered results show evidence per card, the chips and the count on the filter action; the count agrees with the items', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('Matches') && (await scoped().getByRole('button', { name: 'Filters, 3 active' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Vegan' }).getAttribute('aria-pressed')) === 'true';
+  const items = await page.locator('[data-screen="search"]:not([hidden]) ul[data-view] > li').count();
+  return t.includes('Matches all 3 filters') && (await scoped().getByRole('button', { name: 'Recipe filters, 3 active' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Remove filter: Vegan' }).count()) === 1 && t.includes(`${items} recipes match`);
 });
-await scoped().getByRole('button', { name: 'Vegan' }).click();
+await scoped().getByRole('button', { name: 'Remove filter: Vegan' }).click();
 await page.waitForTimeout(150);
-await shot(page, '36-recipes-chip-removed');
-await scoped().getByRole('button', { name: /^Filters/ }).click();
+await shot(page, '36-search-recipes-chip-removed');
+await check(page, 'removing a chip commits at once', async () => (await scoped().getByRole('button', { name: 'Recipe filters, 2 active' }).count()) === 1);
+await scoped().getByRole('radio', { name: 'Grid' }).click();
+await page.waitForTimeout(200);
+await shot(page, '36b-search-recipes-grid');
+await check(page, 'switching to the grid keeps the same recipes, order and count', async () =>
+  page.evaluate(() => {
+    const list = document.querySelector('[data-screen="search"]:not([hidden]) ul[data-view]');
+    const titles = Array.from(list.querySelectorAll('li h3')).map((h) => h.textContent);
+    window.__gridTitles = titles;
+    return list.dataset.view === 'grid' && titles.length > 0;
+  }),
+);
+await scoped().getByRole('radio', { name: 'List' }).click();
+await page.waitForTimeout(200);
+await check(page, 'back to the list: identical set and order', async () =>
+  page.evaluate(() => {
+    const list = document.querySelector('[data-screen="search"]:not([hidden]) ul[data-view]');
+    const titles = Array.from(list.querySelectorAll('li h3')).map((h) => h.textContent);
+    return list.dataset.view === 'list' && JSON.stringify(titles) === JSON.stringify(window.__gridTitles);
+  }),
+);
+await scoped().getByRole('button', { name: /^Recipe filters/ }).click();
 await scoped().getByLabel('Preparation time, at most').fill('5');
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(300);
-await shot(page, '37-recipes-no-match');
+await shot(page, '37-search-recipes-no-match');
 await scoped().getByRole('button', { name: 'Change filters' }).click();
 await scoped().getByRole('button', { name: 'Reset all' }).click();
 await scoped().getByRole('button', { name: 'Apply filters' }).click();
 await page.waitForTimeout(300);
-await check(page, 'reset + apply clears filters', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
-await scoped().getByRole('button', { name: /^Filters/ }).click();
-await scoped().getByLabel('Maximum').fill('460');
-await scoped().getByRole('button', { name: 'Apply filters' }).click();
+await check(page, 'reset + apply clears the filters', async () => (await page.locator('main:visible').innerText()).includes('10 recipes'));
+
+// Details from discovery, with the scroll position kept on return.
+await scoped().getByRole('button', { name: 'Recipes', exact: true }).click();
 await page.waitForTimeout(300);
+await scoped().getByRole('button', { name: 'Under 30 min', exact: true }).click();
+await page.waitForTimeout(200);
+await check(page, 'a quick preference narrows the featured recipe and the collections with evidence on every card', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return t.includes('Matches all 1 filter') && t.includes('1 active');
+});
 await page.evaluate(() => window.scrollTo(0, 200));
 await page.waitForTimeout(100);
 const beforeY = await page.evaluate(() => window.scrollY);
-await scoped().getByRole('button', { name: 'Lentil soup' }).first().click();
+await page.locator('[data-screen="recipes"]:not([hidden]) article').first().getByRole('button', { name: 'Lentil soup' }).click();
 await page.waitForTimeout(150);
 await shot(page, '38-recipe-loading');
 await check(page, 'details keeps Recipes selected while loading', async () => (await currentNav()).includes('Recipes'));
 await page.waitForTimeout(700);
 await shot(page, '39-recipe-loaded');
-await check(page, 'details: hero, time chip, Add beside the title, counts, fixed bar, no sticky footer', async () => {
-  const t = (await page.locator('main:visible').innerText()).replace(/ /g, ' ');
+await check(page, 'details: hero, time chip, Add beside the title, counts, fixed bar, no sticky footer — unchanged by the redesign', async () => {
+  const t = (await page.locator('main:visible').innerText()).replace(/ /g, ' ');
   const add = await scoped().getByRole('button', { name: 'Add Lentil soup to a meal' }).count();
   const footer = await page.locator('[data-screen="recipe"]:not([hidden]) footer').count();
   return t.includes('25 min preparation') && add === 1 && t.includes('7 items') && t.includes('3 steps') && footer === 0 && (await fixedNavigationHolds(page));
@@ -529,27 +634,36 @@ await check(page, 'the recipe entry reopens in existing-entry mode with servings
 await scoped().getByRole('button', { name: 'Back' }).click();
 await page.waitForTimeout(200);
 
-// Home's recommendation reflects the applied browse criteria; Back from details returns to the list.
-await shot(page, '43-home-recommendation-with-filters');
-await check(page, 'Home shows the recipe that matches the applied browse filter with its evidence', async () => {
+// Home's recommendation reflects the active discovery preference; All recipes returns to discovery with its state and scroll.
+await shot(page, '43-home-recommendation-with-preferences');
+await check(page, 'Home shows the recipe that matches the active discovery preference with its evidence, above the meals', async () => {
   const t = await visibleText();
-  return t.includes('Matches your filters') && t.includes('Matches all 1 filter');
+  return t.includes('Matches your preferences') && t.includes('Matches all 1 filter');
 });
 await scoped().getByRole('button', { name: 'All recipes' }).click();
 await page.waitForTimeout(200);
-await check(page, 'All recipes opens the Recipes root with its criteria and scroll kept', async () => {
+await check(page, 'All recipes opens the Recipes root with its preference and scroll kept', async () => {
   const afterY = await page.evaluate(() => window.scrollY);
   log('   scroll before/after:', beforeY, afterY);
-  return (await page.locator('main:visible').innerText()).includes('match your filters') && Math.abs(beforeY - afterY) < 5;
+  return (await page.locator('main:visible').innerText()).includes('1 active') && Math.abs(beforeY - afterY) < 5;
 });
 
-// Browse → Search snapshot, scopes, failure
-await scoped().getByRole('button', { name: 'Search recipes' }).click();
+// Discovery → Search: Browse all carries the preferences; View all adds the collection's rule.
+await scoped().getByRole('button', { name: /^View all \d+ in 30 g protein or more/ }).click();
+await page.waitForTimeout(150);
+await check(page, 'View all opens Search / Recipes with the preference and the collection rule as visible chips', async () => {
+  const t = await page.locator('main:visible').innerText();
+  return (await scoped().getByRole('tab', { name: 'Recipes' }).getAttribute('aria-selected')) === 'true' && (await scoped().getByRole('button', { name: 'Remove filter: Under 30 min' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Remove filter: 30 g protein or more' }).count()) === 1 && t.includes('Matching recipes');
+});
+await scoped().getByRole('button', { name: 'Recipes', exact: true }).click();
+await page.waitForTimeout(200);
+await scoped().getByRole('button', { name: /^Browse all/ }).click();
 await page.waitForTimeout(150);
 await shot(page, '44-search-recipes-scope-snapshot');
-await check(page, 'search opens in Recipes scope with snapshot criteria, the filter action in the field and the catalogue narrowed by them (no query)', async () => {
+await check(page, 'Browse all opens Search / Recipes with the preference only, the filter action counting it and the catalogue narrowed (no query)', async () => {
   const t = await page.locator('main:visible').innerText();
-  return t.includes('Under 460 kcal') && t.includes('Matching recipes') && t.includes('match your filters') && (await scoped().getByRole('tab', { name: 'Recipes' }).getAttribute('aria-selected')) === 'true' && (await scoped().getByRole('button', { name: 'Filters, 1 active' }).count()) === 1;
+  const items = await page.locator('[data-screen="search"]:not([hidden]) ul[data-view] > li').count();
+  return (await scoped().getByRole('button', { name: 'Remove filter: Under 30 min' }).count()) === 1 && (await scoped().getByRole('button', { name: 'Remove filter: 30 g protein or more' }).count()) === 0 && (await scoped().getByRole('button', { name: 'Recipe filters, 1 active' }).count()) === 1 && t.includes(`${items} recipes match your filters`);
 });
 await scoped().getByRole('searchbox').fill('lentil');
 await page.waitForTimeout(1000);
@@ -557,9 +671,10 @@ await shot(page, '45-search-recipes-results');
 await scoped().getByRole('tab', { name: 'Food' }).click();
 await page.waitForTimeout(1000);
 await shot(page, '46-search-food-scope-keeps-query');
-await check(page, 'food scope keeps the query and is unfiltered', async () => {
+await check(page, 'food scope keeps the query, shows the icon-only scanner and is unfiltered by recipe criteria', async () => {
   const t = await page.locator('main:visible').innerText();
-  return (await scoped().getByRole('searchbox').inputValue()) === 'lentil' && !t.includes('Under 460');
+  const scan = scoped().getByRole('button', { name: 'Scan barcode' });
+  return (await scoped().getByRole('searchbox').inputValue()) === 'lentil' && !t.includes('Under 30 min') && (await scan.count()) === 1 && (await scan.innerText()).trim() === '' && (await scoped().getByRole('radio', { name: 'List' }).count()) === 1;
 });
 await scoped().getByRole('searchbox').fill('offline');
 await page.waitForTimeout(1000);
@@ -569,7 +684,7 @@ await page.waitForTimeout(1000);
 await shot(page, '48-search-no-match');
 await scoped().getByRole('button', { name: 'Recipes', exact: true }).click();
 await page.waitForTimeout(150);
-await check(page, 'browse criteria untouched by search edits', async () => (await page.locator('main:visible').innerText()).includes('Under 460 kcal'));
+await check(page, 'discovery preferences untouched by search edits', async () => (await page.locator('main:visible').innerText()).includes('1 active'));
 
 // Remove entry
 await scoped().getByRole('button', { name: 'Home', exact: true }).click();
@@ -588,8 +703,58 @@ await page.waitForTimeout(250);
 await shot(page, '50-home-after-remove');
 await check(page, 'confirmed removal recalculates Home (900 kcal logged) with the goal kept', async () => {
   const t = await visibleText();
-  return t.includes('900 kcal logged') && !t.includes('Vegetable rice bowl') && t.includes('Edit goal');
+  return t.includes('900 kcal logged') && !t.includes('Vegetable rice bowl') && t.includes('Edit targets');
 });
+
+// Help me estimate: three steps, the reviewed estimate, an explicit save
+await scoped().getByRole('button', { name: 'Edit targets' }).click();
+await page.waitForTimeout(350);
+await check(page, 'Edit targets opens the saved values (2,000 kcal, custom 120 / 220 / 65 g)', async () =>
+  (await scoped().getByRole('textbox', { name: 'Daily calorie target' }).inputValue()) === '2000' && (await page.locator('dialog[open]').getByRole('textbox', { name: /^Protein/ }).inputValue()) === '120');
+await scoped().getByRole('button', { name: 'Help me estimate instead' }).click();
+await page.waitForTimeout(200);
+await shot(page, '50b-estimate-about');
+await scoped().getByRole('button', { name: 'Continue' }).click();
+await check(page, 'the About you step refuses blank fields without leaving', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  return d.includes('About you') && d.includes('Enter your age');
+});
+const sheet = () => page.locator('dialog[open]');
+await sheet().getByRole('textbox', { name: 'Age' }).fill('34');
+await sheet().getByRole('radio', { name: 'Female' }).check();
+await sheet().getByRole('textbox', { name: 'Height' }).fill('168');
+await sheet().getByRole('textbox', { name: 'Weight' }).fill('62');
+await scoped().getByRole('button', { name: 'Continue' }).click();
+await sheet().getByRole('radio', { name: /Lightly active/ }).check();
+await page.waitForTimeout(100);
+await shot(page, '50c-estimate-lifestyle');
+await scoped().getByRole('button', { name: 'Continue' }).click();
+await sheet().getByRole('radio', { name: /Lose weight/ }).check();
+await scoped().getByRole('button', { name: 'See the estimate' }).click();
+await page.waitForTimeout(200);
+await shot(page, '50d-estimate-review');
+await check(page, 'the review labels the estimate, shows the maintenance figure and the deficit, and never calls it medical', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  return d.includes('Estimated daily target') && d.includes('1,699') && d.includes('Maintenance estimate 2,199 kcal') && d.includes('500 kcal below') && d.includes('not a measurement or medical advice') && (await scoped().getByRole('textbox', { name: 'Daily calorie target' }).inputValue()) === '1699';
+});
+await scoped().getByRole('button', { name: 'Back' }).click();
+await check(page, 'Back keeps the goal answer', async () => (await sheet().getByRole('radio', { name: /Lose weight/ }).isChecked()) === true);
+await scoped().getByRole('button', { name: 'See the estimate' }).click();
+await scoped().getByRole('button', { name: 'Save targets' }).click();
+await page.waitForTimeout(300);
+await check(page, 'saving the estimate applies it once: 1,699 − 900 = 799 remaining, entries untouched', async () => {
+  const t = await visibleText();
+  return t.includes('799') && t.includes('kcal remaining') && t.includes('900') && t.includes('consumed') && t.includes('1,699 kcal');
+});
+await scoped().getByRole('button', { name: 'Edit targets' }).click();
+await page.waitForTimeout(350);
+await check(page, 'an estimated target explains its assumptions and offers an explicit recalculation', async () => {
+  const d = await page.locator('dialog[open]').innerText();
+  return d.includes('Estimated from female, 34, 168 cm, 62 kg, lightly active') && (await scoped().getByRole('button', { name: 'Recalculate estimate' }).count()) === 1;
+});
+await scoped().getByRole('button', { name: 'Cancel' }).click();
+await page.waitForTimeout(200);
+await check(page, 'Cancel keeps the saved targets', async () => { const t = await visibleText(); return t.includes('799') && t.includes('1,699 kcal'); });
 await page.close();
 
 // --- Responsive / enlarged text ----------------------------------------------

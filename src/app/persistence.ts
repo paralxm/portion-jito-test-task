@@ -16,7 +16,10 @@
 import type { FoodCandidate } from '../features/calorie-calculator/domain/calculation';
 import type { DailyGoal, FoodEntry } from '../features/calorie-calculator/domain/daily-log';
 import { isDayKey, localDayKey } from '../features/calorie-calculator/domain/day-keys';
+import { ACTIVITY_OPTIONS, ESTIMATE_METHOD, GOAL_OPTIONS, SEX_OPTIONS, type EstimateRecord } from '../features/calorie-calculator/domain/energy-estimate';
 import { migrateLegacyGoal, normaliseGoalHistory, type GoalHistory, type GoalPeriod } from '../features/calorie-calculator/domain/goal-history';
+import { PRESET_OPTIONS, type MacroPreset } from '../features/calorie-calculator/domain/macro-presets';
+import { WATER_GOAL_ML, WATER_REFERENCE_RANGE_ML } from '../features/calorie-calculator/domain/water';
 import { MEAL_ORDER, type MealType } from '../features/calorie-calculator/domain/meal';
 
 export const RECORD_KEY = 'portion.record';
@@ -30,10 +33,14 @@ export interface PersistedRecord {
   /** Effective-dated goal periods, sorted by day; empty when no goal was ever set. */
   goals: GoalHistory;
   water: Record<string, number>;
+  /** The daily water reference the tracker measures against (a product default until the person changes it). */
+  waterReferenceMl: number;
   searchView: SearchView;
+  /** The presentation of the Recipes scope's results; independent of the Food view. */
+  recipeView: SearchView;
 }
 
-export const EMPTY_RECORD: PersistedRecord = { version: RECORD_VERSION, entries: [], goals: [], water: {}, searchView: 'list' };
+export const EMPTY_RECORD: PersistedRecord = { version: RECORD_VERSION, entries: [], goals: [], water: {}, waterReferenceMl: WATER_GOAL_ML, searchView: 'list', recipeView: 'list' };
 
 /** The subset of `Storage` the record needs; `localStorage` in the browser, a Map-backed fake in tests. */
 export interface RecordStorage {
@@ -70,10 +77,32 @@ function readEntry(raw: unknown, resolveImage: (candidateId: string) => string |
   };
 }
 
+const isOneOf = <T extends string>(value: unknown, options: ReadonlyArray<{ id: T }>): value is T => typeof value === 'string' && options.some((o) => o.id === value);
+
+/** A saved estimate is kept only whole; a partial one cannot be explained or recalculated, so it is dropped rather than guessed. */
+function readEstimate(raw: unknown): EstimateRecord | undefined {
+  if (!isObject(raw) || raw.method !== ESTIMATE_METHOD) return undefined;
+  const { age, heightCm, weightKg, eerKcal, adjustmentKcal, sex, activity, goal } = raw;
+  if (!isFiniteNumber(age) || !isFiniteNumber(heightCm) || !isFiniteNumber(weightKg) || !isFiniteNumber(eerKcal) || !isFiniteNumber(adjustmentKcal)) return undefined;
+  if (!isOneOf(sex, SEX_OPTIONS) || !isOneOf(activity, ACTIVITY_OPTIONS) || !isOneOf(goal, GOAL_OPTIONS)) return undefined;
+  return { method: ESTIMATE_METHOD, age, sex, heightCm, weightKg, activity, goal, eerKcal, adjustmentKcal };
+}
+
+/** Provenance is additive (§13.4): a goal written before it existed reads as manual; an unreadable source or preset is left out, never invented. */
 function readGoal(raw: unknown): DailyGoal | null {
   if (!isObject(raw) || !isFiniteNumber(raw.kcal) || raw.kcal <= 0) return null;
   const target = (value: unknown) => (isFiniteNumber(value) && value > 0 ? value : null);
-  return { kcal: raw.kcal, proteinG: target(raw.proteinG), carbohydratesG: target(raw.carbohydratesG), fatG: target(raw.fatG) };
+  const goal: DailyGoal = { kcal: raw.kcal, proteinG: target(raw.proteinG), carbohydratesG: target(raw.carbohydratesG), fatG: target(raw.fatG) };
+  if (raw.source === 'manual' || raw.source === 'estimated') goal.source = raw.source;
+  if (isOneOf(raw.preset, PRESET_OPTIONS)) goal.preset = raw.preset as MacroPreset;
+  const estimate = readEstimate(raw.estimate);
+  if (estimate) goal.estimate = estimate;
+  return goal;
+}
+
+/** The water reference: a whole number inside the supported range, else the product default. */
+function readWaterReference(raw: unknown): number {
+  return isFiniteNumber(raw) && raw >= WATER_REFERENCE_RANGE_ML.min && raw <= WATER_REFERENCE_RANGE_ML.max ? Math.round(raw) : WATER_GOAL_ML;
 }
 
 /** Version 2 periods: each needs a day key; a period whose goal cannot be read is a clear (`null`), never a guess. */
@@ -125,7 +154,9 @@ export function parseRecord(text: string | null, options: ParseOptions | ((candi
     entries,
     goals,
     water: readWater(raw.water),
+    waterReferenceMl: readWaterReference(raw.waterReferenceMl),
     searchView: raw.searchView === 'grid' ? 'grid' : 'list',
+    recipeView: raw.recipeView === 'grid' ? 'grid' : 'list',
   };
 }
 

@@ -69,16 +69,18 @@ export function NutritionValue({ value, unit, size = 'inline', label, category, 
             <Text variant={valueVariant} numeric color="primary" className={styles.number}>
               {formatQuantity(value, unit)}
             </Text>
-            {hasTarget ? (
-              <Text variant={unitVariant} numeric color="secondary" className={styles.target}>
-                <VisuallyHidden>of </VisuallyHidden>
-                <span aria-hidden="true">/ </span>
-                {formatQuantity(target as number, unit)}
+            <span className={styles.pair}>
+              {hasTarget ? (
+                <Text variant={unitVariant} numeric color="secondary" className={styles.target}>
+                  <VisuallyHidden>of </VisuallyHidden>
+                  <span aria-hidden="true">/ </span>
+                  {formatQuantity(target as number, unit)}
+                </Text>
+              ) : null}
+              <Text variant={unitVariant} color={size === 'inline' ? 'primary' : 'secondary'} className={styles.unit}>
+                {unit}
               </Text>
-            ) : null}
-            <Text variant={unitVariant} color={size === 'inline' ? 'primary' : 'secondary'} className={styles.unit}>
-              {unit}
-            </Text>
+            </span>
           </>
         ) : (
           <>

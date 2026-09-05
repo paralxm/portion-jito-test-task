@@ -12,7 +12,7 @@ import { draftFromCandidate, EMPTY_MANUAL_DRAFT, newManualId, type ManualDraft }
 import { carryPortion } from '../features/calorie-calculator/domain/portion-draft';
 import { recentCandidates } from '../features/calorie-calculator/domain/recents';
 import { mealPhrase, suggestMeal, type MealType } from '../features/calorie-calculator/domain/meal';
-import { announceWaterAdded, formatWater, WATER_GOAL_ML } from '../features/calorie-calculator/domain/water';
+import { announceWaterAdded, formatWater } from '../features/calorie-calculator/domain/water';
 import { AddToMealSheet } from '../features/calorie-calculator/components/AddToMealSheet';
 import { releasePhotoDraft, type PhotoDraft } from '../features/calorie-calculator/components/PhotoField';
 import { PRESELECTED_MEAL_HINT, SUGGESTED_MEAL_HINT } from '../features/calorie-calculator/components/PortionForm';
@@ -22,6 +22,7 @@ import { HomeScreen, type RecommendedRecipe } from '../features/calorie-calculat
 import { ManualEntryScreen } from '../features/calorie-calculator/screens/ManualEntryScreen';
 import { ManualPortionScreen } from '../features/calorie-calculator/screens/ManualPortionScreen';
 import { PhotoScreen } from '../features/calorie-calculator/screens/PhotoScreen';
+import { toggleTime } from '../features/recipe-discovery/domain/discovery';
 import { activeCriteriaCount, filterRecipes, matchEvidence, removeCriterion, toggleDietary, type CriterionKey, type Recipe, type RecipeCriteria } from '../features/recipe-discovery/domain/matching';
 import { recipeToCandidate } from '../features/recipe-discovery/domain/recipe-entry';
 import { RecipeDetailsScreen, type RecipeDetailsState } from '../features/recipe-discovery/screens/RecipeDetailsScreen';
@@ -124,7 +125,10 @@ export default function App() {
   const [entries, setEntries] = useState<FoodEntry[]>(initialRecord.entries);
   const [goals, setGoals] = useState<GoalHistory>(initialRecord.goals);
   const [water, setWater] = useState<Record<string, number>>(initialRecord.water);
+  // The daily water reference: a product default until the person changes it (ledger §13).
+  const [waterReferenceMl, setWaterReferenceMl] = useState(initialRecord.waterReferenceMl);
   const [foodView, setFoodView] = useState<ViewMode>(initialRecord.searchView);
+  const [recipeView, setRecipeView] = useState<ViewMode>(initialRecord.recipeView);
   const [foodFilters, setFoodFilters] = useState<FoodFilters>(NO_FOOD_FILTERS);
   const [highlightEntryId, setHighlightEntryId] = useState<string | null>(null);
   const [photoStore, setPhotoStore] = useState<PhotoStore>(initialPhotos);
@@ -147,8 +151,8 @@ export default function App() {
 
   // Every confirmed change is written to the device; nothing is written for drafts.
   useEffect(() => {
-    saveRecord(storage, { version: 2, entries, goals, water, searchView: foodView });
-  }, [entries, goals, water, foodView]);
+    saveRecord(storage, { version: 2, entries, goals, water, waterReferenceMl, searchView: foodView, recipeView });
+  }, [entries, goals, water, waterReferenceMl, foodView, recipeView]);
   useEffect(() => {
     savePhotoStore(storage, photoStore);
   }, [photoStore]);
@@ -468,6 +472,11 @@ export default function App() {
     });
   };
 
+  const setWaterReference = (ml: number) => {
+    setWaterReferenceMl(ml);
+    setToast({ message: `Daily water reference set to ${formatWater(ml)}.` });
+  };
+
   const setWaterTotal = (ml: number) => {
     const dayKey = selectedDayKey;
     setWater((w) => ({ ...w, [dayKey]: ml }));
@@ -620,9 +629,10 @@ export default function App() {
           onOpenRecipe={(id) => openRecipe(id, 'home')}
           onFindRecipes={() => switchRoot('recipes')}
           waterMl={waterMl}
-          waterGoalMl={WATER_GOAL_ML}
+          waterGoalMl={waterReferenceMl}
           onAddWater={addWater}
           onSetWaterTotal={setWaterTotal}
+          onSetWaterReference={setWaterReference}
           highlightEntryId={highlightEntryId}
           navigation={navigation('home')}
         />
@@ -655,6 +665,8 @@ export default function App() {
           criteria={searchCriteria}
           onApplyCriteria={setSearchCriteria}
           onRemoveCriterion={(key: CriterionKey) => setSearchCriteria((c) => removeCriterion(c, key))}
+          recipeView={recipeView}
+          onRecipeViewChange={setRecipeView}
           onOpenFood={(candidate) => openReview(candidate, 'search')}
           onOpenRecipe={(id) => openRecipe(id, 'search')}
           onScanBarcode={() => {
@@ -675,10 +687,9 @@ export default function App() {
           recipes={browseRecipes}
           criteria={browseCriteria}
           status={browseStatus}
-          onApplyCriteria={setBrowseCriteria}
-          onRemoveCriterion={(key) => setBrowseCriteria((c) => removeCriterion(c, key))}
           onClearCriteria={() => setBrowseCriteria({})}
           onToggleDietary={(id) => setBrowseCriteria((c) => toggleDietary(c, id))}
+          onToggleTime={(minutes) => setBrowseCriteria((c) => toggleTime(c, minutes))}
           onRetry={() => setBrowseToken((n) => n + 1)}
           onOpenRecipe={(id) => openRecipe(id, 'browse')}
           onOpenSearch={openRecipeSearch}

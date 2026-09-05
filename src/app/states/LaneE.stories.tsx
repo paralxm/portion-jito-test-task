@@ -33,7 +33,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const browse = (criteria: RecipeCriteria, recipes: readonly Recipe[] = recipeCatalogue) => (
-  <RecipesScreen recipes={recipes} criteria={criteria} status="ready" onApplyCriteria={fn()} onRemoveCriterion={fn()} onClearCriteria={fn()} onToggleDietary={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
+  <RecipesScreen recipes={recipes} criteria={criteria} status="ready" onClearCriteria={fn()} onToggleDietary={fn()} onToggleTime={fn()} onRetry={fn()} onOpenRecipe={fn()} onOpenSearch={fn()} navigation={nav('recipes')} />
 );
 
 const recipeSearch = (query: string, criteria: RecipeCriteria) => (
@@ -57,6 +57,8 @@ const recipeSearch = (query: string, criteria: RecipeCriteria) => (
     criteria={criteria}
     onApplyCriteria={fn()}
     onRemoveCriterion={fn()}
+    recipeView="list"
+    onRecipeViewChange={fn()}
     onOpenFood={fn()}
     onOpenRecipe={fn()}
     onScanBarcode={fn()}
@@ -76,18 +78,20 @@ export const S03_2: Story = {
     docs: {
       description: {
         story:
-          'Purpose: applied criteria on discovery — the dietary constraint as the pressed quick chip, the numeric ones as removable chips, match evidence on every card only because criteria are active; the groups keep only matching recipes. Entry: Apply in O02 or a quick chip. Fixture: Vegan, under 500 kcal, 10 g protein or more → two matches (traybake, chickpea curry). Primary action: a card → S08-2. Secondary: Filters → O02; chip remove; View all → S02-11. Limitation: none.',
+          'Purpose: active quick preferences on discovery (ledger §13, after H-REF 2) — the pressed dietary chip and the one time bound, the active count with Reset, match evidence on every card only because preferences are active; the featured recipe and the collections keep only matching recipes. Entry: a quick chip. Fixture: Vegan, under 1 h → four matches. Primary action: a card → S08-2. Secondary: Reset; View all → S02-11. Limitation: the numeric filters live in Search (O02).',
       },
     },
   },
-  render: () => browse(filteredCriteria),
+  render: () => browse({ dietary: ['vegan'], preparationMax: 60 }),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent('2 recipes match your filters');
-    await expect(canvas.getAllByText('Matches all 3 filters').length).toBeGreaterThanOrEqual(1);
-    await expect(canvas.getAllByRole('button', { name: /Remove filter/ })).toHaveLength(2);
+    await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent(/recipes match your preferences/);
+    await expect(canvas.getAllByText('Matches all 2 filters').length).toBeGreaterThanOrEqual(1);
     await expect(within(canvas.getByRole('group', { name: 'Dietary' })).getByRole('button', { name: 'Vegan' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(canvas.getByRole('button', { name: 'Filters, 3 active' })).toBeVisible();
+    await expect(within(canvas.getByRole('group', { name: /Preparation time/ })).getByRole('button', { name: 'Under 1 h' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(canvas.getByText('2 active')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Reset' })).toBeVisible();
+    await expect(canvas.queryByRole('searchbox')).toBeNull();
   },
 };
 
@@ -97,14 +101,14 @@ export const O02: Story = {
     docs: {
       description: {
         story:
-          'Purpose: discrete options and numeric bounds as a draft; the footer never covers the last field; Cancel restores the applied criteria. Entry: Filters on browse or Search. Fixture: the sheet opened over S03-2 with its three applied values. Primary action: Apply filters → the owning list. Secondary: Reset all (still needs Apply); Cancel. Limitation: the play function opens the sheet through the real Filters control.',
+          'Purpose: discrete options and numeric bounds as a draft; the footer never covers the last field; Cancel restores the applied criteria. Entry: the filter action in Search’s Recipes toolbar (ledger §13). Fixture: the sheet opened over S02-11 with three applied values. Primary action: Apply filters → the owning list. Secondary: Reset all (still needs Apply); Cancel. Limitation: the play function opens the sheet through the real filter control.',
       },
     },
   },
-  render: () => browse(filteredCriteria),
+  render: () => recipeSearch('', filteredCriteria),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: /^Filters/ }));
+    await userEvent.click(canvas.getByRole('button', { name: /^Recipe filters/ }));
     const dialog = await canvas.findByRole('dialog', { name: 'Filters' });
     await expect(within(dialog).getByLabelText(/^Maximum/)).toHaveValue('500');
     await expect(within(dialog).getByRole('button', { name: 'Apply filters' })).toBeVisible();
@@ -122,10 +126,10 @@ export const O02_2: Story = {
       },
     },
   },
-  render: () => browse({}),
+  render: () => recipeSearch('', {}),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: /^Filters/ }));
+    await userEvent.click(canvas.getByRole('button', { name: /^Recipe filters/ }));
     const dialog = await canvas.findByRole('dialog', { name: 'Filters' });
     await userEvent.type(within(dialog).getByLabelText(/^Minimum/), '600');
     await userEvent.type(within(dialog).getByLabelText(/^Maximum/), '300');
@@ -173,7 +177,9 @@ export const S02_11: Story = {
     await expect(canvas.getByRole('heading', { name: 'Matching recipes' })).toBeInTheDocument();
     await expect(canvas.getByRole('status', { name: 'Results summary' })).toHaveTextContent(/\d+ recipes match your filters/);
     await expect(canvas.getByRole('button', { name: 'Remove filter: Under 460 kcal' })).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Filters, 1 active' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Recipe filters, 1 active' })).toBeVisible();
+    await expect(canvas.getByRole('radio', { name: 'List' })).toHaveAttribute('aria-checked', 'true');
+    await expect(canvas.queryByRole('button', { name: 'Scan barcode' })).toBeNull();
     await expect(canvas.queryByText('Search for a recipe')).toBeNull();
   },
 };
@@ -315,7 +321,7 @@ export const S02_6: Story = {
 export const S03_2_Narrow320: Story = {
   name: 'S03-2 at 320',
   globals: { viewport: { value: 'mobile320', isRotated: false } },
-  render: () => browse(filteredCriteria),
+  render: () => browse({ dietary: ['vegan'], preparationMax: 60 }),
   play: async () => {
     await expectNoHorizontalOverflow();
   },
@@ -334,9 +340,9 @@ export const S03_2_EnlargedText: Story = {
   name: 'S03-2 at 320 and 200 % text',
   globals: { viewport: { value: 'mobile320', isRotated: false } },
   decorators: [withRootFontSize(200)],
-  render: () => browse(filteredCriteria),
+  render: () => browse({ dietary: ['vegan'], preparationMax: 60 }),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getAllByText('Matches all 3 filters').length).toBeGreaterThanOrEqual(1);
+    await expect(within(canvasElement).getAllByText('Matches all 2 filters').length).toBeGreaterThanOrEqual(1);
     await expectNoHorizontalOverflow();
   },
 };
@@ -345,10 +351,10 @@ export const O02_SafeAreas: Story = {
   name: 'O02 with the iPhone 16 safe-area fixture — sheet footer owns the bottom inset',
   globals: { viewport: { value: 'iPhone16Portrait', isRotated: false } },
   decorators: [withIPhone16PortraitSafeAreas],
-  render: () => browse(filteredCriteria),
+  render: () => recipeSearch('', filteredCriteria),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: /^Filters/ }));
+    await userEvent.click(canvas.getByRole('button', { name: /^Recipe filters/ }));
     const dialog = await canvas.findByRole('dialog', { name: 'Filters' });
     await expect(within(dialog).getByRole('button', { name: 'Apply filters' })).toBeVisible();
   },
