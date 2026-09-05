@@ -25,7 +25,7 @@ const meta = {
   args: {
     entries: [],
     goal: null,
-    onGoalChange: fn(),
+    onSetTargets: fn(),
     onOpenEntry: fn(),
     onAddToMeal: fn(),
     recommended,
@@ -193,30 +193,23 @@ export const RecipeCriteriaApplied: Story = {
 };
 
 export const SetTargets: Story = {
-  name: 'Set targets from Home — the entry sheet, the manual path, one save',
+  name: 'Set targets — the one action on the calorie card starts the targets task',
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Set targets' }));
-    const dialog = await canvas.findByRole('dialog', { name: 'Set daily goal' });
-    await userEvent.click(within(dialog).getByRole('button', { name: /I know my goal/ }));
-    await userEvent.type(within(dialog).getByLabelText('Daily calorie target'), '2200');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
-    await expect(args.onGoalChange).toHaveBeenLastCalledWith({ kcal: 2200, proteinG: 110, carbohydratesG: 275, fatG: 73, preset: 'balanced', source: 'manual' });
-    await expect(args.onGoalChange).toHaveBeenCalledTimes(1);
+    await expect(args.onSetTargets).toHaveBeenCalledTimes(1);
+    await expect(canvas.queryByRole('dialog')).toBeNull();
   },
 };
 
-export const EditTargetsRemove: Story = {
-  name: 'Edit targets — opens the saved values; Remove targets keeps the entries',
-  args: { entries: budget, goal: budgetFixtureGoal, waterMl: 1250 },
+export const EditTargetsScheduled: Story = {
+  name: 'Edit targets — saved targets in force, a scheduled change stated once',
+  args: { entries: budget, goal: budgetFixtureGoal, waterMl: 1250, scheduledNote: 'Scheduled: 1,800 kcal from tomorrow.' },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
+    await expect(canvas.getByText('Scheduled: 1,800 kcal from tomorrow.')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Edit targets' }));
-    const dialog = await canvas.findByRole('dialog', { name: 'Edit targets' });
-    await expect(within(dialog).getByLabelText('Daily calorie target')).toHaveValue('2000');
-    await expect(within(dialog).getByLabelText(/^Protein/)).toHaveValue('120');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Remove targets' }));
-    await expect(args.onGoalChange).toHaveBeenLastCalledWith(null);
+    await expect(args.onSetTargets).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('button', { name: /Yoghurt bowl with oats/ })).toBeVisible();
   },
 };

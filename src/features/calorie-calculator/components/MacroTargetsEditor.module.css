@@ -12,14 +12,12 @@
   padding: 0;
 }
 
-/* The suggested grams on the light surface: one row per nutrient, value and share at the end. */
+/* The suggested grams as plain rows — no card: a nutrient marker, the name, the grams,
+   the share as secondary text. Rows separate with hairlines, not a surface. */
 .suggested {
   display: flex;
   flex-direction: column;
   gap: var(--portion-ref-space-8);
-  padding: var(--portion-ref-space-12);
-  border-radius: var(--portion-radius-card);
-  background: var(--portion-color-background-surface);
   min-inline-size: 0;
 }
 
@@ -27,7 +25,6 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--portion-ref-space-4);
 }
 
 .row {
@@ -36,6 +33,39 @@
   justify-content: space-between;
   gap: var(--portion-ref-space-12);
   flex-wrap: wrap;
+  padding-block: var(--portion-ref-space-8);
+  border-block-end: 1px solid var(--portion-color-border-decorative);
+}
+
+.row:last-child {
+  border-block-end: 0;
+}
+
+.name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+/* The nutrient identifier the Home macros already use; never the only meaning. */
+.marker {
+  inline-size: var(--portion-ref-space-8);
+  block-size: var(--portion-ref-space-8);
+  border-radius: var(--portion-radius-round);
+  flex-shrink: 0;
+}
+
+.marker[data-nutrient='protein'] {
+  background: var(--portion-color-nutrition-protein-accent);
+}
+
+.marker[data-nutrient='carbohydrates'] {
+  background: var(--portion-color-nutrition-carbohydrates-accent);
+}
+
+.marker[data-nutrient='fat'] {
+  background: var(--portion-color-nutrition-fat-accent);
 }
 
 .value {

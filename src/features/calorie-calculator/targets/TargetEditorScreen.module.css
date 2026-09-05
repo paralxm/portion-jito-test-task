@@ -1,0 +1,60 @@
+.content {
+  padding-block-start: var(--portion-ref-space-24);
+  padding-block-end: var(--portion-ref-space-24);
+}
+
+.footer {
+  padding-block: var(--portion-ref-space-12);
+}
+
+/* The estimate as the screen's result: label, the centred 40/48 figure with its unit
+   directly beneath, the Adjust action, the one-line caveat. Nothing else competes. */
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+  text-align: center;
+}
+
+.figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  min-inline-size: 0;
+}
+
+/* Adjust edits in place: the field takes the figure's spot at the field's own width. */
+.adjust {
+  inline-size: 100%;
+  max-inline-size: 18rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--portion-ref-space-8);
+  text-align: start;
+}
+
+.adjustActions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+}
+
+/* A statement at the start, its one action at the end; wraps under enlarged text. */
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--portion-ref-space-8);
+  min-inline-size: 0;
+}
+
+.summary {
+  flex: 1 1 12rem;
+  min-inline-size: 0;
+}

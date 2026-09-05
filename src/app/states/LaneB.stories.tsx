@@ -37,7 +37,7 @@ const emptyHome = () => (
   <HomeScreen
     entries={[]}
     goal={goal2200}
-    onGoalChange={fn()}
+    onSetTargets={fn()}
     onOpenEntry={fn()}
     onAddToMeal={fn()}
     recommended={{ recipe: fixtureR, evidence: [] }}

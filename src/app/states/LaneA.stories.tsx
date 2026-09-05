@@ -9,6 +9,11 @@ import type { DailyGoal, FoodEntry } from '../../features/calorie-calculator/dom
 import { fixtureR, recipeCatalogue } from '../../features/recipe-discovery/domain/fixtures';
 import { RecipesScreen } from '../../features/recipe-discovery/screens/RecipesScreen';
 import { SearchScreen } from '../screens/SearchScreen';
+import { useState } from 'react';
+import { TargetEditorScreen } from '../../features/calorie-calculator/targets/TargetEditorScreen';
+import { TargetsEntrySheet } from '../../features/calorie-calculator/targets/TargetsEntrySheet';
+import { draftSnapshot } from '../../features/calorie-calculator/targets/targets-draft';
+import { reviewedDraft } from '../../features/calorie-calculator/targets/targets-fixtures';
 import { HomeWithWater } from './harnesses';
 import { budgetEntries, budgetGoal, goal2200, populatedEntries, threeDayEntries, TODAY_KEY, WATER_PARTIAL_ML } from './stateFixtures';
 import { addDays } from '../../features/calorie-calculator/domain/day-keys';
@@ -32,6 +37,13 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/** The reviewed estimate held the way the app holds the task draft. */
+function ReviewHarness() {
+  const [start] = useState(reviewedDraft);
+  const [draft, setDraft] = useState(start);
+  return <TargetEditorScreen mode="review" draft={draft} onDraftChange={setDraft} current={null} pending={null} todayKey={TODAY_KEY} dirty={draftSnapshot(draft) !== draftSnapshot(start)} onSave={fn(() => ({ ok: true as const }))} onBack={fn()} onExit={fn()} onEditDetails={fn()} />;
+}
 
 const home = (entries: readonly FoodEntry[], goal: DailyGoal | null, waterMl = 0, extra: Partial<Parameters<typeof HomeWithWater>[0]> = {}) => (
   <HomeWithWater
@@ -238,15 +250,20 @@ export const O09: Story = {
     docs: {
       description: {
         story:
-          'Purpose: targets stay optional and start from a choice of route (ledger §13.4): Help me estimate or I know my goal. Entry: Set targets on the calorie card (the only targets action). Fixture: nothing logged, no targets. Primary action: either route. Secondary: Cancel / close → nothing changes. Limitation: none.',
+          'Purpose: targets stay optional and start from a choice of route (ledger §14): Help me estimate (prominent) or I know my goal; the note beneath says targets can be changed anytime from Home. Entry: Set targets on the calorie card (the only targets action). Fixture: nothing logged, no targets. Primary action: either route → the focused full-screen flow. Secondary: Close → nothing changes. Limitation: none.',
       },
     },
   },
-  render: () => home([], null, 0, { targetsSheetOpen: true }),
+  render: () => (
+    <>
+      {home([], null, 0)}
+      <TargetsEntrySheet open onChoose={fn()} onRequestClose={fn()} />
+    </>
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const dialog = await canvas.findByRole('dialog', { name: 'Set daily goal' });
-    await expect(within(dialog).getByText(/How would you like to set it/)).toBeVisible();
+    await expect(within(dialog).getByText('Choose how to set your target.')).toBeVisible();
     await expect(within(dialog).getByRole('button', { name: /Help me estimate/ })).toBeVisible();
     await expect(within(dialog).getByRole('button', { name: /I know my goal/ })).toBeVisible();
   },
@@ -258,27 +275,20 @@ export const O09_2: Story = {
     docs: {
       description: {
         story:
-          'Purpose: the estimate is reviewed, explained and adjustable before anything is applied (ledger §13.4): the figure, the inputs and the maintenance estimate in words, the deficit for a loss goal, the nutrition preference and its suggested grams, one Save targets. Entry: See the estimate after the three steps. Fixture: female, 34, 168 cm, 62 kg, lightly active, lose weight → 2,199 − 500 = 1,699 kcal. Primary action: Save targets → Home with the new targets. Secondary: Back keeps the answers. Limitation: the play function walks the three steps.',
+          'Purpose: the estimate is reviewed and adjustable before anything is applied (ledger §14): a small Estimated label, the centred figure with kcal/day, Adjust in place, the goal · activity summary with Edit details, the nutrition preference with its nutrient rows, the start date, one Save targets. Entry: Review estimate on the third step. Fixture: female, 34, 168 cm, 62 kg, lightly active, lose weight → 2,199 − 500 = 1,699 kcal. Primary action: Save targets → Home with the new targets. Secondary: Back keeps the answers; Help explains. Limitation: rendered directly from the reviewed draft.',
       },
     },
   },
-  render: () => home([], null, 0, { targetsSheetOpen: true, targetsSheetStep: 'about' }),
+  render: () => <ReviewHarness />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByRole('dialog', { name: 'About you' });
-    await userEvent.type(canvas.getByLabelText('Age'), '34');
-    await userEvent.click(canvas.getByLabelText('Female'));
-    await userEvent.type(canvas.getByLabelText('Height'), '168');
-    await userEvent.type(canvas.getByLabelText('Weight'), '62');
-    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
-    await userEvent.click(canvas.getByLabelText(/Lightly active/));
-    await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
-    await userEvent.click(canvas.getByLabelText(/Lose weight/));
-    await userEvent.click(canvas.getByRole('button', { name: 'See the estimate' }));
-    const dialog = await canvas.findByRole('dialog', { name: 'Estimated daily target' });
-    await expect(within(dialog).getByText('1,699')).toBeVisible();
-    await expect(within(dialog).getByText(/Maintenance estimate 2,199 kcal/)).toBeVisible();
-    await expect(within(dialog).getByRole('button', { name: 'Save targets' })).toBeVisible();
+    await expect(canvas.getByRole('heading', { level: 1, name: 'Your daily target' })).toBeInTheDocument();
+    await expect(canvas.getByText('Estimated')).toBeVisible();
+    await expect(canvas.getByText('1,699')).toBeVisible();
+    await expect(canvas.getByText('kcal/day')).toBeVisible();
+    await expect(canvas.getByText('Lose weight · Lightly active')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Save targets' })).toBeVisible();
+    await expect(canvas.queryByRole('navigation')).toBeNull();
   },
 };
 

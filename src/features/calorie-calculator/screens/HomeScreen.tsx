@@ -12,7 +12,6 @@ import { DailyNutrition } from '../components/DailyNutrition';
 import { DayStrip } from '../components/DayStrip';
 import { MealGroup } from '../components/MealGroup';
 import { StreakIndicator } from '../components/StreakIndicator';
-import { TargetsSheet, type TargetsStep } from '../components/TargetsSheet';
 import { WaterSheet, type WaterSheetMode } from '../components/WaterSheet';
 import { WaterTracker } from '../components/WaterTracker';
 import { formatKcal, summarizeDay, type DailyGoal, type FoodEntry } from '../domain/daily-log';
@@ -33,8 +32,11 @@ export interface HomeScreenProps {
   entries: readonly FoodEntry[];
   /** The targets in force on the selected day, from the goal history (`null` when none were). */
   goal: DailyGoal | null;
+  /** Home's one targets action: the app opens the route choice or the editor (ledger §14). */
+  onSetTargets: () => void;
+  /** The one scheduled change after today, stated on the calorie card while today is shown. */
+  scheduledNote?: string;
   /** Save (targets) or remove (null); the app records it from today onward. */
-  onGoalChange: (goal: DailyGoal | null) => void;
   /** The day Home shows and the device's current local day. */
   selectedDayKey: string;
   todayKey: string;
@@ -66,8 +68,6 @@ export interface HomeScreenProps {
   waterSheetOpen?: boolean;
   waterSheetMode?: WaterSheetMode;
   /** Deterministic starting state for the targets sheet in stories. */
-  targetsSheetOpen?: boolean;
-  targetsSheetStep?: TargetsStep;
   /** The four-control NavigationBar, owned by the app shell. */
   navigation: ReactNode;
 }
@@ -84,7 +84,8 @@ export interface HomeScreenProps {
 export function HomeScreen({
   entries,
   goal,
-  onGoalChange,
+  onSetTargets,
+  scheduledNote,
   selectedDayKey,
   todayKey,
   onSelectDay,
@@ -102,11 +103,8 @@ export function HomeScreen({
   highlightEntryId,
   waterSheetOpen = false,
   waterSheetMode = 'add',
-  targetsSheetOpen = false,
-  targetsSheetStep,
   navigation,
 }: HomeScreenProps) {
-  const [targetsOpen, setTargetsOpen] = useState(targetsSheetOpen);
   const [waterOpen, setWaterOpen] = useState(waterSheetOpen);
   const summary = useMemo(() => summarizeDay(entries, goal?.kcal ?? null), [entries, goal]);
   const isToday = selectedDayKey === todayKey;
@@ -124,7 +122,7 @@ export function HomeScreen({
     <RootScreenLayout header={<AppHeader variant="root" title="Home" context={describeSelectedDay(selectedDayKey, todayKey)} trailing={<StreakIndicator streak={streak} />} />} navigation={navigation}>
       <DayStrip selectedDayKey={selectedDayKey} todayKey={todayKey} onSelectDay={onSelectDay} />
 
-      <DailyNutrition summary={summary} goal={goal} onSetTargets={() => setTargetsOpen(true)} pastDay={!isToday} heading={nutritionHeading} />
+      <DailyNutrition summary={summary} goal={goal} onSetTargets={onSetTargets} scheduledNote={scheduledNote} pastDay={!isToday} heading={nutritionHeading} />
 
       {recommended ? (
         <section aria-labelledby="home-recipe-heading" className={styles.section}>
@@ -159,21 +157,6 @@ export function HomeScreen({
       <MealGroup entries={entries} onOpenEntry={onOpenEntry} onAdd={onAddToMeal} highlightEntryId={highlightEntryId} heading={mealsHeading} />
 
       <WaterTracker totalMl={waterMl} goalMl={waterGoalMl} onQuickAdd={(ml) => onAddWater(ml, 'quick')} onOpen={() => setWaterOpen(true)} />
-
-      <TargetsSheet
-        open={targetsOpen}
-        goal={goal}
-        initialStep={targetsSheetStep}
-        onSave={(next) => {
-          onGoalChange(next);
-          setTargetsOpen(false);
-        }}
-        onRemove={() => {
-          onGoalChange(null);
-          setTargetsOpen(false);
-        }}
-        onCancel={() => setTargetsOpen(false)}
-      />
 
       <WaterSheet
         open={waterOpen}

@@ -1,0 +1,20 @@
+/* Reassurance, not a warning: the information tone's surface and text, one line, the
+   glyph decorative beside it. */
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--portion-ref-space-8);
+  padding: var(--portion-ref-space-12);
+  border-radius: var(--portion-radius-card);
+  background: var(--portion-color-feedback-info-surface);
+  color: var(--portion-color-feedback-info-foreground);
+  min-inline-size: 0;
+}
+
+.noteIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--portion-color-feedback-info-foreground);
+  /* Aligns the 20 px glyph with the first 20 px line of the supporting text. */
+  margin-block-start: 0;
+}
