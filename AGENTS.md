@@ -24,7 +24,7 @@ Do not silently choose between authorities when the conflict changes product beh
 - Core jobs: calculate calories/nutrition for an intended portion, and find a recipe with explainable matching evidence.
 - Identification is always reviewable. Logging and a daily goal are optional and never prerequisites.
 - Fixture-backed barcode/photo/nutrition behavior must be presented honestly; do not imply a production backend.
-- Do not add accounts, onboarding, a diary destination or weekly analytics (Home shows one selected past-or-present day at a time; the streak is a plain count of consecutive logged days), health scores, medical or allergen guarantees, saved collections, meal planning or future days, recipe authoring, popularity or ratings, social/payment/coaching, gamification, notifications, dark mode, or a multi-ingredient builder.
+- Do not add accounts, onboarding, a Profile or diary destination, weekly analytics (Home shows one selected past-or-present day at a time; the streak is a plain count of consecutive logged days), a mandatory or automatically applied calorie target (the optional estimate is reviewed and saved explicitly; no target weight, rate or date), health scores, medical or allergen guarantees, saved collections, meal planning or future days, recipe authoring, popularity or ratings, social/payment/coaching, gamification, notifications, dark mode, or a multi-ingredient builder.
 
 ## Architecture
 

@@ -13,7 +13,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 - **Components** — fields, chips, segmented control, nutrition values, macros and rows, match criteria, media frame, feedback states, entry-method options and food rows.
 - **Patterns** — navigation bar, headers, sheets and dialogs, the 2 × 2 Add food sheet, nutrition summary, recipe card.
 - **Templates** — root and focused-flow layouts.
-- **Product compositions** — the actual feature screens (Home with its calorie ring and goal editor, review, manual entry, barcode, photo, search, recipes, details) and the full runtime app rendered with fixtures.
+- **Product compositions** — the actual feature screens (Home with its day strip, daily-nutrition cards and targets sheet, review, manual entry, barcode, photo, search, recipe discovery, details) and the full runtime app rendered with fixtures.
 
 Every story with behaviour has a play function; the Storybook Vitest project runs them in headless Chromium with the accessibility addon set to fail on violations.
 
@@ -21,7 +21,7 @@ Every story with behaviour has a play function; the Storybook Vitest project run
 
 - Measurements are CSS px. The iOS column in the platform ledger is a mapping, never a relabel.
 - Spacing steps are 0/4/8/12/16/24/32 px. Radius roles are compact control 4, control 8, card 12, grouped surface and sheet 16, and `full` only for true circles.
-- Home's ring shows *remaining* while a goal exists; unknown energy is never drawn as 0 %.
+- Home's calorie card shows *remaining* while a target exists and the logged amount alone without one; unknown energy is never drawn as 0 %, and no macro card invents a denominator.
 - Unknown nutrition is named “Not available”, never zero; a known zero is a value.
 - Nutrition numbers stay neutral; category markers carry labelled colour.
 - Add food is an action in the bottom row, never a tab; one modal at a time; a gesture is never the only exit.
