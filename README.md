@@ -5,9 +5,10 @@
   </picture>
 </p>
 
-<p align="center"><strong>A calorie-calculation and recipe-discovery prototype, designed and built end-to-end.</strong></p>
+<p align="center"><strong>Understand your portion. Find recipes that fit.</strong></p>
 
-**Portion** is a mobile-first React/TypeScript prototype for two everyday food decisions: working out the calories in a specific dish or product, and finding a recipe that actually fits chosen criteria. It began as a UX/UI design test task — this GitHub repository is named `portion-jito-test-task`, and the package and Figma/FigJam files still carry the assignment's original working name, `jito-calories-calculator`. The project was carried end-to-end: secondary research and competitive analysis, UX synthesis and task flows, a visual direction and a reusable design system, into this implemented, interactive prototype — verified in Storybook and the running app rather than left as static screens.
+
+**Portion** is an interactive mobile prototype for two everyday food decisions: working out the calories in a specific dish or product, and finding a recipe that actually fits chosen criteria. It began as a UX/UI design test task — this GitHub repository is named `portion-jito-test-task`, and the package and Figma/FigJam files still carry the assignment's original working name, `jito-calories-calculator`. The project covers the full design process: secondary research and competitive analysis, UX synthesis and task flows, a visual direction, and a reusable design system, brought to life as an interactive prototype — verified in Storybook rather than left as static screens.
 
 ## Explore the project
 
