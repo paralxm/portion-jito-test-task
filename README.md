@@ -19,7 +19,7 @@
 **Research & planning** (FigJam)
 
 - [<img src="docs/assets/readme/icons/figjam.svg" width="18" height="18" align="absmiddle" alt=""> **Brief & Scope**](https://www.figma.com/board/Np6ZrdnQKjVw7tZw8W51kT/jito-calories-calculator?node-id=0-1&t=RMW2GuKy2AItAgSq-1) — the original assignment and its boundaries.
-- [<img src="docs/assets/readme/icons/figjam.svg" width="18" height="18" align="absmiddle" alt=""> **Product Research & Competitive Analysis**](https://www.figma.com/board/Np6ZrdnQKjVw7tZw8W51kT/jito-calories-calculator?node-id=0-1&t=RMW2GuKy2AItAgSq-1) — secondary research and six competitor teardowns.
+- [<img src="docs/assets/readme/icons/figjam.svg" width="18" height="18" align="absmiddle" alt=""> **Product Research & Competitive Analysis**](https://www.figma.com/board/Np6ZrdnQKjVw7tZw8W51kT/jito-calories-calculator?node-id=5-337&t=tXeaCRu1MHP5mUiX-1) — secondary research and six competitor teardowns.
 - [<img src="docs/assets/readme/icons/figjam.svg" width="18" height="18" align="absmiddle" alt=""> **UX Synthesis & Design Hypotheses**](https://www.figma.com/board/Np6ZrdnQKjVw7tZw8W51kT/jito-calories-calculator?node-id=4-333&t=RMW2GuKy2AItAgSq-1) — needs, JTBD and the four design hypotheses.
 - [<img src="docs/assets/readme/icons/figjam.svg" width="18" height="18" align="absmiddle" alt=""> **Task Flows**](https://www.figma.com/board/Np6ZrdnQKjVw7tZw8W51kT/jito-calories-calculator?node-id=4-334&t=RMW2GuKy2AItAgSq-1) — the two core journeys as flow diagrams.
 
