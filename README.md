@@ -109,8 +109,11 @@ The repository's own last recorded full verification run (typecheck, token/drift
 
 ## Outcome and current boundaries
 
-What's here is inspectable, not asserted: real TypeScript/React source, 88 Storybook stories, a written screenshot evidence manifest ([verification/manifest.md](verification/manifest.md)) with per-image inspection notes, a live deploy and a hosted Storybook, and a decisions ledger connecting research to hypotheses to shipped behaviour. That traceability — not a claim of "high quality" on its own — is what makes the work checkable.
+What's here is inspectable, not asserted: Storybook stories, a hosted preview, and a decisions ledger connecting research to design hypotheses. That traceability — not a claim of "high quality" on its own — is what makes the work checkable.
 
-The honest limits: barcode/photo recognition and all nutrition and recipe content are deterministic, labelled fixtures — this is not a live recognition or nutrition service, and the product's own copy says so. Research is secondary and competitive analysis only; no interviews or usability sessions were run, so the four design hypotheses remain hypotheses, not validated findings. Accessibility evidence is automated (axe at error severity) plus computed contrast and spot-checked keyboard/responsive behaviour — not a full WCAG 2.2 AA audit or an assistive-technology pass. And a few full-page evidence screenshots referenced in the manifest show the fixed navigation bar or a sticky footer frozen mid-scroll, a documented artefact of the capture script rather than a runtime defect; the images in this document were framed to avoid it.
+**Honest limits:**
+- **Data & Features:** Barcode/photo recognition and all nutrition and recipe content are deterministic, labelled fixtures — this is a prototype, not a live service.
+- **Research Scope:** Research relies on secondary and competitive analysis. No user interviews or usability sessions were conducted, so the core design hypotheses remain hypotheses rather than validated findings.
+- **Accessibility:** Accessibility checks focus on computed contrast, automated contrast checks, and basic responsive layout behaviour — not a full WCAG 2.2 AA audit or an assistive-technology pass.
 
-The most direct way to see how these decisions hold together is to open the [prototype](https://portion-ochre.vercel.app/) and run both journeys, then compare a component's [Storybook](https://fa5e9c0f1f3c592fd9c920eb4b2181db.share.chromatic.com/?path=/docs/start-here-introduction--docs) states against where it's actually used on screen.
+The most direct way to see how these decisions hold together is to open the interactive prototype and run both user journeys, then compare a component's Storybook states against how it functions in the user flows.
