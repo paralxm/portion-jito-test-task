@@ -24,4 +24,4 @@ Documentation for the Portion calorie calculator and recipe-discovery project.
 
 ## Figma
 
-- [Branding / Stylescape](https://www.figma.com/design/heuO3V1WlKG44CukQswCkw/jito-calories-calculator?node-id=92-1209) — 9 sections, the current visual deliverable
+- [Branding / Stylescape](https://www.figma.com/design/heuO3V1WlKG44CukQswCkw/jito-calories-calculator?node-id=92-1209) — 8 sections, the current visual deliverable
